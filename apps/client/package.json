@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint:fix": "eslint ./src --ext .tsx,.ts --quiet --fix",
-    "lint:format": "prettier --loglevel warn --write \"./src/**/*.{ts,tsx}\" "
+    "lint:format": "prettier --loglevel warn --write \"./src/**/*.{ts,tsx}\" ",
+    "lint": "npm-run-all --parallel lint:fix lint:format"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.6",

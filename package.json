@@ -7,12 +7,14 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "start:client": "yarn --cwd apps/client dev",
     "start:api": "yarn --cwd apps/server dev",
+    "lint:client": "yarn --cwd apps/client lint",
+    "lint:server": "yarn --cwd apps/server lint",
+    "lint": "npm-run-all --parallel lint:client lint:server",
     "dev": "npm-run-all --parallel start:client start:api"
   },
   "devDependencies": {
