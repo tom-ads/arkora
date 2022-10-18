@@ -36,11 +36,19 @@ jobs:
           mysql user: ${{secrets.STAGING_MYSQL_USER}}
           mysql password: ${{secrets.STAGING_MYSQL_PASSWORD}}
 
+      - name: Wait MySql
+        run: |
+          while ! mysqladmin --host 127.0.0.1 --password=$DB_PASSWORD --silent; do
+            sleep 1
+          done
+
       - name: Lint Code
         run: yarn lint
 
       - name: Test Code
-        run: yarn test
+        run: |
+          node ace migration:run
+          yarn test
 
       - name: Build Code
         run: yarn build
