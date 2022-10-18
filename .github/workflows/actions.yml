@@ -35,6 +35,7 @@ jobs:
           mysql database: ${{secrets.STAGING_MYSQL_DATABASE}}
           mysql user: ${{secrets.STAGING_MYSQL_USER}}
           mysql password: ${{secrets.STAGING_MYSQL_PASSWORD}}
+          mysql root password: ${{ secrets.STAGING_MYSQL_PASSWORD }}
 
       # - name: Wait MySql
       #   run: |
