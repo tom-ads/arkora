@@ -1,6 +1,10 @@
-name: Deploy
+name: CI
 
 on: [push]
+
+defaults:
+  run:
+    working-directory: apps/server
 
 jobs:
   staging_api:
