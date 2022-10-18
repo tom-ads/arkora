@@ -37,11 +37,11 @@ jobs:
           mysql password: ${{secrets.STAGING_MYSQL_PASSWORD}}
           mysql root password: ${{ secrets.STAGING_MYSQL_PASSWORD }}
 
-      # - name: Wait MySql
-      #   run: |
-      #     while ! mysqladmin --host 127.0.0.1 --password=$DB_PASSWORD --silent; do
-      #       sleep 1
-      #     done
+      - name: Wait MySql
+        run: |
+          while ! mysqladmin ping --host 127.0.0.1 --password=$DB_PASSWORD --silent; do
+            sleep 1
+          done
 
       - name: Lint Code
         run: yarn lint
