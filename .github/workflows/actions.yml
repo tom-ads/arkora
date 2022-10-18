@@ -1,11 +1,6 @@
 name: Deploy
 
-on:
-  workflow_dispatch:
-    push:
-      branches:
-        - develop
-    pull_request:
+on: [push]
 
 jobs:
   staging_api:
