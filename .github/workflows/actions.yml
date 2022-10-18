@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    braches: develop
+
+jobs:
+  staging_api:
+    runs-on: unbuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Copy ENV
+        run: cp .env.example .env
+
+      - name: Install Dependencies
+        run: yarn
+
+      # Prevent default MySql server from running
+      - name: Shutdown Ubuntu MySql
+        run: sudo service mysql stop
+
+      - name: Setup MySql
+        uses: mirromutth/mysql-action@v1.1
+          with:
+            mysql version: '8.0'
+            mysql database: ${{secrets.STAGING_MYSQL_DATABASE}}
+            mysql user: ${{secrets.STAGING_MYSQL_USER}}
+            mysql password: ${{secrets.STAGING_MYSQL_PASSWORD}}
+
+      - name: Lint Code
+        run: yarn lint
+
+      - name: Test Code
+        run: yarn test
+
+      - name: Build Code
+        run: yarn build
+
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          appdir: "apps/server"
