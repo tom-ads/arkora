@@ -1,8 +1,9 @@
 name: Deploy
 
 on:
-  push:
-    braches: develop
+  workflow_dispatch:
+    push:
+      braches: develop
 
 jobs:
   staging_api:
@@ -27,12 +28,12 @@ jobs:
         run: sudo service mysql stop
 
       - name: Setup MySql
-        uses: mirromutth/mysql-action@v1.1
-          with:
-            mysql version: '8.0'
-            mysql database: ${{secrets.STAGING_MYSQL_DATABASE}}
-            mysql user: ${{secrets.STAGING_MYSQL_USER}}
-            mysql password: ${{secrets.STAGING_MYSQL_PASSWORD}}
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql version: "8.0"
+          mysql database: ${{secrets.STAGING_MYSQL_DATABASE}}
+          mysql user: ${{secrets.STAGING_MYSQL_USER}}
+          mysql password: ${{secrets.STAGING_MYSQL_PASSWORD}}
 
       - name: Lint Code
         run: yarn lint
@@ -43,6 +44,7 @@ jobs:
       - name: Build Code
         run: yarn build
 
+      - name: Deploy to Heroku
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
