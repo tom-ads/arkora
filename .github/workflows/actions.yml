@@ -3,14 +3,16 @@ name: Deploy
 on:
   workflow_dispatch:
     push:
-      braches: develop
+      branches:
+        - develop
+    pull_request:
 
 jobs:
   staging_api:
     runs-on: unbuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Setup node
       - uses: actions/setup-node@v3
