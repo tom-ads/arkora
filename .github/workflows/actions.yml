@@ -32,10 +32,10 @@ jobs:
         uses: mirromutth/mysql-action@v1.1
         with:
           mysql version: "8.0"
-          mysql database: ${{secrets.STAGING_MYSQL_DATABASE}}
-          mysql user: ${{secrets.STAGING_MYSQL_USER}}
-          mysql password: ${{secrets.STAGING_MYSQL_PASSWORD}}
-          mysql root password: ${{ secrets.STAGING_MYSQL_PASSWORD }}
+          mysql database: arkora
+          mysql user: dev
+          mysql password: password
+          mysql root password: password
 
       - name: Wait MySql
         run: |
