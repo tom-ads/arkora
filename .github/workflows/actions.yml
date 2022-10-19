@@ -49,10 +49,7 @@ jobs:
           node ace migration:run
           yarn test
 
-      - name: Build Code
-        run: yarn build
-
-      - name: Deploy to Heroku
+      - name: Deploy to Staging
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
