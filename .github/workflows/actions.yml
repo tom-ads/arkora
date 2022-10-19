@@ -84,4 +84,7 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_API_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           appdir: "apps/server"
-          procfile: "web: yarn start"
+          procfile: "
+            web: node build/server.js
+            release: node build/ace migration:run --force
+          "
