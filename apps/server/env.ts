@@ -23,7 +23,7 @@ export default Env.rules({
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
 
   MYSQL_DATABASE: Env.schema.string(),
-  MYSQL_HOST: Env.schema.string() ?? 'localhost',
+  MYSQL_HOST: Env.schema.string(),
   MYSQL_PORT: Env.schema.number(),
   MYSQL_USER: Env.schema.string(),
   MYSQL_PASSWORD: Env.schema.string(),
