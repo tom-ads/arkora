@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   staging_client:
-    run-on: unbuntu-latest
+    runs-on: unbuntu-latest
     defaults:
       run:
         working-directory: apps/client
