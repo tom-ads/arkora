@@ -30,6 +30,7 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_CLIENT_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           appdir: "apps/client"
+          procfile: "yarn preview"
 
   staging_api:
     runs-on: ubuntu-latest
@@ -59,9 +60,9 @@ jobs:
         uses: mirromutth/mysql-action@v1.1
         with:
           mysql version: "8.0"
-          mysql database: arkora
-          mysql user: dev
-          mysql password: password
+          mysql database: ${{secrets.MYSQL_DATABASE}}
+          mysql user: ${{secrets.MYSQL_USER}}
+          mysql password: ${{secrets.MYSQL_PASSWORD}}
 
       - name: Wait MySql
         run: |
@@ -84,7 +85,4 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_API_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           appdir: "apps/server"
-          procfile: "
-            web: node build/server.js
-            release: node build/ace migration:run --force
-          "
+          procfile: "web: node build/server.js release: node build/ace migration:run --force"
