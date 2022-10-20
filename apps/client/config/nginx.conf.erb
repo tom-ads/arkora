@@ -38,9 +38,9 @@ http {
     client_max_body_size 10M;
 
     # Redirect all non-https traffic to https
-    if ($http_x_forwarded_proto != "https") {
-      return 301 https://$host$request_uri;
-    }
+    # if ($http_x_forwarded_proto != "https") {
+    #   return 301 https://$host$request_uri;
+    # }
 
     location = /index.html {
       add_header Cache-Control "no-store, no-cache";
