@@ -37,6 +37,7 @@ http {
     # Allow payloads of up to 10mb
     client_max_body_size 10M;
 
+    # NOTE: Prevent redirect loop w/ Cloudflare flexible SSL cert
     # Redirect all non-https traffic to https
     # if ($http_x_forwarded_proto != "https") {
     #   return 301 https://$host$request_uri;
@@ -53,6 +54,9 @@ http {
       add_header 'Cache-Control' "public, max-age=3600";
 
       try_files $uri $uri/ /index.html;
+
+      auth_basic "Restricted";
+      auth_basic_user_file basic.htpasswd;
     }
 
     location /manifest.json {
