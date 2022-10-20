@@ -30,7 +30,7 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_CLIENT_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           appdir: "apps/client"
-          procfile: "bin/start-nginx-solo yarn serve"
+          procfile: "web: bin/start-nginx-solo yarn serve"
 
   staging_api:
     runs-on: ubuntu-latest
