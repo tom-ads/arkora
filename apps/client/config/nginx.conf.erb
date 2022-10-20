@@ -1,6 +1,13 @@
 daemon off;
 worker_processes auto;
 
+global {
+  USERNAME    = ENV["BASIC_AUTH_USERNAME"]
+  PASSWORD    = ENV["BASIC_AUTH_PASSWORD"]
+
+  <%= "Here's the variable a value: #{USERNAME} #{PASSWORD}" %>
+}
+
 events {
   use epoll;
   accept_mutex on;
