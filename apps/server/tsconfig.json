@@ -11,8 +11,7 @@
       "App/*": ["./app/*"],
       "Config/*": ["./config/*"],
       "Contracts/*": ["./contracts/*"],
-      "Database/*": ["./database/*"],
-      "Start/*": ["./start/*"]
+      "Database/*": ["./database/*"]
     },
     "types": [
       "@adonisjs/core",
