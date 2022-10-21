@@ -11,39 +11,25 @@
     "App": "app",
     "Config": "config",
     "Database": "database",
-    "Contracts": "contracts"
+    "Contracts": "contracts",
+    "Start": "start"
   },
-  "preloads": [
-    "./start/routes",
-    "./start/kernel"
-  ],
-  "providers": [
-    "./providers/AppProvider",
-    "@adonisjs/core",
-    "@adonisjs/lucid"
-  ],
-  "aceProviders": [
-    "@adonisjs/repl"
-  ],
+  "preloads": ["./start/routes", "./start/kernel"],
+  "providers": ["./providers/AppProvider", "@adonisjs/core", "@adonisjs/lucid", "@adonisjs/auth"],
+  "aceProviders": ["@adonisjs/repl"],
   "tests": {
     "suites": [
       {
         "name": "e2e",
-        "files": [
-          "tests/e2e/**/*.spec(.ts|.js)"
-        ],
+        "files": ["tests/e2e/**/*.spec(.ts|.js)"],
         "timeout": 60000
       },
       {
         "name": "unit",
-        "files": [
-          "tests/unit/**/*.spec(.ts|.js)"
-        ],
+        "files": ["tests/unit/**/*.spec(.ts|.js)"],
         "timeout": 60000
       }
     ]
   },
-  "testProviders": [
-    "@japa/preset-adonis/TestsProvider"
-  ]
+  "testProviders": ["@japa/preset-adonis/TestsProvider"]
 }
