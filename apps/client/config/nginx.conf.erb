@@ -55,6 +55,7 @@ http {
 
       try_files $uri $uri/ /index.html;
 
+      # Enable basic auth
       auth_basic "Access Restricted";
       auth_basic_user_file /app/.htpasswd;
     }

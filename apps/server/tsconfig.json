@@ -3,7 +3,6 @@
   "include": ["**/*"],
   "exclude": ["node_modules", "build"],
   "compilerOptions": {
-    "moduleResolution": "Node",
     "outDir": "build",
     "rootDir": "./",
     "baseUrl": ".",
