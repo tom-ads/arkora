@@ -13,24 +13,6 @@
     "test:unit": "node ace test unit",
     "test:watch": "node ace test e2e unit --watch"
   },
-  "eslintConfig": {
-    "extends": [
-      "plugin:adonis/typescriptApp",
-      "prettier"
-    ],
-    "plugins": [
-      "prettier"
-    ],
-    "rules": {
-      "prettier/prettier": [
-        "error"
-      ]
-    }
-  },
-  "eslintIgnore": [
-    "build",
-    "tsconfig.json"
-  ],
   "prettier": {
     "trailingComma": "es5",
     "semi": false,
