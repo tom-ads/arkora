@@ -1,1 +1,4 @@
-// import Factory from '@ioc:Adonis/Lucid/Factory'
+import OrganisationFactory from './OrganisationFactory'
+import UserFactory from './UserFactory'
+
+export { OrganisationFactory, UserFactory }

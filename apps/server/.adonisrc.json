@@ -12,10 +12,17 @@
     "Config": "config",
     "Database": "database",
     "Contracts": "contracts",
-    "Start": "start"
+    "Start": "start",
+    "Helpers": "helpers"
   },
   "preloads": ["./start/routes", "./start/kernel"],
-  "providers": ["./providers/AppProvider", "@adonisjs/core", "@adonisjs/lucid", "@adonisjs/auth"],
+  "providers": [
+    "./providers/AppProvider",
+    "@adonisjs/core",
+    "@adonisjs/lucid",
+    "@adonisjs/auth",
+    "@adonisjs/session"
+  ],
   "aceProviders": ["@adonisjs/repl"],
   "tests": {
     "suites": [
@@ -31,5 +38,5 @@
       }
     ]
   },
-  "testProviders": ["@japa/preset-adonis/TestsProvider"]
+  "testProviders": ["@japa/preset-adonis/TestsProvider", "./providers/TestRouteProvider"]
 }
