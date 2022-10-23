@@ -68,7 +68,7 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
 | the HTTP server when it is a functional suite.
 */
 export const configureSuite: Config['configureSuite'] = (suite) => {
-  if (suite.name === 'e2e') {
+  if (suite.name === 'e2e' || suite.name === 'unit') {
     suite.setup(() => TestUtils.httpServer().start())
     suite.onGroup((group) => {
       group.each.setup(async () => {

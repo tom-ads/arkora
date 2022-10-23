@@ -26,6 +26,9 @@ import { ValidatorConfig } from '@ioc:Adonis/Core/Validator'
 |
 */
 export const appKey: string = Env.get('APP_KEY')
+export const appHostname: string = Env.get('APP_HOSTNAME')
+
+export const staticAppHostname: string = Env.get('STATIC_APP_HOSTNAME')
 
 /*
 |--------------------------------------------------------------------------
