@@ -5,5 +5,5 @@
 #root,
 html,
 body {
-  @apply min-h-full w-full;
+  @apply min-h-full h-full w-full;
 }
