@@ -1,3 +1,5 @@
+@import url('./fonts/font.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,5 +7,5 @@
 #root,
 html,
 body {
-  @apply min-h-full h-full w-full;
+  @apply min-h-full h-full w-full bg-gray-20 font-inter;
 }
