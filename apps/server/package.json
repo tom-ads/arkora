@@ -44,6 +44,7 @@
     "@adonisjs/lucid": "^18.2.0",
     "@adonisjs/repl": "^3.1.0",
     "@adonisjs/session": "^6.4.0",
+    "@reduxjs/toolkit": "^1.8.6",
     "@types/node": "^18.11.3",
     "luxon": "^3.0.4",
     "mysql2": "^2.3.3",
