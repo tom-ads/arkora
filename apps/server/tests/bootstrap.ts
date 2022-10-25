@@ -9,7 +9,6 @@ import { Config } from '@japa/runner'
 import Database from '@ioc:Adonis/Lucid/Database'
 import TestUtils from '@ioc:Adonis/Core/TestUtils'
 import { assert, runFailedTests, specReporter, apiClient } from '@japa/preset-adonis'
-import { appHostname } from 'Config/app'
 
 /*
 |--------------------------------------------------------------------------
