@@ -55,6 +55,7 @@ http {
 
       try_files $uri $uri/ /index.html;
 
+      # Enable basic auth
       auth_basic "Access Restricted";
       auth_basic_user_file /app/.htpasswd;
     }
@@ -73,7 +74,6 @@ http {
 
       try_files $uri $uri/ =404;
     }
-
 
     # Need this b/c setting $fallback to =404 will try #{root}=404 instead of returning a 404
     location @404 {
