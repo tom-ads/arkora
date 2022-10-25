@@ -12,7 +12,7 @@ export const InlineLink = ({ to, className, children }: InlineLinkProps): JSX.El
   return (
     <Link
       className={classNames(
-        'text-purple-90 inline-block hover:text-purple-80 hover:underline',
+        'text-purple-90 inline-block hover:text-purple-80 hover:underline outline-none focus:underline',
         className,
       )}
       to={to}

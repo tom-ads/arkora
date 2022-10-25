@@ -1,4 +1,4 @@
-import { FormEventHandler, ReactNode, Ref } from 'react'
+import { FormEventHandler, ReactNode } from 'react'
 import classNames from 'classnames'
 import { forwardRef } from 'react'
 
@@ -8,13 +8,16 @@ type ButtonProps = {
   danger?: boolean
   type?: 'button' | 'submit'
   block?: boolean
+  className?: string
   onSubmit?: FormEventHandler<HTMLButtonElement>
   children: ReactNode
 }
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(props, ref) {
   const {
     size = 'md',
     onSubmit,
+    className,
     variant = 'primary',
     danger = false,
     type = 'button',
@@ -36,13 +39,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           'py-3 px-9 active:shadow-md': size === 'md',
           'py-3 px-[2.625rem] active:shadow-lg': size === 'lg',
 
-          'bg-purple-90 border-purple-90 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-90 active:shadow-purple-90':
+          'bg-purple-90 border-purple-90 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-90 active:shadow-purple-90 focus:shadow-purple-90':
             variant === 'primary',
-          'bg-purple-70 border-purple-70 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-70 active:border-purple-70 active:shadow-purple-70':
+          'bg-purple-70 border-purple-70 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-70 active:border-purple-70 active:shadow-purple-70 focus:shadow-purple-70':
             variant === 'secondary',
-          'border-purple-90 !text-purple-90 hover:border-purple-80 hover:!text-purple-80 active:shadow-purple-90 bg-none':
+          'border-purple-90 !text-purple-90 hover:border-purple-80 hover:!text-purple-80 active:shadow-purple-90 focus:shadow-purple-90 bg-none':
             variant === 'outlined',
+
+          'bg-red-90': danger && variant === 'primary',
         },
+        className,
       )}
     >
       {children}

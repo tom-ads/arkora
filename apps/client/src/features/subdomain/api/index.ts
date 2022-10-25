@@ -5,11 +5,11 @@ const subdomainBasePath = '/subdomain'
 
 const subdomainEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
-    getSubdomain: build.query<void, GetSubdomainRequest>({
+    verifySubdomain: build.query<void, GetSubdomainRequest>({
       query: ({ subdomain }) => `${subdomainBasePath}/${subdomain}`,
     }),
   }),
   overrideExisting: false,
 })
 
-export const { useGetSubdomainQuery, useLazyGetSubdomainQuery } = subdomainEndpoints
+export const { useVerifySubdomainQuery, useLazyVerifySubdomainQuery } = subdomainEndpoints

@@ -20,6 +20,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
   const methods = useForm<TFormValues>({
     resolver: validationSchema ? zodResolver(validationSchema) : undefined,
   })
+
   return (
     <form
       className={classNames('flex flex-col gap-6 w-full', className)}

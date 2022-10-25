@@ -1,7 +1,7 @@
 import { Button, Form, FormInput } from '@/components'
-import { FormEvent, FormEventHandler } from 'react'
+import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import * as z from 'zod'
-import { useGetSubdomainQuery, useLazyGetSubdomainQuery } from '../../api'
+import { useLazyVerifySubdomainQuery } from '../../api'
 
 const SubdomainFormSchema = z.object({
   subdomain: z.string(),
@@ -12,23 +12,34 @@ type FormFields = {
 }
 
 export const SubdomainForm = (): JSX.Element => {
-  const [trigger] = useLazyGetSubdomainQuery()
+  const [trigger, { isError }] = useLazyVerifySubdomainQuery()
 
   const handleSubmit = (data: FormFields) => {
     trigger(data)
   }
+
   return (
     <Form<FormFields, typeof SubdomainFormSchema>
+      className="gap-4"
       onSubmit={handleSubmit}
       validationSchema={SubdomainFormSchema}
     >
       {({ register }) => (
         <>
-          <div className="flex items-center gap-3">
-            <FormInput placeHolder="domain" size="md" {...register('subdomain')} />
-            <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <FormInput
+                placeHolder="domain"
+                size="md"
+                error={isError}
+                {...register('subdomain')}
+              />
+              <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
+            </div>
+            <FormErrorMessage isVisible={isError}>Organisation does not exist</FormErrorMessage>
           </div>
-          <Button type="submit" block>
+
+          <Button className="mb-6" type="submit" block>
             Continue
           </Button>
         </>
