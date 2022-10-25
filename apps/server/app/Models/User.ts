@@ -1,14 +1,6 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import {
-  column,
-  beforeSave,
-  BaseModel,
-  hasOne,
-  HasOne,
-  belongsTo,
-  BelongsTo,
-} from '@ioc:Adonis/Lucid/Orm'
+import { column, beforeSave, BaseModel, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import OrganisationRole from 'App/Models/OrganisationRole'
 import Organisation from './Organisation'
 
