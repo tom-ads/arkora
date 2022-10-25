@@ -31,7 +31,6 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_CLIENT_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           appdir: "apps/client"
-          env_file: "/.env.staging"
           procfile: "web: bin/start-nginx-solo"
 
   staging_api:
