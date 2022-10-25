@@ -24,6 +24,7 @@ jobs:
         run: yarn lint
 
       - name: Deploy to Staging
+        if: github.ref == 'refs/heads/develop'
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
@@ -79,6 +80,7 @@ jobs:
           yarn test
 
       - name: Deploy to Staging
+        if: github.ref == 'refs/heads/develop'
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
