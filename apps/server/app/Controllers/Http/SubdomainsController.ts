@@ -3,11 +3,10 @@ import Organisation from 'App/Models/Organisation'
 import { getOriginSubdomain } from 'Helpers/subdomain'
 
 export default class SubdomainsController {
-  public async view({ request, response, organisation }: HttpContextContract) {
-    console.log('testeerre')
+  public async verifySubdomain({ request, response, organisation }: HttpContextContract) {
     const originSubdomain = getOriginSubdomain(request?.header('origin')!)
     if (!originSubdomain) {
-      response.notFound({ message: 'No organisation found' })
+      response.notFound({ message: 'No subdomain found' })
       return
     }
 
@@ -17,6 +16,6 @@ export default class SubdomainsController {
       return
     }
 
-    return organisation.serialize()
+    return response.ok({})
   }
 }

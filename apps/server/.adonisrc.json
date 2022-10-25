@@ -27,8 +27,8 @@
   "tests": {
     "suites": [
       {
-        "name": "e2e",
-        "files": ["tests/e2e/**/*.spec(.ts|.js)"],
+        "name": "integration",
+        "files": ["tests/integration/**/*.spec(.ts|.js)"],
         "timeout": 60000
       },
       {

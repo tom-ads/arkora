@@ -8,10 +8,10 @@
     "start": "node server.js",
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write .",
-    "test": "node ace test e2e unit",
-    "test:e2e": "node ace test e2e",
+    "test": "node ace test integration unit",
+    "test:integration": "node ace test integration",
     "test:unit": "node ace test unit",
-    "test:watch": "node ace test e2e unit --watch"
+    "test:watch": "node ace test integration unit --watch"
   },
   "prettier": {
     "trailingComma": "es5",
