@@ -6,6 +6,8 @@
  */
 
 import { CorsConfig } from '@ioc:Adonis/Core/Cors'
+import { getOriginSubdomain } from 'Helpers/subdomain'
+import { nodeEnv, staticAppHostname } from './app'
 
 const corsConfig: CorsConfig = {
   /*
@@ -20,7 +22,7 @@ const corsConfig: CorsConfig = {
   | you can define a function to enable/disable it on per request basis as well.
   |
   */
-  enabled: false,
+  enabled: true,
 
   // You can also use a function that return true or false.
   // enabled: (request) => request.url().startsWith('/api')
@@ -44,7 +46,12 @@ const corsConfig: CorsConfig = {
   |                     one of the above values.
   |
   */
-  origin: true,
+  origin: (origin) => {
+    const protocol: 'http' | 'https' = nodeEnv === 'development' ? 'http' : 'https'
+    const originSubdomain = getOriginSubdomain(origin)
+
+    return origin === `${protocol}://${originSubdomain}.${staticAppHostname}`
+  },
 
   /*
   |--------------------------------------------------------------------------
