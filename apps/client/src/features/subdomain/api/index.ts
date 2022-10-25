@@ -12,4 +12,4 @@ const subdomainEndpoints = appApi.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useGetSubdomainQuery } = subdomainEndpoints
+export const { useGetSubdomainQuery, useLazyGetSubdomainQuery } = subdomainEndpoints
