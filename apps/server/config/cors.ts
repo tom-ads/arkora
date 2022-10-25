@@ -47,9 +47,14 @@ const corsConfig: CorsConfig = {
   |
   */
   origin: (origin) => {
+    // Allow root domain
     const protocol: 'http' | 'https' = nodeEnv === 'development' ? 'http' : 'https'
-    const originSubdomain = getOriginSubdomain(origin)
+    if (origin === `${protocol}://${staticAppHostname}`) {
+      return true
+    }
 
+    // Allow first-level subdomain
+    const originSubdomain = getOriginSubdomain(origin)
     return origin === `${protocol}://${originSubdomain}.${staticAppHostname}`
   },
 
