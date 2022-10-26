@@ -1,22 +1,20 @@
 import classNames from 'classnames'
-import { forwardRef } from 'react'
+import { UseFormRegisterReturn } from 'react-hook-form'
 
 type FormInputProps = {
+  id: string
   placeHolder?: string
   size?: 'sm' | 'md' | 'lg'
   error?: boolean
+  register: Partial<UseFormRegisterReturn>
 }
 
-export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(function FormInput(
-  props,
-  ref,
-) {
-  const { placeHolder, size = 'sm', error } = props
-
+export const FormInput = ({ id, placeHolder, size = 'sm', error, register }: FormInputProps) => {
   return (
     <input
-      ref={ref}
+      id={id}
       type="text"
+      {...register}
       placeholder={placeHolder}
       className={classNames(
         'border border-gray-40 w-full rounded placeholder:text-green-60 bg-gray-20 font-normal text-gray-80 transition-all outline-none',
@@ -31,4 +29,4 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(function F
       )}
     />
   )
-})
+}

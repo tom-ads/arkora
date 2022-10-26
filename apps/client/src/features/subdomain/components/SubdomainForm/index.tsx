@@ -22,17 +22,18 @@ export const SubdomainForm = (): JSX.Element => {
     <Form<FormFields, typeof SubdomainFormSchema>
       className="gap-4"
       onSubmit={handleSubmit}
-      validationSchema={SubdomainFormSchema}
+      defaultValues={{ subdomain: '' }}
     >
       {({ register }) => (
         <>
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <FormInput
+                id="subdomain"
                 placeHolder="domain"
                 size="md"
                 error={isError}
-                {...register('subdomain')}
+                register={register('subdomain')}
               />
               <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
             </div>
