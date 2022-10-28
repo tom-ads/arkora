@@ -21,6 +21,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
 }: FormProps<TFormValues, ValidationSchema>): JSX.Element => {
   const methods = useForm<TFormValues>({
     defaultValues,
+    resolver: validationSchema && zodResolver(validationSchema),
   })
 
   return (

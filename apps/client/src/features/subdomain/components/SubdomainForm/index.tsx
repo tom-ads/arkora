@@ -37,7 +37,7 @@ export const SubdomainForm = (): JSX.Element => {
               />
               <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
             </div>
-            <FormErrorMessage isVisible={isError}>Organisation does not exist</FormErrorMessage>
+            {isError && <FormErrorMessage>Organisation does not exist</FormErrorMessage>}
           </div>
 
           <Button className="mb-6" type="submit" block>
