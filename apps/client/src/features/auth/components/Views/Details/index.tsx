@@ -15,8 +15,9 @@ import { PasswordStrength } from '@/components/Indicators/PasswordStrength'
 import { useVerifyDetailsMutation } from '../../../api'
 import { setDetails } from '@/stores/slices/registration'
 import { useDispatch } from 'react-redux'
-import { useSearchParams } from 'react-router-dom'
 import * as z from 'zod'
+import { useEffect } from 'react'
+import { RegistrationSteps } from '../../../types'
 
 const DetailsFormSchema = z
   .object({
@@ -42,26 +43,28 @@ type FormFields = {
   passwordConfirmation: string
 }
 
-export const DetailsView = (): JSX.Element => {
-  const dispatch = useDispatch()
+type DetailsViewProps = {
+  onSuccess: (nextStep: RegistrationSteps) => void
+}
 
-  const [_, setSearchParams] = useSearchParams()
+export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
+  const dispatch = useDispatch()
 
   const [verifyDetails, { isSuccess: didVerifyDetails }] = useVerifyDetailsMutation()
 
   const handleSubmit = (data: FormFields) => {
     dispatch(setDetails(data))
-    // verifyDetails({
-    //   ...data,
-    //   password_confirmation: data.passwordConfirmation,
-    // })
+    verifyDetails({
+      ...data,
+      password_confirmation: data.passwordConfirmation,
+    })
   }
 
-  // useEffect(() => {
-  //   if (didVerifyDetails) {
-  //     setSearchParams({ step: 'organisation' })
-  //   }
-  // }, [didVerifyDetails])
+  useEffect(() => {
+    if (didVerifyDetails) {
+      onSuccess('organisation')
+    }
+  }, [didVerifyDetails])
 
   return (
     <Form<FormFields, typeof DetailsFormSchema>

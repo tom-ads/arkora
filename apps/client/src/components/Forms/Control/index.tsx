@@ -7,5 +7,5 @@ type FormControlProps = {
 }
 
 export const FormControl = ({ className, children }: FormControlProps): JSX.Element => {
-  return <fieldset className={classNames('flex flex-col w-full', className)}>{children}</fieldset>
+  return <div className={classNames('flex flex-col w-full', className)}>{children}</div>
 }

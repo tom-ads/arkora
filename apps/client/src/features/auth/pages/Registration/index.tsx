@@ -2,17 +2,16 @@ import { useState } from 'react'
 import Progress from '@/components/Indicators/Progress'
 import { ProgressStep } from '@/components/Indicators/ProgressStep'
 import { DetailsView, OrganisationsView, TeamView } from '../../components/Views'
-
-type RegistrationSteps = 'details' | 'organisation' | 'team'
-
-const registrationViews = {
-  details: <DetailsView />,
-  organisation: <OrganisationsView />,
-  team: <TeamView />,
-}
+import { RegistrationSteps } from '../../types'
 
 export const RegistrationPage = (): JSX.Element => {
   const [activeStep, setActiveStep] = useState<RegistrationSteps>('details')
+
+  const handleStep = (nextStep?: RegistrationSteps) => {
+    if (nextStep) {
+      setActiveStep(nextStep)
+    }
+  }
 
   return (
     <div className="flex flex-col py-11">
@@ -22,7 +21,11 @@ export const RegistrationPage = (): JSX.Element => {
         <ProgressStep id="team" text="Invite the team" />
       </Progress>
 
-      <div className="my-8">{registrationViews[activeStep]}</div>
+      <div className="my-8">
+        {activeStep === 'details' && <DetailsView onSuccess={handleStep} />}
+        {activeStep === 'organisation' && <OrganisationsView onSuccess={handleStep} />}
+        {activeStep === 'team' && <TeamView onSuccess={handleStep} />}
+      </div>
     </div>
   )
 }
