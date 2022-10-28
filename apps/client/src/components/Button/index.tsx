@@ -31,7 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type}
       onSubmit={onSubmit}
       className={classNames(
-        'border rounded transition outline-none font-semibold text-white text-center',
+        'border rounded transition-all outline-none font-semibold text-white text-center',
         {
           'w-full': block,
 

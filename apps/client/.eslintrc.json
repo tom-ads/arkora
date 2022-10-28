@@ -30,6 +30,7 @@
     "prettier/prettier": ["error", {}, { "usePrettierrc": true }],
     "react/react-in-jsx-scope": "off",
     "indent": ["error", 2],
+    "react/jsx-indent-props": ["error", "first"],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "single"],
     "semi": ["error", "never"],

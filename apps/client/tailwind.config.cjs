@@ -6,6 +6,7 @@ module.exports = {
       sm: '0px 0px 5px 0px rgb(0, 0, 0)',
       md: '0px 0px 5px 0.1px rgb(0, 0, 0)',
       lg: '0px 0px 5px 0.2px rgb(0, 0, 0)',
+      card: '0px 4px 12px 0px rbg()',
     },
     colors: {
       white: '#FFFFFF',

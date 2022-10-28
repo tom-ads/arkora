@@ -18,4 +18,5 @@
 |
 */
 
+import './routes/auth'
 import './routes/subdomain'
