@@ -28,11 +28,13 @@ export const FormSelect = ({
       render={({ field }) => {
         const validChildren = children.filter((v) => v.props?.value)
 
-        // const handleChange = (value: string) => {}
+        const handleChange = (selectedItem: string) => {
+          field.onChange(validChildren.find((v) => v.props.value === selectedItem)?.props)
+        }
 
         return (
           <div className="relative w-full">
-            <Listbox value={field.value} onChange={field.onChange}>
+            <Listbox value={field.value?.value} onChange={handleChange}>
               {({ open }) => (
                 <>
                   <Listbox.Button
@@ -53,7 +55,8 @@ export const FormSelect = ({
                         'text-gray-100': field.value,
                       })}
                     >
-                      {field.value ?? placeHolder}
+                      {/* Child of SelectOption, a.k.a the display prop */}
+                      {field.value?.children ?? placeHolder}
                     </span>
                     <span
                       className={classNames(
@@ -92,8 +95,8 @@ export const FormSelect = ({
                     >
                       {validChildren.map((child) => (
                         <Listbox.Option
-                          value={child.props.value}
                           key={child.key}
+                          value={child.props?.value}
                           className={({ selected }) =>
                             classNames(
                               'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10',
@@ -108,7 +111,7 @@ export const FormSelect = ({
                         >
                           {({ selected }) => (
                             <>
-                              <span className="truncate block">{child}</span>
+                              <span className="truncate">{child}</span>
                               {selected && (
                                 <span className="w-4 h-4 shrink-0 mr-1">
                                   <CircleTick />

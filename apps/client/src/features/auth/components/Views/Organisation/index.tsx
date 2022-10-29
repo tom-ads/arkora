@@ -26,6 +26,10 @@ type FormFields = {
   workDays: WeekDay[]
   openingTime: string
   closingTime: string
+  defaultCurrency: {
+    value: string
+    children: string
+  }
 }
 
 const OrganisationDetailsSchema = z.object({
@@ -56,7 +60,8 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
   const currencyOptions = useMemo(() => {
     return Object.keys(currencies).map((currency) => ({
       id: currency,
-      value: currencies[currency as keyof typeof currencies],
+      value: currency,
+      display: currencies[currency as keyof typeof currencies],
     }))
   }, [])
 
@@ -71,6 +76,10 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
         workDays: [],
         openingTime: undefined,
         closingTime: undefined,
+        defaultCurrency: {
+          value: 'GBP',
+          children: 'British Pound Sterling',
+        },
       }}
     >
       {({ register, control, formState: { errors } }) => (
@@ -178,15 +187,10 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
                 budget instead"
               />
               <DescriptorContent className="max-w-[402px]">
-                <FormSelect
-                  size="sm"
-                  name="currency"
-                  control={control}
-                  placeHolder="Select currency"
-                >
+                <FormSelect name="defaultCurrency" control={control} placeHolder="Select currency">
                   {currencyOptions?.map((option) => (
                     <SelectOption key={option.id} value={option.value}>
-                      {option?.value}
+                      {option?.display}
                     </SelectOption>
                   ))}
                 </FormSelect>
