@@ -85,7 +85,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
             <div className="space-y-2 pb-6">
               <h1 className="font-semibold text-[32px] text-gray-100">Your details</h1>
               <p className="text-base text-gray-80">
-                Lets get started! We need to collect some details to setup your account
+                Let&apos;s get started! We need to collect some details to setup your account
               </p>
             </div>
 
@@ -97,7 +97,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                 title="Profile Image"
                 description="Displayed on your profile for others to see"
               />
-              <DescriptorContent className="flex justify-between gap-3 max-w-[402px] w-full">
+              <DescriptorContent className="flex justify-between gap-3 max-w-[402px]">
                 <div></div>
               </DescriptorContent>
             </Descriptor>
@@ -111,7 +111,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                 description="Basic details about you that are displayed across
                     your account and to other team members."
               />
-              <DescriptorContent className="space-y-4 max-w-[402px] w-full">
+              <DescriptorContent className="max-w-[402px]">
                 <div className="flex justify-between gap-3">
                   <FormControl>
                     <FormLabel htmlFor="firstname" size="sm">

@@ -5,7 +5,7 @@ import { DetailsView, OrganisationsView, TeamView } from '../../components/Views
 import { RegistrationSteps } from '../../types'
 
 export const RegistrationPage = (): JSX.Element => {
-  const [activeStep, setActiveStep] = useState<RegistrationSteps>('details')
+  const [activeStep, setActiveStep] = useState<RegistrationSteps>('organisation')
 
   const handleStep = (nextStep?: RegistrationSteps) => {
     if (nextStep) {

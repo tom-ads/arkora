@@ -9,3 +9,10 @@ html,
 body {
   @apply min-h-full h-full w-full bg-gray-20 font-inter;
 }
+
+@layer base {
+  input[type='time']::-webkit-calendar-picker-indicator {
+    background: none;
+    display: none;
+  }
+}

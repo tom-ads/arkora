@@ -1,3 +1,6 @@
 export * from './ArkoraLogo'
 export * from './EyeClosedIcon'
 export * from './EyeOpenIcon'
+export * from './CrossIcon'
+export * from './InfoCircleIcon'
+export * from './TickIcon'

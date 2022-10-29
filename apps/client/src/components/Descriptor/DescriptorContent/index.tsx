@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import { ReactNode } from 'react'
 
 type DescriptorContentProps = {
@@ -6,5 +7,5 @@ type DescriptorContentProps = {
 }
 
 export const DescriptorContent = ({ className, children }: DescriptorContentProps): JSX.Element => {
-  return <div className={className}>{children}</div>
+  return <div className={classNames('space-y-4 w-full', className)}>{children}</div>
 }

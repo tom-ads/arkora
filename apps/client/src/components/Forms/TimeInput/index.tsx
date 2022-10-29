@@ -1,23 +1,26 @@
 import classNames from 'classnames'
 import { UseFormRegisterReturn } from 'react-hook-form'
 
-type FormInputProps = {
+type FormTimeInputProps = {
   id: string
-  placeHolder?: string
   size?: 'sm' | 'md' | 'lg'
   error?: boolean
   register: Partial<UseFormRegisterReturn>
 }
 
-export const FormInput = ({ id, placeHolder, size = 'sm', error, register }: FormInputProps) => {
+export const FormTimeInput = ({
+  id,
+  size = 'sm',
+  error,
+  register,
+}: FormTimeInputProps): JSX.Element => {
   return (
     <input
       id={id}
-      type="text"
+      type="time"
       {...register}
-      placeholder={placeHolder}
       className={classNames(
-        'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none',
+        'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none appearance-none',
         {
           'px-3 py-2 text-sm focus:shadow-sm': size === 'sm',
           'px-3 py-3 text-base focus:shadow-md': size === 'md',
