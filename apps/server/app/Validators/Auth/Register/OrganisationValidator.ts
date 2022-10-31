@@ -1,7 +1,5 @@
 import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { WeekDay } from 'App/Enum/WeekDay'
-import { CurrencyCode } from 'App/Enum/CurrencyCode'
 import { maxHourlyRate } from 'Config/app'
 
 export default class OrganisationValidator {
@@ -66,6 +64,14 @@ export default class OrganisationValidator {
     'work_days.enum': 'Invalid weekday',
     'work_days.minLength': '1 work day required',
     'work_days.maxLength': 'Can only have 7 work days per week',
+
+    'opening_time.required': 'Opening time is required',
+    'opening_time.beforeField': 'Opening time must be before the closing time',
+
+    'closing_time.required': 'Closing time is required',
+    'closing_time.afterField': 'Closing time must be after the opening time',
+
+    'currency.required': 'Currency is required',
 
     'hourly_rate.required': 'Hourly rate is required',
     'hourly_rate.range': 'Hourly rate must be between 0 and 20000',
