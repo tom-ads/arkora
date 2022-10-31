@@ -5,8 +5,8 @@ import {
   DescriptorInsights,
   Form,
   FormInput,
+  Divider,
 } from '@/components'
-import Divider from '@/components/Divider'
 import { FormControl } from '@/components/Forms/Control'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormLabel } from '@/components/Forms/Label'

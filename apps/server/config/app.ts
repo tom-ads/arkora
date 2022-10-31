@@ -33,6 +33,8 @@ export const appHostname: string = Env.get('APP_HOSTNAME')
 
 export const staticAppHostname: string = Env.get('STATIC_APP_HOSTNAME')
 
+export const maxHourlyRate = 20000
+
 /*
 |--------------------------------------------------------------------------
 | Http server configuration

@@ -35,7 +35,7 @@ export const PasswordInput = ({
             'px-3 py-3 text-base focus:shadow-md': size === 'md',
             'px-[0.875rem] py-[10px] text-xl focus:shadow-lg': size === 'lg',
 
-            'focus:shadow-purple-90 focus:border-purple-70': !error,
+            'focus:shadow-purple-70 focus:border-purple-90': !error,
             'border-red-90 focus:shadow-md focus:shadow-red-90': error,
           },
         )}
@@ -43,6 +43,7 @@ export const PasswordInput = ({
 
       <div className="absolute inset-y-0 right-[12px] flex items-center">
         <button
+          type="button"
           onClick={() => setShowPassword(!showPassword)}
           className="w-4 h-4 outline-none focus-visible:text-purple-90 hover:text-purple-90"
         >

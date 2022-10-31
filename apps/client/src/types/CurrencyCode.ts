@@ -1,7 +1,6 @@
 /**
  * ISO 4217 CURRENCY CODES as specified in the documentation
  * Taken from https://www.iso.org/iso-4217-currency-codes.html
- *
  * credit: Dinero.js type defs
  */
 export type CurrencyCode =

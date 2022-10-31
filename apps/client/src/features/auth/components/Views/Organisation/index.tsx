@@ -9,42 +9,40 @@ import {
   FormInput,
   FormSelect,
   FormTimeInput,
-  InlineLink,
+  Divider,
 } from '@/components'
-import Divider from '@/components/Divider'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormLabel } from '@/components/Forms/Label'
 import { RegistrationSteps } from '../../../types'
 import { WeekDaysSelect } from '@/components/WeekDays'
 import { WeekDay } from '@/enums/WeekDay'
-import { z } from 'zod'
 import { SelectOption } from '@/components/Forms/Select/option'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import currencies from '@/assets/currency/currency.json'
+import { z } from 'zod'
 import { DateTime } from 'luxon'
+import { useVerifyOrganisationMutation } from '../../../api'
+import { CurrencyCode } from '@/types/CurrencyCode'
+import { useDispatch } from 'react-redux'
+import { setOrganisation } from '@/stores/slices/registration'
 
-type FormFields = {
-  name: string
-  subdomain: string
-  workDays: WeekDay[]
-  openingTime: string
-  closingTime: string
-  defaultCurrency: {
-    value: string
-    children: string
-  }
-  defaultHourlyRate: string
-}
-
-const OrganisationDetailsSchema = z
+const OrganisationSchema = z
   .object({
     name: z.string().trim().min(1, { message: 'Name is required' }),
-    subdomain: z.string().trim().min(1, { message: 'Subdomain is required' }),
+    subdomain: z
+      .string()
+      .trim()
+      .min(1, { message: 'Subdomain is required' })
+      .regex(/^[a-z-]+$/, { message: 'Subdomains can only contain lowercase letters and hyphens' }),
     workDays: z.array(z.string()).nonempty({ message: 'At least 1 work day required' }),
     openingTime: z.string().trim().min(1, { message: 'Opening time is required' }),
     closingTime: z.string().trim().min(1, { message: 'Closing time is required' }),
-    defaultHourlyRate: z.string().superRefine((val, ctx) => {
-      const hourlyRate = parseInt(val, 10)
+    currency: z.object({
+      value: z.string(),
+      children: z.string(),
+    }),
+    hourlyRate: z.string().superRefine((val, ctx) => {
+      const hourlyRate = parseFloat(val)
 
       const issues = [
         { test: isNaN(hourlyRate), errorMessage: 'Valid rate required' },
@@ -81,16 +79,47 @@ const OrganisationDetailsSchema = z
     }
   })
 
+type FormFields = {
+  name: string
+  subdomain: string
+  workDays: WeekDay[]
+  openingTime: string
+  closingTime: string
+  currency: {
+    value: CurrencyCode
+    children: string
+  }
+  hourlyRate: string
+}
+
 type OrganisationsViewProps = {
   onBack: (prevStep: RegistrationSteps) => void
   onSuccess: (nextStep: RegistrationSteps) => void
 }
 
 export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps): JSX.Element => {
+  const dispatch = useDispatch()
+
+  const [verifyOrganisation, { isSuccess: didVerifyOrganisation }] = useVerifyOrganisationMutation()
+
   const handleSubmit = (data: FormFields) => {
-    console.log(data)
-    console.log()
+    dispatch(setOrganisation(data))
+    verifyOrganisation({
+      name: data.name,
+      subdomain: data.subdomain,
+      opening_time: data.openingTime,
+      closing_time: data.closingTime,
+      currency: data.currency.value,
+      work_days: data.workDays,
+      hourly_rate: parseFloat(data.hourlyRate),
+    })
   }
+
+  useEffect(() => {
+    if (didVerifyOrganisation) {
+      onSuccess('team')
+    }
+  }, [didVerifyOrganisation])
 
   const currencyOptions = useMemo(() => {
     return Object.keys(currencies).map((currency) => ({
@@ -101,21 +130,21 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
   }, [])
 
   return (
-    <Form<FormFields, typeof OrganisationDetailsSchema>
+    <Form<FormFields, typeof OrganisationSchema>
       className="gap-0"
       onSubmit={handleSubmit}
-      validationSchema={OrganisationDetailsSchema}
+      validationSchema={OrganisationSchema}
       defaultValues={{
         name: '',
         subdomain: '',
         workDays: [],
         openingTime: '',
         closingTime: '',
-        defaultCurrency: {
+        currency: {
           value: 'GBP',
           children: 'British Pound Sterling',
         },
-        defaultHourlyRate: '',
+        hourlyRate: '',
       }}
     >
       {({ register, control, formState: { errors } }) => (
@@ -188,7 +217,9 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
               />
               <DescriptorContent className="max-w-[405px]">
                 <FormControl>
-                  <FormLabel size="sm">Work Days</FormLabel>
+                  <FormLabel htmlFor="workDays" size="sm">
+                    Work Days
+                  </FormLabel>
                   <WeekDaysSelect name="workDays" control={control} />
                   {errors.workDays?.message && (
                     <FormErrorMessage size="sm">{errors.workDays?.message}</FormErrorMessage>
@@ -196,7 +227,9 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                 </FormControl>
                 <div className="flex justify-between gap-3">
                   <FormControl>
-                    <FormLabel size="sm">Opening Time</FormLabel>
+                    <FormLabel htmlFor="openingTime" size="sm">
+                      Opening Time
+                    </FormLabel>
                     <FormTimeInput
                       id="openingTime"
                       size="sm"
@@ -209,7 +242,9 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                   </FormControl>
 
                   <FormControl>
-                    <FormLabel size="sm">Closing Time</FormLabel>
+                    <FormLabel htmlFor="closngTime" size="sm">
+                      Closing Time
+                    </FormLabel>
                     <FormTimeInput
                       id="closingTime"
                       size="sm"
@@ -238,33 +273,34 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
               <DescriptorContent className="max-w-[405px]">
                 <div className="flex justify-between gap-3">
                   <FormControl className="flex-grow">
-                    <FormLabel size="sm">Currency</FormLabel>
-                    <FormSelect
-                      name="defaultCurrency"
-                      control={control}
-                      placeHolder="Select currency"
-                    >
+                    <FormLabel htmlFor="currency" size="sm">
+                      Currency
+                    </FormLabel>
+                    <FormSelect name="currency" control={control} placeHolder="Select currency">
                       {currencyOptions?.map((option) => (
                         <SelectOption key={option.id} value={option.value}>
                           {option?.display}
                         </SelectOption>
                       ))}
                     </FormSelect>
+                    {errors.currency?.message && (
+                      <FormErrorMessage size="sm">{errors.currency?.message}</FormErrorMessage>
+                    )}
                   </FormControl>
 
                   <FormControl className="max-w-[130px] w-full">
-                    <FormLabel size="sm">Hourly Rate</FormLabel>
+                    <FormLabel htmlFor="hourlyRate" size="sm">
+                      Hourly Rate
+                    </FormLabel>
                     <FormCurrencyInput
                       size="sm"
                       prefix="£"
-                      name="defaultHourlyRate"
+                      name="hourlyRate"
                       control={control}
-                      error={!!errors?.defaultHourlyRate?.message}
+                      error={!!errors?.hourlyRate?.message}
                     />
-                    {errors.defaultHourlyRate?.message && (
-                      <FormErrorMessage size="sm">
-                        {errors.defaultHourlyRate?.message}
-                      </FormErrorMessage>
+                    {errors.hourlyRate?.message && (
+                      <FormErrorMessage size="sm">{errors.hourlyRate?.message}</FormErrorMessage>
                     )}
                   </FormControl>
                 </div>
@@ -274,7 +310,8 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
 
           <div className="flex justify-between mt-12">
             <button
-              className="outline-none text-purple-90 font-semibold text-base"
+              type="button"
+              className="outline-none text-purple-90 font-semibold text-base hover:text-purple-70"
               onClick={() => onBack('details')}
             >
               Previous Step
