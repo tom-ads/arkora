@@ -2,6 +2,7 @@ import { ChevronIcon } from '@/components/Icons/ChevronIcon'
 import { CircleTick } from '@/components/Icons/CircleTick'
 import { Listbox, Transition } from '@headlessui/react'
 import classNames from 'classnames'
+import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 
 type FormSelectProps = {
@@ -21,6 +22,8 @@ export const FormSelect = ({
   error,
   children,
 }: FormSelectProps): JSX.Element => {
+  const [isFocused, setIsFocused] = useState(false)
+
   return (
     <Controller
       name={name}
@@ -39,7 +42,7 @@ export const FormSelect = ({
                 <>
                   <Listbox.Button
                     className={classNames(
-                      'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between group',
+                      'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between',
                       {
                         'px-3 py-2 text-sm focus:shadow-sm': size === 'sm',
                         'px-3 py-3 text-base focus:shadow-md': size === 'md',
@@ -47,6 +50,7 @@ export const FormSelect = ({
 
                         'focus:shadow-purple-70 focus:border-purple-90': !error,
                         'border-red-90 focus:shadow-md focus:shadow-red-90': error,
+                        '!border-purple-90 !shadow-purple-70 shadow-sm': isFocused,
                       },
                     )}
                   >
@@ -68,7 +72,9 @@ export const FormSelect = ({
                       )}
                     >
                       <ChevronIcon
-                        className="transform transition-transform group-active:-rotate-180"
+                        className={classNames('transform transition-transform', {
+                          '-rotate-180': isFocused,
+                        })}
                         aria-hidden="true"
                       />
                     </span>
@@ -83,10 +89,12 @@ export const FormSelect = ({
                     leaveTo="transform translate-y-0 opacity-0"
                   >
                     <Listbox.Options
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => setIsFocused(false)}
                       className={classNames(
-                        'absolute bg-white w-full shadow-sm rounded shadow-gray-40 overflow-y-auto flex flex-col  outline-none',
+                        'absolute bg-white w-full shadow-sm rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide',
                         {
-                          'min-w-[200px] max-w-[270px] max-h-44 p-3 gap-y-1':
+                          'min-w-[200px] max-w-[270px] max-h-40 p-3 gap-y-1':
                             size === 'sm' || size === 'md',
                           'min-w-[270px] max-w-[330px] max-h-44 py-4 px-3 gap-y-2': size === 'lg',
                         },

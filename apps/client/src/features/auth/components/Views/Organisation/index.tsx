@@ -5,9 +5,11 @@ import {
   DescriptorInsights,
   Form,
   FormControl,
+  FormCurrencyInput,
   FormInput,
   FormSelect,
   FormTimeInput,
+  InlineLink,
 } from '@/components'
 import Divider from '@/components/Divider'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
@@ -19,6 +21,7 @@ import { z } from 'zod'
 import { SelectOption } from '@/components/Forms/Select/option'
 import { useMemo } from 'react'
 import currencies from '@/assets/currency/currency.json'
+import { DateTime } from 'luxon'
 
 type FormFields = {
   name: string
@@ -30,30 +33,62 @@ type FormFields = {
     value: string
     children: string
   }
+  defaultHourlyRate: string
 }
 
-const OrganisationDetailsSchema = z.object({
-  name: z.string().trim().min(1, { message: 'Name is required' }),
-  subdomain: z.string().trim().min(1, { message: 'Subdomain is required' }),
-  selectedDays: z.enum([
-    WeekDay.MONDAY,
-    WeekDay.TUESDAY,
-    WeekDay.WEDNESDAY,
-    WeekDay.THURSDAY,
-    WeekDay.FRIDAY,
-    WeekDay.SATURDAY,
-    WeekDay.SUNDAY,
-  ]),
-  openingTime: z.string().trim(),
-  closingTime: z.string().trim(),
-})
+const OrganisationDetailsSchema = z
+  .object({
+    name: z.string().trim().min(1, { message: 'Name is required' }),
+    subdomain: z.string().trim().min(1, { message: 'Subdomain is required' }),
+    workDays: z.array(z.string()).nonempty({ message: 'At least 1 work day required' }),
+    openingTime: z.string().trim().min(1, { message: 'Opening time is required' }),
+    closingTime: z.string().trim().min(1, { message: 'Closing time is required' }),
+    defaultHourlyRate: z.string().superRefine((val, ctx) => {
+      const hourlyRate = parseInt(val, 10)
+
+      const issues = [
+        { test: isNaN(hourlyRate), errorMessage: 'Valid rate required' },
+        { test: hourlyRate <= 0, errorMessage: 'Must be greater than 0' },
+        { test: hourlyRate > 20000, errorMessage: 'Cannot exceed 20,000' },
+      ]
+
+      if (Object.values(issues).some((i) => i.test)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: Object.values(issues).find((p) => p.test)?.errorMessage,
+        })
+      }
+    }),
+  })
+  .superRefine((val, ctx) => {
+    const openingTime = DateTime.fromFormat(val.openingTime, 'HH:mm')
+    const closingTime = DateTime.fromFormat(val.closingTime, 'HH:mm')
+
+    if (openingTime > closingTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Opening time cannot be after the closing time',
+        path: ['openingTime'],
+      })
+    }
+
+    if (closingTime <= openingTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Closing time cannot be before or equal to the opening time',
+        path: ['closingTime'],
+      })
+    }
+  })
 
 type OrganisationsViewProps = {
+  onBack: (prevStep: RegistrationSteps) => void
   onSuccess: (nextStep: RegistrationSteps) => void
 }
 
-export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.Element => {
+export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps): JSX.Element => {
   const handleSubmit = (data: FormFields) => {
+    console.log(data)
     console.log()
   }
 
@@ -71,15 +106,16 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
       onSubmit={handleSubmit}
       validationSchema={OrganisationDetailsSchema}
       defaultValues={{
-        name: undefined,
-        subdomain: undefined,
+        name: '',
+        subdomain: '',
         workDays: [],
-        openingTime: undefined,
-        closingTime: undefined,
+        openingTime: '',
+        closingTime: '',
         defaultCurrency: {
           value: 'GBP',
           children: 'British Pound Sterling',
         },
+        defaultHourlyRate: '',
       }}
     >
       {({ register, control, formState: { errors } }) => (
@@ -100,8 +136,9 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
               <DescriptorInsights
                 title="Organisation Details"
                 description="Determine the name that your team will visit"
+                className="max-w-md md:max-w-[325px]"
               />
-              <DescriptorContent className="max-w-[400px]">
+              <DescriptorContent className="max-w-[405px]">
                 <div className="flex justify-between gap-3">
                   <FormControl>
                     <FormLabel htmlFor="name" size="sm">
@@ -147,11 +184,15 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
                 description="Specify your organisations working days and
                 hours. This lets Arkora know when to send
                 notifications, stop timers and more"
+                className="max-w-md md:max-w-[325px]"
               />
-              <DescriptorContent className="min-w-[400px] max-w-[402px]">
+              <DescriptorContent className="max-w-[405px]">
                 <FormControl>
-                  <FormLabel size="sm">Week Days</FormLabel>
+                  <FormLabel size="sm">Work Days</FormLabel>
                   <WeekDaysSelect name="workDays" control={control} />
+                  {errors.workDays?.message && (
+                    <FormErrorMessage size="sm">{errors.workDays?.message}</FormErrorMessage>
+                  )}
                 </FormControl>
                 <div className="flex justify-between gap-3">
                   <FormControl>
@@ -162,7 +203,11 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
                       error={!!errors.openingTime}
                       register={register('openingTime')}
                     />
+                    {errors.openingTime?.message && (
+                      <FormErrorMessage size="sm">{errors.openingTime?.message}</FormErrorMessage>
+                    )}
                   </FormControl>
+
                   <FormControl>
                     <FormLabel size="sm">Closing Time</FormLabel>
                     <FormTimeInput
@@ -171,6 +216,9 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
                       error={!!errors.closingTime}
                       register={register('closingTime')}
                     />
+                    {errors.closingTime?.message && (
+                      <FormErrorMessage size="sm">{errors.closingTime?.message}</FormErrorMessage>
+                    )}
                   </FormControl>
                 </div>
               </DescriptorContent>
@@ -185,20 +233,52 @@ export const OrganisationsView = ({ onSuccess }: OrganisationsViewProps): JSX.El
                 description="Project budgets can be billable on an hourly
                 rate, you can even set fixed cost on any
                 budget instead"
+                className="max-w-md md:max-w-[325px]"
               />
-              <DescriptorContent className="max-w-[402px]">
-                <FormSelect name="defaultCurrency" control={control} placeHolder="Select currency">
-                  {currencyOptions?.map((option) => (
-                    <SelectOption key={option.id} value={option.value}>
-                      {option?.display}
-                    </SelectOption>
-                  ))}
-                </FormSelect>
+              <DescriptorContent className="max-w-[405px]">
+                <div className="flex justify-between gap-3">
+                  <FormControl className="flex-grow">
+                    <FormLabel size="sm">Currency</FormLabel>
+                    <FormSelect
+                      name="defaultCurrency"
+                      control={control}
+                      placeHolder="Select currency"
+                    >
+                      {currencyOptions?.map((option) => (
+                        <SelectOption key={option.id} value={option.value}>
+                          {option?.display}
+                        </SelectOption>
+                      ))}
+                    </FormSelect>
+                  </FormControl>
+
+                  <FormControl className="max-w-[130px] w-full">
+                    <FormLabel size="sm">Hourly Rate</FormLabel>
+                    <FormCurrencyInput
+                      size="sm"
+                      prefix="£"
+                      name="defaultHourlyRate"
+                      control={control}
+                      error={!!errors?.defaultHourlyRate?.message}
+                    />
+                    {errors.defaultHourlyRate?.message && (
+                      <FormErrorMessage size="sm">
+                        {errors.defaultHourlyRate?.message}
+                      </FormErrorMessage>
+                    )}
+                  </FormControl>
+                </div>
               </DescriptorContent>
             </Descriptor>
           </div>
 
-          <div className="flex justify-end mt-12">
+          <div className="flex justify-between mt-12">
+            <button
+              className="outline-none text-purple-90 font-semibold text-base"
+              onClick={() => onBack('details')}
+            >
+              Previous Step
+            </button>
             <Button size="sm" className="max-w-[220px] w-full" type="submit">
               Next step
             </Button>

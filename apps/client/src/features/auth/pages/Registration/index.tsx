@@ -13,6 +13,10 @@ export const RegistrationPage = (): JSX.Element => {
     }
   }
 
+  const handleBack = (prevStep: RegistrationSteps) => {
+    setActiveStep(prevStep)
+  }
+
   return (
     <div className="flex flex-col py-11">
       <Progress activeStep={activeStep} defaultStep="details">
@@ -23,7 +27,9 @@ export const RegistrationPage = (): JSX.Element => {
 
       <div className="my-8">
         {activeStep === 'details' && <DetailsView onSuccess={handleStep} />}
-        {activeStep === 'organisation' && <OrganisationsView onSuccess={handleStep} />}
+        {activeStep === 'organisation' && (
+          <OrganisationsView onBack={handleBack} onSuccess={handleStep} />
+        )}
         {activeStep === 'team' && <TeamView onSuccess={handleStep} />}
       </div>
     </div>

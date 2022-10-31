@@ -4,10 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+::selection {
+  color: #352c98;
+  background: #dfddf5;
+}
+
 #root,
 html,
 body {
   @apply min-h-full h-full w-full bg-gray-20 font-inter;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @layer base {
