@@ -20,7 +20,7 @@ export default class WorkDay extends BaseModel {
   // Relationships
 
   @manyToMany(() => Organisation, {
-    pivotTable: 'organisation_workdays',
+    pivotTable: 'organisation_work_days',
     pivotForeignKey: 'workday_id',
   })
   public organisations: ManyToMany<typeof Organisation>

@@ -1,5 +1,5 @@
 import User from './User'
-import { DateTime } from 'luxon'
+import { DateInput, DateTime } from 'luxon'
 import {
   BaseModel,
   BelongsTo,
@@ -16,7 +16,7 @@ import WorkDay from './WorkDay'
 export default class Organisation extends BaseModel {
   // Columns
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, serializeAs: null })
   public id: number
 
   @column()
@@ -28,10 +28,10 @@ export default class Organisation extends BaseModel {
   @column()
   public subdomain: string
 
-  @column.dateTime()
+  @column.dateTime({ serialize: (val: DateTime) => val.toFormat('HH:mm') })
   public openingTime: DateTime
 
-  @column.dateTime()
+  @column.dateTime({ serialize: (val: DateTime) => val.toFormat('HH:mm') })
   public closingTime: DateTime
 
   @column()
@@ -52,7 +52,7 @@ export default class Organisation extends BaseModel {
   public currency: BelongsTo<typeof Currency>
 
   @manyToMany(() => WorkDay, {
-    pivotTable: 'organisation_workdays',
+    pivotTable: 'organisation_work_days',
     pivotRelatedForeignKey: 'workday_id',
   })
   public workDays: ManyToMany<typeof WorkDay>

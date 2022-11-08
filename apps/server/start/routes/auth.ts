@@ -6,4 +6,6 @@ Route.group(() => {
     Route.post('/details', 'AuthController.verifyDetails')
     Route.post('/organisation', 'AuthController.verifyOrganisation')
   }).prefix('/register')
-}).prefix('/auth')
+})
+  .prefix('/auth')
+  .middleware('blockAuth')

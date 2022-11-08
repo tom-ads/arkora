@@ -57,7 +57,7 @@ export default class OrganisationValidator {
     'name.required': 'Name is required',
 
     'subdomain.required': 'Subdomain is required',
-    'subdomain.unique': 'Subdoamin already taken',
+    'subdomain.unique': 'Subdomain already taken',
     'subdomain.regex': 'Invalid subdomain, can only have letters and hyphens',
 
     'work_days.required': 'Work days are required',
