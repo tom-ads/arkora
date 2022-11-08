@@ -1,6 +1,13 @@
 import classNames from 'classnames'
 import { ReactNode } from 'react'
-import { DeepPartial, FieldValues, SubmitHandler, useForm, UseFormReturn } from 'react-hook-form'
+import {
+  DeepPartial,
+  FieldValues,
+  FormProvider,
+  SubmitHandler,
+  useForm,
+  UseFormReturn,
+} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ZodType } from 'zod'
 
@@ -25,11 +32,13 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
   })
 
   return (
-    <form
-      onSubmit={methods.handleSubmit(onSubmit)}
-      className={classNames('flex flex-col gap-6 w-full', className)}
-    >
-      {children(methods)}
-    </form>
+    <FormProvider {...methods}>
+      <form
+        onSubmit={methods.handleSubmit(onSubmit)}
+        className={classNames('flex flex-col gap-6 w-full', className)}
+      >
+        <fieldset className="w-full">{children(methods)}</fieldset>
+      </form>
+    </FormProvider>
   )
 }

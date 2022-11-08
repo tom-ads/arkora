@@ -79,7 +79,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
         passwordConfirmation: '',
       }}
     >
-      {({ register, watch, formState: { errors } }) => (
+      {({ watch, formState: { errors } }) => (
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
             <div className="space-y-2 pb-6">
@@ -118,11 +118,10 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                       Firstname
                     </FormLabel>
                     <FormInput
-                      id="firstname"
+                      name="firstname"
                       placeHolder="Enter firstname"
                       size="sm"
                       error={!!errors.firstname}
-                      register={register('firstname')}
                     />
                     {errors.firstname?.message && (
                       <FormErrorMessage size="sm">{errors.firstname?.message}</FormErrorMessage>
@@ -134,11 +133,10 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                       Lastname
                     </FormLabel>
                     <FormInput
-                      id="lastname"
+                      name="lastname"
                       placeHolder="Enter lastname"
                       size="sm"
                       error={!!errors.lastname}
-                      register={register('lastname')}
                     />
                     {errors.lastname?.message && (
                       <FormErrorMessage size="sm">{errors.lastname?.message}</FormErrorMessage>
@@ -151,11 +149,10 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                     Email
                   </FormLabel>
                   <FormInput
-                    id="email"
+                    name="email"
                     placeHolder="Enter email address"
                     size="sm"
                     error={!!errors.email}
-                    register={register('email')}
                   />
                   {errors.email?.message && (
                     <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
@@ -167,11 +164,10 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                     Password
                   </FormLabel>
                   <PasswordInput
-                    id="password"
+                    name="password"
                     placeHolder="Enter password"
                     size="sm"
                     error={!!errors?.password}
-                    register={register('password')}
                   />
                   <PasswordStrength password={watch('password')} isError={!!errors?.password} />
                 </FormControl>
@@ -181,11 +177,10 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                     Confirm Password
                   </FormLabel>
                   <PasswordInput
-                    id="passwordConfirmation"
-                    placeHolder="Enter password"
+                    name="passwordConfirmation"
+                    placeHolder="Enter confirmation"
                     size="sm"
                     error={!!errors.passwordConfirmation?.message}
-                    register={register('passwordConfirmation')}
                   />
                   {errors.passwordConfirmation?.message && (
                     <FormErrorMessage>{errors.passwordConfirmation?.message}</FormErrorMessage>

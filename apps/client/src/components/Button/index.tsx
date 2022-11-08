@@ -1,14 +1,15 @@
-import { FormEventHandler, ReactNode } from 'react'
+import { FormEventHandler, MouseEventHandler, ReactNode } from 'react'
 import classNames from 'classnames'
 import { forwardRef } from 'react'
 
 type ButtonProps = {
   size?: 'sm' | 'md' | 'lg'
-  variant?: 'primary' | 'secondary' | 'outlined'
+  variant?: 'primary' | 'secondary' | 'outlined' | 'blank'
   danger?: boolean
   type?: 'button' | 'submit'
   block?: boolean
   className?: string
+  onClick?: MouseEventHandler<HTMLButtonElement>
   onSubmit?: FormEventHandler<HTMLButtonElement>
   children: ReactNode
 }
@@ -18,6 +19,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     size = 'md',
     onSubmit,
     className,
+    onClick,
     variant = 'primary',
     danger = false,
     type = 'button',
@@ -29,6 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button
       ref={ref}
       type={type}
+      onClick={onClick}
       onSubmit={onSubmit}
       className={classNames(
         'border rounded transition-all outline-none font-semibold text-white text-center',
@@ -45,6 +48,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
             variant === 'secondary',
           'border-purple-90 !text-purple-90 hover:border-purple-80 hover:!text-purple-80 active:shadow-purple-90 focus:shadow-purple-90 bg-none':
             variant === 'outlined',
+          'text-purple-90 hover:text-purple-70 focus:text-purple-90 border-none focus:!shadow-none !p-0':
+            variant === 'blank',
 
           'bg-red-90': danger && variant === 'primary',
         },

@@ -1,20 +1,21 @@
 import classNames from 'classnames'
-import { UseFormRegisterReturn } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
-type FormInputProps = {
-  id: string
+type FormInputBaseProps = {
+  name: string
   placeHolder?: string
   size?: 'sm' | 'md' | 'lg'
   error?: boolean
-  register: Partial<UseFormRegisterReturn>
 }
 
-export const FormInput = ({ id, placeHolder, size = 'sm', error, register }: FormInputProps) => {
+export const FormInput = ({ name, placeHolder, size = 'sm', error }: FormInputBaseProps) => {
+  const { register } = useFormContext()
+
   return (
     <input
-      id={id}
+      id={name}
       type="text"
-      {...register}
+      {...register(name)}
       placeholder={placeHolder}
       className={classNames(
         'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none',

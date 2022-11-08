@@ -1,24 +1,20 @@
 import classNames from 'classnames'
-import { UseFormRegisterReturn } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
 type FormTimeInputProps = {
-  id: string
+  name: string
   size?: 'sm' | 'md' | 'lg'
   error?: boolean
-  register: Partial<UseFormRegisterReturn>
 }
 
-export const FormTimeInput = ({
-  id,
-  size = 'sm',
-  error,
-  register,
-}: FormTimeInputProps): JSX.Element => {
+export const FormTimeInput = ({ name, size = 'sm', error }: FormTimeInputProps): JSX.Element => {
+  const { register } = useFormContext()
+
   return (
     <input
-      id={id}
+      id={name}
       type="time"
-      {...register}
+      {...register(name)}
       className={classNames(
         'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none appearance-none',
         {

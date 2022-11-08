@@ -12,7 +12,8 @@
       "Config/*": ["./config/*"],
       "Contracts/*": ["./contracts/*"],
       "Database/*": ["./database/*"],
-      "Helpers/*": ["./helpers/*"]
+      "Helpers/*": ["./helpers/*"],
+      "Resources/*": ["./resources/*"]
     },
     "types": [
       "@adonisjs/core",

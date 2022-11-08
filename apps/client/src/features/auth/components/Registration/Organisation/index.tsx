@@ -147,7 +147,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
         hourlyRate: '',
       }}
     >
-      {({ register, control, formState: { errors } }) => (
+      {({ control, formState: { errors } }) => (
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
             <div className="space-y-2 pb-6">
@@ -175,11 +175,10 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     </FormLabel>
 
                     <FormInput
-                      id="name"
+                      name="name"
                       placeHolder="Enter name"
                       size="sm"
                       error={!!errors.name}
-                      register={register('name')}
                     />
                     {errors.name?.message && (
                       <FormErrorMessage size="sm">{errors.name?.message}</FormErrorMessage>
@@ -190,11 +189,10 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                       Subdomain
                     </FormLabel>
                     <FormInput
-                      id="subdomain"
+                      name="subdomain"
                       placeHolder="Enter subdomain"
                       size="sm"
                       error={!!errors.subdomain}
-                      register={register('subdomain')}
                     />
                     {errors.subdomain?.message && (
                       <FormErrorMessage size="sm">{errors.subdomain?.message}</FormErrorMessage>
@@ -230,12 +228,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     <FormLabel htmlFor="openingTime" size="sm">
                       Opening Time
                     </FormLabel>
-                    <FormTimeInput
-                      id="openingTime"
-                      size="sm"
-                      error={!!errors.openingTime}
-                      register={register('openingTime')}
-                    />
+                    <FormTimeInput name="openingTime" size="sm" error={!!errors.openingTime} />
                     {errors.openingTime?.message && (
                       <FormErrorMessage size="sm">{errors.openingTime?.message}</FormErrorMessage>
                     )}
@@ -245,12 +238,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     <FormLabel htmlFor="closngTime" size="sm">
                       Closing Time
                     </FormLabel>
-                    <FormTimeInput
-                      id="closingTime"
-                      size="sm"
-                      error={!!errors.closingTime}
-                      register={register('closingTime')}
-                    />
+                    <FormTimeInput name="closingTime" size="sm" error={!!errors.closingTime} />
                     {errors.closingTime?.message && (
                       <FormErrorMessage size="sm">{errors.closingTime?.message}</FormErrorMessage>
                     )}

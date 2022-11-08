@@ -3,5 +3,6 @@ declare module '@ioc:Adonis/Core/Validator' {
     password(): Rule
     currencyCode(): Rule
     workDays(): Rule
+    // uniqueMember(): Rule
   }
 }

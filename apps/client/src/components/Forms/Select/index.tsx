@@ -2,7 +2,7 @@ import { ChevronIcon } from '@/components/Icons/ChevronIcon'
 import { CircleTick } from '@/components/Icons/CircleTick'
 import { Listbox, Transition } from '@headlessui/react'
 import classNames from 'classnames'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Controller } from 'react-hook-form'
 
 type FormSelectProps = {
@@ -42,7 +42,7 @@ export const FormSelect = ({
                 <>
                   <Listbox.Button
                     className={classNames(
-                      'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between',
+                      'relative border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0',
                       {
                         'px-3 py-2 text-sm focus:shadow-sm': size === 'sm',
                         'px-3 py-3 text-base focus:shadow-md': size === 'md',
@@ -55,7 +55,7 @@ export const FormSelect = ({
                     )}
                   >
                     <span
-                      className={classNames('text-gray-80 text-start truncate', {
+                      className={classNames('text-gray-80 text-start truncate capitalize', {
                         'text-gray-100': field.value,
                       })}
                     >
@@ -80,6 +80,7 @@ export const FormSelect = ({
                     </span>
                   </Listbox.Button>
                   <Transition
+                    as={Fragment}
                     show={open}
                     enter="transition duration-200 ease-out"
                     enterFrom="transform translate-y-0 opacity-0"
@@ -92,7 +93,7 @@ export const FormSelect = ({
                       onFocus={() => setIsFocused(true)}
                       onBlur={() => setIsFocused(false)}
                       className={classNames(
-                        'absolute bg-white w-full shadow-sm rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide',
+                        'absolute bg-white w-full shadow-sm rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50',
                         {
                           'min-w-[200px] max-w-[270px] max-h-40 p-3 gap-y-1':
                             size === 'sm' || size === 'md',
@@ -119,7 +120,7 @@ export const FormSelect = ({
                         >
                           {({ selected }) => (
                             <>
-                              <span className="truncate">{child}</span>
+                              <span className="truncate capitalize">{child}</span>
                               {selected && (
                                 <span className="w-4 h-4 shrink-0 mr-1">
                                   <CircleTick />

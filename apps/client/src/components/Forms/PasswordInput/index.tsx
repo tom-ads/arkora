@@ -2,30 +2,30 @@ import { EyeClosedIcon } from '@/components/Icons/EyeClosedIcon'
 import { EyeOpenIcon } from '@/components/Icons/EyeOpenIcon'
 import classNames from 'classnames'
 import { useState } from 'react'
-import { UseFormRegisterReturn } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
 type PasswordInputProps = {
-  id: string
+  name: string
   placeHolder: string
   size?: 'sm' | 'md' | 'lg'
-  register: Partial<UseFormRegisterReturn>
   error?: boolean
 }
 
 export const PasswordInput = ({
-  id,
+  name,
   size,
   error,
-  register,
   placeHolder,
 }: PasswordInputProps): JSX.Element => {
+  const { register } = useFormContext()
+
   const [showPassword, setShowPassword] = useState(false)
 
   return (
     <div className="w-full relative">
       <input
-        id={id}
-        {...register}
+        id={name}
+        {...register(name)}
         placeholder={placeHolder}
         type={showPassword ? 'text' : 'password'}
         className={classNames(

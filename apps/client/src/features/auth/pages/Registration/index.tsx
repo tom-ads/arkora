@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import Progress from '@/components/Indicators/Progress'
 import { ProgressStep } from '@/components/Indicators/ProgressStep'
-import { DetailsView, OrganisationsView, TeamView } from '../../components/Views'
+import { DetailsView, OrganisationsView, TeamView } from '../../components/Registration'
 import { RegistrationSteps } from '../../types'
 
 export const RegistrationPage = (): JSX.Element => {
-  const [activeStep, setActiveStep] = useState<RegistrationSteps>('organisation')
+  const [activeStep, setActiveStep] = useState<RegistrationSteps>('team')
 
   const handleStep = (nextStep?: RegistrationSteps) => {
     if (nextStep) {

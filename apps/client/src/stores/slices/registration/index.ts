@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { WeekDay } from '@/enums/WeekDay'
 import { CurrencyCode } from '@/types/CurrencyCode'
+import UserRole from '@/enums/UserRole'
 
 interface RegisterDetails {
   firstname: string
@@ -23,7 +24,14 @@ interface RegisterOrganisation {
   hourlyRate: string
 }
 
-type RegistrationState = RegisterDetails & RegisterOrganisation
+interface RegisterTeam {
+  team: Array<{
+    email: string
+    role: UserRole
+  }>
+}
+
+type RegistrationState = RegisterDetails & RegisterOrganisation & RegisterTeam
 
 const initialState: RegistrationState = {
   firstname: '',
@@ -41,6 +49,8 @@ const initialState: RegistrationState = {
     children: 'British Pound Sterling',
   },
   hourlyRate: '',
+
+  team: [],
 }
 
 const registrationSlice = createSlice({
@@ -62,6 +72,10 @@ const registrationSlice = createSlice({
       currenctState.closingTime = action.payload.closingTime
       currenctState.currency = action.payload.currency
       currenctState.hourlyRate = action.payload.hourlyRate
+    },
+
+    setTeam: (currentState, action: PayloadAction<RegisterTeam>) => {
+      currentState.team = action.payload.team
     },
   },
 })
