@@ -204,7 +204,9 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                       }
                       value={watch('subdomain')}
                       onChange={async (value) => {
-                        checkSubdomainTrigger({ subdomain: value })
+                        if (value) {
+                          checkSubdomainTrigger({ subdomain: value })
+                        }
                         setValue('subdomain', value)
                       }}
                     />
