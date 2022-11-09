@@ -1,3 +1,3 @@
-import GetSubdomainRequest from './GetSubdomain'
+import CheckSubdomainRequest from './CheckSubdomain'
 
-export type { GetSubdomainRequest }
+export type { CheckSubdomainRequest }

@@ -5,17 +5,22 @@ test.group('Verify Subdomain', () => {
   test('valid organisation subdomain should be verified', async ({ client }) => {
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
-    const response = await client.get('/subdomain/test-org')
+    const response = await client.get('/subdomain?subdomain=test-org')
 
     response.assertStatus(200)
+    response.assertBody({
+      exists: true,
+    })
   })
 
   test('invalid organisation subdomain should not be verified', async ({ client }) => {
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
-    const response = await client.get('/subdomain/diff-org')
+    const response = await client.get('/subdomain?subdomain=diff-org')
 
-    response.assertStatus(404)
-    response.assertBody({ message: 'No organisation found' })
+    response.assertStatus(200)
+    response.assertBody({
+      exists: false,
+    })
   })
 })

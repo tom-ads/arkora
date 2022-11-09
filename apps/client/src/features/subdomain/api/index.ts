@@ -1,15 +1,22 @@
 import appApi from 'api'
-import { GetSubdomainRequest } from './types/requests'
+import { CheckSubdomainRequest } from './types/requests'
+import { CheckSubdomainResponse } from './types/responses'
 
 const subdomainBasePath = '/subdomain'
 
 const subdomainEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
-    verifySubdomain: build.query<void, GetSubdomainRequest>({
-      query: ({ subdomain }) => `${subdomainBasePath}/${subdomain}`,
+    checkSubdomain: build.query<CheckSubdomainResponse, CheckSubdomainRequest>({
+      query: ({ subdomain }) => ({
+        url: subdomainBasePath,
+        params: {
+          // Default to empty string to prevent RTK from removing the param
+          subdomain: subdomain ?? '',
+        },
+      }),
     }),
   }),
   overrideExisting: false,
 })
 
-export const { useVerifySubdomainQuery, useLazyVerifySubdomainQuery } = subdomainEndpoints
+export const { useCheckSubdomainQuery, useLazyCheckSubdomainQuery } = subdomainEndpoints

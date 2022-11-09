@@ -10,6 +10,7 @@ import {
   FormSelect,
   FormTimeInput,
   Divider,
+  FormDebouncedInput,
 } from '@/components'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormLabel } from '@/components/Forms/Label'
@@ -25,6 +26,7 @@ import { useVerifyOrganisationMutation } from '../../../api'
 import { CurrencyCode } from '@/types/CurrencyCode'
 import { useDispatch } from 'react-redux'
 import { setOrganisation } from '@/stores/slices/registration'
+import { useLazyCheckSubdomainQuery } from '@/features/subdomain'
 
 const OrganisationSchema = z
   .object({
@@ -102,6 +104,8 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
 
   const [verifyOrganisation, { isSuccess: didVerifyOrganisation }] = useVerifyOrganisationMutation()
 
+  const [checkSubdomainTrigger, { data: checkSubdomainResult }] = useLazyCheckSubdomainQuery()
+
   const handleSubmit = (data: FormFields) => {
     dispatch(setOrganisation(data))
     verifyOrganisation({
@@ -147,7 +151,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
         hourlyRate: '',
       }}
     >
-      {({ control, formState: { errors } }) => (
+      {({ control, setValue, watch, formState: { errors } }) => (
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
             <div className="space-y-2 pb-6">
@@ -188,14 +192,28 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     <FormLabel htmlFor="subdomain" size="sm">
                       Subdomain
                     </FormLabel>
-                    <FormInput
+                    <FormDebouncedInput
                       name="subdomain"
                       placeHolder="Enter subdomain"
                       size="sm"
-                      error={!!errors.subdomain}
+                      error={
+                        !!errors.subdomain ||
+                        (checkSubdomainResult?.exists !== undefined
+                          ? checkSubdomainResult?.exists
+                          : false)
+                      }
+                      value={watch('subdomain')}
+                      onChange={async (value) => {
+                        checkSubdomainTrigger({ subdomain: value })
+                        setValue('subdomain', value)
+                      }}
                     />
-                    {errors.subdomain?.message && (
-                      <FormErrorMessage size="sm">{errors.subdomain?.message}</FormErrorMessage>
+                    {(errors.subdomain?.message || checkSubdomainResult?.exists !== undefined
+                      ? checkSubdomainResult?.exists
+                      : false) && (
+                      <FormErrorMessage size="sm">
+                        {errors.subdomain?.message ?? 'Subdomain already taken'}
+                      </FormErrorMessage>
                     )}
                   </FormControl>
                 </div>
