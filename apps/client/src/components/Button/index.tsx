@@ -1,6 +1,7 @@
 import { FormEventHandler, MouseEventHandler, ReactNode } from 'react'
 import classNames from 'classnames'
 import { forwardRef } from 'react'
+import { Spinner } from '../Spinner'
 
 type ButtonProps = {
   size?: 'sm' | 'md' | 'lg'
@@ -9,6 +10,7 @@ type ButtonProps = {
   type?: 'button' | 'submit'
   block?: boolean
   className?: string
+  isLoading?: boolean
   onClick?: MouseEventHandler<HTMLButtonElement>
   onSubmit?: FormEventHandler<HTMLButtonElement>
   children: ReactNode
@@ -18,6 +20,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const {
     size = 'md',
     onSubmit,
+    isLoading,
     className,
     onClick,
     variant = 'primary',
@@ -33,8 +36,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type}
       onClick={onClick}
       onSubmit={onSubmit}
+      disabled={isLoading}
       className={classNames(
-        'border rounded transition-all outline-none font-semibold text-white text-center',
+        'border rounded transition-all outline-none font-semibold text-white flex items-center justify-center',
         {
           'w-full': block,
 
@@ -56,7 +60,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         className,
       )}
     >
-      {children}
+      {isLoading ? <Spinner className="w-6 h-6 text-white" /> : children}
     </button>
   )
 })
