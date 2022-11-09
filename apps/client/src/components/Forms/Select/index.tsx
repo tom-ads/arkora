@@ -8,7 +8,7 @@ import { Controller } from 'react-hook-form'
 type FormSelectProps = {
   name: string
   control: any
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
   placeHolder?: string
   error?: boolean
   children: JSX.Element[]
@@ -44,6 +44,7 @@ export const FormSelect = ({
                     className={classNames(
                       'relative border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0',
                       {
+                        'px-2 py-1': size === 'xs',
                         'px-3 py-2 text-sm focus:shadow-sm': size === 'sm',
                         'px-3 py-3 text-base focus:shadow-md': size === 'md',
                         'px-[0.875rem] py-[10px] text-xl focus:shadow-lg': size === 'lg',
@@ -66,7 +67,7 @@ export const FormSelect = ({
                       className={classNames(
                         'text-gray-100 ml-2 flex flex-shrink-0 pointer-events-none',
                         {
-                          'w-5 h-5': size === 'sm' || size === 'md',
+                          'w-5 h-5': size === 'xs' || size === 'sm' || size === 'md',
                           'w-6 h-6': size === 'lg',
                         },
                       )}
@@ -95,7 +96,8 @@ export const FormSelect = ({
                       className={classNames(
                         'absolute bg-white w-full shadow-sm rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50',
                         {
-                          'min-w-[200px] max-w-[270px] max-h-40 p-3 gap-y-1':
+                          'min-w-[200px] max-w-[270px] max-h-40 gap-y-1 p-[7px]': size === 'xs',
+                          'min-w-[200px] max-w-[270px] max-h-40 gap-y-1 p-2':
                             size === 'sm' || size === 'md',
                           'min-w-[270px] max-w-[330px] max-h-44 py-4 px-3 gap-y-2': size === 'lg',
                         },
@@ -110,7 +112,8 @@ export const FormSelect = ({
                             classNames(
                               'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10',
                               {
-                                'text-sm px-2 py-[6px]': size === 'sm' || size === 'md',
+                                'text-sm px-2 py-[6px]':
+                                  size === 'xs' || size === 'sm' || size === 'md',
                                 'text-base px-3 py-2': size === 'lg',
 
                                 'bg-purple-10 !text-purple-90 hover:bg-purple-10': selected,
@@ -120,10 +123,12 @@ export const FormSelect = ({
                         >
                           {({ selected }) => (
                             <>
-                              <span className="truncate capitalize">{child}</span>
+                              <span className="truncate capitalize select-none pointer-events-none">
+                                {child}
+                              </span>
                               {selected && (
                                 <span className="w-4 h-4 shrink-0 mr-1">
-                                  <CircleTick />
+                                  <CircleTick aria-hidden />
                                 </span>
                               )}
                             </>
