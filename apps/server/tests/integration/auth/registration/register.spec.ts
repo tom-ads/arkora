@@ -34,13 +34,10 @@ test.group('Auth: Registration - Register', () => {
     const createdOrganisation = await Organisation.findBy('subdomain', payload.subdomain)
     assert.exists(createdOrganisation)
 
-    await createdOrganisation?.load('workDays')
     assert.notStrictEqual(
       createdOrganisation?.workDays.map((day) => day.name),
       payload.work_days
     )
-
-    await createdOrganisation?.load('currency')
     assert.equal(createdOrganisation?.currency.code, payload.currency)
   })
 

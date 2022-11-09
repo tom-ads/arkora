@@ -1,7 +1,9 @@
 import User from './User'
-import { DateInput, DateTime } from 'luxon'
+import { DateTime } from 'luxon'
 import {
   BaseModel,
+  beforeFetch,
+  beforeFind,
   BelongsTo,
   belongsTo,
   column,
@@ -9,9 +11,12 @@ import {
   hasMany,
   ManyToMany,
   manyToMany,
+  ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 import Currency from './Currency'
 import WorkDay from './WorkDay'
+
+type OrganisationQueryBuilder = ModelQueryBuilderContract<typeof Organisation>
 
 export default class Organisation extends BaseModel {
   // Columns
@@ -56,4 +61,12 @@ export default class Organisation extends BaseModel {
     pivotRelatedForeignKey: 'workday_id',
   })
   public workDays: ManyToMany<typeof WorkDay>
+
+  // Hooks
+
+  @beforeFind()
+  @beforeFetch()
+  public static preloadRelations(query: OrganisationQueryBuilder) {
+    query.preload('currency').preload('workDays')
+  }
 }
