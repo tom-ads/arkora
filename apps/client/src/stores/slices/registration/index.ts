@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { WeekDay } from '@/enums/WeekDay'
 import { CurrencyCode } from '@/types/CurrencyCode'
-import UserRole from '@/enums/UserRole'
+import { SelectedRole } from '@/features/auth'
 
 interface RegisterDetails {
   firstname: string
@@ -24,31 +24,37 @@ interface RegisterOrganisation {
   hourlyRate: string
 }
 
-interface RegisterTeam {
-  team: Array<{
-    email: string
-    role: UserRole
-  }>
+interface RegisterTeamMember {
+  email: string
+  role: SelectedRole
 }
 
-type RegistrationState = RegisterDetails & RegisterOrganisation & RegisterTeam
+interface RegistrationState {
+  details: RegisterDetails
+  organisation: RegisterOrganisation
+  team: RegisterTeamMember[]
+}
 
 const initialState: RegistrationState = {
-  firstname: '',
-  lastname: '',
-  email: '',
-  password: '',
-
-  name: '',
-  subdomain: '',
-  workDays: [],
-  openingTime: '',
-  closingTime: '',
-  currency: {
-    value: 'GBP',
-    children: 'British Pound Sterling',
+  details: {
+    firstname: '',
+    lastname: '',
+    email: '',
+    password: '',
   },
-  hourlyRate: '',
+
+  organisation: {
+    name: '',
+    subdomain: '',
+    workDays: [],
+    openingTime: '',
+    closingTime: '',
+    currency: {
+      value: 'GBP',
+      children: 'British Pound Sterling',
+    },
+    hourlyRate: '',
+  },
 
   team: [],
 }
@@ -58,27 +64,31 @@ const registrationSlice = createSlice({
   initialState,
   reducers: {
     setDetails: (currentState, action: PayloadAction<RegisterDetails>) => {
-      currentState.firstname = action.payload.firstname
-      currentState.lastname = action.payload.lastname
-      currentState.email = action.payload.email
-      currentState.password = action.payload.password
+      currentState.details.firstname = action.payload.firstname
+      currentState.details.lastname = action.payload.lastname
+      currentState.details.email = action.payload.email
+      currentState.details.password = action.payload.password
     },
 
     setOrganisation: (currenctState, action: PayloadAction<RegisterOrganisation>) => {
-      currenctState.name = action.payload.name
-      currenctState.subdomain = action.payload.subdomain
-      currenctState.workDays = action.payload.workDays
-      currenctState.openingTime = action.payload.openingTime
-      currenctState.closingTime = action.payload.closingTime
-      currenctState.currency = action.payload.currency
-      currenctState.hourlyRate = action.payload.hourlyRate
+      currenctState.organisation.name = action.payload.name
+      currenctState.organisation.subdomain = action.payload.subdomain
+      currenctState.organisation.workDays = action.payload.workDays
+      currenctState.organisation.openingTime = action.payload.openingTime
+      currenctState.organisation.closingTime = action.payload.closingTime
+      currenctState.organisation.currency = action.payload.currency
+      currenctState.organisation.hourlyRate = action.payload.hourlyRate
     },
 
-    setTeam: (currentState, action: PayloadAction<RegisterTeam>) => {
-      currentState.team = action.payload.team
+    setTeam: (currentState, action: PayloadAction<RegisterTeamMember[]>) => {
+      currentState.team = action.payload
+    },
+
+    clearRegistration: (currentState) => {
+      currentState = initialState
     },
   },
 })
 
-export const { setDetails, setOrganisation } = registrationSlice.actions
+export const { setDetails, setOrganisation, setTeam, clearRegistration } = registrationSlice.actions
 export default registrationSlice.reducer

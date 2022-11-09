@@ -24,23 +24,17 @@ export const SubdomainForm = (): JSX.Element => {
       onSubmit={handleSubmit}
       defaultValues={{ subdomain: '' }}
     >
-      {({ register }) => (
+      {() => (
         <>
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <FormInput
-                id="subdomain"
-                placeHolder="domain"
-                size="md"
-                error={isError}
-                register={register('subdomain')}
-              />
+              <FormInput name="subdomain" placeHolder="domain" size="md" error={isError} />
               <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
             </div>
             {isError && <FormErrorMessage>Organisation does not exist</FormErrorMessage>}
           </div>
 
-          <Button className="mb-6" type="submit" block>
+          <Button className="mt-6" type="submit" block>
             Continue
           </Button>
         </>

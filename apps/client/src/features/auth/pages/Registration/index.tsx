@@ -5,11 +5,12 @@ import { DetailsView, OrganisationsView, TeamView } from '../../components/Regis
 import { RegistrationSteps } from '../../types'
 
 export const RegistrationPage = (): JSX.Element => {
-  const [activeStep, setActiveStep] = useState<RegistrationSteps>('team')
+  const [activeStep, setActiveStep] = useState<RegistrationSteps>('details')
 
   const handleStep = (nextStep?: RegistrationSteps) => {
     if (nextStep) {
       setActiveStep(nextStep)
+      return
     }
   }
 
@@ -30,7 +31,7 @@ export const RegistrationPage = (): JSX.Element => {
         {activeStep === 'organisation' && (
           <OrganisationsView onBack={handleBack} onSuccess={handleStep} />
         )}
-        {activeStep === 'team' && <TeamView onSuccess={handleStep} />}
+        {activeStep === 'team' && <TeamView />}
       </div>
     </div>
   )

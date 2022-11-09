@@ -42,9 +42,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           'py-3 px-9 active:shadow-md': size === 'md',
           'py-3 px-[2.625rem] active:shadow-lg': size === 'lg',
 
-          'bg-purple-90 border-purple-90 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-90 active:shadow-purple-90 focus:shadow-purple-90':
+          'bg-purple-90 border-purple-90 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-90 active:shadow-purple-90 focus:shadow-purple-90 focus-visible:bg-purple-80 focus-visible:border-purple-80':
             variant === 'primary',
-          'bg-purple-70 border-purple-70 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-70 active:border-purple-70 active:shadow-purple-70 focus:shadow-purple-70':
+          'bg-purple-70 border-purple-70 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-70 active:border-purple-70 active:shadow-purple-70 focus:shadow-purple-70 focus-visible:bg-purple-80 focus-visible:border-purple-80':
             variant === 'secondary',
           'border-purple-90 !text-purple-90 hover:border-purple-80 hover:!text-purple-80 active:shadow-purple-90 focus:shadow-purple-90 bg-none':
             variant === 'outlined',

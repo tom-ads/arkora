@@ -1,6 +1,6 @@
 import appApi from 'api'
-import { VerifyDetailsRequest } from './types'
-import VerifyOrganisationRequest from './types/requests/verify_organisation'
+import { VerifyDetailsRequest, VerifyOrganisationRequest, RegisterRequest } from './types/requests'
+import { RegisterResponse } from './types/response'
 
 const authBasePath = '/auth'
 
@@ -20,8 +20,16 @@ const authEndpoints = appApi.injectEndpoints({
         body,
       }),
     }),
+    register: build.mutation<RegisterResponse, RegisterRequest>({
+      query: (body) => ({
+        url: `${authBasePath}/register`,
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
   overrideExisting: false,
 })
 
-export const { useVerifyDetailsMutation, useVerifyOrganisationMutation } = authEndpoints
+export const { useVerifyDetailsMutation, useVerifyOrganisationMutation, useRegisterMutation } =
+  authEndpoints

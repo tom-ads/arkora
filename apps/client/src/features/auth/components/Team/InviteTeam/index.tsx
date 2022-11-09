@@ -10,25 +10,21 @@ import {
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import UserRole from '@/enums/UserRole'
+import { SelectedRole } from './../../../types'
 import { useMemo } from 'react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 
-type SelectRole = {
-  value: UserRole
-  children: string
-}
-
 export interface TeamProps {
   team: Array<{
     email: string
-    role: SelectRole
+    role: SelectedRole
   }>
 }
 
 type FormFields = {
   email: string
-  role: SelectRole
+  role: SelectedRole
 } & TeamProps
 
 type InviteTeamProps = UseFormReturn<FormFields, 'Team'>
@@ -128,7 +124,7 @@ export const InviteTeam = ({
         </Button>
       </div>
 
-      {/* Inline table as this differs from main app table significantly, can refactor in future */}
+      {/* Inline table as this differs from main app table significantly, can be refactored later */}
       <table className="w-full table-fixed">
         <thead>
           <tr className="text-gray-100 font-medium text-base border-b border-gray-30 text-justify">
