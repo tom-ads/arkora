@@ -1,10 +1,19 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
-import OrganisationRole from 'App/Models/OrganisationRole'
+import {
+  column,
+  beforeSave,
+  BaseModel,
+  belongsTo,
+  BelongsTo,
+  beforeCreate,
+} from '@ioc:Adonis/Lucid/Orm'
+import Role from 'App/Models/Role'
 import Organisation from './Organisation'
 
 export default class User extends BaseModel {
+  // Columns
+
   @column({ isPrimary: true })
   public id: number
 
@@ -29,19 +38,24 @@ export default class User extends BaseModel {
   @column()
   public rememberMeToken: string | null
 
-  @belongsTo(() => OrganisationRole)
-  public role: BelongsTo<typeof OrganisationRole>
+  @column.dateTime({ autoCreate: true, serializeAs: null })
+  public createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
+  public updatedAt: DateTime
+
+  // Relationships
+
+  @belongsTo(() => Role)
+  public role: BelongsTo<typeof Role>
 
   @belongsTo(() => Organisation)
   public organisation: BelongsTo<typeof Organisation>
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
+  // Hooks
 
   @beforeSave()
+  @beforeCreate()
   public static async hashPassword(user: User) {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password)

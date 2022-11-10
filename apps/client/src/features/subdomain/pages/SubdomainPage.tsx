@@ -17,9 +17,12 @@ export const SubdomainPage = (): JSX.Element => {
 
       <SubdomainForm />
 
-      <div className="flex justify-end w-full">
+      <div className="w-full text-end mt-2">
         <span className="text-gray-80 text-base">
-          Need to <InlineLink to="/register">Register?</InlineLink>
+          Need to{' '}
+          <InlineLink className="font-medium" to="/register">
+            Register?
+          </InlineLink>
         </span>
       </div>
     </div>

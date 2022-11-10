@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
 
-test.group('Auth: Registration - Verify Details EP', () => {
+test.group('Auth: Registration - Verify Details', () => {
   test('valid details for registration step', async ({ client }) => {
     const response = await client.post('/auth/register/details').form({
       firstname: 'bob',

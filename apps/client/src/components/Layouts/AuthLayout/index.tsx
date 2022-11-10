@@ -12,7 +12,7 @@ export const AuthLayout = (): JSX.Element => {
         <ArkoraLogo className="w-[18.375rem] lg:h-[18.875rem] xl:w-[22.375rem] xl:h-[22.875rem] absolute -bottom-[7.1875rem] -right-[6.5625rem]" />
       </div>
 
-      <div className="fixed w-full lg:w-2/3 bg-gray-20 inset-y-0 h-full py-12 sm:px-[42px] px-4">
+      <div className="fixed w-full lg:w-2/3 bg-white inset-y-0 h-full py-12 sm:px-[42px] px-4">
         <div className="flex items-center gap-2 pb-3">
           <ArkoraLogo className="w-12 h-12" />
           <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>

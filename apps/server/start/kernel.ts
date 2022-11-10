@@ -40,4 +40,5 @@ Server.middleware.register([() => import('@ioc:Adonis/Core/BodyParser')])
 */
 Server.middleware.registerNamed({
   subdomain: () => import('App/Middleware/ValidateSubdomain'),
+  blockAuth: () => import('App/Middleware/BlockAuth'),
 })

@@ -1,7 +1,7 @@
-import OrganisationRole from 'App/Models/OrganisationRole'
+import Role from 'App/Models/Role'
 import Factory from '@ioc:Adonis/Lucid/Factory'
 
-export default Factory.define(OrganisationRole, () => {
+export default Factory.define(Role, () => {
   return {
     //
   }

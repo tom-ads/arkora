@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -7,6 +10,7 @@ module.exports = {
       md: '0px 0px 5px 0.1px rgb(0, 0, 0)',
       lg: '0px 0px 5px 0.2px rgb(0, 0, 0)',
       card: '0px 4px 12px 0px rbg()',
+      none: defaultTheme.boxShadow.none,
     },
     colors: {
       white: '#FFFFFF',
@@ -27,7 +31,7 @@ module.exports = {
         40: '#C5CDD8',
         30: '#DADFE7',
         20: '#EBEFF4',
-        10: '#F2F4F8',
+        10: '#FAFAFA',
       },
       green: {
         90: '#5B8A53',

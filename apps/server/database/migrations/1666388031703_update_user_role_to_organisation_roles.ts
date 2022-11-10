@@ -7,7 +7,7 @@ export default class extends BaseSchema {
     this.schema.alterTable(this.tableName, (table) => {
       table.dropColumn('role')
 
-      table.integer('role_id').unsigned().references('organisation_roles.id').after('id')
+      table.integer('role_id').unsigned().references('roles.id').after('id')
     })
   }
 

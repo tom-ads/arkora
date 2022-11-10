@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import { ReactNode } from 'react'
 
 type FormLabelProps = {
-  htmlFor: string
+  htmlFor?: string
   size?: 'sm' | 'md' | 'lg'
   children: ReactNode
 }

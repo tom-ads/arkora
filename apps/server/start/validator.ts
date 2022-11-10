@@ -1,4 +1,7 @@
 import { validator } from '@ioc:Adonis/Core/Validator'
+import { CurrencyCode } from 'App/Enum/CurrencyCode'
+import WeekDay from 'App/Enum/WeekDay'
+import Organisation from 'App/Models/Organisation'
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +46,40 @@ validator.rule('password', (password, _, options) => {
       options.pointer,
       'password',
       'password validation failed',
+      options.arrayExpressionPointer
+    )
+  }
+})
+
+validator.rule('currencyCode', (currencyCode, _, options) => {
+  if (typeof currencyCode !== 'string') {
+    return
+  }
+
+  const supportedCurrencyCode = Object.values(CurrencyCode).some((code) => code === currencyCode)
+
+  if (!supportedCurrencyCode) {
+    options.errorReporter.report(
+      options.pointer,
+      'currencyCode',
+      'currencyCode validation failed',
+      options.arrayExpressionPointer
+    )
+  }
+})
+
+validator.rule('workDays', (workDays, _, options) => {
+  if (!Array.isArray(workDays)) {
+    return
+  }
+
+  const isInvalid = workDays.some((day) => !Object.values(WeekDay).includes(day))
+
+  if (isInvalid) {
+    options.errorReporter.report(
+      options.pointer,
+      'workDays',
+      'workDays validation failed',
       options.arrayExpressionPointer
     )
   }

@@ -1,19 +1,25 @@
 import { AuthLayout, MainLayout } from '@/components'
-import { RegistrationPage } from '@/features/auth'
-import { SubdomainPage } from '@/features/subdomain'
-import { useLocation } from 'react-router-dom'
+import { LoginPage, RegistrationPage } from '@/features/auth'
+import { SubdomainPage, useCheckSubdomainQuery } from '@/features/subdomain'
+import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export const PublicRoutes = (): JSX.Element => {
   const location = useLocation()
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
 
-  // const { isSuccess } = useVerifySubdomainQuery({
-  //   subdomain: window?.location.host?.split('.')?.[0],
-  // })
+  const { data, isSuccess } = useCheckSubdomainQuery({
+    subdomain: window?.location.host?.split('.')?.[0],
+  })
 
-  // if (isSuccess) {
-  //   return <Navigate to="/login" />
-  // }
+  /*
+    If subdomain exists, redirect to organisation portal
+  */
+  useEffect(() => {
+    if (isSuccess && location.pathname !== '/register') {
+      navigate(data?.exists ? '/login' : '/')
+    }
+  }, [data?.exists, location?.pathname])
 
   return location.pathname === '/register' ? <MainLayout /> : <AuthLayout />
 }
@@ -29,6 +35,10 @@ export const publicRoutes = [
       {
         path: '/register',
         element: <RegistrationPage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
       },
     ],
   },

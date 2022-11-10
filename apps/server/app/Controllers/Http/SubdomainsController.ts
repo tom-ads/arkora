@@ -1,14 +1,15 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Organisation from 'App/Models/Organisation'
+import CheckSubdomainValidator from 'App/Validators/Subdomain/CheckSubdomainValidator'
 
 export default class SubdomainsController {
-  public async verifySubdomain({ request, response, organisation }: HttpContextContract) {
-    organisation = await Organisation.findBy('subdomain', request.param('subdomain'))
-    if (!organisation) {
-      response.notFound({ message: 'No organisation found' })
-      return
-    }
+  public async checkSubdomain({ request, response }: HttpContextContract) {
+    const payload = await request.validate(CheckSubdomainValidator)
 
-    return response.ok({})
+    const organisation = await Organisation.findBy('subdomain', payload.subdomain)
+
+    return response.ok({
+      exists: !!organisation,
+    })
   }
 }

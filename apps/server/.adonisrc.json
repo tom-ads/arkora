@@ -13,13 +13,10 @@
     "Database": "database",
     "Contracts": "contracts",
     "Start": "start",
-    "Helpers": "helpers"
+    "Helpers": "helpers",
+    "Resources": "resources"
   },
-  "preloads": [
-    "./start/routes",
-    "./start/kernel",
-    "./start/validator"
-  ],
+  "preloads": ["./start/routes", "./start/kernel", "./start/validator"],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
@@ -27,29 +24,20 @@
     "@adonisjs/auth",
     "@adonisjs/session"
   ],
-  "aceProviders": [
-    "@adonisjs/repl"
-  ],
+  "aceProviders": ["@adonisjs/repl"],
   "tests": {
     "suites": [
       {
         "name": "integration",
-        "files": [
-          "tests/integration/**/*.spec(.ts|.js)"
-        ],
+        "files": ["tests/integration/**/*.spec(.ts|.js)"],
         "timeout": 60000
       },
       {
         "name": "unit",
-        "files": [
-          "tests/unit/**/*.spec(.ts|.js)"
-        ],
+        "files": ["tests/unit/**/*.spec(.ts|.js)"],
         "timeout": 60000
       }
     ]
   },
-  "testProviders": [
-    "@japa/preset-adonis/TestsProvider",
-    "./providers/TestRouteProvider"
-  ]
+  "testProviders": ["@japa/preset-adonis/TestsProvider", "./providers/TestRouteProvider"]
 }
