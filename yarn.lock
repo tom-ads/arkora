@@ -1165,6 +1165,11 @@
   resolved "https://registry.npmjs.org/@types/luxon/-/luxon-3.0.1.tgz"
   integrity sha512-/LAvk1cMOJt0ghzMFrZEvByUhsiEfeeT2IF53Le+Ki3A538yEL9pRZ7a6MuCxdrYK+YNqNIDmrKU/r2nnw04zQ==
 
+"@types/luxon@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-3.1.0.tgz#b9842d233a06b267fe4117f1c224f20b8a149825"
+  integrity sha512-gCd/HcCgjqSxfMrgtqxCgYk/22NBQfypwFUG7ZAyG/4pqs51WLTcUzVp1hqTbieDYeHS3WoVEh2Yv/2l+7B0Vg==
+
 "@types/minimatch@*":
   version "5.1.2"
   resolved "https://registry.npmjs.org/@types/minimatch/-/minimatch-5.1.2.tgz"

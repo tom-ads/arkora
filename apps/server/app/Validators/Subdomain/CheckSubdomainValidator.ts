@@ -1,4 +1,4 @@
-import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class CheckSubdomainValidator {

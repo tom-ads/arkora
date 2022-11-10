@@ -1,7 +1,6 @@
 import { validator } from '@ioc:Adonis/Core/Validator'
 import { CurrencyCode } from 'App/Enum/CurrencyCode'
 import WeekDay from 'App/Enum/WeekDay'
-import Organisation from 'App/Models/Organisation'
 
 /*
 |--------------------------------------------------------------------------
