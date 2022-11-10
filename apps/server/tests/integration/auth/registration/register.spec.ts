@@ -22,7 +22,6 @@ test.group('Auth: Registration - Register', () => {
         email: 'bob.marley@example.com',
       },
       organisation: {
-        currency_id: 50,
         name: 'test-org',
         subdomain: 'test-org',
         opening_time: '09:00',
