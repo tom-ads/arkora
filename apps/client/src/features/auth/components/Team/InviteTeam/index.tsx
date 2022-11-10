@@ -53,7 +53,11 @@ export const InviteTeam = ({
       },
       valid: {
         test: emailValidation.safeParse(getValues('email'))?.success,
-        errorMessage: 'Invalid email',
+        errorMessage: 'Valid email required',
+      },
+      alreadyExists: {
+        test: !fields.some((member) => member.email === email),
+        errorMessage: 'Team member already in invite list',
       },
     })?.filter((v) => !v.test)
 
@@ -127,7 +131,7 @@ export const InviteTeam = ({
       {/* Inline table as this differs from main app table significantly, can be refactored later */}
       <table className="w-full table-fixed">
         <thead>
-          <tr className="text-gray-100 font-medium text-base border-b border-gray-30 text-justify">
+          <tr className="text-gray-100 font-medium text-sm border-b border-gray-30 text-justify">
             <th scope="col" className="py-2">
               Email
             </th>
@@ -141,11 +145,16 @@ export const InviteTeam = ({
           {fields?.map((teamMember, idx) => (
             <tr
               key={teamMember.id}
-              className="border-b border-gray-30 text-base text-gray-80 transition-all"
+              className="border-b border-gray-30 text-sm text-gray-80 transition-all"
             >
               <td className="p-2 truncate">{teamMember?.email}</td>
               <td className="p-2">
-                <FormSelect control={control} name={`team.${idx}.role`} placeHolder="Select role">
+                <FormSelect
+                  control={control}
+                  name={`team.${idx}.role`}
+                  placeHolder="Select role"
+                  size="xs"
+                >
                   {roleOptions?.map((option) => (
                     <SelectOption key={option.id} value={option.value}>
                       {option?.display}
@@ -157,7 +166,7 @@ export const InviteTeam = ({
                 <button
                   type="button"
                   onClick={() => remove(idx)}
-                  className="outline-non w-6 h-6 text-red-90"
+                  className="outline-non w-5 h-5 text-red-90"
                 >
                   <BinIcon />
                 </button>

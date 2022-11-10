@@ -1,21 +1,18 @@
-import { useState } from 'react'
 import Progress from '@/components/Indicators/Progress'
 import { ProgressStep } from '@/components/Indicators/ProgressStep'
 import { DetailsView, OrganisationsView, TeamView } from '../../components/Registration'
 import { RegistrationSteps } from '../../types'
+import { useDispatch, useSelector } from 'react-redux'
+import { setStep } from '@/stores/slices/registration'
+import { RootState } from '@/stores/store'
 
 export const RegistrationPage = (): JSX.Element => {
-  const [activeStep, setActiveStep] = useState<RegistrationSteps>('details')
+  const dispatch = useDispatch()
 
-  const handleStep = (nextStep?: RegistrationSteps) => {
-    if (nextStep) {
-      setActiveStep(nextStep)
-      return
-    }
-  }
+  const activeStep = useSelector((state: RootState) => state.registration.misc?.step)
 
-  const handleBack = (prevStep: RegistrationSteps) => {
-    setActiveStep(prevStep)
+  const handleStep = (step: RegistrationSteps) => {
+    dispatch(setStep({ step }))
   }
 
   return (
@@ -29,9 +26,9 @@ export const RegistrationPage = (): JSX.Element => {
       <div className="my-8">
         {activeStep === 'details' && <DetailsView onSuccess={handleStep} />}
         {activeStep === 'organisation' && (
-          <OrganisationsView onBack={handleBack} onSuccess={handleStep} />
+          <OrganisationsView onBack={handleStep} onSuccess={handleStep} />
         )}
-        {activeStep === 'team' && <TeamView />}
+        {activeStep === 'team' && <TeamView onBack={handleStep} />}
       </div>
     </div>
   )

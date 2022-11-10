@@ -1,6 +1,7 @@
 import { useDebounce } from '@/hooks/useDebounce'
 import classNames from 'classnames'
 import { useEffect, useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 type FormDebouncedInputBaseProps = {
   name: string
@@ -19,6 +20,8 @@ export const FormDebouncedInput = ({
   value,
   onChange,
 }: FormDebouncedInputBaseProps): JSX.Element => {
+  const { register } = useFormContext()
+
   const [input, setInput] = useState<string>(value)
 
   const debouncedInput = useDebounce<string>(input, 500)
@@ -29,6 +32,7 @@ export const FormDebouncedInput = ({
 
   return (
     <input
+      {...register(name)}
       type="text"
       name={name}
       value={input}

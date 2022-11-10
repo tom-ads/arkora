@@ -24,7 +24,7 @@ export default class Organisation extends BaseModel {
   @column({ isPrimary: true, serializeAs: null })
   public id: number
 
-  @column()
+  @column({ serializeAs: null })
   public currencyId: number
 
   @column()

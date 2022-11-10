@@ -1,13 +1,21 @@
-import { Descriptor, DescriptorContent, DescriptorInsights, Divider, Form } from '@/components'
+import {
+  Button,
+  Descriptor,
+  DescriptorContent,
+  DescriptorInsights,
+  Divider,
+  Form,
+} from '@/components'
 import UserRole from '@/enums/UserRole'
 import { useRegisterMutation } from './../../../api'
 import { clearRegistration, setTeam } from '@/stores/slices/registration'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
 import { InviteTeam } from '../../Team/InviteTeam'
-import { SelectedRole } from './../../../types'
+import { RegistrationSteps, SelectedRole } from './../../../types'
 import { RootState } from '@/stores/store'
 import { Navigate } from 'react-router-dom'
+import { isEqual } from 'lodash'
 
 export interface TeamProps {
   team: Array<{
@@ -21,23 +29,32 @@ type FormFields = {
   role: SelectedRole
 } & TeamProps
 
-const TeamFormSchema = z.array(
-  z.object({
-    email: z.string(),
-    role: z.nativeEnum(UserRole),
-  }),
-)
+const TeamFormSchema = z.object({
+  team: z.array(
+    z.object({
+      email: z.string(),
+      role: z.object({
+        value: z.nativeEnum(UserRole),
+        children: z.string(),
+      }),
+    }),
+  ),
+})
 
-export const TeamView = (): JSX.Element => {
+type TeamViewProps = {
+  onBack: (prevStep: RegistrationSteps) => void
+}
+
+export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
   const dispatch = useDispatch()
 
   const { organisation, details, team } = useSelector((state: RootState) => state.registration)
 
-  const [register, { isSuccess: didRegister }] = useRegisterMutation()
+  const [register, { isLoading: isRegistering, isSuccess: didRegister }] = useRegisterMutation()
 
-  const handleSubmit = (data: FormFields) => {
-    dispatch(setTeam(data.team))
-    register({
+  const handleSubmit = async (data: FormFields) => {
+    dispatch(setTeam({ ...data.team }))
+    await register({
       firstname: details.firstname,
       lastname: details.lastname,
       email: details.email,
@@ -57,10 +74,23 @@ export const TeamView = (): JSX.Element => {
         role: member.role.value,
       })),
     })
+      .unwrap()
+      .then((response) => {
+        dispatch(clearRegistration())
+
+        window.location.host = `${response.organisation.subdomain}.${
+          import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
+        }`
+      })
+  }
+
+  const handleFormChange = (data: FormFields) => {
+    if (!isEqual(team, data.team)) {
+      dispatch(setTeam(data.team))
+    }
   }
 
   if (didRegister) {
-    dispatch(clearRegistration())
     return <Navigate to="/login" />
   }
 
@@ -68,6 +98,7 @@ export const TeamView = (): JSX.Element => {
     <Form<FormFields, typeof TeamFormSchema>
       className="gap-0"
       onSubmit={handleSubmit}
+      onChange={handleFormChange}
       validationSchema={TeamFormSchema}
       defaultValues={{
         email: '',
@@ -75,20 +106,12 @@ export const TeamView = (): JSX.Element => {
           value: UserRole.MEMBER,
           children: 'Member',
         },
-        team: [
-          {
-            email: 'ta@example.commmmmmmmmmmmmm',
-            role: {
-              value: UserRole.MEMBER,
-              children: 'Member',
-            },
-          },
-        ],
+        team: team ?? [],
       }}
     >
       {(methods) => (
         <>
-          <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20 min-h-[650px]">
+          <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20 min-h-[600px]">
             <div className="space-y-2 pb-6">
               <h1 className="font-semibold text-[32px] text-gray-100">Create organisation</h1>
               <p className="text-base text-gray-80">
@@ -101,7 +124,7 @@ export const TeamView = (): JSX.Element => {
             <Descriptor>
               <DescriptorInsights
                 title="Team Members"
-                description="Invite the team to the organisation"
+                description="Start inviting the team, or invite them later"
                 className="max-w-md md:max-w-[325px]"
               />
 
@@ -110,6 +133,24 @@ export const TeamView = (): JSX.Element => {
                 <InviteTeam {...methods} />
               </DescriptorContent>
             </Descriptor>
+          </div>
+
+          <div className="flex justify-between mt-12">
+            <button
+              type="button"
+              className="outline-none text-purple-90 font-semibold text-base hover:text-purple-70"
+              onClick={() => onBack('organisation')}
+            >
+              Previous Step
+            </button>
+            <Button
+              size="sm"
+              className="max-w-[220px] w-full"
+              type="submit"
+              isLoading={isRegistering}
+            >
+              Finish
+            </Button>
           </div>
         </>
       )}

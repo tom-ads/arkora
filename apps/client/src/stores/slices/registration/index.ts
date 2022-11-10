@@ -2,7 +2,11 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { WeekDay } from '@/enums/WeekDay'
 import { CurrencyCode } from '@/types/CurrencyCode'
-import { SelectedRole } from '@/features/auth'
+import { RegistrationSteps, SelectedRole } from '@/features/auth'
+
+interface RegisterMisc {
+  step: RegistrationSteps
+}
 
 interface RegisterDetails {
   firstname: string
@@ -33,62 +37,80 @@ interface RegistrationState {
   details: RegisterDetails
   organisation: RegisterOrganisation
   team: RegisterTeamMember[]
+  misc: RegisterMisc
 }
 
-const initialState: RegistrationState = {
-  details: {
-    firstname: '',
-    lastname: '',
-    email: '',
-    password: '',
+const initialState: RegistrationState = JSON.parse(
+  localStorage.getItem('registration') ??
+    `{
+  "misc": {
+    "step": "details"
   },
-
-  organisation: {
-    name: '',
-    subdomain: '',
-    workDays: [],
-    openingTime: '',
-    closingTime: '',
-    currency: {
-      value: 'GBP',
-      children: 'British Pound Sterling',
+  "details": {
+    "firstname": "",
+    "lastname": "",
+    "email": "",
+    "password": ""
+  },
+  "organisation": {
+    "name": "",
+    "subdomain": "",
+    "workDays": [],
+    "openingTime": "",
+    "closingTime": "",
+    "currency": {
+      "value": "GBP",
+      "children": "British Pound Sterling"
     },
-    hourlyRate: '',
+    "hourlyRate": ""
   },
-
-  team: [],
-}
+  "team": []
+}`,
+)
 
 const registrationSlice = createSlice({
   name: 'registration',
   initialState,
   reducers: {
+    setStep: (currentState, action: PayloadAction<Pick<RegisterMisc, 'step'>>) => {
+      currentState.misc.step = action.payload.step
+
+      localStorage.setItem('registration', JSON.stringify(currentState))
+    },
+
     setDetails: (currentState, action: PayloadAction<RegisterDetails>) => {
       currentState.details.firstname = action.payload.firstname
       currentState.details.lastname = action.payload.lastname
       currentState.details.email = action.payload.email
       currentState.details.password = action.payload.password
+
+      localStorage.setItem('registration', JSON.stringify(currentState))
     },
 
-    setOrganisation: (currenctState, action: PayloadAction<RegisterOrganisation>) => {
-      currenctState.organisation.name = action.payload.name
-      currenctState.organisation.subdomain = action.payload.subdomain
-      currenctState.organisation.workDays = action.payload.workDays
-      currenctState.organisation.openingTime = action.payload.openingTime
-      currenctState.organisation.closingTime = action.payload.closingTime
-      currenctState.organisation.currency = action.payload.currency
-      currenctState.organisation.hourlyRate = action.payload.hourlyRate
+    setOrganisation: (currentState, action: PayloadAction<RegisterOrganisation>) => {
+      currentState.organisation.name = action.payload.name
+      currentState.organisation.subdomain = action.payload.subdomain
+      currentState.organisation.workDays = action.payload.workDays
+      currentState.organisation.openingTime = action.payload.openingTime
+      currentState.organisation.closingTime = action.payload.closingTime
+      currentState.organisation.currency = action.payload.currency
+      currentState.organisation.hourlyRate = action.payload.hourlyRate
+
+      localStorage.setItem('registration', JSON.stringify(currentState))
     },
 
     setTeam: (currentState, action: PayloadAction<RegisterTeamMember[]>) => {
       currentState.team = action.payload
+
+      localStorage.setItem('registration', JSON.stringify(currentState))
     },
 
     clearRegistration: (currentState) => {
-      currentState = initialState
+      localStorage.removeItem('registration')
     },
   },
 })
 
-export const { setDetails, setOrganisation, setTeam, clearRegistration } = registrationSlice.actions
+export const { setStep, setDetails, setOrganisation, setTeam, clearRegistration } =
+  registrationSlice.actions
 export default registrationSlice.reducer

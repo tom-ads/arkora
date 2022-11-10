@@ -14,21 +14,27 @@ import { PasswordInput } from '@/components/Forms/PasswordInput'
 import { PasswordStrength } from '@/components/Indicators/PasswordStrength'
 import { useVerifyDetailsMutation } from '../../../api'
 import { setDetails } from '@/stores/slices/registration'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import * as z from 'zod'
-import { useEffect } from 'react'
 import { RegistrationSteps } from '../../../types'
+import { RootState } from '@/stores/store'
 
 const DetailsFormSchema = z
   .object({
-    firstname: z.string().min(1, { message: 'Firstname is required' }),
-    lastname: z.string().min(1, { message: 'Lastname is required' }),
+    firstname: z
+      .string()
+      .min(1, { message: 'Firstname is required' })
+      .regex(/^([^0-9]+)$/, { message: 'Firstname cannot contain numbers' }),
+    lastname: z
+      .string()
+      .min(1, { message: 'Lastname is required' })
+      .regex(/^([^0-9]+)$/, { message: ' Lastname cannot contain numbers' }),
     email: z
       .string()
       .min(1, { message: 'Email is required' })
       .email({ message: 'Must be a valid email address' }),
     password: z.string().min(1, { message: 'Password is required' }),
-    passwordConfirmation: z.string().min(1, { message: 'Confirm password is required' }),
+    passwordConfirmation: z.string().min(1, { message: 'Password confirmation is required' }),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: 'Passwords do not match',
@@ -50,21 +56,20 @@ type DetailsViewProps = {
 export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
   const dispatch = useDispatch()
 
-  const [verifyDetails, { isSuccess: didVerifyDetails }] = useVerifyDetailsMutation()
+  const details = useSelector((state: RootState) => state.registration.details)
 
-  const handleSubmit = (data: FormFields) => {
+  const [verifyDetails, { isLoading: isVerifying }] = useVerifyDetailsMutation()
+
+  const handleSubmit = async (data: FormFields) => {
     dispatch(setDetails(data))
-    verifyDetails({
-      ...data,
+    await verifyDetails({
+      firstname: data.firstname,
+      lastname: data.lastname,
+      email: data.email,
+      password: data.password,
       password_confirmation: data.passwordConfirmation,
-    })
+    }).then(() => onSuccess('organisation'))
   }
-
-  useEffect(() => {
-    if (didVerifyDetails) {
-      onSuccess('organisation')
-    }
-  }, [didVerifyDetails])
 
   return (
     <Form<FormFields, typeof DetailsFormSchema>
@@ -72,10 +77,10 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
       onSubmit={handleSubmit}
       validationSchema={DetailsFormSchema}
       defaultValues={{
-        firstname: '',
-        lastname: '',
-        email: '',
-        password: '',
+        firstname: details?.firstname ?? '',
+        lastname: details?.lastname ?? '',
+        email: details.email ?? '',
+        password: details.password ?? '',
         passwordConfirmation: '',
       }}
     >
@@ -191,7 +196,12 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
           </div>
 
           <div className="flex justify-end mt-12">
-            <Button size="sm" className="max-w-[220px] w-full" type="submit">
+            <Button
+              size="sm"
+              className="max-w-[220px] w-full"
+              type="submit"
+              isLoading={isVerifying}
+            >
               Next step
             </Button>
           </div>

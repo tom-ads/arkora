@@ -18,15 +18,17 @@ import { RegistrationSteps } from '../../../types'
 import { WeekDaysSelect } from '@/components/WeekDays'
 import { WeekDay } from '@/enums/WeekDay'
 import { SelectOption } from '@/components/Forms/Select/option'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import currencies from '@/assets/currency/currency.json'
 import { z } from 'zod'
 import { DateTime } from 'luxon'
 import { useVerifyOrganisationMutation } from '../../../api'
 import { CurrencyCode } from '@/types/CurrencyCode'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setOrganisation } from '@/stores/slices/registration'
 import { useLazyCheckSubdomainQuery } from '@/features/subdomain'
+import { RootState } from '@/stores/store'
+import { isEqual } from 'lodash'
 
 const OrganisationSchema = z
   .object({
@@ -102,13 +104,15 @@ type OrganisationsViewProps = {
 export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps): JSX.Element => {
   const dispatch = useDispatch()
 
-  const [verifyOrganisation, { isSuccess: didVerifyOrganisation }] = useVerifyOrganisationMutation()
+  const organisation = useSelector((state: RootState) => state.registration.organisation)
+
+  const [verifyOrganisation, { isLoading: isVerifying }] = useVerifyOrganisationMutation()
 
   const [checkSubdomainTrigger, { data: checkSubdomainResult }] = useLazyCheckSubdomainQuery()
 
-  const handleSubmit = (data: FormFields) => {
+  const handleSubmit = async (data: FormFields) => {
     dispatch(setOrganisation(data))
-    verifyOrganisation({
+    await verifyOrganisation({
       name: data.name,
       subdomain: data.subdomain,
       opening_time: data.openingTime,
@@ -117,13 +121,16 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
       work_days: data.workDays,
       hourly_rate: parseFloat(data.hourlyRate),
     })
+      .unwrap()
+      .then(() => onSuccess('team'))
+      .catch()
   }
 
-  useEffect(() => {
-    if (didVerifyOrganisation) {
-      onSuccess('team')
+  const handleFormChange = (data: FormFields) => {
+    if (!isEqual(organisation, data)) {
+      dispatch(setOrganisation(data))
     }
-  }, [didVerifyOrganisation])
+  }
 
   const currencyOptions = useMemo(() => {
     return Object.keys(currencies).map((currency) => ({
@@ -137,21 +144,22 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
     <Form<FormFields, typeof OrganisationSchema>
       className="gap-0"
       onSubmit={handleSubmit}
+      onChange={handleFormChange}
       validationSchema={OrganisationSchema}
       defaultValues={{
-        name: '',
-        subdomain: '',
-        workDays: [],
-        openingTime: '',
-        closingTime: '',
+        name: organisation?.name ?? '',
+        subdomain: organisation?.subdomain ?? '',
+        workDays: organisation?.workDays ?? [],
+        openingTime: organisation?.openingTime ?? '',
+        closingTime: organisation?.closingTime ?? '',
         currency: {
-          value: 'GBP',
-          children: 'British Pound Sterling',
+          value: organisation?.currency?.value ?? '',
+          children: organisation?.currency?.children ?? '',
         },
-        hourlyRate: '',
+        hourlyRate: organisation?.hourlyRate ?? '',
       }}
     >
-      {({ control, setValue, watch, formState: { errors } }) => (
+      {({ control, setValue, watch, trigger, formState: { errors } }) => (
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
             <div className="space-y-2 pb-6">
@@ -204,15 +212,22 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                       }
                       value={watch('subdomain')}
                       onChange={async (value) => {
+                        setValue('subdomain', value)
                         if (value) {
+                          /* 
+                            We need to manually trigger onChange as the component
+                            overrides the register method onChange function and
+                            react-hook-form is unable to track it properly.
+                          */
+                          await trigger('subdomain')
                           checkSubdomainTrigger({ subdomain: value })
                         }
-                        setValue('subdomain', value)
                       }}
                     />
-                    {(errors.subdomain?.message || checkSubdomainResult?.exists !== undefined
-                      ? checkSubdomainResult?.exists
-                      : false) && (
+                    {(errors.subdomain?.message ||
+                      (checkSubdomainResult?.exists !== undefined
+                        ? checkSubdomainResult?.exists
+                        : false)) && (
                       <FormErrorMessage size="sm">
                         {errors.subdomain?.message ?? 'Subdomain already taken'}
                       </FormErrorMessage>
@@ -324,7 +339,12 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
             >
               Previous Step
             </button>
-            <Button size="sm" className="max-w-[220px] w-full" type="submit">
+            <Button
+              size="sm"
+              className="max-w-[220px] w-full"
+              type="submit"
+              isLoading={isVerifying}
+            >
               Next step
             </Button>
           </div>

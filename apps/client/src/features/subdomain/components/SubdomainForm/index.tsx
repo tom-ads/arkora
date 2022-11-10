@@ -14,8 +14,14 @@ type FormFields = {
 export const SubdomainForm = (): JSX.Element => {
   const [trigger, { isLoading, data }] = useLazyCheckSubdomainQuery()
 
-  const handleSubmit = (data: FormFields) => {
-    trigger(data)
+  const handleSubmit = async (data: FormFields) => {
+    await trigger(data)
+      .unwrap()
+      .then((response) => {
+        if (response.exists) {
+          window.location.host = `${data.subdomain}.${import.meta.env.VITE_ARKORA_STATIC_HOSTNAME}`
+        }
+      })
   }
 
   return (
