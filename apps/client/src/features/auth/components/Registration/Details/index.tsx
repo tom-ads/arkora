@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import * as z from 'zod'
 import { RegistrationSteps } from '../../../types'
 import { RootState } from '@/stores/store'
+import { isEqual } from 'lodash'
 
 const DetailsFormSchema = z
   .object({
@@ -71,10 +72,17 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
     }).then(() => onSuccess('organisation'))
   }
 
+  const handleFormChange = (data: FormFields) => {
+    if (!isEqual(details, data)) {
+      dispatch(setDetails(data))
+    }
+  }
+
   return (
     <Form<FormFields, typeof DetailsFormSchema>
       className="gap-0"
       onSubmit={handleSubmit}
+      onChange={handleFormChange}
       validationSchema={DetailsFormSchema}
       defaultValues={{
         firstname: details?.firstname ?? '',

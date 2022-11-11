@@ -50,7 +50,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
       onChange(cloneDeep(methods.getValues()))
     }
   }, [methods.watch(), onChange])
-  console.log(methods.formState.errors)
+
   return (
     <FormProvider {...methods}>
       <form

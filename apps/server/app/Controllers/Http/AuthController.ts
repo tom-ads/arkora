@@ -57,10 +57,13 @@ export default class AuthController {
     await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
     await owner.related('organisation').associate(createdOrganisation)
 
+    // Prevent member list from trying to create owner again
+    const filteredMembers = team.members?.filter((member) => member.email !== details.email)
+
     // Create & Invite Team members
-    if (team.members?.length) {
+    if (filteredMembers?.length) {
       const invitedMembers = await User.createMany(
-        team.members.map((member) => ({
+        filteredMembers.map((member) => ({
           email: member.email,
         }))
       )
@@ -68,7 +71,7 @@ export default class AuthController {
       await Promise.all(
         invitedMembers.map(async (member) => {
           const role = userRoles.find(
-            (role) => role.name === team.members?.find((m) => m.email === member.email)?.role
+            (role) => role.name === filteredMembers?.find((m) => m.email === member.email)?.role
           )
 
           await member.related('role').associate(role!)
