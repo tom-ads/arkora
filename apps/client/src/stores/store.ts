@@ -2,9 +2,11 @@ import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/dist/query'
 import appApi from 'api'
 import RegistrationReducer from './slices/registration'
+import OrganisationReducer from './slices/organisation'
 
 const appReducers = {
   registration: RegistrationReducer,
+  organisation: OrganisationReducer,
 }
 
 export const store = configureStore({

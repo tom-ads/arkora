@@ -53,7 +53,6 @@ export default class AuthController {
       email: details.email,
       password: details.password,
     })
-
     await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
     await owner.related('organisation').associate(createdOrganisation)
 

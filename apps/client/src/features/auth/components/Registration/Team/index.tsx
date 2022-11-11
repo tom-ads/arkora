@@ -14,8 +14,8 @@ import { z } from 'zod'
 import { InviteTeam } from '../../Team/InviteTeam'
 import { RegistrationSteps, SelectedRole } from './../../../types'
 import { RootState } from '@/stores/store'
-import { Navigate } from 'react-router-dom'
 import { isEqual } from 'lodash'
+import { Navigate, useNavigate } from 'react-router-dom'
 
 export interface TeamProps {
   team: Array<{
@@ -47,6 +47,7 @@ type TeamViewProps = {
 
 export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const { organisation, details, team } = useSelector((state: RootState) => state.registration)
 
@@ -75,12 +76,12 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       })),
     })
       .unwrap()
-      .then((response) => {
-        dispatch(clearRegistration())
-
-        window.location.host = `${response.organisation.subdomain}.${
+      .then(() => {
+        navigate('/login', { replace: true, state: { location: '/' } })
+        window.location.host = `${organisation.subdomain}.${
           import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
         }`
+        dispatch(clearRegistration())
       })
   }
 
@@ -88,10 +89,6 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
     if (!isEqual(team, data.team)) {
       dispatch(setTeam(data.team))
     }
-  }
-
-  if (didRegister) {
-    return <Navigate to="/login" />
   }
 
   return (
