@@ -5,8 +5,11 @@ import { RegistrationSteps } from '../../types'
 import { useDispatch, useSelector } from 'react-redux'
 import { setStep } from '@/stores/slices/registration'
 import { RootState } from '@/stores/store'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const RegistrationPage = (): JSX.Element => {
+  useDocumentTitle('Register')
+
   const dispatch = useDispatch()
 
   const activeStep = useSelector((state: RootState) => state.registration.misc?.step)
