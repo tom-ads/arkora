@@ -10,8 +10,10 @@ import {
 } from '@/components'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { setAuth } from '@/stores/slices/auth'
+import { setOrganisation } from '@/stores/slices/organisation'
 import { RootState } from '@/stores/store'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { useLoginMutation } from '../../api'
@@ -30,6 +32,7 @@ type FormFields = {
 }
 
 export const LoginPage = (): JSX.Element => {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
 
   useDocumentTitle('Login')
@@ -42,8 +45,10 @@ export const LoginPage = (): JSX.Element => {
     await login(data)
       .unwrap()
       .then((response) => {
-        console.log('LOGGED IN', response)
-        // navigate('/dashboard/projects')
+        dispatch(setAuth(response.user))
+        dispatch(setOrganisation(response.organisation))
+
+        navigate('/dashboard/projects', { replace: true })
       })
   }
 
