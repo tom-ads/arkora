@@ -100,8 +100,7 @@ export default class AuthController {
     const payload = await ctx.request.validate(LoginValidator)
 
     const user = await User.query()
-      .where('email', payload.email)
-      .whereHas('organisation', (query) => query.where('subdomain', originSubdomain))
+      .withScopes((scopes) => scopes.organisationUser(payload.email, originSubdomain))
       .preload('role')
       .first()
 

@@ -7,9 +7,13 @@ import {
   belongsTo,
   BelongsTo,
   beforeCreate,
+  scope,
+  ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
+
+type UserBuilder = ModelQueryBuilderContract<typeof User>
 
 export default class User extends BaseModel {
   // Columns
@@ -61,4 +65,12 @@ export default class User extends BaseModel {
       user.password = await Hash.make(user.password)
     }
   }
+
+  // Scopes
+
+  public static organisationUser = scope((query: UserBuilder, email: string, subdomain: string) => {
+    return query
+      .where('email', email)
+      .whereHas('organisation', (query) => query.where('subdomain', subdomain))
+  })
 }
