@@ -32,7 +32,7 @@ const authEndpoints = appApi.injectEndpoints({
         body,
       }),
     }),
-    login: build.mutation<LoginRequest, LoginResponse>({
+    login: build.mutation<LoginResponse, LoginRequest>({
       query: (body) => ({
         url: `${authBasePath}/login`,
         method: 'POST',
