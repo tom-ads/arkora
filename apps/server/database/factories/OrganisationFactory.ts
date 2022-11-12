@@ -3,6 +3,7 @@ import Factory from '@ioc:Adonis/Lucid/Factory'
 import UserFactory from './UserFactory'
 import CurrencyFactory from './CurrencyFactory'
 import { DateTime } from 'luxon'
+import WorkDayFactory from './WorkDayFactory'
 
 export default Factory.define(Organisation, ({ faker }) => {
   const name = faker.company.name()
@@ -16,4 +17,5 @@ export default Factory.define(Organisation, ({ faker }) => {
 })
   .relation('users', () => UserFactory)
   .relation('currency', () => CurrencyFactory)
+  .relation('workDays', () => WorkDayFactory)
   .build()
