@@ -1,10 +1,18 @@
-import { AuthLayout, MainLayout } from '@/components'
+import { AuthLayout, MainLayout, Spinner } from '@/components'
 import { LoginPage, RegistrationPage } from '@/features/auth'
 import { SubdomainPage, SubdomainNotFoundPage, useCheckSubdomainQuery } from '@/features/subdomain'
 import { setOrganisation } from '@/stores/slices/organisation'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
+
+const Loader = () => {
+  return (
+    <div className="min-h-full grid place-content-center">
+      <Spinner className="text-purple-90 w-12 h-12 stroke-[10px]" />
+    </div>
+  )
+}
 
 export const PublicRoutes = (): JSX.Element => {
   const location = useLocation()
@@ -25,7 +33,7 @@ export const PublicRoutes = (): JSX.Element => {
   }, [data?.exists, location?.pathname])
 
   if (isLoading) {
-    return <p>loading...</p>
+    return <Loader />
   }
 
   if (

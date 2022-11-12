@@ -38,71 +38,69 @@ export const LoginPage = (): JSX.Element => {
 
   return (
     <div className="flex flex-col justify-center pt-40">
-      <div>
-        <div className="flex items-center flex-wrap gap-4 pb-6">
-          <ArkoraLogo className="w-24 h-24 flex-shrink-0" />
-          <div className="flex flex-col justify-start">
-            <h2 className="text-gray-100 text-xl">Welcome to</h2>
-            <h1 className="font-medium text-3xl text-purple-90">{organisation.name ?? 'Arkora'}</h1>
-          </div>
+      <div className="flex items-center flex-wrap gap-4 pb-6">
+        <ArkoraLogo className="w-24 h-24 flex-shrink-0" />
+        <div className="flex flex-col justify-start">
+          <h2 className="text-gray-100 text-xl">Welcome to</h2>
+          <h1 className="font-medium text-3xl text-purple-90">{organisation.name ?? 'Arkora'}</h1>
         </div>
-
-        <div className="w-full mb-9">
-          <p className="text-gray-60 align-baseline">Please enter your credentials</p>
-        </div>
-
-        <Form<FormFields, typeof LoginFormSchema>
-          mode="onSubmit"
-          className="gap-4"
-          onSubmit={handleSubmit}
-          validationSchema={LoginFormSchema}
-          defaultValues={{ email: '', password: '' }}
-        >
-          {({ formState: { errors } }) => (
-            <>
-              <FormControl>
-                <FormLabel htmlFor="email" size="sm">
-                  Email
-                </FormLabel>
-                <FormInput
-                  name="email"
-                  placeHolder="Enter email address"
-                  size="sm"
-                  error={!!errors.email}
-                  className="h-11 text-[15px]"
-                />
-                {errors.email?.message && (
-                  <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
-                )}
-              </FormControl>
-
-              <FormControl>
-                <FormLabel htmlFor="password" size="sm">
-                  Password
-                </FormLabel>
-                <PasswordInput
-                  name="password"
-                  placeHolder="Enter password"
-                  size="sm"
-                  error={!!errors?.password}
-                  className="h-11 text-[15px]"
-                />
-                {errors.password?.message && (
-                  <FormErrorMessage size="sm">{errors.password?.message}</FormErrorMessage>
-                )}
-              </FormControl>
-
-              <InlineLink className="font-semibold text-sm" to="/forgot-password">
-                Forgot Password?
-              </InlineLink>
-
-              <Button type="submit" size="sm" className="mt-8">
-                Login
-              </Button>
-            </>
-          )}
-        </Form>
       </div>
+
+      <div className="w-full mb-9">
+        <p className="text-gray-60 align-baseline">Please enter your credentials</p>
+      </div>
+
+      <Form<FormFields, typeof LoginFormSchema>
+        mode="onSubmit"
+        className="gap-4"
+        onSubmit={handleSubmit}
+        validationSchema={LoginFormSchema}
+        defaultValues={{ email: '', password: '' }}
+      >
+        {({ formState: { errors } }) => (
+          <>
+            <FormControl>
+              <FormLabel htmlFor="email" size="sm">
+                Email
+              </FormLabel>
+              <FormInput
+                name="email"
+                placeHolder="Enter email address"
+                size="sm"
+                error={!!errors.email}
+                className="h-11 text-[15px]"
+              />
+              {errors.email?.message && (
+                <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
+              )}
+            </FormControl>
+
+            <FormControl>
+              <FormLabel htmlFor="password" size="sm">
+                Password
+              </FormLabel>
+              <PasswordInput
+                name="password"
+                placeHolder="Enter password"
+                size="sm"
+                error={!!errors?.password}
+                className="h-11 text-[15px]"
+              />
+              {errors.password?.message && (
+                <FormErrorMessage size="sm">{errors.password?.message}</FormErrorMessage>
+              )}
+            </FormControl>
+
+            <InlineLink className="font-semibold text-sm" to="/forgot-password">
+              Forgot Password?
+            </InlineLink>
+
+            <Button type="submit" size="sm" className="mt-8">
+              Login
+            </Button>
+          </>
+        )}
+      </Form>
 
       <div className="text-center py-10 w-full mt-auto">
         <h2 className="text-gray-100 font-medium">Need to register?</h2>
