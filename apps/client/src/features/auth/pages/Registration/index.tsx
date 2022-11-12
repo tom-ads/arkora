@@ -18,6 +18,8 @@ export const RegistrationPage = (): JSX.Element => {
     dispatch(setStep({ step }))
   }
 
+  // TODO: reset registration state on page visit / leave
+
   return (
     <div className="flex flex-col py-11">
       <Progress activeStep={activeStep} defaultStep="details">

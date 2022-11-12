@@ -12,7 +12,9 @@ import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
+import { useLoginMutation } from '../../api'
 
 const LoginFormSchema = z.object({
   email: z
@@ -28,12 +30,21 @@ type FormFields = {
 }
 
 export const LoginPage = (): JSX.Element => {
+  const navigate = useNavigate()
+
   useDocumentTitle('Login')
 
   const organisation = useSelector((state: RootState) => state.organisation)
 
-  const handleSubmit = (data: FormFields) => {
-    console.log(data)
+  const [login, { isError: didLoginError, isLoading: isLoggingIn }] = useLoginMutation()
+
+  const handleSubmit = async (data: FormFields) => {
+    await login(data)
+      .unwrap()
+      .then((response) => {
+        console.log('LOGGED IN', response)
+        // navigate('/dashboard/projects')
+      })
   }
 
   return (
@@ -89,13 +100,18 @@ export const LoginPage = (): JSX.Element => {
               {errors.password?.message && (
                 <FormErrorMessage size="sm">{errors.password?.message}</FormErrorMessage>
               )}
+              {!errors.password?.message && didLoginError && (
+                <FormErrorMessage size="sm">
+                  Email or password incorrect, please try your details again
+                </FormErrorMessage>
+              )}
             </FormControl>
 
             <InlineLink className="font-semibold text-sm" to="/forgot-password">
               Forgot Password?
             </InlineLink>
 
-            <Button type="submit" size="sm" className="mt-8">
+            <Button type="submit" size="sm" className="mt-8" isLoading={isLoggingIn}>
               Login
             </Button>
           </>

@@ -15,7 +15,7 @@ import { InviteTeam } from '../../Team/InviteTeam'
 import { RegistrationSteps, SelectedRole } from './../../../types'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 export interface TeamProps {
   team: Array<{
@@ -51,7 +51,7 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
 
   const { organisation, details, team } = useSelector((state: RootState) => state.registration)
 
-  const [register, { isLoading: isRegistering, isSuccess: didRegister }] = useRegisterMutation()
+  const [register, { isLoading: isRegistering }] = useRegisterMutation()
 
   const handleSubmit = async (data: FormFields) => {
     dispatch(setTeam({ ...data.team }))
