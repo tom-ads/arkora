@@ -48,7 +48,7 @@ export const LoginPage = (): JSX.Element => {
         dispatch(setAuth(response.user))
         dispatch(setOrganisation(response.organisation))
 
-        navigate('/dashboard/projects', { replace: true })
+        navigate('/projects', { replace: true })
       })
   }
 

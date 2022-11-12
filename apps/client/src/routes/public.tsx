@@ -2,9 +2,10 @@ import { AuthLayout, MainLayout, Spinner } from '@/components'
 import { LoginPage, RegistrationPage } from '@/features/auth'
 import { SubdomainPage, SubdomainNotFoundPage, useCheckSubdomainQuery } from '@/features/subdomain'
 import { setOrganisation } from '@/stores/slices/organisation'
+import { RootState } from '@/stores/store'
 import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 const Loader = () => {
   return (
@@ -18,6 +19,8 @@ export const PublicRoutes = (): JSX.Element => {
   const location = useLocation()
   const navigate = useNavigate()
   const disptach = useDispatch()
+
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
   const { data, isSuccess, isLoading } = useCheckSubdomainQuery({
     subdomain: window?.location.host?.split('.')?.[0],
@@ -43,6 +46,10 @@ export const PublicRoutes = (): JSX.Element => {
     window?.location.host?.split('.')?.[0] !== 'arkora'
   ) {
     return <SubdomainNotFoundPage />
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/projects" replace={true} />
   }
 
   return location.pathname === '/register' ? <MainLayout /> : <AuthLayout />

@@ -79,7 +79,7 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
     })
       .unwrap()
       .then((response) => {
-        navigate('/dashboard', { replace: true, state: { location: '/' } })
+        navigate('/projects', { replace: true, state: { location: '/' } })
         window.location.host = `${organisation.subdomain}.${
           import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
         }`
