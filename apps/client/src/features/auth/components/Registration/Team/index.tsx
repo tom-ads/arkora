@@ -16,6 +16,8 @@ import { RegistrationSteps, SelectedRole } from './../../../types'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
 import { useNavigate } from 'react-router-dom'
+import { setAuth } from '@/stores/slices/auth'
+import { setOrganisation } from '@/stores/slices/organisation'
 
 export interface TeamProps {
   team: Array<{
@@ -76,11 +78,14 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       })),
     })
       .unwrap()
-      .then(() => {
-        navigate('/login', { replace: true, state: { location: '/' } })
+      .then((response) => {
+        navigate('/dashboard', { replace: true, state: { location: '/' } })
         window.location.host = `${organisation.subdomain}.${
           import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
         }`
+
+        dispatch(setAuth(response.user))
+        dispatch(setOrganisation(response.organisation))
         dispatch(clearRegistration())
       })
   }

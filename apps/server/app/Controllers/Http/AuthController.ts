@@ -23,12 +23,12 @@ export default class AuthController {
     return response.noContent()
   }
 
-  public async register({ request }: HttpContextContract) {
+  public async register(ctx: HttpContextContract) {
     // Revalidate each step of registration flow
     const [details, organisation, team] = await Promise.all([
-      request.validate(DetailsValidator),
-      request.validate(OrganisationValidator),
-      request.validate(TeamValidator),
+      ctx.request.validate(DetailsValidator),
+      ctx.request.validate(OrganisationValidator),
+      ctx.request.validate(TeamValidator),
     ])
 
     const [currency, weekDays] = await Promise.all([
@@ -83,6 +83,8 @@ export default class AuthController {
         })
       )
     }
+
+    await ctx.auth.login(owner)
 
     return {
       user: owner.serialize(),
