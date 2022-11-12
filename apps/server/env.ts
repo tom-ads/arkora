@@ -22,8 +22,9 @@ export default Env.rules({
   DRIVE_DISK: Env.schema.enum(['local'] as const),
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
   APP_HOSTNAME: Env.schema.string(),
-
   STATIC_APP_HOSTNAME: Env.schema.string(),
+
+  COOKIE_DOMAIN: Env.schema.string(),
 
   SESSION_DRIVER: Env.schema.string(),
 

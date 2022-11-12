@@ -74,7 +74,7 @@ export const http: ServerConfig = {
   | HTTP request and set it as `x-request-id` header.
   |
   */
-  generateRequestId: false,
+  generateRequestId: true,
 
   /*
   |--------------------------------------------------------------------------
@@ -110,12 +110,13 @@ export const http: ServerConfig = {
   |--------------------------------------------------------------------------
   */
   cookie: {
-    domain: '',
+    domain:
+      Env.get('NODE_ENV') !== 'development' ? Env.get('COOKIE_DOMAIN', 'localhost') : undefined,
     path: '/',
     maxAge: '2h',
     httpOnly: true,
-    secure: false,
-    sameSite: false,
+    secure: Env.get('NODE_ENV') === 'production',
+    sameSite: 'strict',
   },
 
   /*

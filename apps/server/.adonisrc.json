@@ -16,28 +16,42 @@
     "Helpers": "helpers",
     "Resources": "resources"
   },
-  "preloads": ["./start/routes", "./start/kernel", "./start/validator"],
+  "preloads": [
+    "./start/routes",
+    "./start/kernel",
+    "./start/validator"
+  ],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
     "@adonisjs/lucid",
     "@adonisjs/auth",
-    "@adonisjs/session"
+    "@adonisjs/session",
+    "@adonisjs/shield"
   ],
-  "aceProviders": ["@adonisjs/repl"],
+  "aceProviders": [
+    "@adonisjs/repl"
+  ],
   "tests": {
     "suites": [
       {
         "name": "integration",
-        "files": ["tests/integration/**/*.spec(.ts|.js)"],
+        "files": [
+          "tests/integration/**/*.spec(.ts|.js)"
+        ],
         "timeout": 60000
       },
       {
         "name": "unit",
-        "files": ["tests/unit/**/*.spec(.ts|.js)"],
+        "files": [
+          "tests/unit/**/*.spec(.ts|.js)"
+        ],
         "timeout": 60000
       }
     ]
   },
-  "testProviders": ["@japa/preset-adonis/TestsProvider", "./providers/TestRouteProvider"]
+  "testProviders": [
+    "@japa/preset-adonis/TestsProvider",
+    "./providers/TestRouteProvider"
+  ]
 }

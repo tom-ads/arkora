@@ -122,10 +122,6 @@ export default class AuthController {
   }
 
   public async session(ctx: HttpContextContract) {
-    if (!(await ctx.auth.check())) {
-      ctx.response.unauthorized({ message: 'You are not authenticated, please login' })
-    }
-
     await ctx.auth.user?.load('organisation')
 
     return {

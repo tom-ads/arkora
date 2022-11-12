@@ -13,5 +13,5 @@ Route.group(() => {
     .prefix('/auth')
     .middleware('blockAuth')
 
-  Route.get('/session', 'AuthController.session').prefix('/auth')
+  Route.get('/session', 'AuthController.session').prefix('/auth').middleware('auth')
 })
