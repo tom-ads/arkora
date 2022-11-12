@@ -39,8 +39,8 @@ export const PublicRoutes = (): JSX.Element => {
   if (
     data?.exists !== undefined &&
     !data?.exists &&
-    window?.location.host?.split('.')?.[0]?.toLowerCase() !==
-      import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
+    window?.location.host?.split('.')?.[0] !== import.meta.env.VITE_ARKORA_STATIC_HOSTNAME &&
+    window?.location.host?.split('.')?.[0] !== 'arkora'
   ) {
     return <SubdomainNotFoundPage />
   }
