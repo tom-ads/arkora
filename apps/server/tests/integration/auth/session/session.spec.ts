@@ -11,7 +11,7 @@ test.group('Auth: Session', () => {
       .with('role')
       .create()
 
-    const response = await client.get(sessionRoute).loginAs(authUser)
+    const response = await client.get(sessionRoute).loginAs(authUser).withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -23,7 +23,7 @@ test.group('Auth: Session', () => {
   test('unauthenticated user receives unauthenticed when trying to pull session', async ({
     client,
   }) => {
-    const response = await client.get(sessionRoute)
+    const response = await client.get(sessionRoute).withCsrfToken()
 
     response.assertStatus(401)
   })

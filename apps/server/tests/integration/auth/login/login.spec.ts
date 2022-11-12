@@ -19,6 +19,7 @@ test.group('Auth: Login', () => {
         password: 'newPassword123!',
       })
       .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -41,6 +42,7 @@ test.group('Auth: Login', () => {
         password: 'newPassword123!',
       })
       .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
 
     response.assertStatus(400)
     response.assertBodyContains({ message: 'Email or password is incorrect' })
@@ -68,6 +70,7 @@ test.group('Auth: Login', () => {
         password: 'newPassword123!',
       })
       .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
 
     response.assertStatus(400)
     response.assertBodyContains({ message: 'Email or password is incorrect' })
@@ -102,6 +105,7 @@ test.group('Auth: Login', () => {
         password: 'newPassword123!',
       })
       .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -119,10 +123,13 @@ test.group('Auth: Login', () => {
   })
 
   test('user login request without Origin header responds with bad request', async ({ client }) => {
-    const response = await client.post(loginRoute).form({
-      email: 'sameemail@example.com',
-      password: 'newPassword123!',
-    })
+    const response = await client
+      .post(loginRoute)
+      .form({
+        email: 'sameemail@example.com',
+        password: 'newPassword123!',
+      })
+      .withCsrfToken()
 
     response.assertStatus(404)
     response.assertBody({ message: 'Origin header not present' })
@@ -143,6 +150,7 @@ test.group('Auth: Login', () => {
         password: user.password,
       })
       .loginAs(user)
+      .withCsrfToken()
 
     response.assertStatus(403)
   })

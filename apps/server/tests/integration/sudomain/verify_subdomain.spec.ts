@@ -8,7 +8,7 @@ test.group('Verify Subdomain', () => {
       .with('workDays')
       .create()
 
-    const response = await client.get('/subdomain?subdomain=test-org')
+    const response = await client.get('/subdomain?subdomain=test-org').withCsrfToken()
 
     response.assertStatus(200)
     response.assertBody({
@@ -22,7 +22,7 @@ test.group('Verify Subdomain', () => {
   test('invalid organisation subdomain should not be verified', async ({ client }) => {
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
-    const response = await client.get('/subdomain?subdomain=diff-org')
+    const response = await client.get('/subdomain?subdomain=diff-org').withCsrfToken()
 
     response.assertStatus(200)
     response.assertBody({
