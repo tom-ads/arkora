@@ -30,7 +30,7 @@ export default class TeamValidator {
         email: schema.string({ trim: true }, [rules.email()]),
         role: schema.string({ trim: true }, [
           rules.exists({
-            table: 'organisation_roles',
+            table: 'roles',
             column: 'name',
           }),
           // Invited members cannot be the owner of the organisation

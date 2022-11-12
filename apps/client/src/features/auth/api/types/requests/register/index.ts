@@ -3,7 +3,7 @@ import VerifyDetailsRequest from '../verify_details'
 import VerifyOrganisationRequest from '../verify_organisation'
 
 type RegisterRequest = {
-  team: Array<{
+  members: Array<{
     email: string
     role: Exclude<UserRole, 'OWNER'>
   }>

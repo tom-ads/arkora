@@ -70,7 +70,7 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       currency: organisation.currency.value,
       hourly_rate: parseInt(organisation.hourlyRate, 10),
 
-      team: team.map((member) => ({
+      members: team.map((member) => ({
         email: member.email,
         role: member.role.value,
       })),
