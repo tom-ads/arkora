@@ -20,7 +20,7 @@ test.group('Verify Subdomain', () => {
   })
 
   test('invalid organisation subdomain should not be verified', async ({ client }) => {
-    const organisation = await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
+    await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
     const response = await client.get('/subdomain?subdomain=diff-org')
 

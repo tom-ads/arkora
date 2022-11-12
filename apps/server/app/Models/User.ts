@@ -6,7 +6,6 @@ import {
   BaseModel,
   belongsTo,
   BelongsTo,
-  beforeCreate,
   scope,
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
