@@ -8,6 +8,8 @@ import {
   BelongsTo,
   scope,
   ModelQueryBuilderContract,
+  beforeFind,
+  beforeFetch,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
@@ -56,6 +58,12 @@ export default class User extends BaseModel {
   public organisation: BelongsTo<typeof Organisation>
 
   // Hooks
+
+  @beforeFind()
+  @beforeFetch()
+  public static preloadRelations(query: UserBuilder) {
+    query.preload('role')
+  }
 
   @beforeSave()
   public static async hashPassword(user: User) {

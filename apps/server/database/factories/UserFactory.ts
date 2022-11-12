@@ -1,6 +1,7 @@
 import User from 'App/Models/User'
 import Factory from '@ioc:Adonis/Lucid/Factory'
 import OrganisationFactory from './OrganisationFactory'
+import RoleFactory from './RoleFactory'
 
 export default Factory.define(User, ({ faker }) => {
   return {
@@ -11,4 +12,5 @@ export default Factory.define(User, ({ faker }) => {
   }
 })
   .relation('organisation', () => OrganisationFactory)
+  .relation('role', () => RoleFactory)
   .build()

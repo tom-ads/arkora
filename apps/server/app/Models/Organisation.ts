@@ -50,7 +50,7 @@ export default class Organisation extends BaseModel {
 
   // Relationships
 
-  @hasMany(() => User)
+  @hasMany(() => User, { serializeAs: null })
   public users: HasMany<typeof User>
 
   @belongsTo(() => Currency)
