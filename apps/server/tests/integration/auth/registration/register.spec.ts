@@ -14,9 +14,8 @@ test.group('Auth: Registration - Register', () => {
     const response = await client.post(registerRoute).form(payload)
 
     response.assertStatus(200)
-    response.assertBody({
+    response.assertBodyContains({
       user: {
-        id: 1,
         firstname: 'bob',
         lastname: 'marley',
         email: 'bob.marley@example.com',
