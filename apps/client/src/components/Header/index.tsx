@@ -29,30 +29,30 @@ export const Header = (): JSX.Element => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
   return (
-    <>
-      <header className="w-full bg-white">
-        <div className="mx-9 py-4 flex gap-x-6">
-          <div className="flex items-center gap-2 pr-3">
-            <ArkoraLogo className="w-[38px] h-[39px]" />
-            <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
-          </div>
-
-          {isAuthenticated && (
-            <nav className="flex gap-2 px-3 items-center">
-              <NavItem to="projects">Projects</NavItem>
-              <NavItem to="team">Team</NavItem>
-            </nav>
-          )}
+    <header className="w-full bg-white">
+      {/* Main Navi */}
+      <div className="flex gap-x-6 max-w-[1440px] mx-auto py-4 px-[46px]">
+        <div className="flex items-center gap-2 pr-3">
+          <ArkoraLogo className="w-[38px] h-[39px]" />
+          <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
         </div>
 
         {isAuthenticated && (
-          <>
-            <Divider />
-
-            <div className="h-[51px] mx-9 flex gap-x-6"></div>
-          </>
+          <nav className="flex gap-2 px-3 items-center">
+            <NavItem to="projects">Projects</NavItem>
+            <NavItem to="team">Team</NavItem>
+          </nav>
         )}
-      </header>
-    </>
+      </div>
+
+      {isAuthenticated && (
+        <>
+          <Divider />
+
+          {/* Sub Navi */}
+          <div className="h-[51px] flex gap-x-6 max-w-[1440px] mx-auto px-[46px]"></div>
+        </>
+      )}
+    </header>
   )
 }
