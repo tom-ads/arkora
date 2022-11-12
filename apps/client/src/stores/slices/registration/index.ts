@@ -106,6 +106,29 @@ const registrationSlice = createSlice({
     },
 
     clearRegistration: (currentState) => {
+      currentState.details = {
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+      }
+      currentState.misc = {
+        step: 'details',
+      }
+      currentState.organisation = {
+        name: '',
+        subdomain: '',
+        workDays: [],
+        openingTime: '',
+        closingTime: '',
+        currency: {
+          value: 'GBP',
+          children: 'British Pound Sterling',
+        },
+        hourlyRate: '',
+      }
+      currentState.team = []
+
       localStorage.removeItem('registration')
     },
   },
