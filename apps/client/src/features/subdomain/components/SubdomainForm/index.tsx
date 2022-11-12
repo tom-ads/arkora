@@ -1,5 +1,7 @@
 import { Button, Form, FormInput } from '@/components'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
+import { setOrganisation } from '@/stores/slices/organisation'
+import { useDispatch } from 'react-redux'
 import * as z from 'zod'
 import { useLazyCheckSubdomainQuery } from '../../api'
 
@@ -12,6 +14,8 @@ type FormFields = {
 }
 
 export const SubdomainForm = (): JSX.Element => {
+  const dispatch = useDispatch()
+
   const [trigger, { isLoading, data }] = useLazyCheckSubdomainQuery()
 
   const handleSubmit = async (data: FormFields) => {
@@ -19,6 +23,7 @@ export const SubdomainForm = (): JSX.Element => {
       .unwrap()
       .then((response) => {
         if (response.exists) {
+          dispatch(setOrganisation({ ...response.organisation }))
           window.location.host = `${data.subdomain}.${import.meta.env.VITE_ARKORA_STATIC_HOSTNAME}`
         }
       })
@@ -50,7 +55,7 @@ export const SubdomainForm = (): JSX.Element => {
             )}
           </div>
 
-          <Button className="mt-6" type="submit" isLoading={isLoading} block>
+          <Button className="mt-6" type="submit" isLoading={isLoading} size="sm" block>
             Continue
           </Button>
         </>

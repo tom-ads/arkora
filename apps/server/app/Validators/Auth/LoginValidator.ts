@@ -1,8 +1,7 @@
 import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import UserRole from 'App/Enum/UserRole'
 
-export default class TeamValidator {
+export default class LoginValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -25,19 +24,8 @@ export default class TeamValidator {
    *    ```
    */
   public schema = schema.create({
-    members: schema.array.optional([rules.minLength(0)]).members(
-      schema.object().members({
-        email: schema.string({ trim: true }, [rules.email()]),
-        role: schema.string({ trim: true }, [
-          rules.exists({
-            table: 'roles',
-            column: 'name',
-          }),
-          // Invited members cannot be the owner of the organisation
-          rules.notIn([UserRole.OWNER]),
-        ]),
-      })
-    ),
+    email: schema.string([rules.email(), rules.trim()]),
+    password: schema.string([rules.password(), rules.trim()]),
   })
 
   /**
@@ -51,7 +39,5 @@ export default class TeamValidator {
    * }
    *
    */
-  public messages: CustomMessages = {
-    'members.*.role.notIn': 'Invited members cannot be owners of the organisation',
-  }
+  public messages: CustomMessages = {}
 }

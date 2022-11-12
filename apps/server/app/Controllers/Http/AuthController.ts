@@ -5,9 +5,12 @@ import Organisation from 'App/Models/Organisation'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
 import WorkDay from 'App/Models/WorkDay'
+import LoginValidator from 'App/Validators/Auth/LoginValidator'
 import DetailsValidator from 'App/Validators/Auth/Register/DetailsValidator'
 import OrganisationValidator from 'App/Validators/Auth/Register/OrganisationValidator'
 import TeamValidator from 'App/Validators/Auth/Register/TeamValidator'
+import { getOriginSubdomain } from 'Helpers/subdomain'
+import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -20,12 +23,12 @@ export default class AuthController {
     return response.noContent()
   }
 
-  public async register({ request }: HttpContextContract) {
+  public async register(ctx: HttpContextContract) {
     // Revalidate each step of registration flow
     const [details, organisation, team] = await Promise.all([
-      request.validate(DetailsValidator),
-      request.validate(OrganisationValidator),
-      request.validate(TeamValidator),
+      ctx.request.validate(DetailsValidator),
+      ctx.request.validate(OrganisationValidator),
+      ctx.request.validate(TeamValidator),
     ])
 
     const [currency, weekDays] = await Promise.all([
@@ -53,7 +56,6 @@ export default class AuthController {
       email: details.email,
       password: details.password,
     })
-
     await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
     await owner.related('organisation').associate(createdOrganisation)
 
@@ -82,9 +84,40 @@ export default class AuthController {
       )
     }
 
+    await ctx.auth.login(owner)
+
     return {
       user: owner.serialize(),
       organisation: createdOrganisation.serialize(),
+    }
+  }
+
+  public async login(ctx: HttpContextContract) {
+    const originSubdomain = getOriginSubdomain(ctx.request.header('origin')!)
+    if (!originSubdomain) {
+      ctx.response.notFound({ message: 'Origin header not present' })
+      return
+    }
+
+    const payload = await ctx.request.validate(LoginValidator)
+
+    const user = await User.query()
+      .withScopes((scopes) => scopes.organisationUser(payload.email, originSubdomain))
+      .preload('role')
+      .first()
+
+    if (!user || !(await Hash.verify(user?.password, payload.password))) {
+      ctx.response.badRequest({ message: 'Email or password is incorrect' })
+      return
+    }
+
+    const organisation = await Organisation.findBy('subdomain', originSubdomain)
+
+    await ctx.auth.login(user)
+
+    return {
+      user: user.serialize(),
+      organisation: organisation?.serialize(),
     }
   }
 }

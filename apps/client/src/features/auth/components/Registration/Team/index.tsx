@@ -14,8 +14,10 @@ import { z } from 'zod'
 import { InviteTeam } from '../../Team/InviteTeam'
 import { RegistrationSteps, SelectedRole } from './../../../types'
 import { RootState } from '@/stores/store'
-import { Navigate } from 'react-router-dom'
 import { isEqual } from 'lodash'
+import { useNavigate } from 'react-router-dom'
+import { setAuth } from '@/stores/slices/auth'
+import { setOrganisation } from '@/stores/slices/organisation'
 
 export interface TeamProps {
   team: Array<{
@@ -47,10 +49,11 @@ type TeamViewProps = {
 
 export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const { organisation, details, team } = useSelector((state: RootState) => state.registration)
 
-  const [register, { isLoading: isRegistering, isSuccess: didRegister }] = useRegisterMutation()
+  const [register, { isLoading: isRegistering }] = useRegisterMutation()
 
   const handleSubmit = async (data: FormFields) => {
     dispatch(setTeam({ ...data.team }))
@@ -69,18 +72,21 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       currency: organisation.currency.value,
       hourly_rate: parseInt(organisation.hourlyRate, 10),
 
-      team: team.map((member) => ({
+      members: team.map((member) => ({
         email: member.email,
         role: member.role.value,
       })),
     })
       .unwrap()
       .then((response) => {
-        dispatch(clearRegistration())
-
-        window.location.host = `${response.organisation.subdomain}.${
+        navigate('/dashboard', { replace: true, state: { location: '/' } })
+        window.location.host = `${organisation.subdomain}.${
           import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
         }`
+
+        dispatch(setAuth(response.user))
+        dispatch(setOrganisation(response.organisation))
+        dispatch(clearRegistration())
       })
   }
 
@@ -88,10 +94,6 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
     if (!isEqual(team, data.team)) {
       dispatch(setTeam(data.team))
     }
-  }
-
-  if (didRegister) {
-    return <Navigate to="/login" />
   }
 
   return (

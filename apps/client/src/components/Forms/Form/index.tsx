@@ -7,10 +7,11 @@ import {
   SubmitHandler,
   useForm,
   UseFormReturn,
+  ValidationMode,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ZodType } from 'zod'
-import { cloneDeep, isEqual } from 'lodash'
+import { cloneDeep } from 'lodash'
 
 type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType> = {
   onChange?: (fields: TFormValues) => void
@@ -19,6 +20,7 @@ type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType
   validationSchema?: ValidationSchema
   children: (methods: UseFormReturn<TFormValues>) => ReactNode
   defaultValues: DeepPartial<TFormValues>
+  mode?: keyof ValidationMode
 }
 
 export const Form = <TFormValues extends FieldValues, ValidationSchema extends ZodType>({
@@ -28,13 +30,13 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
   children,
   onChange,
   defaultValues,
+  mode = 'all',
 }: FormProps<TFormValues, ValidationSchema>): JSX.Element => {
   const methods = useForm<TFormValues>({
-    mode: 'all',
+    mode,
     defaultValues,
     resolver: validationSchema && zodResolver(validationSchema),
   })
-
   /*
     Using watch() in useEffect isn't the most optimal solution,
     can be improved in the future.
@@ -53,11 +55,10 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
 
   return (
     <FormProvider {...methods}>
-      <form
-        onSubmit={methods.handleSubmit(onSubmit)}
-        className={classNames('flex flex-col gap-6 w-full', className)}
-      >
-        <fieldset className="w-full">{children(methods)}</fieldset>
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">
+        <fieldset className={classNames('flex flex-col w-full', className)}>
+          {children(methods)}
+        </fieldset>
       </form>
     </FormProvider>
   )

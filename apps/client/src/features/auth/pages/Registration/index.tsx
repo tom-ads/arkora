@@ -5,8 +5,11 @@ import { RegistrationSteps } from '../../types'
 import { useDispatch, useSelector } from 'react-redux'
 import { setStep } from '@/stores/slices/registration'
 import { RootState } from '@/stores/store'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const RegistrationPage = (): JSX.Element => {
+  useDocumentTitle('Register')
+
   const dispatch = useDispatch()
 
   const activeStep = useSelector((state: RootState) => state.registration.misc?.step)
@@ -14,6 +17,8 @@ export const RegistrationPage = (): JSX.Element => {
   const handleStep = (step: RegistrationSteps) => {
     dispatch(setStep({ step }))
   }
+
+  // TODO: reset registration state on page visit / leave
 
   return (
     <div className="flex flex-col py-11">

@@ -6,9 +6,16 @@ type FormInputBaseProps = {
   placeHolder?: string
   size?: 'sm' | 'md' | 'lg'
   error?: boolean
+  className?: string
 }
 
-export const FormInput = ({ name, placeHolder, size = 'sm', error }: FormInputBaseProps) => {
+export const FormInput = ({
+  name,
+  placeHolder,
+  size = 'sm',
+  error,
+  className,
+}: FormInputBaseProps) => {
   const { register } = useFormContext()
 
   return (
@@ -27,6 +34,7 @@ export const FormInput = ({ name, placeHolder, size = 'sm', error }: FormInputBa
           'focus:shadow-purple-70 focus:border-purple-90': !error,
           'border-red-90 focus:shadow-md focus:shadow-red-90': error,
         },
+        className,
       )}
     />
   )

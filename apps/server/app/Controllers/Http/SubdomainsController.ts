@@ -10,6 +10,7 @@ export default class SubdomainsController {
 
     return response.ok({
       exists: !!organisation,
+      organisation: organisation?.serialize(),
     })
   }
 }

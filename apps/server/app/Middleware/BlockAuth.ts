@@ -5,9 +5,9 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
   ie. registering
 */
 export default class BlockAuth {
-  public async handle({ auth, response }: HttpContextContract, next: () => Promise<void>) {
-    if (await auth.check()) {
-      return response.forbidden()
+  public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
+    if (await ctx.auth.check()) {
+      return ctx.response.forbidden()
     }
 
     await next()
