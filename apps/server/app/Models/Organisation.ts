@@ -37,10 +37,16 @@ export default class Organisation extends BaseModel {
   @column()
   public subdomain: string
 
-  @column.dateTime({ serialize: (val: DateTime) => val.toFormat('HH:mm') })
+  @column.dateTime({
+    prepare: (time: DateTime) => time.toFormat('HH:mm'),
+    serialize: (val: DateTime) => val.toFormat('HH:mm'),
+  })
   public openingTime: DateTime
 
-  @column.dateTime({ serialize: (val: DateTime) => val.toFormat('HH:mm') })
+  @column.dateTime({
+    prepare: (time: DateTime) => time.toFormat('HH:mm'),
+    serialize: (val: DateTime) => val.toFormat('HH:mm'),
+  })
   public closingTime: DateTime
 
   @column()
