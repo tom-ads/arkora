@@ -18,7 +18,7 @@ const baseUrl = (): string => {
 const prepareHeaders = (headers: Headers) => {
   const xsrfCookie = document.cookie.match(new RegExp('(XSRF-TOKEN)=([^;]*)'))
   if (xsrfCookie) {
-    headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrfCookie[3]))
+    headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrfCookie[2]))
   }
   return headers
 }
