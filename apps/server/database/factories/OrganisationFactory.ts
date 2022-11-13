@@ -4,6 +4,7 @@ import UserFactory from './UserFactory'
 import CurrencyFactory from './CurrencyFactory'
 import { DateTime } from 'luxon'
 import WorkDayFactory from './WorkDayFactory'
+import ClientFactory from './ClientFactory'
 
 export default Factory.define(Organisation, ({ faker }) => {
   const name = faker.company.name()
@@ -18,4 +19,5 @@ export default Factory.define(Organisation, ({ faker }) => {
   .relation('users', () => UserFactory)
   .relation('currency', () => CurrencyFactory)
   .relation('workDays', () => WorkDayFactory)
+  .relation('clients', () => ClientFactory)
   .build()

@@ -9,12 +9,16 @@ import {
   column,
   HasMany,
   hasMany,
+  HasManyThrough,
+  hasManyThrough,
   ManyToMany,
   manyToMany,
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 import Currency from './Currency'
 import WorkDay from './WorkDay'
+import Client from './Client'
+import Project from './Project'
 
 type OrganisationQueryBuilder = ModelQueryBuilderContract<typeof Organisation>
 
@@ -61,6 +65,12 @@ export default class Organisation extends BaseModel {
     pivotRelatedForeignKey: 'workday_id',
   })
   public workDays: ManyToMany<typeof WorkDay>
+
+  @hasMany(() => Client)
+  public clients: HasMany<typeof Client>
+
+  @hasManyThrough([() => Project, () => Client])
+  public projects: HasManyThrough<typeof Project>
 
   // Hooks
 

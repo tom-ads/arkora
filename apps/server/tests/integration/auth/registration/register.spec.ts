@@ -44,11 +44,7 @@ test.group('Auth: Registration - Register', () => {
   }) => {
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
-    const response = await client
-      .post(registerRoute)
-      .form(registerRoute)
-      .form(payload)
-      .withCsrfToken()
+    const response = await client.post(registerRoute).form(payload).withCsrfToken()
 
     response.assertStatus(422)
     response.assertBodyContains({

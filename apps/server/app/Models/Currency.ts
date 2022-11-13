@@ -4,6 +4,7 @@ import Organisation from './Organisation'
 
 export default class Currency extends BaseModel {
   public static table = 'currencies'
+
   // Columns
 
   @column({ isPrimary: true, serializeAs: null })
