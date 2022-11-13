@@ -40,6 +40,7 @@ export const Header = (): JSX.Element => {
         {isAuthenticated && (
           <nav className="flex gap-2 px-3 items-center">
             <NavItem to="projects">Projects</NavItem>
+            <NavItem to="team">Clients</NavItem>
             <NavItem to="team">Team</NavItem>
           </nav>
         )}
