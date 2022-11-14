@@ -8,7 +8,7 @@ export const MainLayout = (): JSX.Element => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
   return (
-    <div className="flex flex-col flex-grow h-full">
+    <div className="relative flex flex-col flex-grow h-full">
       <Header />
       <main
         className={classNames('mx-auto w-full h-full', {
