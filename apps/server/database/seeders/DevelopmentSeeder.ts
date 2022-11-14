@@ -11,11 +11,15 @@ export default class extends BaseSeeder {
 
     await UserFactory.merge({
       roleId: ownerRole?.id,
+      email: 'ta@example.com',
+      password: 'newPassword123!',
     })
       .with('organisation', 1, (orgBuilder) => {
-        return orgBuilder.with('clients', 1, (clientBuilder) => {
-          return clientBuilder.with('projects', 3)
-        })
+        return orgBuilder
+          .merge({ name: 'Test Organisation', subdomain: 'test-org' })
+          .with('clients', 1, (clientBuilder) => {
+            return clientBuilder.with('projects', 3)
+          })
       })
       .create()
   }
