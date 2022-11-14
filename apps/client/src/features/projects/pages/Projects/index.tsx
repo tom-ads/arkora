@@ -1,6 +1,9 @@
 import { Table, TableBody, TableContainer, TableHead, TableHeading, TableRow } from '@/components'
+import { useGetProjectsQuery } from '../../api'
 
 export const ProjectsPage = (): JSX.Element => {
+  const { data: projects } = useGetProjectsQuery()
+
   return (
     <TableContainer>
       <Table>

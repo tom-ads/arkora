@@ -5,11 +5,11 @@ const projectsBasePath = '/projects'
 
 const projectEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
-    projects: build.query<void, GetProjectsResponse>({
+    getProjects: build.query<GetProjectsResponse, void>({
       query: () => projectsBasePath,
     }),
   }),
   overrideExisting: false,
 })
 
-export const { useProjectsQuery } = projectEndpoints
+export const { useGetProjectsQuery } = projectEndpoints
