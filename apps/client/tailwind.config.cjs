@@ -9,7 +9,7 @@ module.exports = {
       sm: '0px 0px 5px 0px rgb(0, 0, 0)',
       md: '0px 0px 5px 0.1px rgb(0, 0, 0)',
       lg: '0px 0px 5px 0.2px rgb(0, 0, 0)',
-      card: '0px 0px 5px 0px rbg(218, 223, 231x)',
+      card: '0px 0px 5px 0px rgb(218, 223, 231)',
       none: defaultTheme.boxShadow.none,
     },
     colors: {
