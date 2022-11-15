@@ -5,6 +5,8 @@ import ClientFactory from './ClientFactory'
 import ProjectFactory from './ProjectFactory'
 import RoleFactory from './RoleFactory'
 import CurrencyFactory from './CurrencyFactory'
+import BudgetFactory from './BudgetFactory'
+import BudgetTypeFactory from './BudgetTypeFactory'
 
 export {
   OrganisationFactory,
@@ -14,4 +16,6 @@ export {
   WorkDayFactory,
   ClientFactory,
   ProjectFactory,
+  BudgetFactory,
+  BudgetTypeFactory,
 }

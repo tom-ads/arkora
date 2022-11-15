@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Client from './Client'
 import Status from 'App/Enum/Status'
+import Budget from './Budget'
 
 export default class Project extends BaseModel {
   // Columns
@@ -15,10 +16,10 @@ export default class Project extends BaseModel {
   @column()
   public name: string
 
-  @column({ consume: (value) => Boolean(value) })
+  @column({ serialize: Boolean })
   public showCost: boolean
 
-  @column({ consume: (value) => Boolean(value) })
+  @column({ serialize: Boolean })
   public private: boolean
 
   @column()
@@ -34,4 +35,7 @@ export default class Project extends BaseModel {
 
   @belongsTo(() => Client)
   public client: BelongsTo<typeof Client>
+
+  @hasMany(() => Budget)
+  public budgets: HasMany<typeof Budget>
 }

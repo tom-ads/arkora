@@ -1,7 +1,17 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  HasMany,
+  hasMany,
+  HasManyThrough,
+  hasManyThrough,
+} from '@ioc:Adonis/Lucid/Orm'
 import Organisation from './Organisation'
 import Project from './Project'
+import Budget from './Budget'
 
 export default class Client extends BaseModel {
   // Columns
@@ -28,4 +38,7 @@ export default class Client extends BaseModel {
 
   @hasMany(() => Project)
   public projects: HasMany<typeof Project>
+
+  @hasManyThrough([() => Budget, () => Project])
+  public budgets: HasManyThrough<typeof Budget>
 }

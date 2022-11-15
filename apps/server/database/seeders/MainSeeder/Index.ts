@@ -11,7 +11,7 @@ export default class extends BaseSeeder {
       this.runSeeder(await import('../Role')),
       this.runSeeder(await import('../Currency')),
       this.runSeeder(await import('../WorkDay')),
-      this.runSeeder(await import('../RateType')),
+      this.runSeeder(await import('../BudgetType')),
     ])
 
     if (nodeEnv === 'development') {
