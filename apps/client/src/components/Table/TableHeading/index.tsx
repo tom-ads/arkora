@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 
 type TableHeadingProps = {
   className?: string
-  children: ReactNode
+  children?: ReactNode
 }
 
 export const TableHeading = ({ className, children }: TableHeadingProps): JSX.Element => {
