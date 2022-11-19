@@ -6,17 +6,20 @@ import {
   BelongsTo,
   belongsTo,
   column,
+  ManyToMany,
+  manyToMany,
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 import Project from './Project'
 import BudgetType from './BudgetType'
+import User from './User'
 
 type BudgetBuilder = ModelQueryBuilderContract<typeof Budget>
 
 export default class Budget extends BaseModel {
   // Columns
 
-  @column({ isPrimary: true, serializeAs: null })
+  @column({ isPrimary: true })
   public id: number
 
   @column({ serializeAs: null })
@@ -53,6 +56,11 @@ export default class Budget extends BaseModel {
 
   @belongsTo(() => BudgetType, { serializeAs: 'budget_type' })
   public budgetType: BelongsTo<typeof BudgetType>
+
+  @manyToMany(() => User, {
+    pivotTable: 'budget_members',
+  })
+  public members: ManyToMany<typeof User>
 
   // Hooks
 

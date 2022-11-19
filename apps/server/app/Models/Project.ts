@@ -1,13 +1,23 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  HasMany,
+  hasMany,
+  ManyToMany,
+  manyToMany,
+} from '@ioc:Adonis/Lucid/Orm'
 import Client from './Client'
 import Status from 'App/Enum/Status'
 import Budget from './Budget'
+import User from './User'
 
 export default class Project extends BaseModel {
   // Columns
 
-  @column({ isPrimary: true, serializeAs: null })
+  @column({ isPrimary: true })
   public id: number
 
   @column({ serializeAs: null })
@@ -31,11 +41,16 @@ export default class Project extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   public updatedAt: DateTime
 
-  // Relations
+  // Relationships
 
   @belongsTo(() => Client)
   public client: BelongsTo<typeof Client>
 
   @hasMany(() => Budget)
   public budgets: HasMany<typeof Budget>
+
+  @manyToMany(() => User, {
+    pivotTable: 'project_members',
+  })
+  public members: ManyToMany<typeof User>
 }
