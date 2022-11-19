@@ -1,3 +1,5 @@
 export * from './Organisation'
 export * from './CurrencyCode'
 export * from './User'
+export * from './Budget'
+export * from './Project'

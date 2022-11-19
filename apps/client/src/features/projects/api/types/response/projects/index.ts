@@ -1,7 +1,7 @@
-import Project from '@/types/Project'
+import ProjectBudget from '@/types/ProjectBudget'
 
 type GetProjectsResponse = {
-  projects: Project[]
+  projects: ProjectBudget[]
 }
 
 export default GetProjectsResponse

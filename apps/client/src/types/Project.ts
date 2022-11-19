@@ -1,6 +1,7 @@
 import Status from '@/enums/Status'
 
 type Project = {
+  id: number
   name: string
   showCost: boolean
   private: boolean
