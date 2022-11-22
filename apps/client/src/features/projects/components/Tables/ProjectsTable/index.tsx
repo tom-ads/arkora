@@ -9,6 +9,8 @@ import {
   InlineLink,
   ChevronIcon,
   Badge,
+  AvatarLimit,
+  Button,
 } from '@/components'
 import { ExpandableRow } from '@/components/Table/ExpandableRow'
 import Status from '@/enums/Status'
@@ -30,12 +32,13 @@ export const ProjectsTable = (): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[35px]"></TableHeading>
-            <TableHeading className="max-w-[255px]">NAME</TableHeading>
-            <TableHeading className="max-w-[255px]">CLIENT</TableHeading>
+            <TableHeading className="w-[32px]"></TableHeading>
+            <TableHeading className="max-w-[355px]">NAME</TableHeading>
+            <TableHeading className="max-w-[355px]">CLIENT</TableHeading>
             <TableHeading className="max-w-[255px]">TEAM</TableHeading>
             <TableHeading className="max-w-[255px]">STATUS</TableHeading>
-            <TableHeading className="max-w-[255px]">VISIBILITY</TableHeading>
+            <TableHeading className="max-w-[100px]">VISIBILITY</TableHeading>
+            <TableHeading className="w-[86px]"></TableHeading>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -60,12 +63,17 @@ export const ProjectsTable = (): JSX.Element => {
                   </InlineLink>
                 </TableData>
                 <TableData>{project.client.name}</TableData>
-                <TableData>{project.name}</TableData>
+                <TableData>
+                  <AvatarLimit values={project.members.map((member) => member.initials)} />
+                </TableData>
                 <TableData>
                   {project.status === Status.ACTIVE && <Badge variant="success">Active</Badge>}
                   {project.status === Status.INACTIVE && <Badge variant="warn">Inactive</Badge>}
                 </TableData>
                 <TableData>{project.private ? 'Private' : 'Public'}</TableData>
+                <TableData>
+                  <Button variant="blank">Manage</Button>
+                </TableData>
               </TableRow>
               {/* Project Budgets Expandable */}
               <ExpandableRow show={expandedRow === project.id}>

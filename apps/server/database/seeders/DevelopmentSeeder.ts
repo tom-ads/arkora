@@ -21,9 +21,13 @@ export default class extends BaseSeeder {
           .merge({ name: 'Test Organisation', subdomain: 'test-org' })
           .with('clients', 1, (clientBuilder) => {
             return clientBuilder.with('projects', 3, (projectBuilder) => {
-              return projectBuilder.with('budgets', 5, (budgetBuilder) => {
-                return budgetBuilder.merge({ budgetTypeId: budgetTypes?.[0].id })
-              })
+              return projectBuilder
+                .with('members', 5, (memberBuilder) => {
+                  return memberBuilder.merge({ organisationId: 1, roleId: 4 })
+                })
+                .with('budgets', 5, (budgetBuilder) => {
+                  return budgetBuilder.merge({ budgetTypeId: budgetTypes?.[0].id })
+                })
             })
           })
       })

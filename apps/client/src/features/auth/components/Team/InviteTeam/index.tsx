@@ -120,7 +120,7 @@ export const InviteTeam = ({
         <Button
           type="button"
           variant="blank"
-          className="text-sm flex gap-x-1 focus-visible:text-purple-70"
+          className="text-sm flex gap-x-1"
           onClick={handleAddMember}
         >
           <PlusIcon className="w-5 h-5 pointer-events-none" aria-hidden />

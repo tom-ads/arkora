@@ -12,6 +12,8 @@ import {
   beforeFetch,
   manyToMany,
   ManyToMany,
+  computed,
+  afterCreate,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
@@ -53,6 +55,16 @@ export default class User extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   public updatedAt: DateTime
 
+  // Computed
+
+  @computed()
+  public get initials(): string {
+    const fnInitial = this.firstname ? this.firstname.charAt(0) : ''
+    const lsInitial = this.lastname ? this.lastname.charAt(0) : ''
+
+    return `${fnInitial}${lsInitial}`
+  }
+
   // Relationships
 
   @belongsTo(() => Role)
@@ -75,6 +87,7 @@ export default class User extends BaseModel {
 
   @beforeFind()
   @beforeFetch()
+  @afterCreate()
   public static preloadRelations(query: UserBuilder) {
     query.preload('role')
   }

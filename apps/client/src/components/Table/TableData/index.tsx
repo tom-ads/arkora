@@ -9,7 +9,7 @@ type TableDataProps = {
 
 export const TableData = ({ colSpan, className, children }: TableDataProps): JSX.Element => {
   return (
-    <td className={classNames('p-4 text-sm text-gray-80 truncate', className)} colSpan={colSpan}>
+    <td className={classNames('p-4 text-sm text-gray-80', className)} colSpan={colSpan}>
       {children}
     </td>
   )
