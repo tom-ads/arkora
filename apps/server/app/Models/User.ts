@@ -87,7 +87,6 @@ export default class User extends BaseModel {
 
   @beforeFind()
   @beforeFetch()
-  @afterCreate()
   public static preloadRelations(query: UserBuilder) {
     query.preload('role')
   }

@@ -7,7 +7,13 @@ test.group('Projects: All Projects', () => {
   test('authenticated user can view organisations projects', async ({ client }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (builder) => {
-        return builder.with('projects', 2)
+        return builder.with('projects', 2, (projectBuilder) => {
+          return projectBuilder
+            .with('members', 5, (memberBuilder) => {
+              return memberBuilder.merge({ organisationId: 1, roleId: 4 })
+            })
+            .with('budgets', 5)
+        })
       })
     })
       .with('role')
@@ -19,7 +25,12 @@ test.group('Projects: All Projects', () => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    const projects = await authUser.organisation.related('projects').query()
+    const projects = await authUser.organisation
+      .related('projects')
+      .query()
+      .preload('budgets')
+      .preload('client')
+      .preload('members')
 
     response.assertStatus(200)
     response.assertBody({ projects: projects.map((p) => p.serialize()) })
@@ -60,8 +71,18 @@ test.group('Projects: All Projects', () => {
       .withCsrfToken()
       .loginAs(diffUser)
 
-    const testOrgProjects = await authUser.organisation.related('projects').query()
-    const diffOrgProjects = await diffUser.organisation.related('projects').query()
+    const testOrgProjects = await authUser.organisation
+      .related('projects')
+      .query()
+      .preload('budgets')
+      .preload('client')
+      .preload('members')
+    const diffOrgProjects = await diffUser.organisation
+      .related('projects')
+      .query()
+      .preload('budgets')
+      .preload('client')
+      .preload('members')
 
     assert.notEqual(
       diffOrgProjects.map((p) => p.serialize()),
