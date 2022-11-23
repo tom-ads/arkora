@@ -5,7 +5,7 @@ import {
   RegisterRequest,
   LoginRequest,
 } from './types/requests'
-import { RegisterResponse, LoginResponse } from './types/response'
+import { RegisterResponse, LoginResponse, SessionResponse } from './types/response'
 
 const authBasePath = '/auth'
 
@@ -39,6 +39,9 @@ const authEndpoints = appApi.injectEndpoints({
         body,
       }),
     }),
+    session: build.query<SessionResponse, void>({
+      query: () => `${authBasePath}/session `,
+    }),
   }),
   overrideExisting: false,
 })
@@ -48,4 +51,5 @@ export const {
   useVerifyOrganisationMutation,
   useRegisterMutation,
   useLoginMutation,
+  useSessionQuery,
 } = authEndpoints

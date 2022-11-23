@@ -4,18 +4,20 @@ import UserFactory from './UserFactory'
 import CurrencyFactory from './CurrencyFactory'
 import { DateTime } from 'luxon'
 import WorkDayFactory from './WorkDayFactory'
+import ClientFactory from './ClientFactory'
 
 export default Factory.define(Organisation, ({ faker }) => {
   const name = faker.company.name()
   return {
     name: name,
     subdomain: name,
-    openingTime: DateTime.now().set({ hour: 9, minute: 0 }),
-    closingTime: DateTime.now().set({ hour: 17, minute: 0 }),
+    openingTime: DateTime.now().set({ hour: 9, minute: 0, second: 0 }),
+    closingTime: DateTime.now().set({ hour: 17, minute: 0, second: 0 }),
     defaultRate: parseInt(faker.random.numeric(4), 10),
   }
 })
   .relation('users', () => UserFactory)
   .relation('currency', () => CurrencyFactory)
   .relation('workDays', () => WorkDayFactory)
+  .relation('clients', () => ClientFactory)
   .build()

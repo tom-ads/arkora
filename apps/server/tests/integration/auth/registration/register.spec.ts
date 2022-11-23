@@ -11,7 +11,7 @@ test.group('Auth: Registration - Register', () => {
     client,
     assert,
   }) => {
-    const response = await client.post(registerRoute).form(payload)
+    const response = await client.post(registerRoute).form(payload).withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -44,7 +44,7 @@ test.group('Auth: Registration - Register', () => {
   }) => {
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
-    const response = await client.post(registerRoute).form(registerRoute).form(payload)
+    const response = await client.post(registerRoute).form(payload).withCsrfToken()
 
     response.assertStatus(422)
     response.assertBodyContains({
@@ -61,7 +61,11 @@ test.group('Auth: Registration - Register', () => {
   test('auth user is forbidden from registering an organisation', async ({ client }) => {
     const authUser = await UserFactory.create()
 
-    const response = await client.post(registerRoute).loginAs(authUser).form(payload)
+    const response = await client
+      .post(registerRoute)
+      .loginAs(authUser)
+      .form(payload)
+      .withCsrfToken()
 
     response.assertStatus(403)
   })

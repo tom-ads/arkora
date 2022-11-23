@@ -120,4 +120,13 @@ export default class AuthController {
       organisation: organisation?.serialize(),
     }
   }
+
+  public async session(ctx: HttpContextContract) {
+    await ctx.auth.user?.load('organisation')
+
+    return {
+      user: ctx.auth.user,
+      organisation: ctx.auth.user?.organisation,
+    }
+  }
 }

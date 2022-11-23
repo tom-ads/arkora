@@ -15,7 +15,7 @@ import { cloneDeep } from 'lodash'
 
 type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType> = {
   onChange?: (fields: TFormValues) => void
-  onSubmit: SubmitHandler<TFormValues>
+  onSubmit?: SubmitHandler<TFormValues>
   className?: string
   validationSchema?: ValidationSchema
   children: (methods: UseFormReturn<TFormValues>) => ReactNode

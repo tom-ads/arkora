@@ -9,7 +9,7 @@ module.exports = {
       sm: '0px 0px 5px 0px rgb(0, 0, 0)',
       md: '0px 0px 5px 0.1px rgb(0, 0, 0)',
       lg: '0px 0px 5px 0.2px rgb(0, 0, 0)',
-      card: '0px 4px 12px 0px rbg()',
+      card: '0px 0px 5px 0px rgb(218, 223, 231)',
       none: defaultTheme.boxShadow.none,
     },
     colors: {
@@ -35,14 +35,17 @@ module.exports = {
       },
       green: {
         90: '#5B8A53',
+        60: '#3EC729',
         10: '#E1F4DE',
       },
       red: {
         90: '#B63A44',
+        60: '#C72936',
         10: '#FBDFDF',
       },
-      gold: {
+      yellow: {
         90: '#C07A02',
+        60: '#C78D29',
         10: '#FBF1E0',
       },
     },

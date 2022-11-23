@@ -46,7 +46,7 @@ export default sessionConfig({
   | The name of the cookie that will hold the session id.
   |
   */
-  cookieName: 'arkora-session',
+  cookieName: 'arkora_session',
 
   /*
   |--------------------------------------------------------------------------
@@ -87,7 +87,7 @@ export default sessionConfig({
   cookie: {
     path: '/',
     httpOnly: true,
-    sameSite: true,
+    sameSite: 'strict',
   },
 
   /*

@@ -8,9 +8,17 @@ import {
   BelongsTo,
   scope,
   ModelQueryBuilderContract,
+  beforeFind,
+  beforeFetch,
+  manyToMany,
+  ManyToMany,
+  computed,
+  afterCreate,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
+import Project from './Project'
+import Budget from './Budget'
 
 type UserBuilder = ModelQueryBuilderContract<typeof User>
 
@@ -47,6 +55,16 @@ export default class User extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   public updatedAt: DateTime
 
+  // Computed
+
+  @computed()
+  public get initials(): string {
+    const fnInitial = this.firstname ? this.firstname.charAt(0) : ''
+    const lsInitial = this.lastname ? this.lastname.charAt(0) : ''
+
+    return `${fnInitial}${lsInitial}`
+  }
+
   // Relationships
 
   @belongsTo(() => Role)
@@ -55,7 +73,23 @@ export default class User extends BaseModel {
   @belongsTo(() => Organisation)
   public organisation: BelongsTo<typeof Organisation>
 
+  @manyToMany(() => Project, {
+    pivotTable: 'project_members',
+  })
+  public projects: ManyToMany<typeof Project>
+
+  @manyToMany(() => Budget, {
+    pivotTable: 'budget_members',
+  })
+  public budgets: ManyToMany<typeof Budget>
+
   // Hooks
+
+  @beforeFind()
+  @beforeFetch()
+  public static preloadRelations(query: UserBuilder) {
+    query.preload('role')
+  }
 
   @beforeSave()
   public static async hashPassword(user: User) {

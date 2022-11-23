@@ -1,8 +1,5 @@
-import { Organisation, User } from '@/types'
+import { Auth } from '../../../../types'
 
-type LoginResponse = {
-  user: User
-  organisation: Organisation
-}
+type LoginResponse = Auth
 
 export default LoginResponse

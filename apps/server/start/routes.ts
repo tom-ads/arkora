@@ -20,3 +20,4 @@
 
 import './routes/auth'
 import './routes/subdomain'
+import './routes/project'

@@ -15,6 +15,7 @@ test.group('ValidateSubdomain Middleware', () => {
       .get('/test-subdomain')
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
   })
@@ -28,13 +29,14 @@ test.group('ValidateSubdomain Middleware', () => {
       .get('/test-subdomain')
       .headers({ origin: `http://diff-org.arkora.co.uk` })
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(404)
     response.assertBody({ message: 'Organisation account does not exist' })
   })
 
   test('unauthenticated user cannot pass middleware', async ({ client }) => {
-    const response = await client.get('/test-subdomain')
+    const response = await client.get('/test-subdomain').withCsrfToken()
 
     response.assertStatus(401)
     response.assertBody({ message: 'Unauthenticated' })

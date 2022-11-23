@@ -38,7 +38,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       onSubmit={onSubmit}
       disabled={isLoading}
       className={classNames(
-        'border rounded transition-all outline-none font-semibold text-white flex items-center justify-center',
+        'border rounded transition-all outline-none font-semibold flex items-center justify-center',
         {
           'w-full': block,
 
@@ -46,13 +46,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           'py-3 px-9 active:shadow-md': size === 'md',
           'py-3 px-[2.625rem] active:shadow-lg': size === 'lg',
 
-          'bg-purple-90 border-purple-90 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-90 active:shadow-purple-90 focus:shadow-purple-90 focus-visible:bg-purple-80 focus-visible:border-purple-80':
+          'bg-purple-90 border-purple-90 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-90 active:shadow-purple-90 focus:shadow-purple-90 focus-visible:bg-purple-80 focus-visible:border-purple-80 text-white':
             variant === 'primary',
-          'bg-purple-70 border-purple-70 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-70 active:border-purple-70 active:shadow-purple-70 focus:shadow-purple-70 focus-visible:bg-purple-80 focus-visible:border-purple-80':
+          'bg-purple-70 border-purple-70 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-70 active:border-purple-70 active:shadow-purple-70 focus:shadow-purple-70 focus-visible:bg-purple-80 focus-visible:border-purple-80 text-white':
             variant === 'secondary',
           'border-purple-90 !text-purple-90 hover:border-purple-80 hover:!text-purple-80 active:shadow-purple-90 focus:shadow-purple-90 bg-none':
             variant === 'outlined',
-          'text-purple-90 hover:text-purple-70 focus:text-purple-90 border-none focus:!shadow-none !p-0':
+          'text-purple-90 hover:text-purple-80 focus:text-purple-90 focus-visible:text-purple-80 border-none focus:!shadow-none !p-0':
             variant === 'blank',
 
           'bg-red-90': danger && variant === 'primary',

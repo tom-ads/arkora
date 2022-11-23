@@ -9,12 +9,16 @@ import {
   column,
   HasMany,
   hasMany,
+  HasManyThrough,
+  hasManyThrough,
   ManyToMany,
   manyToMany,
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 import Currency from './Currency'
 import WorkDay from './WorkDay'
+import Client from './Client'
+import Project from './Project'
 
 type OrganisationQueryBuilder = ModelQueryBuilderContract<typeof Organisation>
 
@@ -33,10 +37,16 @@ export default class Organisation extends BaseModel {
   @column()
   public subdomain: string
 
-  @column.dateTime({ serialize: (val: DateTime) => val.toFormat('HH:mm') })
+  @column.dateTime({
+    prepare: (time: DateTime) => time.toFormat('HH:mm'),
+    serialize: (val: DateTime) => val.toFormat('HH:mm'),
+  })
   public openingTime: DateTime
 
-  @column.dateTime({ serialize: (val: DateTime) => val.toFormat('HH:mm') })
+  @column.dateTime({
+    prepare: (time: DateTime) => time.toFormat('HH:mm'),
+    serialize: (val: DateTime) => val.toFormat('HH:mm'),
+  })
   public closingTime: DateTime
 
   @column()
@@ -50,7 +60,7 @@ export default class Organisation extends BaseModel {
 
   // Relationships
 
-  @hasMany(() => User)
+  @hasMany(() => User, { serializeAs: null })
   public users: HasMany<typeof User>
 
   @belongsTo(() => Currency)
@@ -61,6 +71,12 @@ export default class Organisation extends BaseModel {
     pivotRelatedForeignKey: 'workday_id',
   })
   public workDays: ManyToMany<typeof WorkDay>
+
+  @hasMany(() => Client)
+  public clients: HasMany<typeof Client>
+
+  @hasManyThrough([() => Project, () => Client])
+  public projects: HasManyThrough<typeof Project>
 
   // Hooks
 
