@@ -1,8 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class ProjectController {
-  public async create(ctx: HttpContextContract) {}
-
   public async index(ctx: HttpContextContract) {
     const projects = await ctx.organisation
       ?.related('projects')

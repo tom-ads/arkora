@@ -13,7 +13,6 @@ import {
   manyToMany,
   ManyToMany,
   computed,
-  afterCreate,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
