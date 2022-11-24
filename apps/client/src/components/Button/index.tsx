@@ -4,7 +4,7 @@ import { forwardRef } from 'react'
 import { Spinner } from '../Spinner'
 
 type ButtonProps = {
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
   variant?: 'primary' | 'secondary' | 'outlined' | 'blank'
   danger?: boolean
   type?: 'button' | 'submit'
@@ -42,13 +42,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         {
           'w-full': block,
 
+          'py-[0.625rem] px-6 leading-[1.0625rem]': size === 'xs',
           'py-[0.625rem] px-6 active:shadow-sm': size === 'sm',
           'py-3 px-9 active:shadow-md': size === 'md',
           'py-3 px-[2.625rem] active:shadow-lg': size === 'lg',
 
           'bg-purple-90 border-purple-90 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-90 active:shadow-purple-90 focus:shadow-purple-90 focus-visible:bg-purple-80 focus-visible:border-purple-80 text-white':
             variant === 'primary',
-          'bg-purple-70 border-purple-70 hover:bg-purple-80 hover:border-purple-80 active:bg-purple-70 active:border-purple-70 active:shadow-purple-70 focus:shadow-purple-70 focus-visible:bg-purple-80 focus-visible:border-purple-80 text-white':
+          'bg-purple-80 border-purple-80 hover:bg-purple-70 hover:border-purple-70 active:bg-purple-80 active:border-purple-80 active:shadow-purple-80 focus:shadow-purple-70 focus-visible:bg-purple-70 focus-visible:border-purple-70 text-white':
             variant === 'secondary',
           'border-purple-90 !text-purple-90 hover:border-purple-80 hover:!text-purple-80 active:shadow-purple-90 focus:shadow-purple-90 bg-none':
             variant === 'outlined',
