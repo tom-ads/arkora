@@ -22,6 +22,18 @@ const databaseConfig: DatabaseConfig = {
   connection: Env.get('DB_CONNECTION'),
 
   connections: {
+    sqlite: {
+      client: 'sqlite',
+      connection: {
+        filename: `db.sqlite3`,
+      },
+      migrations: {
+        naturalSort: true,
+      },
+      useNullAsDefault: true,
+      healthCheck: false,
+      debug: false,
+    },
     /*
     |--------------------------------------------------------------------------
     | MySQL config
