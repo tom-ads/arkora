@@ -142,4 +142,41 @@ test.group('Projects: Create Project', () => {
 
     response.assertStatus(401)
   })
+
+  test('diff organisation user, cannot create project for test organisation', async ({
+    client,
+    route,
+  }) => {
+    await UserFactory.with('organisation', 1, (orgBuilder) => {
+      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
+        return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
+      })
+    })
+      .with('role')
+      .create()
+
+    const diffUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
+      return orgBuilder.merge({ subdomain: 'diff-org' }).with('clients', 1, (clientBuilder) => {
+        return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
+      })
+    })
+      .with('role')
+      .create()
+
+    const response = await client
+      .post(route('ProjectController.create'))
+      .form({
+        name: 'Test Project',
+        client_id: 1,
+        show_cost: true,
+        private: false,
+        team: [],
+      })
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(diffUser)
+
+    response.assertStatus(404)
+    response.assertBody({ message: 'Organisation account does not exist' })
+  })
 })
