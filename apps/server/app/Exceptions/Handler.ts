@@ -25,13 +25,19 @@ export default class ExceptionHandler extends HttpExceptionHandler {
   public async handle(error: any, ctx: HttpContextContract): Promise<any> {
     if (error.code === 'E_ROW_NOT_FOUND') {
       return ctx.response.notFound({
-        message: 'Resource not found',
+        message: [{ message: 'Resource not found' }],
       })
     }
 
     if (error.code === 'E_CANNOT_FIND_ROUTE') {
       return ctx.response.notFound({
-        message: 'Route not found',
+        message: [{ message: 'Route not found' }],
+      })
+    }
+
+    if (error.code === 'E_AUTHORIZATION_FAILURE') {
+      return ctx.response.forbidden({
+        message: [{ message: 'Not authorized to perform this action' }],
       })
     }
 
