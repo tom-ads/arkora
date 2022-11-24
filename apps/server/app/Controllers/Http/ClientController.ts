@@ -6,6 +6,8 @@ export default class ClientController {
 
     await ctx.organisation?.load('clients')
 
-    return ctx.organisation?.clients.map((client) => client.serialize())
+    return {
+      clients: ctx.organisation?.clients.map((client) => client.serialize()),
+    }
   }
 }

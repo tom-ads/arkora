@@ -25,12 +25,14 @@ test.group('Clients: All Clients', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody([
-      {
-        id: 1,
-        name: 'Bobs Burger',
-      },
-    ])
+    response.assertBody({
+      clients: [
+        {
+          id: 1,
+          name: 'Bobs Burger',
+        },
+      ],
+    })
   })
 
   test('organisation org_admin can index clients', async ({ client, route }) => {
@@ -49,12 +51,14 @@ test.group('Clients: All Clients', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody([
-      {
-        id: 1,
-        name: 'Bobs Burger',
-      },
-    ])
+    response.assertBody({
+      clients: [
+        {
+          id: 1,
+          name: 'Bobs Burger',
+        },
+      ],
+    })
   })
 
   test('organisation owner can index clients', async ({ client, route }) => {
@@ -73,12 +77,14 @@ test.group('Clients: All Clients', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody([
-      {
-        id: 1,
-        name: 'Bobs Burger',
-      },
-    ])
+    response.assertBody({
+      clients: [
+        {
+          id: 1,
+          name: 'Bobs Burger',
+        },
+      ],
+    })
   })
 
   test('organisation member cannot index clients', async ({ client, route }) => {
@@ -149,7 +155,14 @@ test.group('Clients: All Clients', () => {
     )
 
     response.assertStatus(200)
-    response.assertBody([{ id: 2, name: 'Bobs Burger' }])
+    response.assertBody({
+      clients: [
+        {
+          id: 2,
+          name: 'Bobs Burger',
+        },
+      ],
+    })
   })
 
   test('diff organisation user, cannot view clients for test organisation', async ({
