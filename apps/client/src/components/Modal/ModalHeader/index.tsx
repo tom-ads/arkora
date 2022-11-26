@@ -18,7 +18,7 @@ export const ModalHeader = ({
   return (
     <div className="w-full flex justify-between gap-x-4 px-8 pt-8 pb-6">
       <div className="flex gap-x-6">
-        <div className="bg-purple-10 text-purple-90 h-14 w-14 rounded-full place-content-center flex-shrink-0 hidden sm:grid">
+        <div className="bg-purple-20 text-purple-90 h-14 w-14 rounded-full place-content-center flex-shrink-0 hidden sm:grid">
           <span className="w-7 h-7">{icon}</span>
         </div>
         <div className="space-y-[2px]">

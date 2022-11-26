@@ -44,11 +44,18 @@ export const Modal = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 flex items-center justify-center lg:p-4">
-            <Dialog.Panel className="rounded bg-white mx-auto max-w-xl w-full flex flex-col divide-y divide-gray-30 shadow-glow">
-              <ModalHeader title={title} description={description} icon={icon} onClose={onClose} />
-              <div className="w-full pt-6 pb-8 px-8">{children}</div>
-            </Dialog.Panel>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center lg:p-4">
+              <Dialog.Panel className="rounded bg-white mx-auto max-w-xl w-full flex flex-col divide-y divide-gray-30 shadow-glow">
+                <ModalHeader
+                  title={title}
+                  description={description}
+                  icon={icon}
+                  onClose={onClose}
+                />
+                <div className="w-full pt-6 pb-8 px-8">{children}</div>
+              </Dialog.Panel>
+            </div>
           </div>
         </Transition.Child>
       </Dialog>

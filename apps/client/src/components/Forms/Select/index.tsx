@@ -11,6 +11,7 @@ type FormSelectProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg'
   placeHolder?: string
   error?: boolean
+  fullWidth?: boolean
   children: JSX.Element[]
 }
 
@@ -20,6 +21,7 @@ export const FormSelect = ({
   size = 'sm',
   placeHolder = 'Select option',
   error,
+  fullWidth = false,
   children,
 }: FormSelectProps): JSX.Element => {
   const [isFocused, setIsFocused] = useState(false)
@@ -42,7 +44,7 @@ export const FormSelect = ({
                 <>
                   <Listbox.Button
                     className={classNames(
-                      'relative border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0',
+                      'relative border border-gray-40 w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0',
                       {
                         'px-2 py-1': size === 'xs',
                         'px-3 py-2 text-sm focus:shadow-sm': size === 'sm',
@@ -56,8 +58,8 @@ export const FormSelect = ({
                     )}
                   >
                     <span
-                      className={classNames('text-gray-80 text-start truncate capitalize', {
-                        'text-gray-100': field.value,
+                      className={classNames('text-gray-60 text-start truncate capitalize', {
+                        'text-gray-90': field.value?.children,
                       })}
                     >
                       {/* Child of SelectOption, a.k.a the display prop */}
@@ -96,10 +98,15 @@ export const FormSelect = ({
                       className={classNames(
                         'absolute bg-white w-full shadow-sm rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50',
                         {
-                          'min-w-[200px] max-w-[270px] max-h-40 gap-y-1 p-[7px]': size === 'xs',
-                          'min-w-[200px] max-w-[270px] max-h-40 gap-y-1 p-2':
-                            size === 'sm' || size === 'md',
-                          'min-w-[270px] max-w-[330px] max-h-44 py-4 px-3 gap-y-2': size === 'lg',
+                          'gap-y-1 p-[7px]': size === 'xs',
+                          'gap-y-1 p-2': size == 'sm' || size === 'md',
+                          'py-4 px-3 gap-y-2': size === 'lg',
+
+                          'min-w-[200px] max-w-[270px] max-h-40': size === 'xs' && !fullWidth,
+                          'min-w-[200px] max-w-[270px] max-h-40 ':
+                            (size === 'sm' || size === 'md') && !fullWidth,
+                          'min-w-[270px] max-w-[330px] max-h-44': size === 'lg' && !fullWidth,
+                          'max-w-full': fullWidth,
                         },
                       )}
                       static

@@ -1,9 +1,15 @@
+import classNames from 'classnames'
 import { ReactNode } from 'react'
 
 type ModalFooterProps = {
+  className?: string
   children: ReactNode
 }
 
-export const ModalFooter = ({ children }: ModalFooterProps): JSX.Element => {
-  return <div className="w-full flex justify-between gap-x-2 mt-6">{children}</div>
+export const ModalFooter = ({ className, children }: ModalFooterProps): JSX.Element => {
+  return (
+    <div className={classNames('w-full flex justify-between gap-x-2 mt-6', className)}>
+      {children}
+    </div>
+  )
 }

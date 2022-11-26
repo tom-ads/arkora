@@ -1,5 +1,20 @@
+import { cva } from 'class-variance-authority'
 import classNames from 'classnames'
 import { useFormContext } from 'react-hook-form'
+
+const buttonCva = cva(
+  'border border-gray-40 w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none',
+  {
+    variants: {
+      size: {
+        xs: 'px-3 py-2 text-sm',
+        sm: '',
+        md: '',
+        lg: '',
+      },
+    },
+  },
+)
 
 type FormInputBaseProps = {
   name: string

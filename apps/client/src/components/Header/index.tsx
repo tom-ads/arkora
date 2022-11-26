@@ -15,7 +15,7 @@ const NavItem = ({ to, children }: { to: string; children: ReactNode }) => {
           'font-medium text-sm px-3 py-1 rounded h-min min-w-[79px] grid place-content-center transition-colors outline-none',
           {
             'bg-white text-gray-100 hover:bg-gray-10 focus-visible:bg-gray-10': !isActive,
-            'bg-purple-10 text-purple-90 hover': isActive,
+            'bg-purple-20 text-purple-90 hover': isActive,
           },
         )
       }
