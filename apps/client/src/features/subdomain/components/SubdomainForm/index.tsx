@@ -43,7 +43,6 @@ export const SubdomainForm = (): JSX.Element => {
               <FormInput
                 name="subdomain"
                 placeHolder="domain"
-                size="md"
                 error={!!errors.subdomain || (data?.exists !== undefined ? !data?.exists : false)}
               />
               <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
