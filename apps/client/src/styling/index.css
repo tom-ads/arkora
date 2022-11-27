@@ -40,4 +40,9 @@ body {
     appearance: none;
     -moz-appearance: textfield;
   }
+
+  .checkbox {
+    @apply bg-no-repeat bg-center;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke-width='1.5' stroke=%27white%27 fill=%27none%27 stroke-linecap='round' stroke-linejoin='round'%3e%3cpath stroke='none' d='M0 0h24v24H0z' fill='none'/%3e%3cpath d='M5 12l5 5l10 -10' /%3e%3c/svg%3e");
+  }
 }
