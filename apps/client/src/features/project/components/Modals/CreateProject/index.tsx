@@ -242,7 +242,7 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
               <Button
                 size="xs"
                 type="submit"
-                isLoading={creatingProject}
+                loading={creatingProject}
                 className="max-w-[161px] w-full"
               >
                 Create Project

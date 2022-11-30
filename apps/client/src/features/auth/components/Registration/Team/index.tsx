@@ -149,7 +149,7 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
               size="sm"
               className="max-w-[220px] w-full"
               type="submit"
-              isLoading={isRegistering}
+              loading={isRegistering}
             >
               Finish
             </Button>

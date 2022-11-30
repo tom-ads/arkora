@@ -202,12 +202,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
           </div>
 
           <div className="flex justify-end mt-12">
-            <Button
-              size="sm"
-              className="max-w-[220px] w-full"
-              type="submit"
-              isLoading={isVerifying}
-            >
+            <Button size="sm" className="max-w-[220px] w-full" type="submit" loading={isVerifying}>
               Next step
             </Button>
           </div>
