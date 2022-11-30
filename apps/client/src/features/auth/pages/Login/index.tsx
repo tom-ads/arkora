@@ -2,9 +2,9 @@ import {
   ArkoraLogo,
   FormControl,
   FormInput,
+  FormPasswordInput,
   FormLabel,
   Form,
-  PasswordInput,
   Button,
   InlineLink,
 } from '@/components'
@@ -32,10 +32,10 @@ type FormFields = {
 }
 
 export const LoginPage = (): JSX.Element => {
+  useDocumentTitle('Login')
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
-
-  useDocumentTitle('Login')
 
   const organisation = useSelector((state: RootState) => state.organisation)
 
@@ -76,13 +76,10 @@ export const LoginPage = (): JSX.Element => {
         {({ formState: { errors } }) => (
           <>
             <FormControl>
-              <FormLabel htmlFor="email" size="sm">
-                Email
-              </FormLabel>
+              <FormLabel htmlFor="email">Email</FormLabel>
               <FormInput
                 name="email"
-                placeHolder="Enter email address"
-                size="sm"
+                placeHolder="Enter email"
                 error={!!errors.email}
                 className="h-11 text-[15px]"
               />
@@ -95,12 +92,12 @@ export const LoginPage = (): JSX.Element => {
               <FormLabel htmlFor="password" size="sm">
                 Password
               </FormLabel>
-              <PasswordInput
+              <FormPasswordInput
                 name="password"
                 placeHolder="Enter password"
                 size="sm"
                 error={!!errors?.password}
-                className="h-11 text-[15px]"
+                className="h-11"
               />
               {errors.password?.message && (
                 <FormErrorMessage size="sm">{errors.password?.message}</FormErrorMessage>

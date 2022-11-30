@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 
 type SelectOptionProps = {
+  id: string | number
   value: string
   children: ReactNode
 }

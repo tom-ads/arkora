@@ -1,5 +1,5 @@
 import { MainLayout } from '@/components'
-import { ProjectRoutes } from '@/features/projects'
+import { ProjectRoutes } from '@/features/project'
 import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom'

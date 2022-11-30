@@ -115,7 +115,7 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20 min-h-[600px]">
             <div className="space-y-2 pb-6">
-              <h1 className="font-semibold text-[32px] text-gray-100">Create organisation</h1>
+              <h1 className="font-semibold text-3xl text-gray-100">Create organisation</h1>
               <p className="text-base text-gray-80">
                 Almost there! Define your organisation teams and invite your team members
               </p>

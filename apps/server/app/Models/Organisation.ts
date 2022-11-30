@@ -20,7 +20,7 @@ import WorkDay from './WorkDay'
 import Client from './Client'
 import Project from './Project'
 
-type OrganisationQueryBuilder = ModelQueryBuilderContract<typeof Organisation>
+type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 
 export default class Organisation extends BaseModel {
   // Columns
@@ -82,7 +82,7 @@ export default class Organisation extends BaseModel {
 
   @beforeFind()
   @beforeFetch()
-  public static preloadRelations(query: OrganisationQueryBuilder) {
+  public static preloadRelations(query: OrganisationBuilder) {
     query.preload('currency').preload('workDays')
   }
 }

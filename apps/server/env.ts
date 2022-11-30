@@ -28,6 +28,8 @@ export default Env.rules({
 
   SESSION_DRIVER: Env.schema.string(),
 
+  DB_CONNECTION: Env.schema.string(),
+
   MYSQL_DATABASE: Env.schema.string(),
   MYSQL_HOST: Env.schema.string(),
   MYSQL_PORT: Env.schema.number(),

@@ -13,7 +13,7 @@ export const DescriptorInsights = ({
 }: DescriptorInsightsProps): JSX.Element => {
   return (
     <div className={classNames('align-baseline space-y-1 w-full', className)}>
-      <h4 className="font-semibold text-sm text-gray-100">{title}</h4>
+      <h4 className="font-semibold text-base text-gray-100">{title}</h4>
       <p className="text-sm text-gray-80">{description}</p>
     </div>
   )

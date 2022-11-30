@@ -54,7 +54,7 @@ export const FormCurrencyInput = ({
               onChange={handleChange}
               placeholder={placeHolder}
               className={classNames(
-                'border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-100 transition-all outline-none appearance-none',
+                'border border-gray-40 w-full rounded placeholder:text-gray-60 font-normal text-gray-100 transition-all outline-none appearance-none',
                 {
                   'pr-3 pl-7 py-2 text-sm focus:shadow-sm': size === 'sm',
                   'px-3 py-3 text-base focus:shadow-md': size === 'md',

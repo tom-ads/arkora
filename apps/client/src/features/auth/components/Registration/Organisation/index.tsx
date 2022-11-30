@@ -163,7 +163,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
             <div className="space-y-2 pb-6">
-              <h1 className="font-semibold text-[32px] text-gray-100">Create organisation</h1>
+              <h1 className="font-semibold text-3xl text-gray-100">Create organisation</h1>
               <p className="text-base text-gray-80">
                 Let&apos;s setup your organisation. It&apos;ll be home to everything your team does
                 with Arkora

@@ -18,6 +18,7 @@ import Role from 'App/Models/Role'
 import Organisation from './Organisation'
 import Project from './Project'
 import Budget from './Budget'
+import UserRole from 'App/Enum/UserRole'
 
 type UserBuilder = ModelQueryBuilderContract<typeof User>
 
@@ -103,5 +104,11 @@ export default class User extends BaseModel {
     return query
       .where('email', email)
       .whereHas('organisation', (query) => query.where('subdomain', subdomain))
+  })
+
+  public static organisationAdmins = scope((query: UserBuilder) => {
+    return query.whereHas('role', (query) =>
+      query.whereIn('name', [UserRole.OWNER, UserRole.ORG_ADMIN, UserRole.MANAGER])
+    )
   })
 }

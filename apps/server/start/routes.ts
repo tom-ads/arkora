@@ -21,3 +21,5 @@
 import './routes/auth'
 import './routes/subdomain'
 import './routes/project'
+import './routes/client'
+import './routes/account'

@@ -1,6 +1,7 @@
 import { ChevronIcon } from '@/components/Icons/ChevronIcon'
 import { CircleTick } from '@/components/Icons/CircleTick'
 import { Listbox, Transition } from '@headlessui/react'
+import { cva } from 'class-variance-authority'
 import classNames from 'classnames'
 import { Fragment, useState } from 'react'
 import { Controller } from 'react-hook-form'
@@ -11,8 +12,53 @@ type FormSelectProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg'
   placeHolder?: string
   error?: boolean
+  fullWidth?: boolean
   children: JSX.Element[]
 }
+
+const listBoxButton = cva(
+  'relative border w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0 min-w-[150px] lg:min-w-[200px]',
+  {
+    variants: {
+      size: {
+        xs: 'px-3 py-[7px] text-sm focus:shadow-sm',
+        sm: 'px-3 py-[9px] text-base focus:shadow-sm',
+        md: 'px-3 py-[10px] text-lg focus:shadow-md',
+        lg: 'px-[14px] py-[11px] text-xl focus:shadow-lg',
+      },
+      error: {
+        true: '!border-red-90 focus:shadow-md focus:!shadow-red-90',
+        false: 'focus:shadow-purple-70 focus:border-purple-90',
+      },
+      focused: {
+        true: 'border-purple-90 shadow-purple-70 shadow-sm',
+        false: 'focus:shadow-purple-70 focus:border-purple-90 border-gray-40',
+      },
+    },
+    compoundVariants: [
+      {
+        error: true,
+        focused: true,
+        className: '!shadow-red-90',
+      },
+    ],
+    defaultVariants: {
+      size: 'sm',
+    },
+  },
+)
+
+const listBoxOptions = cva(
+  'absolute bg-white w-full shadow-sm gap-y-1 rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50 p-3 min-h-[150px]',
+  {
+    variants: {
+      fullWidth: {
+        true: 'max-w-full',
+        false: 'max-w-[350px] lg:max-w-[450px]',
+      },
+    },
+  },
+)
 
 export const FormSelect = ({
   name,
@@ -20,19 +66,20 @@ export const FormSelect = ({
   size = 'sm',
   placeHolder = 'Select option',
   error,
+  fullWidth = false,
   children,
 }: FormSelectProps): JSX.Element => {
-  const [isFocused, setIsFocused] = useState(false)
+  const [focused, setFocused] = useState(false)
 
   return (
     <Controller
       name={name}
       control={control}
       render={({ field }) => {
-        const validChildren = children.filter((v) => v.props?.value)
+        const validChildren = children?.filter((v) => v.props?.value)
 
         const handleChange = (selectedItem: string) => {
-          field.onChange(validChildren.find((v) => v.props.value === selectedItem)?.props)
+          field.onChange(validChildren?.find((v) => v.props.value === selectedItem)?.props)
         }
 
         return (
@@ -40,30 +87,17 @@ export const FormSelect = ({
             <Listbox value={field.value?.value} onChange={handleChange}>
               {({ open }) => (
                 <>
-                  <Listbox.Button
-                    className={classNames(
-                      'relative border border-gray-40 w-full rounded placeholder:text-green-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0',
-                      {
-                        'px-2 py-1': size === 'xs',
-                        'px-3 py-2 text-sm focus:shadow-sm': size === 'sm',
-                        'px-3 py-3 text-base focus:shadow-md': size === 'md',
-                        'px-[0.875rem] py-[10px] text-xl focus:shadow-lg': size === 'lg',
-
-                        'focus:shadow-purple-70 focus:border-purple-90': !error,
-                        'border-red-90 focus:shadow-md focus:shadow-red-90': error,
-                        '!border-purple-90 !shadow-purple-70 shadow-sm': isFocused,
-                      },
-                    )}
-                  >
+                  <Listbox.Button className={listBoxButton({ size, error, focused })}>
                     <span
-                      className={classNames('text-gray-80 text-start truncate capitalize', {
-                        'text-gray-100': field.value,
+                      className={classNames('text-gray-60 text-start truncate capitalize', {
+                        'text-gray-90': field.value?.children,
                       })}
                     >
                       {/* Child of SelectOption, a.k.a the display prop */}
                       {field.value?.children ?? placeHolder}
                     </span>
                     <span
+                      aria-hidden
                       className={classNames(
                         'text-gray-100 ml-2 flex flex-shrink-0 pointer-events-none',
                         {
@@ -74,7 +108,7 @@ export const FormSelect = ({
                     >
                       <ChevronIcon
                         className={classNames('transform transition-transform', {
-                          '-rotate-180': isFocused,
+                          '-rotate-180': focused,
                         })}
                         aria-hidden="true"
                       />
@@ -91,17 +125,9 @@ export const FormSelect = ({
                     leaveTo="transform translate-y-0 opacity-0"
                   >
                     <Listbox.Options
-                      onFocus={() => setIsFocused(true)}
-                      onBlur={() => setIsFocused(false)}
-                      className={classNames(
-                        'absolute bg-white w-full shadow-sm rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50',
-                        {
-                          'min-w-[200px] max-w-[270px] max-h-40 gap-y-1 p-[7px]': size === 'xs',
-                          'min-w-[200px] max-w-[270px] max-h-40 gap-y-1 p-2':
-                            size === 'sm' || size === 'md',
-                          'min-w-[270px] max-w-[330px] max-h-44 py-4 px-3 gap-y-2': size === 'lg',
-                        },
-                      )}
+                      onFocus={() => setFocused(true)}
+                      onBlur={() => setFocused(false)}
+                      className={listBoxOptions({ fullWidth })}
                       static
                     >
                       {validChildren.map((child) => (
@@ -110,12 +136,8 @@ export const FormSelect = ({
                           value={child.props?.value}
                           className={({ selected }) =>
                             classNames(
-                              'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10',
+                              'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10 text-sm lg:text-base p-2 lg:p-3',
                               {
-                                'text-sm px-2 py-[6px]':
-                                  size === 'xs' || size === 'sm' || size === 'md',
-                                'text-base px-3 py-2': size === 'lg',
-
                                 'bg-purple-10 !text-purple-90 hover:bg-purple-10': selected,
                               },
                             )
@@ -127,7 +149,7 @@ export const FormSelect = ({
                                 {child}
                               </span>
                               {selected && (
-                                <span className="w-4 h-4 shrink-0 mr-1">
+                                <span className="w-4 h-4 shrink-0 mr-1" aria-hidden>
                                   <CircleTick aria-hidden />
                                 </span>
                               )}

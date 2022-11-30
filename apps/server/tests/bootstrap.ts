@@ -69,14 +69,12 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
 */
 export const configureSuite: Config['configureSuite'] = (suite) => {
   if (suite.name === 'integration' || suite.name === 'unit') {
-    suite.setup(() => suite.setup(() => TestUtils.httpServer().start()))
+    suite.setup(() => TestUtils.httpServer().start())
 
     suite.onGroup((group) => {
-      group.tap((test) => {
-        test.setup(async () => {
-          await Database.beginGlobalTransaction()
-          return () => Database.rollbackGlobalTransaction()
-        })
+      group.each.setup(async () => {
+        await Database.beginGlobalTransaction('sqlite')
+        return () => Database.rollbackGlobalTransaction('sqlite')
       })
     })
   }
