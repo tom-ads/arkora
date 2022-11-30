@@ -1,3 +1,4 @@
+import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Status from 'App/Enum/Status'
 import Client from 'App/Models/Client'
@@ -69,5 +70,12 @@ export default class ProjectController {
     return {
       projects: projects?.map((project) => project.serialize()),
     }
+  }
+
+  @bind()
+  public async view(ctx: HttpContextContract, project: Project) {
+    await ctx.bouncer.with('ProjectPolicy').authorize('view')
+
+    return project.serialize()
   }
 }

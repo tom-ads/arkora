@@ -7,7 +7,10 @@ export default class ProjectPolicy extends BasePolicy {
  	  Owners and org admins can do perform all project actions.
   */
   public async before(user: User | null) {
-    if (user && (user.role.name === UserRole.OWNER || user?.role.name === UserRole.ORG_ADMIN)) {
+    if (
+      user?.id &&
+      (user.role?.name === UserRole.OWNER || user?.role?.name === UserRole.ORG_ADMIN)
+    ) {
       return true
     }
   }
@@ -20,7 +23,13 @@ export default class ProjectPolicy extends BasePolicy {
   /* 
  	Check auth user can view a project 
   */
-  // public async view(user: User, project: project) {}
+  public async view(user: User) {
+    if (user.role?.name === UserRole.MEMBER) {
+      return false
+    }
+
+    return true
+  }
 
   /* 
  	  Check auth user can create a project 
