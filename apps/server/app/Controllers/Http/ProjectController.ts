@@ -1,4 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Status from 'App/Enum/Status'
 import Client from 'App/Models/Client'
 import Project from 'App/Models/Project'
 import CreateProjectValidator from 'App/Validators/Project/CreateProjectValidator'
@@ -25,6 +26,7 @@ export default class ProjectController {
       name: payload.name,
       showCost: payload.show_cost,
       private: payload.private,
+      status: Status.ACTIVE,
     })
     await createdProject.related('client').associate(projectClient)
 
