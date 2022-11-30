@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
 import {
   BaseModel,
+  beforeDelete,
   BelongsTo,
   belongsTo,
   column,
@@ -53,4 +54,11 @@ export default class Project extends BaseModel {
     pivotTable: 'project_members',
   })
   public members: ManyToMany<typeof User>
+
+  // Hooks
+
+  @beforeDelete()
+  public static async beforeDelete(project: Project) {
+    project.related('budgets').query().delete()
+  }
 }

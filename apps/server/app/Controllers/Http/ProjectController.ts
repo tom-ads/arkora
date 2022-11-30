@@ -74,8 +74,16 @@ export default class ProjectController {
 
   @bind()
   public async view(ctx: HttpContextContract, project: Project) {
-    await ctx.bouncer.with('ProjectPolicy').authorize('view')
-
+    await ctx.bouncer.with('ProjectPolicy').authorize('view', project)
     return project.serialize()
+  }
+
+  @bind()
+  public async delete(ctx: HttpContextContract, project: Project) {
+    await ctx.bouncer.with('ProjectPolicy').authorize('delete', project)
+
+    project.delete()
+
+    return ctx.response.noContent()
   }
 }

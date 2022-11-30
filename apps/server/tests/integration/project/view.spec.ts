@@ -14,7 +14,7 @@ test.group('Project: View Project', () => {
           })
       })
     })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.OWNER }))
+      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.MANAGER }))
       .create()
 
     const response = await client
@@ -24,7 +24,7 @@ test.group('Project: View Project', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
+    response.assertBodyContains({
       id: 1,
       name: 'new-project',
       private: false,
@@ -51,7 +51,7 @@ test.group('Project: View Project', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
+    response.assertBodyContains({
       id: 1,
       name: 'new-project',
       private: false,
@@ -78,7 +78,7 @@ test.group('Project: View Project', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
+    response.assertBodyContains({
       id: 1,
       name: 'new-project',
       private: false,
@@ -122,7 +122,7 @@ test.group('Project: View Project', () => {
     response.assertStatus(401)
   })
 
-  test('diff organisation user, cannot view a project from test organisation', async ({
+  test('diff organisation auth user, cannot view a project from test organisation', async ({
     client,
     route,
   }) => {
@@ -156,5 +156,36 @@ test.group('Project: View Project', () => {
 
     response.assertStatus(404)
     response.assertBody({ message: 'Organisation account does not exist' })
+  })
+
+  test('test organisation user cannot view diff organisations project', async ({
+    client,
+    route,
+  }) => {
+    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
+      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
+        return clientBuilder
+          .merge({ organisationId: clientBuilder.parent.id })
+          .with('projects', 1, (projectBuilder) => {
+            projectBuilder.merge({ name: 'new-project' })
+          })
+      })
+    })
+      .with('role')
+      .create()
+
+    await OrganisationFactory.merge({ subdomain: 'diff-org' })
+      .with('clients', 1, (clientBuilder) => {
+        return clientBuilder.merge({ organisationId: clientBuilder.parent.id }).with('projects', 1)
+      })
+      .create()
+
+    const response = await client
+      .get(route('ProjectController.view', { project: 2 }))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(403)
   })
 })

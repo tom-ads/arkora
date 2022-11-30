@@ -159,11 +159,7 @@ test.group('Projects: Create Project', () => {
   })
 
   test('unauthenticated user cannot create a project', async ({ client, route }) => {
-    await OrganisationFactory.merge({ subdomain: 'test-org' })
-      .with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id })
-      })
-      .create()
+    await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
     const response = await client
       .post(route('ProjectController.create'))
