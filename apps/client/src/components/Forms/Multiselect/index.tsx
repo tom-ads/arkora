@@ -18,6 +18,11 @@ type FormMultiselectProps = {
   children: JSX.Element[]
 }
 
+type SelectedItem = {
+  id: string | number
+  value: string
+}
+
 const multiSelectButton = cva(
   'relative border w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0 min-w-[150px] lg:min-w-[200px]',
   {
@@ -37,6 +42,13 @@ const multiSelectButton = cva(
         false: 'focus:shadow-purple-70 focus:border-purple-90 border-gray-40',
       },
     },
+    compoundVariants: [
+      {
+        error: true,
+        focused: true,
+        className: '!shadow-red-90 !border-red-90',
+      },
+    ],
     defaultVariants: {
       size: 'sm',
     },
@@ -71,30 +83,47 @@ export const FormMultiSelect = ({
       name={name}
       control={control}
       render={({ field }) => {
-        const validChildren = children?.filter((v) => v.props?.value)
+        const validChildren = children
+          ?.filter((v) => v.props)
+          ?.map((child) => ({
+            id: child?.props?.id,
+            value: child?.props?.value,
+            children: child?.props?.children,
+          }))
 
-        const handleRemove = (selected: string) => {
-          field.onChange(field.value.filter((value: string) => value !== selected))
+        const handleRemove = (selected: SelectedItem) => {
+          field.onChange(field.value?.filter((child: SelectedItem) => child?.id !== selected.id))
         }
 
         const handleSelectAll = () => {
           if (field.value?.length !== validChildren?.length) {
-            field.onChange(validChildren?.map((child) => child.props?.value))
+            field.onChange(validChildren?.map((child) => child?.id))
           }
+        }
+
+        const onChange = (data: SelectedItem) => {
+          // Filter out existing child
+          if (field.value?.some((child: SelectedItem) => child?.id === data.id)) {
+            field.onChange(field.value?.filter((child: SelectedItem) => child?.id !== data.id))
+            return
+          }
+
+          // Add item to existing list of children
+          field.onChange([...field.value, data])
         }
 
         return (
           <div className="relative w-full">
-            <Listbox value={field.value} onChange={field.onChange} multiple>
+            <Listbox value={field.value} multiple>
               {({ open }) => (
                 <>
                   <Listbox.Button className={multiSelectButton({ size, focused, error })}>
                     {/* Selected Items */}
                     {field?.value?.length > 0 ? (
                       <div className="flex-grow flex flex-wrap gap-2">
-                        {field.value?.map((fieldItem: string) => (
+                        {field.value?.map((fieldItem: SelectedItem) => (
                           <Selected
-                            key={fieldItem}
+                            key={fieldItem?.id}
                             size={size}
                             onClick={(e) => {
                               // Prevent this event from bubbling up into the ListBox.Button component
@@ -102,7 +131,7 @@ export const FormMultiSelect = ({
                               handleRemove(fieldItem)
                             }}
                           >
-                            {fieldItem}
+                            {fieldItem?.value}
                           </Selected>
                         ))}
                       </div>
@@ -158,37 +187,37 @@ export const FormMultiSelect = ({
                           </Button>
                         </div>
                       </div>
-                      <ul className="w-full outline-none overflow-y-auto scrollbar-hide min-h-[100px] max-h-[100px] lg:max-h-[200px] space-y-1 lg:space-y-2">
+                      <ul className="w-full outline-none overflow-y-auto scrollbar-hide min-h-[150px] max-h-[200px] space-y-1 lg:space-y-2">
                         {validChildren?.map((child) => (
                           <Listbox.Option
-                            key={child.key}
-                            value={child.props?.value}
-                            className={({ selected }) =>
-                              classNames(
-                                'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10 relative pr-10',
-                                {
-                                  'text-sm px-3 py-[6px]':
-                                    size === 'xs' || size === 'sm' || size === 'md',
-                                  'text-base px-3 py-2': size === 'lg',
+                            onClick={() => onChange(child)}
+                            key={child?.id}
+                            value={child?.value}
+                            className={classNames(
+                              'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10 relative pr-10',
+                              {
+                                'text-sm px-3 py-[6px]':
+                                  size === 'xs' || size === 'sm' || size === 'md',
+                                'text-base px-3 py-2': size === 'lg',
 
-                                  'bg-purple-10 !text-purple-90 hover:bg-purple-10': selected,
-                                },
-                              )
-                            }
-                          >
-                            {({ selected }) => (
-                              <>
-                                {child}
-                                {selected && (
-                                  <span
-                                    aria-hidden
-                                    className="absolute inset-y-0 right-[12px] flex items-center"
-                                  >
-                                    <CircleTick className="w-4 h-4 shrink-0" />
-                                  </span>
-                                )}
-                              </>
+                                'bg-purple-10 !text-purple-90 hover:bg-purple-10':
+                                  field.value?.some((item: SelectedItem) => item?.id === child?.id),
+                              },
                             )}
+                          >
+                            <>
+                              {child?.children}
+                              {field.value?.some(
+                                (item: SelectedItem) => item?.id === child?.id,
+                              ) && (
+                                <span
+                                  aria-hidden
+                                  className="absolute inset-y-0 right-[12px] flex items-center"
+                                >
+                                  <CircleTick className="w-4 h-4 shrink-0" />
+                                </span>
+                              )}
+                            </>
                           </Listbox.Option>
                         ))}
                       </ul>

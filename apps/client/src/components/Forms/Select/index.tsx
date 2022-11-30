@@ -27,7 +27,7 @@ const listBoxButton = cva(
         lg: 'px-[14px] py-[11px] text-xl focus:shadow-lg',
       },
       error: {
-        true: 'border-red-90 focus:shadow-md focus:shadow-red-90',
+        true: '!border-red-90 focus:shadow-md focus:!shadow-red-90',
         false: 'focus:shadow-purple-70 focus:border-purple-90',
       },
       focused: {
@@ -35,6 +35,13 @@ const listBoxButton = cva(
         false: 'focus:shadow-purple-70 focus:border-purple-90 border-gray-40',
       },
     },
+    compoundVariants: [
+      {
+        error: true,
+        focused: true,
+        className: '!shadow-red-90',
+      },
+    ],
     defaultVariants: {
       size: 'sm',
     },

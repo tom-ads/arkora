@@ -8,6 +8,7 @@ const projectEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
     getProjects: build.query<GetProjectsResponse, void>({
       query: () => projectsBasePath,
+      providesTags: ['Projects'],
     }),
     createProject: build.mutation<CreateProjectResponse, CreateProjectRequest>({
       query: (body) => ({
@@ -15,6 +16,7 @@ const projectEndpoints = appApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Projects'],
     }),
   }),
   overrideExisting: false,

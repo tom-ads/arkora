@@ -1,7 +1,7 @@
 type CreateProjectRequest = {
   name: string
-  clientId: number
-  showCost: boolean
+  client_id: number
+  show_cost: boolean
   private: boolean
   team: Array<number>
 }

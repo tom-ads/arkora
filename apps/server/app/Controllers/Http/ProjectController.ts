@@ -9,6 +9,16 @@ export default class ProjectController {
 
     const payload = await ctx.request.validate(CreateProjectValidator)
 
+    const nameExists = await ctx.organisation
+      ?.related('projects')
+      .query()
+      .where('projects.name', payload.name)
+
+    if (nameExists?.length) {
+      ctx.response.unprocessableEntity({ name: { message: 'Project name already exists' } })
+      return
+    }
+
     const projectClient = await Client.findOrFail(payload.client_id)
 
     const createdProject = await Project.create({

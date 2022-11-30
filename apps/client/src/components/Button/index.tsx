@@ -38,7 +38,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       onSubmit={onSubmit}
       disabled={isLoading}
       className={classNames(
-        'border rounded transition-all outline-none font-semibold flex items-center justify-center my-auto',
+        'relative border rounded transition-all outline-none font-semibold flex items-center justify-center my-auto min-h-[39px]',
         {
           'w-full': block,
 
@@ -61,7 +61,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         className,
       )}
     >
-      {isLoading ? <Spinner className="w-6 h-6 text-white" /> : children}
+      <Spinner
+        className={classNames('w-4 h-4 text-white absolute grid place-content-center', {
+          visable: isLoading,
+          invisible: !isLoading,
+        })}
+      />
+      <div className={classNames({ invisible: isLoading, visable: !isLoading })}>{children}</div>
     </button>
   )
 })

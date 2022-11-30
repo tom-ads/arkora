@@ -13,7 +13,7 @@ const checkBox = cva(
         lg: 'h-8 w-8 focus:shadow-lg',
       },
       error: {
-        true: 'border-red-90 focus:shadow-md focus:shadow-red-90',
+        true: 'border-red-90 focus:shadow-md focus:!shadow-red-90 checked:border-red-90 checked:bg-red-90 focus-visible:border-red-90',
         false: 'focus:shadow-purple-70 focus:border-purple-90',
       },
     },

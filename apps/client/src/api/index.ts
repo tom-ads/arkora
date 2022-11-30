@@ -31,6 +31,7 @@ const baseQuery = fetchBaseQuery({
 
 const appApi = createApi({
   reducerPath: 'arkoraApi',
+  tagTypes: ['Project', 'Projects'],
   baseQuery,
 
   endpoints: () => ({}),

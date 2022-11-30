@@ -1,10 +1,9 @@
 import { ReactNode, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { Spinner } from './components'
 import { useSessionQuery } from './features/auth'
 import { setAuth } from './stores/slices/auth'
 import { setOrganisation } from './stores/slices/organisation'
-import { RootState } from './stores/store'
 
 const Loader = () => {
   return (

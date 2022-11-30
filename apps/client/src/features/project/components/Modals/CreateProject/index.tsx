@@ -2,10 +2,11 @@ import {
   Avatar,
   Button,
   Form,
+  FormCheckbox,
   FormControl,
   FormInput,
   FormLabel,
-  FormMultiselect,
+  FormMultiSelect,
   FormSelect,
   HouseIcon,
   UsersIcon,
@@ -16,7 +17,10 @@ import { Modal, ModalFooter } from '@/components/Modal'
 import UserRole from '@/enums/UserRole'
 import { useGetAccountsQuery } from '@/features/accounts'
 import { useGetClientsQuery } from '@/features/client'
+import { useCreateProjectMutation } from '@/features/project'
+import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
+import { Transition } from '@headlessui/react'
 import { useMemo } from 'react'
 import { z } from 'zod'
 
@@ -28,18 +32,32 @@ type FormFields = {
   }
   private: boolean
   hideCost: boolean
-  team: Array<string>
+  team: Array<{ id: number; value: string }>
 }
 
 const projectSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
   private: z.boolean(),
   hideCost: z.boolean(),
+  client: z.object({
+    value: z.string({ required_error: 'Client is required' }),
+    children: z.string(),
+  }),
+  team: z
+    .array(
+      z.object({
+        id: z.number(),
+        value: z.string(),
+      }),
+    )
+    .optional(),
 })
 
 type CreateProjectModalProps = ModalBaseProps
 
 export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element => {
+  const { successToast, errorToast } = useToast()
+
   const { data: orgClients } = useGetClientsQuery(undefined, {
     skip: !props.isOpen,
   })
@@ -51,19 +69,50 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
     },
   )
 
-  const handleSubmit = (data: FormFields) => {
-    console.log(data)
+  const [createProject, { isLoading: creatingProject, error, reset: resetMutation }] =
+    useCreateProjectMutation()
+
+  const reset = () => {
+    resetMutation()
+    props.onClose()
   }
 
-  const clientOptions = useMemo(() => {
-    return (
+  const onSubmit = async (data: FormFields) => {
+    const client = orgClients?.clients?.find((client) => client.name === data.client.value)
+    console.log(data.team)
+    if (client?.id) {
+      await createProject({
+        name: data.name,
+        show_cost: data.hideCost,
+        private: data.private,
+        client_id: client.id,
+        team: data?.team?.map((member) => member.id),
+      })
+        .unwrap()
+        .then(() => {
+          reset()
+          successToast('Project has been created')
+        })
+        .catch((error) => {
+          if (error.status === 422) {
+            return
+          }
+
+          reset()
+          errorToast('Unable to create project, please try again later')
+        })
+    }
+  }
+
+  const clientOptions = useMemo(
+    () =>
       orgClients?.clients.map((client) => ({
         id: client.id,
         value: client.name,
         display: client.name,
-      })) ?? []
-    )
-  }, [orgClients?.clients])
+      })) ?? [],
+    [orgClients?.clients],
+  )
 
   const teamOptions = useMemo(
     () =>
@@ -89,8 +138,10 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
       {...props}
     >
       <Form<FormFields, typeof projectSchema>
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         className="space-y-6"
+        validationSchema={projectSchema}
+        queryError={error}
         defaultValues={{
           name: '',
           client: {
@@ -102,50 +153,104 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
           team: [],
         }}
       >
-        {({ control, formState: { errors } }) => (
+        {({ control, watch, formState: { errors } }) => (
           <>
             <FormControl>
-              <FormLabel>Name</FormLabel>
+              <FormLabel htmlFor="name">Name</FormLabel>
               <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
               {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
             </FormControl>
+
             <FormControl>
-              <FormLabel>Client</FormLabel>
-              <FormSelect name="client" control={control} placeHolder="Select client" fullWidth>
+              <FormLabel htmlFor="client">Client</FormLabel>
+              <FormSelect
+                name="client"
+                control={control}
+                placeHolder="Select client"
+                error={!!errors?.client?.value?.message}
+                fullWidth
+              >
                 {clientOptions?.map((option) => (
-                  <SelectOption key={option.id} value={option.value}>
+                  <SelectOption id={option.id} key={option.id} value={option.value}>
                     {option?.display}
                   </SelectOption>
                 ))}
               </FormSelect>
+              {errors?.client?.value?.message && (
+                <FormErrorMessage>{errors.client.value?.message}</FormErrorMessage>
+              )}
             </FormControl>
-            <FormControl>
-              <FormLabel>Team</FormLabel>
-              <FormMultiselect name="team" control={control} placeHolder="Select members" fullWidth>
-                {teamOptions?.map((option) => (
-                  <SelectOption key={option.id} value={option.value}>
-                    <div className="flex gap-x-4 items-center">
-                      <Avatar className="w-[34px] h-[34px]">
-                        <UsersIcon className="w-5 h-5" />
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold ">{option.display}</p>
-                        <p className="text-xs max-w-[350px] truncate">{option.info.email}</p>
+
+            <div className="flex flex-grow-0 max-w-[250px]">
+              <FormControl className="!flex-row gap-x-3">
+                <FormCheckbox name="private" error={!!errors?.private?.message} />
+                <FormLabel htmlFor="private">Private?</FormLabel>
+              </FormControl>
+
+              <FormControl className="!flex-row gap-x-3">
+                <FormCheckbox name="hideCost" error={!!errors?.hideCost?.message} />
+                <FormLabel htmlFor="hideCost">Hide Cost?</FormLabel>
+              </FormControl>
+            </div>
+
+            <Transition
+              show={watch('private')}
+              enter="transition duration-300 ease-out"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition duration-200 ease-in"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <FormControl>
+                <FormLabel htmlFor="team">Team</FormLabel>
+                <FormMultiSelect
+                  name="team"
+                  control={control}
+                  placeHolder="Select members"
+                  error={!!errors?.team?.message}
+                  fullWidth
+                >
+                  {teamOptions?.map((option) => (
+                    <SelectOption
+                      id={option.id}
+                      key={`team-select-${option.id}`}
+                      value={option.value}
+                    >
+                      <div className="flex gap-x-4 items-center">
+                        <Avatar className="w-[34px] h-[34px]">
+                          <UsersIcon className="w-5 h-5" />
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold ">{option.display}</p>
+                          <p className="text-xs max-w-[350px] truncate">{option.info.email}</p>
+                        </div>
                       </div>
-                    </div>
-                  </SelectOption>
-                ))}
-              </FormMultiselect>
-            </FormControl>
+                    </SelectOption>
+                  ))}
+                </FormMultiSelect>
+                {errors?.team?.message && (
+                  <FormErrorMessage>{errors.team.message}</FormErrorMessage>
+                )}
+              </FormControl>
+            </Transition>
+
+            <ModalFooter className="!mt-36">
+              <Button variant="blank" onClick={props.onClose}>
+                Cancel
+              </Button>
+              <Button
+                size="xs"
+                type="submit"
+                isLoading={creatingProject}
+                className="max-w-[161px] w-full"
+              >
+                Create Project
+              </Button>
+            </ModalFooter>
           </>
         )}
       </Form>
-      <ModalFooter className="mt-24">
-        <Button variant="blank" onClick={props.onClose}>
-          Cancel
-        </Button>
-        <Button size="xs">Create Project</Button>
-      </ModalFooter>
     </Modal>
   )
 }

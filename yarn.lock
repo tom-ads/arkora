@@ -5941,6 +5941,11 @@ react-dom@^18.2.0:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
 
+react-headless-notifier@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/react-headless-notifier/-/react-headless-notifier-0.1.6.tgz#757ddfd33a26ed10276846240be1ea5f0b4c0f9c"
+  integrity sha512-idgAYF2AYW8cZN9cfaPvSUyeUrGyLoOT5RyKj77MQ1S/zCIv73Wajgp3fVxJkA2exBxGiQbo8Ng/p8ZnQUz3wg==
+
 react-hook-form@^7.37.0:
   version "7.37.0"
   resolved "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.37.0.tgz"
