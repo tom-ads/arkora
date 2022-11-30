@@ -1,29 +1,19 @@
 import { BasePolicy } from '@ioc:Adonis/Addons/Bouncer'
 import User from 'App/Models/User'
 import UserRole from 'App/Enum/UserRole'
+import Project from 'App/Models/Project'
 
 export default class ProjectPolicy extends BasePolicy {
   /* 
- 	  Owners and org admins can do perform all project actions.
+ 	  Check auth user can view an organisations project 
   */
-  public async before(user: User | null) {
-    if (
-      user?.id &&
-      (user.role?.name === UserRole.OWNER || user?.role?.name === UserRole.ORG_ADMIN)
-    ) {
-      return true
+  public async view(user: User, project: Project) {
+    await project.load('client')
+
+    if (project.client.organisationId !== user.organisationId) {
+      return false
     }
-  }
 
-  /*
- 	  Check auth user can view a list of projects
-  */
-  // public async viewList(user: User) {}
-
-  /* 
- 	Check auth user can view a project 
-  */
-  public async view(user: User) {
     if (user.role?.name === UserRole.MEMBER) {
       return false
     }
@@ -32,7 +22,7 @@ export default class ProjectPolicy extends BasePolicy {
   }
 
   /* 
- 	  Check auth user can create a project 
+ 	  Check auth user can create an organisations project 
   */
   public async create(user: User) {
     if (user.role.name === UserRole.MEMBER) {
@@ -42,19 +32,20 @@ export default class ProjectPolicy extends BasePolicy {
     return true
   }
 
-  /* 
- 	  Check auth user can update a project 
+  /*
+ 	  Check auth user can delete an organisations project 
   */
-  // public async update(user: User, project: project) {
-  //   if (user.role.name !== UserRole.MANAGER) {
-  //     return false
-  //   }
+  public async delete(user: User, project: Project) {
+    await project.load('client')
 
-  //   return true
-  // }
+    if (project.client.organisationId !== user.organisationId) {
+      return false
+    }
 
-  /* 
- 	  Check auth user can delete a project 
-  */
-  // public async delete(user: User, project: project) {}
+    if (user.role.name === UserRole.MEMBER) {
+      return false
+    }
+
+    return true
+  }
 }
