@@ -17,7 +17,7 @@ type FormSelectProps = {
 }
 
 const listBoxButton = cva(
-  'relative border w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0 min-w-[150px] lg:min-w-[200px]',
+  'relative border w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0',
   {
     variants: {
       size: {
@@ -49,7 +49,7 @@ const listBoxButton = cva(
 )
 
 const listBoxOptions = cva(
-  'absolute bg-white w-full shadow-sm gap-y-1 rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50 p-3 min-h-[150px]',
+  'absolute bg-white w-full shadow-sm gap-y-1 rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50 p-3 min-h-[150px] max-h-[200px]',
   {
     variants: {
       fullWidth: {
