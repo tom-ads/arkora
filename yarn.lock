@@ -258,6 +258,13 @@
     rev-hash "^3.0.0"
     source-map-support "^0.5.21"
 
+"@adonisjs/route-model-binding@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@adonisjs/route-model-binding/-/route-model-binding-1.0.1.tgz#97c5f4e315b3ed42d019636043d39a16f770e13d"
+  integrity sha512-EmUFMaD7ILHempGGNKT0Z7zKts5ykCFfo1dHWAEJza6LIUswkp/NyLy+8YOjQHSdZU5/nAp1vwWrXFA9OefQ0Q==
+  dependencies:
+    "@poppinss/utils" "^4.0.4"
+
 "@adonisjs/session@^6.4.0":
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/@adonisjs/session/-/session-6.4.0.tgz#464201a02df6a5d05c3ff423565ab0e7914c355d"
