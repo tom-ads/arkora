@@ -67,7 +67,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           invisible: !isLoading,
         })}
       />
-      <div className={classNames({ invisible: isLoading, visable: !isLoading })}>{children}</div>
+      <div
+        className={classNames({ invisible: isLoading, 'visible flex items-center': !isLoading })}
+      >
+        {children}
+      </div>
     </button>
   )
 })
