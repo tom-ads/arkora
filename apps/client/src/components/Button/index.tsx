@@ -70,25 +70,31 @@ interface ButtonProps
     VariantProps<typeof button> {
   loading?: boolean
   disabled?: boolean
+  danger?: boolean
   type?: 'button' | 'submit'
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, type = 'button', ...props },
+  { className, type = 'button', loading, danger, ...props },
   ref,
 ) {
   return (
-    <button {...props} type={type} ref={ref} className={classNames(button(props), className)}>
+    <button
+      {...props}
+      ref={ref}
+      type={type}
+      className={classNames(button({ danger, ...props }), className)}
+    >
       <Spinner
         className={classNames('w-4 h-4 text-white absolute grid place-content-center', {
-          visable: props.loading,
-          invisible: !props.loading,
+          visible: loading,
+          invisible: !loading,
         })}
       />
       <div
         className={classNames({
-          invisible: props.loading,
-          'visible flex items-center': !props.loading,
+          invisible: loading,
+          'visible flex items-center flex-shrink-0': !loading,
         })}
       >
         {props.children}

@@ -4,6 +4,7 @@ import Status from 'App/Enum/Status'
 import Client from 'App/Models/Client'
 import Project from 'App/Models/Project'
 import CreateProjectValidator from 'App/Validators/Project/CreateProjectValidator'
+import UpdateProjectValidator from 'App/Validators/Project/UpdateProjectValidator'
 
 export default class ProjectController {
   public async create(ctx: HttpContextContract) {
@@ -73,8 +74,36 @@ export default class ProjectController {
   }
 
   @bind()
+  public async update(ctx: HttpContextContract, project: Project) {
+    await ctx.bouncer.with('ProjectPolicy').authorize('update', project)
+
+    const payload = await ctx.request.validate(UpdateProjectValidator)
+
+    if (payload.name !== project.name) {
+      project.name = payload.name
+    }
+
+    if (payload.private !== project.private) {
+      project.private = payload.private
+    }
+
+    if (payload.show_cost !== project.showCost) {
+      project.showCost = payload.show_cost
+    }
+
+    await project.assignProjectMembers(ctx, project, payload.team ?? [])
+
+    await project.save()
+
+    return project.serialize()
+  }
+
+  @bind()
   public async view(ctx: HttpContextContract, project: Project) {
     await ctx.bouncer.with('ProjectPolicy').authorize('view', project)
+
+    await project.load('members')
+
     return project.serialize()
   }
 

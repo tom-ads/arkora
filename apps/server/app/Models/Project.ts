@@ -14,6 +14,7 @@ import Client from './Client'
 import Status from 'App/Enum/Status'
 import Budget from './Budget'
 import User from './User'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class Project extends BaseModel {
   // Columns
@@ -59,6 +60,33 @@ export default class Project extends BaseModel {
 
   @beforeDelete()
   public static async beforeDelete(project: Project) {
-    project.related('budgets').query().delete()
+    await project.related('budgets').query().delete()
+    await project.related('members').query().delete()
+  }
+
+  // Methods
+
+  public async assignProjectMembers(ctx: HttpContextContract, project: Project, members: number[]) {
+    await project.related('members').detach()
+
+    let projectMembers: number[]
+    if (project.private) {
+      const organisationAdmins = await ctx
+        .organisation!.related('users')
+        .query()
+        .withScopes((scopes) => scopes.organisationAdmins())
+        .whereNotIn('id', members)
+      projectMembers = organisationAdmins.map((admin) => admin.id).concat(members)
+    } else {
+      const organisationUsers = await ctx.organisation!.related('users').query()
+      projectMembers = organisationUsers.map((member) => member.id)
+    }
+
+    // Link project members to the new project
+    await Promise.all(
+      projectMembers.map(async (userId) => {
+        await project.related('members').attach([userId])
+      })
+    )
   }
 }

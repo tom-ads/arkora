@@ -5,5 +5,5 @@ type ModalDescriptionProps = {
 }
 
 export const ModalDescription = ({ children }: ModalDescriptionProps): JSX.Element => {
-  return <p className="text-base text-gray-80 leading-5">{children}</p>
+  return <p className="text-base text-gray-80">{children}</p>
 }

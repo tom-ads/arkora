@@ -18,7 +18,11 @@ import classNames from 'classnames'
 import { Fragment, useState } from 'react'
 import { useGetProjectsQuery } from '../../../api'
 
-export const ProjectsTable = (): JSX.Element => {
+type ProjectTableProps = {
+  onManage: (id: number) => void
+}
+
+export const ProjectsTable = ({ onManage }: ProjectTableProps): JSX.Element => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null)
 
   const { data } = useGetProjectsQuery()
@@ -43,7 +47,7 @@ export const ProjectsTable = (): JSX.Element => {
         </TableHead>
         <TableBody>
           {data?.projects?.map((project) => (
-            <Fragment key={project.id}>
+            <Fragment key={`project-${project?.id}`}>
               <TableRow>
                 <TableData>
                   <button onClick={() => handleExpandedRow(project.id)}>
@@ -72,7 +76,9 @@ export const ProjectsTable = (): JSX.Element => {
                 </TableData>
                 <TableData>{project.private ? 'Private' : 'Public'}</TableData>
                 <TableData>
-                  <Button variant="blank">Manage</Button>
+                  <Button variant="blank" onClick={() => onManage(project.id)}>
+                    Manage
+                  </Button>
                 </TableData>
               </TableRow>
               {/* Project Budgets Expandable */}

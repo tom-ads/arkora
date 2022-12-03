@@ -11,7 +11,7 @@ import {
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ZodType } from 'zod'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEqual, method } from 'lodash'
 import { useQueryError } from '@/hooks/useQueryError'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
 import { SerializedError } from '@reduxjs/toolkit'
@@ -60,6 +60,19 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
       onChange(cloneDeep(methods.getValues()))
     }
   }, [methods.watch(), onChange])
+
+  /* 
+    When defaultValues is set initially, there might be an async operation
+    awaiting i.e network request. When the network request returns with nested
+    data i.e objects and arrays there is no way to update defaultValues for
+    those fields. So, we need to manually check for these changes and reset the
+    form so it accurately represents the defaultValues.
+  */
+  useEffect(() => {
+    if (!isEqual(methods.formState.defaultValues, defaultValues)) {
+      methods.reset(defaultValues)
+    }
+  }, [defaultValues])
 
   return (
     <FormProvider {...methods}>

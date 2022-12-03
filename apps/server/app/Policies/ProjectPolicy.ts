@@ -33,6 +33,23 @@ export default class ProjectPolicy extends BasePolicy {
   }
 
   /*
+ 	  Check auth user can update an organisations project 
+  */
+  public async update(user: User, project: Project) {
+    await project.load('client')
+
+    if (project.client.organisationId !== user.organisationId) {
+      return false
+    }
+
+    if (user.role.name === UserRole.MEMBER) {
+      return false
+    }
+
+    return true
+  }
+
+  /*
  	  Check auth user can delete an organisations project 
   */
   public async delete(user: User, project: Project) {

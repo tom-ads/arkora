@@ -1,3 +1,4 @@
+import { transformResponse } from '@/helpers/transform'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 /* 
@@ -15,6 +16,8 @@ const baseUrl = (): string => {
   return url.toString()
 }
 
+// add response interceptor to redirect on 401
+
 const prepareHeaders = (headers: Headers) => {
   const xsrfCookie = document.cookie.match(new RegExp('(XSRF-TOKEN)=([^;]*)'))
   if (xsrfCookie) {
@@ -23,7 +26,7 @@ const prepareHeaders = (headers: Headers) => {
   return headers
 }
 
-const baseQuery = fetchBaseQuery({
+const rootQuery = fetchBaseQuery({
   baseUrl: baseUrl(),
   credentials: 'include',
   prepareHeaders: prepareHeaders,
@@ -32,7 +35,13 @@ const baseQuery = fetchBaseQuery({
 const appApi = createApi({
   reducerPath: 'arkoraApi',
   tagTypes: ['Project', 'Projects'],
-  baseQuery,
+  async baseQuery(...args) {
+    const result = await rootQuery(...args)
+    if (result.data) {
+      result.data = transformResponse(result.data)
+    }
+    return result
+  },
 
   endpoints: () => ({}),
 })

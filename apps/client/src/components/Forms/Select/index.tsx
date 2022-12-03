@@ -76,15 +76,21 @@ export const FormSelect = ({
       name={name}
       control={control}
       render={({ field }) => {
-        const validChildren = children?.filter((v) => v.props?.value)
+        const validChildren = children
+          ?.filter((v) => v.props?.value)
+          .map((child) => ({
+            id: child.props?.id,
+            value: child.props?.value,
+            children: child?.props?.children,
+          }))
 
-        const handleChange = (selectedItem: string) => {
-          field.onChange(validChildren?.find((v) => v.props.value === selectedItem)?.props)
+        const handleChange = (selectedItem: number) => {
+          field.onChange(validChildren?.find((child) => child.id === selectedItem))
         }
 
         return (
           <div className="relative w-full">
-            <Listbox value={field.value?.value} onChange={handleChange}>
+            <Listbox value={field.value?.id} onChange={handleChange}>
               {({ open }) => (
                 <>
                   <Listbox.Button className={listBoxButton({ size, error, focused })}>
@@ -132,8 +138,8 @@ export const FormSelect = ({
                     >
                       {validChildren.map((child) => (
                         <Listbox.Option
-                          key={child.key}
-                          value={child.props?.value}
+                          key={child.id}
+                          value={child?.id}
                           className={({ selected }) =>
                             classNames(
                               'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10 text-sm lg:text-base p-2 lg:p-3',
@@ -146,7 +152,7 @@ export const FormSelect = ({
                           {({ selected }) => (
                             <>
                               <span className="truncate capitalize select-none pointer-events-none">
-                                {child}
+                                {child?.children}
                               </span>
                               {selected && (
                                 <span className="w-4 h-4 shrink-0 mr-1" aria-hidden>

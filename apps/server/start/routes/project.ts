@@ -6,6 +6,7 @@ Route.group(() => {
 
   Route.group(() => {
     Route.get('/', 'ProjectController.view')
+    Route.put('/', 'ProjectController.update')
     Route.delete('/', 'ProjectController.delete')
   })
     .prefix(':project')
