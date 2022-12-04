@@ -11,6 +11,7 @@ import OrganisationValidator from 'App/Validators/Auth/Register/OrganisationVali
 import TeamValidator from 'App/Validators/Auth/Register/TeamValidator'
 import { getOriginSubdomain } from 'Helpers/subdomain'
 import Hash from '@ioc:Adonis/Core/Hash'
+import Task from 'App/Models/Task'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -31,9 +32,10 @@ export default class AuthController {
       ctx.request.validate(TeamValidator),
     ])
 
-    const [currency, weekDays] = await Promise.all([
+    const [currency, weekDays, commonTasks] = await Promise.all([
       Currency.findByOrFail('code', organisation.currency),
       WorkDay.query().withScopes((scopes) => scopes.workDayNames(organisation.work_days)),
+      Task.getCommonTasks(),
     ])
 
     // Create organisation and relations
@@ -45,7 +47,8 @@ export default class AuthController {
       defaultRate: organisation.hourly_rate,
     })
     await createdOrganisation.related('currency').associate(currency)
-    await createdOrganisation.related('workDays').sync(weekDays.map((p) => p.id))
+    await createdOrganisation.related('tasks').sync(commonTasks.map((task) => task.id))
+    await createdOrganisation.related('workDays').sync(weekDays.map((weekDay) => weekDay.id))
 
     const userRoles = await Role.all()
 

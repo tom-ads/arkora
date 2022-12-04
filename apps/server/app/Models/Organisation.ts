@@ -19,6 +19,7 @@ import Currency from './Currency'
 import WorkDay from './WorkDay'
 import Client from './Client'
 import Project from './Project'
+import Task from './Task'
 
 type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 
@@ -71,6 +72,14 @@ export default class Organisation extends BaseModel {
     pivotRelatedForeignKey: 'workday_id',
   })
   public workDays: ManyToMany<typeof WorkDay>
+
+  @manyToMany(() => Organisation)
+  public organisations: ManyToMany<typeof Organisation>
+
+  @manyToMany(() => Task, {
+    pivotTable: 'common_tasks',
+  })
+  public tasks: ManyToMany<typeof Task>
 
   @hasMany(() => Client)
   public clients: HasMany<typeof Client>

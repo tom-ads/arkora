@@ -68,7 +68,12 @@ export const ProjectsTable = ({ onManage }: ProjectTableProps): JSX.Element => {
                 </TableData>
                 <TableData>{project.client.name}</TableData>
                 <TableData>
-                  <AvatarLimit values={project.members.map((member) => member.initials)} />
+                  <AvatarLimit
+                    values={project.members.map((member) => ({
+                      id: member.id,
+                      value: member.initials,
+                    }))}
+                  />
                 </TableData>
                 <TableData>
                   {project.status === Status.ACTIVE && <Badge variant="success">Active</Badge>}
