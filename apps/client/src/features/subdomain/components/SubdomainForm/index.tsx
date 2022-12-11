@@ -54,7 +54,7 @@ export const SubdomainForm = (): JSX.Element => {
             )}
           </div>
 
-          <Button className="mt-6" type="submit" isLoading={isLoading} size="sm" block>
+          <Button className="mt-6" type="submit" loading={isLoading} size="sm" block>
             Continue
           </Button>
         </>

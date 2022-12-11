@@ -3,7 +3,7 @@ import { InputHTMLAttributes } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 export const input = cva(
-  'border w-full rounded placeholder:text-gray-60 text-gray-80 font-normal transition-all outline-none',
+  'border w-full rounded placeholder:text-gray-60 text-gray-80 font-normal transition-all outline-none appearance-none',
   {
     variants: {
       size: {

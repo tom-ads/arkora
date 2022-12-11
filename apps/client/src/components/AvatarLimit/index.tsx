@@ -1,9 +1,9 @@
-import { ReactNode, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Avatar } from '../Avatar'
 
 type AvatarLimitProps = {
   limit?: number
-  values: string[]
+  values: { id: number; value: string }[]
 }
 
 export const AvatarLimit = ({ limit = 3, values }: AvatarLimitProps): JSX.Element => {
@@ -21,7 +21,7 @@ export const AvatarLimit = ({ limit = 3, values }: AvatarLimitProps): JSX.Elemen
   return (
     <div className="flex gap-x-1 items-center">
       {limitedChildren.avatars?.map((avatar) => (
-        <Avatar key={avatar}>{avatar}</Avatar>
+        <Avatar key={avatar.id}>{avatar.value}</Avatar>
       ))}
       {limitedChildren?.offset > 0 && (
         <span className="text-gray-80 ml-1 font-medium">+{limitedChildren?.offset ?? 0}</span>

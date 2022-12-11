@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import GetAccountsValidator from 'App/Validators/accounts/GetAccountsValidator'
+import GetAccountsValidator from 'App/Validators/Accounts/GetAccountsValidator'
 
 export default class AccountController {
   public async index(ctx: HttpContextContract) {

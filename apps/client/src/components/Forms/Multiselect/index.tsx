@@ -6,7 +6,7 @@ import { cva } from 'class-variance-authority'
 import classNames from 'classnames'
 import { Fragment, useState } from 'react'
 import { Controller } from 'react-hook-form'
-import { Selected } from './selected'
+import { Selected } from './selected/mix'
 
 type FormMultiselectProps = {
   name: string

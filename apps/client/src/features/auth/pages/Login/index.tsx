@@ -109,11 +109,13 @@ export const LoginPage = (): JSX.Element => {
               )}
             </FormControl>
 
-            <InlineLink className="font-semibold text-sm" to="/forgot-password">
-              Forgot Password?
-            </InlineLink>
+            <div>
+              <InlineLink className="font-semibold text-sm" to="/forgot-password">
+                Forgot Password?
+              </InlineLink>
+            </div>
 
-            <Button type="submit" size="sm" className="mt-8" isLoading={isLoggingIn}>
+            <Button type="submit" size="sm" className="mt-8" loading={isLoggingIn}>
               Login
             </Button>
           </>

@@ -339,12 +339,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
             >
               Previous Step
             </button>
-            <Button
-              size="sm"
-              className="max-w-[220px] w-full"
-              type="submit"
-              isLoading={isVerifying}
-            >
+            <Button size="sm" className="max-w-[220px] w-full" type="submit" loading={isVerifying}>
               Next step
             </Button>
           </div>

@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import Status from 'App/Enum/Status'
 import UserRole from 'App/Enum/UserRole'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 
@@ -31,6 +32,7 @@ test.group('Projects: Create Project', () => {
       name: 'Test Project',
       private: false,
       show_cost: true,
+      status: Status.ACTIVE,
     })
   })
 
@@ -62,6 +64,7 @@ test.group('Projects: Create Project', () => {
       name: 'Test Project',
       private: false,
       show_cost: true,
+      status: Status.ACTIVE,
     })
   })
 
@@ -93,6 +96,7 @@ test.group('Projects: Create Project', () => {
       name: 'Test Project',
       private: false,
       show_cost: true,
+      status: Status.ACTIVE,
     })
   })
 
@@ -155,11 +159,7 @@ test.group('Projects: Create Project', () => {
   })
 
   test('unauthenticated user cannot create a project', async ({ client, route }) => {
-    await OrganisationFactory.merge({ subdomain: 'test-org' })
-      .with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id })
-      })
-      .create()
+    await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
     const response = await client
       .post(route('ProjectController.create'))

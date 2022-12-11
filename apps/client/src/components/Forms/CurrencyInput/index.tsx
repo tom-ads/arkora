@@ -1,21 +1,23 @@
 import classNames from 'classnames'
 import { Controller } from 'react-hook-form'
-import { ChangeEvent } from 'react'
+import { ChangeEvent, HTMLAttributes } from 'react'
+import { VariantProps } from 'class-variance-authority'
+import { input } from '../Input'
 
-type FormCurrencyInputProps = {
+interface FormCurrencyInputProps
+  extends HTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof input> {
   name: string
-  placeHolder?: string
-  prefix: string
   control: any
-  size?: 'sm' | 'md' | 'lg'
-  error?: boolean
+  prefix: string
+  placeHolder: string
 }
 
 export const FormCurrencyInput = ({
   name,
   control,
   prefix,
-  size = 'md',
+  size,
   placeHolder = '00.00',
   error,
 }: FormCurrencyInputProps): JSX.Element => {
@@ -53,17 +55,7 @@ export const FormCurrencyInput = ({
               value={field.value}
               onChange={handleChange}
               placeholder={placeHolder}
-              className={classNames(
-                'border border-gray-40 w-full rounded placeholder:text-gray-60 font-normal text-gray-100 transition-all outline-none appearance-none',
-                {
-                  'pr-3 pl-7 py-2 text-sm focus:shadow-sm': size === 'sm',
-                  'px-3 py-3 text-base focus:shadow-md': size === 'md',
-                  'px-[0.875rem] py-[10px] text-xl focus:shadow-lg': size === 'lg',
-
-                  'focus:shadow-purple-70 focus:border-purple-90': !error,
-                  'border-red-90 focus:shadow-md focus:shadow-red-90': error,
-                },
-              )}
+              className={`${input({ size, error })} pl-7`}
             />
           </div>
         )

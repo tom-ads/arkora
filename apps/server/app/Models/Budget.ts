@@ -13,6 +13,7 @@ import {
 import Project from './Project'
 import BudgetType from './BudgetType'
 import User from './User'
+import Task from './Task'
 
 type BudgetBuilder = ModelQueryBuilderContract<typeof Budget>
 
@@ -61,6 +62,11 @@ export default class Budget extends BaseModel {
     pivotTable: 'budget_members',
   })
   public members: ManyToMany<typeof User>
+
+  @manyToMany(() => Task, {
+    pivotTable: 'budget_tasks',
+  })
+  public tasks: ManyToMany<typeof Task>
 
   // Hooks
 
