@@ -5,6 +5,14 @@ import Organisation from './Organisation'
 import { CommonTask } from 'App/Enum/CommonTask'
 
 export default class Task extends BaseModel {
+  // Serialize Pivots
+
+  public serializeExtras() {
+    return {
+      is_billable: Boolean(this.$extras.pivot_is_billable),
+    }
+  }
+
   // Columns
 
   @column({ isPrimary: true })
@@ -23,11 +31,13 @@ export default class Task extends BaseModel {
 
   @manyToMany(() => Organisation, {
     pivotTable: 'common_tasks',
+    pivotColumns: ['is_billable'],
   })
   public organisations: ManyToMany<typeof Organisation>
 
   @manyToMany(() => Budget, {
     pivotTable: 'budget_tasks',
+    pivotColumns: ['is_billable'],
   })
   public budgets: ManyToMany<typeof Budget>
 

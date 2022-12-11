@@ -73,11 +73,9 @@ export default class Organisation extends BaseModel {
   })
   public workDays: ManyToMany<typeof WorkDay>
 
-  @manyToMany(() => Organisation)
-  public organisations: ManyToMany<typeof Organisation>
-
   @manyToMany(() => Task, {
     pivotTable: 'common_tasks',
+    pivotColumns: ['is_billable'],
   })
   public tasks: ManyToMany<typeof Task>
 

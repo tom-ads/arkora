@@ -65,6 +65,7 @@ export default class Budget extends BaseModel {
 
   @manyToMany(() => Task, {
     pivotTable: 'budget_tasks',
+    pivotColumns: ['is_billable'],
   })
   public tasks: ManyToMany<typeof Task>
 
