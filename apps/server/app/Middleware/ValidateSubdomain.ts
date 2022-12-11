@@ -18,6 +18,12 @@ export default class ValidateSubdomain {
       return
     }
 
+    // Check the origin header is present in the request
+    if (!ctx.request.header('origin')) {
+      ctx.response.badRequest({ message: 'Missing Origin header' })
+      return
+    }
+
     // Check the origin contained a subdomain
     const originSubdomain = getOriginSubdomain(ctx.request.header('origin')!)
     if (!originSubdomain) {
