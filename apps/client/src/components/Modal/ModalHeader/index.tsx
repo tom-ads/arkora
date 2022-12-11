@@ -27,7 +27,11 @@ export const ModalHeader = ({
         </div>
       </div>
 
-      <button type="button" onClick={onClose} className="outline-none text-gray-100 mb-auto">
+      <button
+        type="button"
+        onClick={onClose}
+        className="outline-none text-gray-100 mb-auto p-1 rounded hover:bg-gray-20 transition-colors duration-150"
+      >
         <CrossIcon className="w-6 h-6" aria-hidden />
       </button>
     </div>
