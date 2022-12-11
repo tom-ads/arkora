@@ -12,14 +12,15 @@ export default Factory.define(TimeEntry, ({ faker }) => {
     description: faker.lorem.sentence(),
     durationMinutes: faker.datatype.number({ min: 0, max: 480 }),
     estimatedMinutes: faker.datatype.number({ min: 0, max: 480 }),
-    lastStartedAt: DateTime.now(),
+    lastStartedAt: DateTime.now().set({ millisecond: 0 }),
     lastStoppedAt: null,
     status: TimeSheetStatus.PENDING,
   }
 })
   .state(
     'lastStoppedAt',
-    (builder) => (builder.lastStoppedAt = DateTime.now().plus({ minutes: 20 }))
+    (builder) =>
+      (builder.lastStoppedAt = DateTime.now().plus({ minutes: 20 }).set({ millisecond: 0 }))
   )
   .relation('budget', () => BudgetFactory)
   .relation('task', () => TaskFactory)

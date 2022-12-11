@@ -68,4 +68,14 @@ export default class TimeEntry extends BaseModel {
     this.lastStoppedAt = DateTime.now()
     this.save()
   }
+
+  public static async getTimesheet(user: User, startDate: string, endDate: string) {
+    let result = await TimeEntry.query()
+      .where('user_id', user.id)
+      .where('date', '>=', startDate)
+      .where('date', '<=', endDate)
+      .exec()
+
+    return result
+  }
 }
