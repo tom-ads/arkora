@@ -4,7 +4,7 @@ import { Spinner } from '../Spinner'
 import { cva, VariantProps } from 'class-variance-authority'
 
 const button = cva(
-  'relative border rounded transition-colors duration-150 outline-none font-semibold flex items-center justify-center my-auto min-h-[39px]',
+  'relative border rounded transition-all duration-100 outline-none font-semibold flex items-center justify-center my-auto min-h-[39px]',
   {
     variants: {
       variant: {
@@ -13,12 +13,12 @@ const button = cva(
         secondary:
           'bg-purple-80 border-purple-80 hover:bg-purple-70 hover:border-purple-70 active:bg-purple-80 active:border-purple-80 active:shadow-purple-80 focus:shadow-purple-70 focus-visible:bg-purple-70 focus-visible:border-purple-70 text-white',
         outlined:
-          'border-purple-90 text-purple-90 hover:border-purple-80 hover:text-purple-80 active:shadow-purple-90 focus:shadow-purple-90 bg-none',
+          'border-purple-90 text-purple-90 bg-none hover:border-purple-80 hover:text-purple-80 focus:border-purple-80 focus:text-purple-80 active:shadow-purple-80 active:text-purple-90 active:border-purple-90',
         blank:
           'text-purple-90 hover:text-purple-80 focus:text-purple-90 focus-visible:text-purple-80 border-none focus:!shadow-none !p-0',
       },
       size: {
-        xs: 'py-[0.625rem] px-6 leading-[1.0625rem]',
+        xs: 'py-[0.625rem] px-6 leading-[1.0625rem] active:shadow-sm',
         sm: 'py-[0.625rem] px-6 active:shadow-sm',
         md: 'py-3 px-9 active:shadow-md',
         lg: 'py-3 px-[2.625rem] active:shadow-lg',
@@ -94,7 +94,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       <div
         className={classNames({
           invisible: loading,
-          'visible flex items-center flex-shrink-0': !loading,
+          'visible flex items-center flex-shrink-0 gap-x-4': !loading,
         })}
       >
         {props.children}
