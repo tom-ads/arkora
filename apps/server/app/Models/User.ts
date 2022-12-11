@@ -13,12 +13,15 @@ import {
   manyToMany,
   ManyToMany,
   computed,
+  hasMany,
+  HasMany,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
 import Project from './Project'
 import Budget from './Budget'
 import UserRole from 'App/Enum/UserRole'
+import TimeEntry from './TimeEntry'
 
 type UserBuilder = ModelQueryBuilderContract<typeof User>
 
@@ -83,6 +86,9 @@ export default class User extends BaseModel {
   })
   public budgets: ManyToMany<typeof Budget>
 
+  @hasMany(() => TimeEntry)
+  public timeEntries: HasMany<typeof TimeEntry>
+
   // Hooks
 
   @beforeFind()
@@ -111,4 +117,12 @@ export default class User extends BaseModel {
       query.whereIn('name', [UserRole.OWNER, UserRole.ORG_ADMIN, UserRole.MANAGER])
     )
   })
+
+  // Methods
+
+  // TODO: After create, assign user to organisation budgets that are not private
+
+  public async getActiveTimer(this: User) {
+    return await this.related('timeEntries').query().whereNull('last_stopped_at').first()
+  }
 }
