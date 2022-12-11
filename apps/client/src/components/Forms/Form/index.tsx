@@ -22,7 +22,7 @@ type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType
   className?: string
   validationSchema?: ValidationSchema
   children: (methods: UseFormReturn<TFormValues>) => ReactNode
-  defaultValues: DeepPartial<TFormValues>
+  defaultValues?: DeepPartial<TFormValues>
   mode?: keyof ValidationMode
   queryError?: FetchBaseQueryError | SerializedError
 }
@@ -55,7 +55,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
         We need to deep clone the form state as passing it to redux
         will cause the values to be readonly and throw.
 
-        Cloning will greate a completely new reference each time.
+        Cloning will create a completely new reference.
       */
       onChange(cloneDeep(methods.getValues()))
     }

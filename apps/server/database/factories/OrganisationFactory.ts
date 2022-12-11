@@ -11,7 +11,7 @@ export default Factory.define(Organisation, ({ faker }) => {
   const name = faker.company.name()
   return {
     name: name,
-    subdomain: name,
+    subdomain: 'test-org',
     openingTime: DateTime.now().set({ hour: 9, minute: 0, second: 0 }),
     closingTime: DateTime.now().set({ hour: 17, minute: 0, second: 0 }),
     defaultRate: parseInt(faker.random.numeric(4), 10),

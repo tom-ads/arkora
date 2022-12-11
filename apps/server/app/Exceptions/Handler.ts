@@ -41,6 +41,12 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       })
     }
 
+    if (error.code === 'E_UNAUTHORIZED_ACCESS') {
+      return ctx.response.unauthorized({
+        message: [{ message: 'Unauthenticated. Please login.' }],
+      })
+    }
+
     return super.handle(error, ctx)
   }
 }

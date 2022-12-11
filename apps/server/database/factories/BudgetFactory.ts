@@ -2,6 +2,7 @@ import Budget from 'App/Models/Budget'
 import Factory from '@ioc:Adonis/Lucid/Factory'
 import BudgetType from 'App/Models/BudgetType'
 import TaskFactory from './TaskFactory'
+import UserFactory from './UserFactory'
 
 export default Factory.define(Budget, ({ faker }) => {
   return {
@@ -14,4 +15,5 @@ export default Factory.define(Budget, ({ faker }) => {
 })
   .relation('tasks', () => TaskFactory)
   .relation('budgetType', () => BudgetType)
+  .relation('members', () => UserFactory)
   .build()
