@@ -49,7 +49,7 @@ export const PublicRoutes = (): JSX.Element => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/projects" replace={true} />
+    return <Navigate to="/timer" replace={true} />
   }
 
   return location.pathname === '/register' ? <MainLayout /> : <AuthLayout />
