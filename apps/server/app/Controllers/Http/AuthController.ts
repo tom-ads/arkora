@@ -39,28 +39,49 @@ export default class AuthController {
     ])
 
     // Create organisation and relations
-    const createdOrganisation = await Organisation.create({
-      name: organisation.name,
-      subdomain: organisation.subdomain,
-      openingTime: organisation.opening_time,
-      closingTime: organisation.closing_time,
-      defaultRate: organisation.hourly_rate,
-    })
-    await createdOrganisation.related('currency').associate(currency)
-    await createdOrganisation.related('tasks').sync(commonTasks.map((task) => task.id))
-    await createdOrganisation.related('workDays').sync(weekDays.map((weekDay) => weekDay.id))
+    let createdOrganisation: Organisation
+    try {
+      createdOrganisation = await Organisation.create({
+        name: organisation.name,
+        subdomain: organisation.subdomain,
+        openingTime: organisation.opening_time,
+        closingTime: organisation.closing_time,
+        defaultRate: organisation.hourly_rate,
+      })
+
+      await Promise.all([
+        createdOrganisation.related('currency').associate(currency),
+        createdOrganisation.related('tasks').sync(commonTasks.map((task) => task.id)),
+        createdOrganisation.related('workDays').sync(weekDays.map((weekDay) => weekDay.id)),
+      ])
+
+      ctx.logger.info(`Created Tenant: ${createdOrganisation.subdomain}`)
+    } catch (err) {
+      ctx.logger.error(`Failed to create new tenant due to: ${err.message}`)
+      return ctx.response.internalServerError()
+    }
 
     const userRoles = await Role.all()
 
-    // Create account owner
-    const owner = await User.create({
-      firstname: details.firstname,
-      lastname: details.lastname,
-      email: details.email,
-      password: details.password,
-    })
-    await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
-    await owner.related('organisation').associate(createdOrganisation)
+    // Create organisation owner and relations
+    let owner: User
+    try {
+      owner = await User.create({
+        firstname: details.firstname,
+        lastname: details.lastname,
+        email: details.email,
+        password: details.password,
+      })
+      await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
+      await owner.related('organisation').associate(createdOrganisation)
+
+      ctx.logger.info(`Created tenant Owner with id: ${owner.id}`)
+    } catch (err) {
+      ctx.logger.error(
+        `Registering tenant (${createdOrganisation.subdomain}) Owner account failed due to: ${err.message}`
+      )
+      return ctx.response.internalServerError()
+    }
 
     // Prevent member list from trying to create owner again
     const filteredMembers = team.members?.filter((member) => member.email !== details.email)
@@ -86,6 +107,8 @@ export default class AuthController {
         })
       )
     }
+
+    ctx.logger.info(`Tenant (${createdOrganisation.subdomain}) has been onboarded`)
 
     await ctx.auth.login(owner)
 
@@ -114,7 +137,7 @@ export default class AuthController {
       return
     }
 
-    const organisation = await Organisation.findBy('subdomain', originSubdomain)
+    const organisation = await Organisation.findByOrFail('subdomain', originSubdomain)
 
     await ctx.auth.login(user)
 
@@ -130,6 +153,7 @@ export default class AuthController {
     return {
       user: ctx.auth.user,
       organisation: ctx.auth.user?.organisation,
+      timer: await ctx.auth.user!.getActiveTimer(),
     }
   }
 }
