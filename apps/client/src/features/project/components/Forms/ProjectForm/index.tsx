@@ -12,7 +12,7 @@ import {
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import UserRole from '@/enums/UserRole'
-import { useGetAccountsQuery } from '@/features/accounts'
+import { useGetAccountsQuery } from '@/features/account'
 import { useGetClientsQuery } from '@/features/client'
 import { User } from '@/types'
 import { Transition } from '@headlessui/react'
