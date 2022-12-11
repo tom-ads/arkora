@@ -1,5 +1,6 @@
 import {
   Form,
+  FormChangeCallback,
   FormControl,
   FormLabel,
   FormTextArea,
@@ -11,7 +12,7 @@ import { FormGroupSelect } from '@/components/Forms/GroupSelect'
 import { GroupOption } from '@/components/Forms/GroupSelect/option'
 import { useGetBudgetsQuery } from '../../../../budget/api'
 import { Budget, ModalBaseProps } from '@/types'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { startCase } from 'lodash'
 import { useLazyGetTasksQuery } from '@/features/task'
@@ -19,6 +20,7 @@ import Task from '@/types/Task'
 import { useCreateTimerMutation } from '../../../api'
 import { DateTime } from 'luxon'
 import { useToast } from '@/hooks/useToast'
+import { UseFormReturn } from 'react-hook-form'
 
 export type TimeEntryFields = {
   budget: {
@@ -92,13 +94,21 @@ export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps)
     }
   }
 
-  const handleFormChange = (data: TimeEntryFields) => {
-    // Only trigger task when budgetId changes
-    if (data?.budget?.id !== budgetId) {
-      triggerTasks({ budget_id: data.budget.id, group_by: 'BILLABLE' })
-      setBudgetId(data.budget.id)
+  const handleFormChange = useCallback<FormChangeCallback<TimeEntryFields>>(
+    (fields: TimeEntryFields, methods: UseFormReturn<TimeEntryFields>) => {
+      if (fields?.budget?.id !== budgetId) {
+        setBudgetId(fields.budget.id)
+        methods.resetField('task')
+      }
+    },
+    [budgetId, triggerTasks],
+  )
+
+  useEffect(() => {
+    if (budgetId) {
+      triggerTasks({ budget_id: budgetId, group_by: 'BILLABLE' })
     }
-  }
+  }, [budgetId])
 
   const budgetOptions: Record<string, GroupOption[]> = useMemo(() => {
     if (!budgets) {
