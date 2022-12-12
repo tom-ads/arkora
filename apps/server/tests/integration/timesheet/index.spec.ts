@@ -5,6 +5,8 @@ import TimeEntry from 'App/Models/TimeEntry'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
+import { getDatesBetweenPeriod } from 'Helpers/date'
+import { getTimeEntriesTotalMinutes } from 'Helpers/timer'
 import { groupBy } from 'lodash'
 import { DateTime } from 'luxon'
 
@@ -68,24 +70,37 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     ])
 
     const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
+      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
+      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
     }
 
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
-      .qs(params)
+      .qs({
+        start_date: params.start_date.toISODate(),
+        end_date: params.end_date.toISODate(),
+      })
       .withCsrfToken()
       .loginAs(authUser)
 
+    const timesheetGrouped = groupBy(timesheet, 'date')
+    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
+
     response.assertStatus(200)
-    response.assertBody(
-      groupBy(
-        timesheet.map((entry) => entry.serialize()),
-        'date'
-      )
-    )
+    response.assertBodyContains({
+      total_minutes: getTimeEntriesTotalMinutes(timesheet),
+      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
+        (day) => {
+          const dayEntries = timesheetGrouped[day.toISO()]
+          return {
+            day: day.toISODate(),
+            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
+            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
+          }
+        }
+      ),
+    })
   })
 
   test('organisation manager can index a timesheet for a specific week', async ({
@@ -102,24 +117,37 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     ])
 
     const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
+      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
+      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
     }
 
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
-      .qs(params)
+      .qs({
+        start_date: params.start_date.toISODate(),
+        end_date: params.end_date.toISODate(),
+      })
       .withCsrfToken()
       .loginAs(authUser)
 
+    const timesheetGrouped = groupBy(timesheet, 'date')
+    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
+
     response.assertStatus(200)
-    response.assertBody(
-      groupBy(
-        timesheet.map((entry) => entry.serialize()),
-        'date'
-      )
-    )
+    response.assertBodyContains({
+      total_minutes: getTimeEntriesTotalMinutes(timesheet),
+      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
+        (day) => {
+          const dayEntries = timesheetGrouped[day.toISO()]
+          return {
+            day: day.toISODate(),
+            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
+            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
+          }
+        }
+      ),
+    })
   })
 
   test('organisation org_admin can index a timesheet for a specific week', async ({
@@ -136,24 +164,37 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     ])
 
     const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
+      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
+      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
     }
 
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
-      .qs(params)
+      .qs({
+        start_date: params.start_date.toISODate(),
+        end_date: params.end_date.toISODate(),
+      })
       .withCsrfToken()
       .loginAs(authUser)
 
+    const timesheetGrouped = groupBy(timesheet, 'date')
+    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
+
     response.assertStatus(200)
-    response.assertBody(
-      groupBy(
-        timesheet.map((entry) => entry.serialize()),
-        'date'
-      )
-    )
+    response.assertBodyContains({
+      total_minutes: getTimeEntriesTotalMinutes(timesheet),
+      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
+        (day) => {
+          const dayEntries = timesheetGrouped[day.toISO()]
+          return {
+            day: day.toISODate(),
+            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
+            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
+          }
+        }
+      ),
+    })
   })
 
   test('organisation owner can index a timesheet for a specific week', async ({
@@ -168,24 +209,37 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     ])
 
     const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
+      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
+      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
     }
 
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
-      .qs(params)
+      .qs({
+        start_date: params.start_date.toISODate(),
+        end_date: params.end_date.toISODate(),
+      })
       .withCsrfToken()
       .loginAs(authUser)
 
+    const timesheetGrouped = groupBy(timesheet, 'date')
+    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
+
     response.assertStatus(200)
-    response.assertBody(
-      groupBy(
-        timesheet.map((entry) => entry.serialize()),
-        'date'
-      )
-    )
+    response.assertBodyContains({
+      total_minutes: getTimeEntriesTotalMinutes(timesheet),
+      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
+        (day) => {
+          const dayEntries = timesheetGrouped[day.toISO()]
+          return {
+            day: day.toISODate(),
+            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
+            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
+          }
+        }
+      ),
+    })
   })
 
   test('organisation cannot index timesheets from another organisation', async ({
