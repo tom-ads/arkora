@@ -15,7 +15,7 @@ const button = cva(
         outlined:
           'border-purple-90 text-purple-90 bg-none hover:border-purple-80 hover:text-purple-80 focus:border-purple-80 focus:text-purple-80 active:shadow-purple-80 active:text-purple-90 active:border-purple-90',
         blank:
-          'text-purple-90 hover:text-purple-80 focus:text-purple-90 focus-visible:text-purple-80 border-none focus:!shadow-none !p-0',
+          'text-purple-90 hover:text-purple-80 focus:text-purple-90 focus-visible:text-purple-80 border-none focus:!shadow-none active:shadow-none !p-0',
       },
       size: {
         xs: 'py-[0.625rem] px-6 leading-[1.0625rem] active:shadow-sm',
