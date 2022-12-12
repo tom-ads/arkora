@@ -74,6 +74,7 @@ export default class TimeEntry extends BaseModel {
       .where('user_id', user.id)
       .where('date', '>=', startDate)
       .where('date', '<=', endDate)
+      .orderBy('date', 'asc')
       .exec()
 
     return result
