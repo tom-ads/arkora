@@ -29,11 +29,21 @@ export const TimesheetPeriod = (): JSX.Element => {
     )
   }
 
+  const handleBack = () => {
+    dispatch(
+      setTimesheetPeriod({
+        startDate: DateTime.now().startOf('week').toISO(),
+        endDate: DateTime.now().endOf('week').toISO(),
+      }),
+    )
+  }
+
   const period = useMemo(() => {
     const currentStartDate = DateTime.fromISO(timesheet.startDate!)
     const currentEndDate = DateTime.fromISO(timesheet.endDate!)
 
     return {
+      currentWeek: currentStartDate.equals(DateTime.now().startOf('week')),
       startDate: currentStartDate.hasSame(currentEndDate, 'month')
         ? addOrdinalSuffix(currentStartDate, 'dd ')
         : addOrdinalSuffix(currentStartDate, 'dd  LLL, yyyy'),
@@ -47,36 +57,46 @@ export const TimesheetPeriod = (): JSX.Element => {
     <Card className="space-y-2">
       {/* Timesheet Heading */}
       <div className="flex gap-x-4 items-center">
-        <span className="font-semibold text-xl text-gray-50">Timesheet</span>
+        <span className="font-semibold text-base md:text-xl text-gray-50">Timesheet</span>
         <Divider />
       </div>
 
       {/* Timesheet Week */}
-      <div className="flex justify-between items-center flex-wrap gap-4 sm:flex-nowrap">
+      <div className="flex justify-between items-center flex-wrap gap-2 md:gap-4 sm:flex-nowrap">
         {timesheet?.startDate && timesheet?.endDate && (
-          <p className="text-gray-90 text-2xl capitalize font-medium transition-all">
-            {`${period.startDate} - ${period.endDate}`}
-          </p>
+          <div>
+            <p className="text-gray-90 text-xl md:text-2xl capitalize font-medium transition-all">
+              {`${period.startDate} - ${period.endDate}`}
+            </p>
+            <Button
+              variant="blank"
+              disabled={period.currentWeek}
+              onClick={handleBack}
+              className="text-sm md:text-base"
+            >
+              Back to Current Week
+            </Button>
+          </div>
         )}
 
-        <div className="flex gap-x-4">
+        <div className="flex gap-x-4 mb-auto">
           <Button
             size="xs"
             variant="outlined"
             onClick={() => handleWeekChange(false)}
-            className="h-[39px] font-normal gap-x-4 !px-3 !py-2 shrink-0"
+            className="font-normal gap-x-4 !px-3 !py-0 shrink-0 min-h-[32px] lg:min-h-[39px]"
           >
-            <ArrowThin className="w-6 h-6 hidden md:block" />
-            <span>Prev Week</span>
+            <ArrowThin className="w-6 h-6" />
+            <span className="hidden lg:block">Prev Week</span>
           </Button>
           <Button
             size="xs"
             variant="outlined"
             onClick={() => handleWeekChange(true)}
-            className="h-[39px] font-normal gap-x-4 !px-3 !py-2 shrink-0"
+            className="font-normal gap-x-4 !px-3 !py-0 shrink-0 min-h-[32px] lg:min-h-[39px]"
           >
-            <span>Next Week</span>
-            <ArrowThin className="w-6 h-6 transform rotate-180 hidden md:block" />
+            <span className="hidden lg:block">Next Week</span>
+            <ArrowThin className="w-6 h-6 transform rotate-180" />
           </Button>
         </div>
       </div>

@@ -1,8 +1,6 @@
 import {
-  ArrowThin,
   Button,
   Card,
-  Divider,
   Page,
   PageContent,
   PageDescription,
@@ -10,38 +8,24 @@ import {
   PageTitle,
 } from '@/components'
 import { useGetTimesheetQuery } from '@/features/timesheet'
-import { RootState } from '@/stores/store'
 import { DateTime } from 'luxon'
-import { useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { TimesheetPeriod } from '../../components'
+import { useState } from 'react'
+import { TimesheetPeriod, WeekDaySelect } from '../../components'
 import { NewTimeEntryModal } from '../../components/Modals/NewTimeEntry'
 
 export const TimerPage = (): JSX.Element => {
   const [openNewTimeEntryModal, setOpenNewTimeEntryModal] = useState(false)
 
-  const { timesheet } = useSelector((state: RootState) => ({
-    timesheet: state.timer.timesheet,
-  }))
-
   const { data } = useGetTimesheetQuery({
-    start_date: DateTime.now().startOf('week').toISO(),
-    end_date: DateTime.now().endOf('week').toISO(),
+    start_date: DateTime.now().startOf('week').toISODate(),
+    end_date: DateTime.now().endOf('week').toISODate(),
   })
-
-  const period = useMemo(
-    () => ({
-      startDate: DateTime.fromISO(timesheet.startDate!).toFormat('dd LLL, yyyy'),
-      endDate: DateTime.fromISO(timesheet.endDate!).toFormat('dd LLL, yyyy'),
-    }),
-    [timesheet],
-  )
 
   return (
     <Page>
       <PageHeader>
         <div>
-          <PageTitle>Tracking</PageTitle>
+          <PageTitle>Timer</PageTitle>
           <PageDescription>Start tracking against a budget to record your time</PageDescription>
         </div>
         <Button
@@ -53,8 +37,14 @@ export const TimerPage = (): JSX.Element => {
         </Button>
       </PageHeader>
 
-      <PageContent>
+      <PageContent className="space-y-6">
         <TimesheetPeriod />
+
+        <Card className="p-0">
+          <WeekDaySelect />
+
+          <div className="w-full bg-gray-20 h-9 px-6"></div>
+        </Card>
       </PageContent>
 
       <NewTimeEntryModal
