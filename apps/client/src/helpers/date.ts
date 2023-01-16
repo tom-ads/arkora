@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon'
+import { DateTime, Interval } from 'luxon'
 
 /* credit to thread for solution: https://github.com/moment/luxon/issues/118 */
 function getOrdinalSuffix(n: number) {
@@ -20,4 +20,22 @@ export function addOrdinalSuffix(date: DateTime, format: string) {
   const formattedDate = date.toFormat(format)
 
   return formattedDate.replace(/(?<=\d)\s/, getOrdinalSuffix(monthDay))
+}
+
+export function durationToFormattedTime(duration: number) {
+  const hours = Math.floor(Math.abs(duration / 60))
+  const minutes = duration % 60
+
+  return {
+    displayFormat: `${hours}h ${minutes}m`,
+    consumableFormat: `${hours < 10 ? `0${hours}` : hours}:${
+      minutes < 10 ? `0${minutes}` : minutes
+    }`,
+  }
+}
+
+export function getDatesBetweenPeriod(startDate: DateTime, endDate: DateTime) {
+  return Interval.fromDateTimes(startDate, endDate.plus(1))
+    .splitBy({ day: 1 })
+    .map((d) => d.start)
 }

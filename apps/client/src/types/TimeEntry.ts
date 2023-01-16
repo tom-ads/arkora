@@ -1,13 +1,16 @@
-import { DateTime } from 'luxon'
+import { Budget } from './Budget'
+import Task from './Task'
 
 type TimeEntry = {
   id: number
-  date: DateTime
+  date: string
   durationMinutes: number
   estimatedMinutes: number
   description: string
-  lastStartedAt: DateTime
-  lastStoppedAt: DateTime
+  lastStartedAt: string
+  lastStoppedAt: string
+  budget: Budget & { projectName: string }
+  task: Task
 }
 
 export default TimeEntry

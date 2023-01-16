@@ -1,14 +1,13 @@
 import TimeEntry from '@/types/TimeEntry'
-import { DateTime } from 'luxon'
 
 type TimesheetDay = {
-  day: DateTime
-  total_minutes: number
+  day: string
+  totalMinutes: number
   entries: TimeEntry[]
 }
 
 type GetTimesheetResponse = {
-  total_minutes: string
+  totalMinutes: string
   days: TimesheetDay[]
 }
 

@@ -22,6 +22,7 @@ import Project from './Project'
 import Budget from './Budget'
 import UserRole from 'App/Enum/UserRole'
 import TimeEntry from './TimeEntry'
+import Task from './Task'
 
 type UserBuilder = ModelQueryBuilderContract<typeof User>
 
@@ -123,6 +124,11 @@ export default class User extends BaseModel {
   // TODO: After create, assign user to organisation budgets that are not private
 
   public async getActiveTimer(this: User) {
-    return await this.related('timeEntries').query().whereNull('last_stopped_at').first()
+    return await this.related('timeEntries')
+      .query()
+      .whereNull('last_stopped_at')
+      .preload('budget')
+      .preload('task')
+      .first()
   }
 }

@@ -1,4 +1,4 @@
-import { Button, ClockIcon } from '@/components'
+import { Button, ClockIcon, PlayIcon } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
 import { ModalBaseProps } from '@/types'
 import { TimeEntryForm } from '../../Forms/TimeEntryForm'
@@ -20,7 +20,8 @@ export const NewTimeEntryModal = ({ isOpen, onClose }: StartTimerModalProps): JS
             Cancel
           </Button>
           <Button size="xs" type="submit" className="max-w-[161px] w-full">
-            Start Tracking
+            <PlayIcon className="w-4 h-4 shrink-0" />
+            <span>Start Timer</span>
           </Button>
         </ModalFooter>
       </TimeEntryForm>

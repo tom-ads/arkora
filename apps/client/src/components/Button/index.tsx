@@ -75,7 +75,7 @@ interface ButtonProps
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, type = 'button', loading, danger, ...props },
+  { className, type = 'button', loading, danger, block, ...props },
   ref,
 ) {
   return (
@@ -83,7 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {...props}
       ref={ref}
       type={type}
-      className={classNames(button({ danger, ...props }), className)}
+      className={classNames(button({ danger, block, ...props }), className)}
     >
       <Spinner
         className={classNames('w-4 h-4 text-white absolute grid place-content-center', {

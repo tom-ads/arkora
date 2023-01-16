@@ -34,7 +34,7 @@ const rootQuery = fetchBaseQuery({
 
 const appApi = createApi({
   reducerPath: 'arkoraApi',
-  tagTypes: ['Project', 'Projects'],
+  tagTypes: ['Project', 'Projects', 'TimeEntries'],
   async baseQuery(...args) {
     const result = await rootQuery(...args)
     if (result.data) {

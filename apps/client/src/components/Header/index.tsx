@@ -31,14 +31,14 @@ export const Header = (): JSX.Element => {
   return (
     <header className="w-full bg-white">
       {/* Main Navi */}
-      <div className="flex gap-x-6 max-w-[1440px] mx-auto py-4 px-[46px]">
+      <div className="flex gap-x-6 max-w-[1440px] mx-auto py-4 px-7 lg:px-[46px]">
         <div className="flex items-center gap-2 pr-3">
           <ArkoraLogo className="w-[38px] h-[39px]" />
           <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
         </div>
 
         {isAuthenticated && (
-          <nav className="flex gap-2 px-3 items-center">
+          <nav className="sm:flex gap-2 px-3 items-center hidden">
             <NavItem to="timer">Timer</NavItem>
             <NavItem to="projects">Projects</NavItem>
             <NavItem to="team">Clients</NavItem>
@@ -52,7 +52,7 @@ export const Header = (): JSX.Element => {
           <Divider />
 
           {/* Sub Navi */}
-          <div className="h-[51px] flex gap-x-6 max-w-[1440px] mx-auto px-[46px]"></div>
+          <div className="h-[51px] flex gap-x-6 max-w-[1440px] mx-auto px-7 lg:px-[46px]"></div>
         </>
       )}
     </header>

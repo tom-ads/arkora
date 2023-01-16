@@ -21,6 +21,14 @@ import TimeEntry from './TimeEntry'
 type BudgetBuilder = ModelQueryBuilderContract<typeof Budget>
 
 export default class Budget extends BaseModel {
+  // Serialize Pivots
+
+  public serializeExtras() {
+    return {
+      project_name: this.$extras?.project_name,
+    }
+  }
+
   // Columns
 
   @column({ isPrimary: true })
@@ -81,5 +89,14 @@ export default class Budget extends BaseModel {
   @beforeFetch()
   public static preloadRelations(query: BudgetBuilder) {
     query.preload('budgetType')
+  }
+
+  // Scopes
+  public static async getBudgetsWithProjectFields(budgetIds: number[], projectFields: string) {
+    return await Budget.query()
+      .select('budgets.*', projectFields)
+      .join('projects', 'budgets.project_id', '=', 'projects.id')
+      .whereIn('budgets.id', budgetIds)
+      .exec()
   }
 }

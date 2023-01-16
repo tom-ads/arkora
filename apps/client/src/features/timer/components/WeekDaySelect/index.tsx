@@ -14,7 +14,7 @@ export const WeekDaySelect = (): JSX.Element => {
   }))
 
   const handleSelectedDay = (selectedDay: string) => {
-    dispatch(setSelectedDay({ selectedDay }))
+    dispatch(setSelectedDay({ selectedDay: DateTime.fromISO(selectedDay).toISODate() }))
   }
 
   const weekDays = useMemo(() => {

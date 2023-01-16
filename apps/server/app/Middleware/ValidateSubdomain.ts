@@ -11,8 +11,8 @@ import { getOriginSubdomain } from './../../helpers/subdomain'
  */
 export default class ValidateSubdomain {
   public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
+    // Check user is authenticated
     const auth = await ctx.auth.check()
-
     if (!auth || !ctx.auth?.user) {
       ctx.response.unauthorized({ message: 'Unauthenticated' })
       return

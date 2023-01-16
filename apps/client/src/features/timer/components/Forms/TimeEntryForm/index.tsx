@@ -21,6 +21,9 @@ import { useCreateTimerMutation } from '../../../api'
 import { DateTime } from 'luxon'
 import { useToast } from '@/hooks/useToast'
 import { UseFormReturn } from 'react-hook-form'
+import { useDispatch } from 'react-redux'
+import { startTimer } from '@/stores/slices/timer'
+import TimeEntry from '@/types/TimeEntry'
 
 export type TimeEntryFields = {
   budget: {
@@ -61,18 +64,14 @@ type TimeEntryFormProps = ModalBaseProps & {
 }
 
 export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps): JSX.Element => {
+  const dispatch = useDispatch()
   const { errorToast } = useToast()
 
   const [budgetId, setBudgetId] = useState<number | undefined>(undefined)
 
   const [createTimer] = useCreateTimerMutation()
 
-  const { data: budgets } = useGetBudgetsQuery(
-    {
-      group_by: 'PROJECT',
-    },
-    { skip: !isOpen },
-  )
+  const { data: budgets } = useGetBudgetsQuery({ group_by: 'PROJECT' }, { skip: !isOpen })
 
   const [triggerTasks, { data: tasks }] = useLazyGetTasksQuery()
 
@@ -86,11 +85,11 @@ export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps)
         duration_minutes: data.tracked_time.durationMinutes,
         estimated_minutes: data.est_time.durationMinutes,
       })
-        .then((data) => {
-          onClose()
-          /* Save into redux */
-        })
+        .unwrap()
+        .then((data) => dispatch(startTimer(data)))
         .catch(() => errorToast('Unable to start timer, please contact your administrator'))
+
+      onClose()
     }
   }
 

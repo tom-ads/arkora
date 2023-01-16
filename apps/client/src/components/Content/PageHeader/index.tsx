@@ -5,5 +5,5 @@ type PageHeaderProps = {
 }
 
 export const PageHeader = ({ children }: PageHeaderProps) => {
-  return <div className="flex justify-between items-center">{children}</div>
+  return <div className="flex justify-between items-center gap-x-4">{children}</div>
 }

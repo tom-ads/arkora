@@ -11,6 +11,7 @@ const timesheetEndpoints = appApi.injectEndpoints({
         url: timesheetBasePath,
         params,
       }),
+      providesTags: ['TimeEntries'],
     }),
   }),
   overrideExisting: false,

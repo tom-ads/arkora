@@ -61,7 +61,7 @@ export const ProjectsTable = ({ onManage }: ProjectTableProps): JSX.Element => {
                     />
                   </button>
                 </TableData>
-                <TableData>
+                <TableData className="truncate">
                   <InlineLink className="font-medium" to={`/projects/${project.id}`}>
                     {project.name}
                   </InlineLink>

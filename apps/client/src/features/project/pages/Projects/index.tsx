@@ -29,7 +29,6 @@ export const ProjectsPage = (): JSX.Element => {
         isOpen={openCreateProjectModal}
         onClose={() => setOpenCreateProjectModal(false)}
       />
-
       <UpdateProjectModal
         projectId={projectId}
         isOpen={!!projectId}
