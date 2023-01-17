@@ -25,7 +25,7 @@ export default class Budget extends BaseModel {
 
   public serializeExtras() {
     return {
-      project_name: this.$extras?.project_name,
+      ...(this.$extras?.project_name && { project_name: this.$extras?.project_name }),
     }
   }
 
