@@ -97,7 +97,7 @@ export const FormMultiSelect = ({
 
         const handleSelectAll = () => {
           if (field.value?.length !== validChildren?.length) {
-            field.onChange(validChildren?.map((child) => child?.id))
+            field.onChange(validChildren)
           }
         }
 

@@ -10,7 +10,7 @@ interface FormCurrencyInputProps
   name: string
   control: any
   prefix: string
-  placeHolder: string
+  placeHolder?: string
 }
 
 export const FormCurrencyInput = ({

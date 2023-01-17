@@ -11,13 +11,18 @@ import {
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ZodType } from 'zod'
-import { cloneDeep, isEqual, method } from 'lodash'
+import { cloneDeep, isEqual } from 'lodash'
 import { useQueryError } from '@/hooks/useQueryError'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
 import { SerializedError } from '@reduxjs/toolkit'
 
-type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType> = {
-  onChange?: (fields: TFormValues) => void
+export type FormChangeCallback<TFormValues extends FieldValues> = (
+  fields: TFormValues,
+  methods: UseFormReturn<TFormValues>,
+) => void
+
+export type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType> = {
+  onChange?: (fields: TFormValues, methods: UseFormReturn<TFormValues>) => void
   onSubmit: SubmitHandler<TFormValues>
   className?: string
   validationSchema?: ValidationSchema
@@ -57,7 +62,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
 
         Cloning will create a completely new reference.
       */
-      onChange(cloneDeep(methods.getValues()))
+      onChange(cloneDeep(methods.getValues()), methods)
     }
   }, [methods.watch(), onChange])
 

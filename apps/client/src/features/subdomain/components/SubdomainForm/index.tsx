@@ -27,6 +27,7 @@ export const SubdomainForm = (): JSX.Element => {
           window.location.host = `${data.subdomain}.${import.meta.env.VITE_ARKORA_STATIC_HOSTNAME}`
         }
       })
+      .catch() // TODO: handle exception
   }
 
   return (

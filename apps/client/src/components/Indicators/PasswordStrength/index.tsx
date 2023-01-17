@@ -17,8 +17,9 @@ const CriteriaSuggestion = ({ criteria }: { criteria: TCriteriaFields }) => {
     <div className="flex items-center gap-x-2 transition-all duration-1000">
       <div
         className={classNames(
-          'bg-red-10 h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200',
+          ' h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200',
           {
+            'bg-red-10': !criteria.achieved,
             'bg-green-10': criteria.achieved,
           },
         )}

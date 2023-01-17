@@ -1,8 +1,7 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import UserRole from 'App/Enum/UserRole'
 
-export default class GetAccountsValidator {
+export default class GetTimesheetValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -25,7 +24,8 @@ export default class GetAccountsValidator {
    *    ```
    */
   public schema = schema.create({
-    role: schema.enum.optional(Object.values(UserRole)),
+    start_date: schema.date({ format: 'iso' }),
+    end_date: schema.date({ format: 'iso' }),
   })
 
   /**
@@ -39,5 +39,9 @@ export default class GetAccountsValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'start_date.required': 'Start date is required',
+
+    'end_date.required': 'End date is required',
+  }
 }

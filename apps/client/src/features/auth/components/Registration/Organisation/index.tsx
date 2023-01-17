@@ -301,7 +301,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     </FormLabel>
                     <FormSelect name="currency" control={control} placeHolder="Select currency">
                       {currencyOptions?.map((option) => (
-                        <SelectOption key={option.id} value={option.value}>
+                        <SelectOption key={option.id} value={option.value} id={option.id}>
                           {option?.display}
                         </SelectOption>
                       ))}

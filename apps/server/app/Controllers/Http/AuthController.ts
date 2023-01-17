@@ -144,6 +144,7 @@ export default class AuthController {
     return {
       user: user.serialize(),
       organisation: organisation?.serialize(),
+      timer: await ctx.auth.user!.getActiveTimer(),
     }
   }
 

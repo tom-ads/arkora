@@ -12,6 +12,7 @@ import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { setAuth } from '@/stores/slices/auth'
 import { setOrganisation } from '@/stores/slices/organisation'
+import { startTimer } from '@/stores/slices/timer'
 import { RootState } from '@/stores/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -47,13 +48,16 @@ export const LoginPage = (): JSX.Element => {
       .then((response) => {
         dispatch(setAuth(response.user))
         dispatch(setOrganisation(response.organisation))
+        if (response.timer) {
+          dispatch(startTimer(response.timer))
+        }
 
         navigate('/projects', { replace: true })
       })
   }
 
   return (
-    <div className="flex flex-col justify-center pt-40">
+    <div className="flex flex-col justify-center self-center">
       <div className="flex items-center flex-wrap gap-4 pb-6">
         <ArkoraLogo className="w-24 h-24 flex-shrink-0" />
         <div className="flex flex-col justify-start">

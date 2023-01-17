@@ -4,7 +4,7 @@ import { UserFactory } from 'Database/factories'
 const projectsRoute = '/projects'
 
 test.group('Projects: All Projects', () => {
-  test('authenticated user can view organisations projects', async ({ client }) => {
+  test('authenticated user can view organisations projects', async ({ client, route }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (builder) => {
         return builder.with('projects', 2, (projectBuilder) => {
@@ -16,7 +16,7 @@ test.group('Projects: All Projects', () => {
       .create()
 
     const response = await client
-      .get(projectsRoute)
+      .get(route('ProjectController.index'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -32,9 +32,9 @@ test.group('Projects: All Projects', () => {
     response.assertBody({ projects: projects.map((p) => p.serialize()) })
   })
 
-  test('unauthenticated user cannot view organisations projects', async ({ client }) => {
+  test('unauthenticated user cannot view organisations projects', async ({ client, route }) => {
     const response = await client
-      .get(projectsRoute)
+      .get(route('ProjectController.index'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 
@@ -107,7 +107,7 @@ test.group('Projects: All Projects', () => {
       .create()
 
     const response = await client
-      .get(route('ClientController.index'))
+      .get(route('ProjectController.index'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(diffUser)

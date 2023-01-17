@@ -2,8 +2,9 @@ import { ChevronIcon } from '@/components/Icons/ChevronIcon'
 import { Listbox, Transition } from '@headlessui/react'
 import { cva } from 'class-variance-authority'
 import classNames from 'classnames'
+import { useMemo } from 'react'
 import { Fragment, useState } from 'react'
-import { Controller } from 'react-hook-form'
+import { useController } from 'react-hook-form'
 
 type FormSelectProps = {
   name: string
@@ -75,84 +76,78 @@ export const FormGroupSelect = ({
   fullWidth = false,
   children,
 }: FormSelectProps): JSX.Element => {
+  const { field } = useController({ name, control })
+
   const [focused, setFocused] = useState(false)
 
+  const validChildren = useMemo(() => {
+    return children
+      .map((child) => child.props?.group)
+      .flat()
+      .map((child) => ({
+        id: child.id,
+        value: child.value,
+        display: child.display,
+      }))
+  }, [children])
+
+  const handleChange = (selectedItem: number) => {
+    field.onChange(validChildren?.find((child) => child.id === selectedItem))
+  }
+
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => {
-        const validChildren = children
-          .map((child) => child.props?.group)
-          .flat()
-          .map((child) => ({
-            id: child.id,
-            value: child.value,
-            display: child.display,
-          }))
-
-        const handleChange = (selectedItem: number) => {
-          field.onChange(validChildren?.find((child) => child.id === selectedItem))
-        }
-
-        return (
-          <div className="relative w-full">
-            <Listbox disabled={disabled} value={field.value?.id} onChange={handleChange}>
-              {({ open }) => (
-                <>
-                  <Listbox.Button className={listBoxButton({ size, error, focused, disabled })}>
-                    <span
-                      className={classNames('text-gray-60 text-start truncate capitalize', {
-                        'text-gray-90': field.value?.display,
-                      })}
-                    >
-                      {/* Child of SelectOption, a.k.a the display prop */}
-                      {field.value?.display ?? placeHolder}
-                    </span>
-                    <span
-                      aria-hidden
-                      className={classNames(
-                        'text-gray-100 ml-2 flex flex-shrink-0 pointer-events-none',
-                        {
-                          'w-5 h-5': size === 'xs' || size === 'sm' || size === 'md',
-                          'w-6 h-6': size === 'lg',
-                        },
-                      )}
-                    >
-                      <ChevronIcon
-                        className={classNames('transform transition-transform', {
-                          '-rotate-180': focused,
-                          'text-gray-60': disabled,
-                        })}
-                        aria-hidden="true"
-                      />
-                    </span>
-                  </Listbox.Button>
-                  <Transition
-                    as={Fragment}
-                    show={open}
-                    enter="transition duration-200 ease-out"
-                    enterFrom="transform translate-y-0 opacity-0"
-                    enterTo="transform translate-y-1 opacity-100"
-                    leave="transition duration-150 ease-in"
-                    leaveFrom="transform translate-y-1 opacity-100"
-                    leaveTo="transform translate-y-0 opacity-0"
-                  >
-                    <Listbox.Options
-                      onFocus={() => setFocused(true)}
-                      onBlur={() => setFocused(false)}
-                      className={listBoxOptions({ fullWidth })}
-                      static
-                    >
-                      {children}
-                    </Listbox.Options>
-                  </Transition>
-                </>
-              )}
-            </Listbox>
-          </div>
-        )
-      }}
-    />
+    <div className="relative w-full">
+      {/* Listbox will not change last selected if passed undefined, so we need to pass null instead */}
+      <Listbox disabled={disabled} value={field.value?.id ?? null} onChange={handleChange}>
+        {({ open }) => (
+          <>
+            <Listbox.Button className={listBoxButton({ size, error, focused, disabled })}>
+              <span
+                className={classNames('text-gray-60 text-start truncate capitalize', {
+                  'text-gray-90': field.value?.display,
+                })}
+              >
+                {/* Child of SelectOption, a.k.a the display prop */}
+                {field.value?.display ?? placeHolder}
+              </span>
+              <span
+                aria-hidden
+                className={classNames('text-gray-100 ml-2 flex flex-shrink-0 pointer-events-none', {
+                  'w-5 h-5': size === 'xs' || size === 'sm' || size === 'md',
+                  'w-6 h-6': size === 'lg',
+                })}
+              >
+                <ChevronIcon
+                  className={classNames('transform transition-transform', {
+                    '-rotate-180': focused,
+                    'text-gray-60': disabled,
+                  })}
+                  aria-hidden="true"
+                />
+              </span>
+            </Listbox.Button>
+            <Transition
+              as={Fragment}
+              show={open}
+              enter="transition duration-200 ease-out"
+              enterFrom="transform translate-y-0 opacity-0"
+              enterTo="transform translate-y-1 opacity-100"
+              leave="transition duration-150 ease-in"
+              leaveFrom="transform translate-y-1 opacity-100"
+              leaveTo="transform translate-y-0 opacity-0"
+            >
+              <Listbox.Options
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                className={listBoxOptions({ fullWidth })}
+                static
+              >
+                {children}
+              </Listbox.Options>
+            </Transition>
+          </>
+        )}
+      </Listbox>
+    </div>
   )
 }
