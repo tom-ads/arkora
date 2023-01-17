@@ -57,7 +57,7 @@ export const LoginPage = (): JSX.Element => {
   }
 
   return (
-    <div className="flex flex-col justify-center pt-40">
+    <div className="flex flex-col justify-center self-center">
       <div className="flex items-center flex-wrap gap-4 pb-6">
         <ArkoraLogo className="w-24 h-24 flex-shrink-0" />
         <div className="flex flex-col justify-start">
