@@ -22,7 +22,6 @@ import Project from './Project'
 import Budget from './Budget'
 import UserRole from 'App/Enum/UserRole'
 import TimeEntry from './TimeEntry'
-import Task from './Task'
 
 type UserBuilder = ModelQueryBuilderContract<typeof User>
 
