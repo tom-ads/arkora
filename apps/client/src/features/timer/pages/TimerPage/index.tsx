@@ -28,7 +28,7 @@ export const TimerPage = (): JSX.Element => {
     timer: state.timer,
   }))
 
-  const [minutes, { restartTracking, stopTracking }] = useTimeTracker({})
+  const [minutes, { restartTracking, stopTracking }] = useTimeTracker(60000)
 
   const { data: weekDays } = useGetTimesheetQuery({
     start_date: timesheet.startDate ?? DateTime.now().startOf('week').toISODate(),
@@ -36,19 +36,16 @@ export const TimerPage = (): JSX.Element => {
   })
 
   const handleTracking = async (timerId?: number) => {
-    // stop timer
     if (timer.isTracking) {
       await stopTracking(timer.trackedEntry!.id)
       return
     }
 
-    // restart timer
     if (timerId) {
       await restartTracking(timerId)
       return
     }
 
-    // new entry
     setOpenNewTimeEntryModal(true)
   }
 

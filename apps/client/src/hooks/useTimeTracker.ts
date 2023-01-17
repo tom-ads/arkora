@@ -17,13 +17,9 @@ export interface UseTimerControls {
   trackingLoading: boolean
 }
 
-interface UseTimeTrackerParams {
-  delay?: number
-}
-
 export type UseTimeTrackerReturn = [number, UseTimerControls]
 
-export function useTimeTracker({ delay = 1000 }: UseTimeTrackerParams): UseTimeTrackerReturn {
+export function useTimeTracker(delay?: number): UseTimeTrackerReturn {
   const dispatch = useDispatch()
   const { errorToast } = useToast()
 
@@ -75,7 +71,7 @@ export function useTimeTracker({ delay = 1000 }: UseTimeTrackerParams): UseTimeT
     [stopTimerMutation],
   )
 
-  useInterval(() => setIncrement(increment + 1), isPlaying ? delay : null)
+  useInterval(() => setIncrement(increment + 1), isPlaying ? delay ?? 1000 : null)
 
   return [
     increment,
