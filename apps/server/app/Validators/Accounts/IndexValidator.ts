@@ -2,7 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import UserRole from 'App/Enum/UserRole'
 
-export default class GetAccountsValidator {
+export default class IndexValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   /*

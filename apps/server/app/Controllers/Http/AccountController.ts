@@ -1,11 +1,11 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import GetAccountsValidator from 'App/Validators/Accounts/GetAccountsValidator'
+import IndexValidator from 'App/Validators/Accounts/IndexValidator'
 
 export default class AccountController {
   public async index(ctx: HttpContextContract) {
     await ctx.bouncer.with('AccountPolicy').authorize('viewList')
 
-    const payload = await ctx.request.validate(GetAccountsValidator)
+    const payload = await ctx.request.validate(IndexValidator)
 
     const organisationAccounts = await ctx.organisation
       ?.related('users')
