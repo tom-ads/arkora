@@ -1,3 +1,3 @@
-import GetTasksRequest from './get_tasks'
+import GetTasksRequest from './GetTasksRequest'
 
 export type { GetTasksRequest }
