@@ -33,7 +33,7 @@ export const TimeEntryCard = ({ entry, onToggle }: TimeEntryCardProps) => {
             'text-gray-60': isActiveEntry,
           })}
         >
-          {entry.budget.projectName}
+          {entry.budget?.project?.name}
         </p>
         <div className="flex gap-4">
           <h2 className="font-medium text-base lg:text-xl text-gray-100">{entry.budget.name}</h2>

@@ -126,7 +126,7 @@ export default class User extends BaseModel {
     return await this.related('timeEntries')
       .query()
       .whereNull('last_stopped_at')
-      .preload('budget')
+      .preload('budget', (query) => query.preload('project'))
       .preload('task')
       .first()
   }

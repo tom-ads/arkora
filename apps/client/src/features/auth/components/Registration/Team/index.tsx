@@ -3,7 +3,7 @@ import {
   Descriptor,
   DescriptorContent,
   DescriptorInsights,
-  Divider,
+  HorizontalDivider,
   Form,
 } from '@/components'
 import UserRole from '@/enums/UserRole'
@@ -121,7 +121,7 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
               </p>
             </div>
 
-            <Divider />
+            <HorizontalDivider />
 
             <Descriptor>
               <DescriptorInsights

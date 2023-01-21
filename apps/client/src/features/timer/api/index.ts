@@ -1,11 +1,15 @@
 import TimeEntry from '@/types/TimeEntry'
 import appApi from 'api'
-import { CreateTimerRequest, StartTimerRequest, StopTimerRequest } from './types'
+import { CreateTimerRequest, GetTimersResponse, StartTimerRequest, StopTimerRequest } from './types'
 
 const timerBasePath = '/timers'
 
 const taskEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
+    getTimers: build.query<GetTimersResponse, void>({
+      query: () => timerBasePath,
+    }),
+
     createTimer: build.mutation<TimeEntry, CreateTimerRequest>({
       query: (body) => ({
         url: timerBasePath,
@@ -14,6 +18,7 @@ const taskEndpoints = appApi.injectEndpoints({
       }),
       invalidatesTags: ['TimeEntries'],
     }),
+
     startTimer: build.mutation<TimeEntry, StartTimerRequest>({
       query: (params) => ({
         url: `${timerBasePath}/start`,
@@ -22,6 +27,7 @@ const taskEndpoints = appApi.injectEndpoints({
       }),
       invalidatesTags: ['TimeEntries'],
     }),
+
     stopTimer: build.mutation<TimeEntry, StopTimerRequest>({
       query: (params) => ({
         url: `${timerBasePath}/stop`,
@@ -34,4 +40,9 @@ const taskEndpoints = appApi.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useCreateTimerMutation, useStartTimerMutation, useStopTimerMutation } = taskEndpoints
+export const {
+  useCreateTimerMutation,
+  useGetTimersQuery,
+  useStartTimerMutation,
+  useStopTimerMutation,
+} = taskEndpoints

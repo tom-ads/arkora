@@ -1,5 +1,6 @@
 import { MainLayout } from '@/components'
 import { ProjectRoutes } from '@/features/project'
+import { TeamRoutes } from '@/features/team'
 import { TimerRoute } from '@/features/timer'
 import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
@@ -26,6 +27,10 @@ export const privateRoutes = [
       {
         path: '/timer/*',
         element: <TimerRoute />,
+      },
+      {
+        path: '/team/*',
+        element: <TeamRoutes />,
       },
     ],
   },

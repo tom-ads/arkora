@@ -9,7 +9,7 @@ import {
   FormInput,
   FormSelect,
   FormTimeInput,
-  Divider,
+  HorizontalDivider,
   FormDebouncedInput,
 } from '@/components'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
@@ -170,7 +170,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
               </p>
             </div>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Organisation Details */}
             <Descriptor>
@@ -237,7 +237,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
               </DescriptorContent>
             </Descriptor>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Operating Hours */}
             <Descriptor>
@@ -282,7 +282,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
               </DescriptorContent>
             </Descriptor>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Rates and Cost */}
             <Descriptor>

@@ -1,4 +1,4 @@
-import { ArrowThin, Button, Card, Divider } from '@/components'
+import { ArrowThin, Button, Card, HorizontalDivider } from '@/components'
 import { addOrdinalSuffix } from '@/helpers/date'
 import { setTimesheetPeriod } from '@/stores/slices/timer'
 import { RootState } from '@/stores/store'
@@ -58,7 +58,7 @@ export const TimesheetPeriod = (): JSX.Element => {
       {/* Timesheet Heading */}
       <div className="flex gap-x-4 items-center">
         <span className="font-semibold text-base md:text-xl text-gray-50">Timesheet</span>
-        <Divider />
+        <HorizontalDivider />
       </div>
 
       {/* Timesheet Week */}

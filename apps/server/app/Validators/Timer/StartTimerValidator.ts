@@ -24,8 +24,7 @@ export default class StartTimerValidator {
    *    ```
    */
   public schema = schema.create({
-    timer_id: schema.number.optional([
-      rules.trim(),
+    timer_id: schema.number([
       rules.exists({
         table: 'time_entries',
         column: 'id',

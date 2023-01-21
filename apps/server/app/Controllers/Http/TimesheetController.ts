@@ -15,17 +15,19 @@ export default class TimesheetController {
       const startDate = payload.start_date.toISO()
       const endDate = payload.end_date.toISO()
 
-      const timesheet = await TimeEntry.getTimesheet(
+      const timesheet = await TimeEntry.getUserTimesheet(
         ctx.auth.user!,
         payload.start_date.toISODate(),
         payload.end_date.toISODate()
       )
 
       const [budgets, tasks] = await Promise.all([
-        Budget.getBudgetsWithProjectFields(
-          timesheet.map((entry) => entry.budgetId),
-          'projects.name as project_name'
-        ),
+        Budget.query()
+          .preload('project')
+          .whereIn(
+            'id',
+            timesheet.map((entry) => entry.budgetId)
+          ),
         Task.query().whereIn(
           'id',
           timesheet.map((entry) => entry.taskId)
