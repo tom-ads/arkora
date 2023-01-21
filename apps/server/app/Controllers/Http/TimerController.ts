@@ -135,7 +135,7 @@ export default class TimerController {
     await timeEntry.refresh()
 
     return {
-      ...timeEntry?.serialize({ relations: { user: {} } }),
+      ...timeEntry?.serialize(),
       last_stopped_at: null,
       description: timeEntry.description ?? null,
     }
