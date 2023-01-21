@@ -1,4 +1,5 @@
 import { Budget } from './Budget'
+import Project from './Project'
 import Task from './Task'
 
 type TimeEntry = {
@@ -9,7 +10,7 @@ type TimeEntry = {
   description: string
   lastStartedAt: string
   lastStoppedAt: string
-  budget: Budget & { projectName: string }
+  budget: Budget & { project: Project }
   task: Task
 }
 

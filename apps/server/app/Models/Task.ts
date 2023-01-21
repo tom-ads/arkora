@@ -3,6 +3,7 @@ import { BaseModel, column, ManyToMany, manyToMany } from '@ioc:Adonis/Lucid/Orm
 import Budget from './Budget'
 import Organisation from './Organisation'
 import { CommonTask } from 'App/Enum/CommonTask'
+import { camelCase, startCase } from 'lodash'
 
 export default class Task extends BaseModel {
   // Serialize Pivots
@@ -18,7 +19,7 @@ export default class Task extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column()
+  @column({ serialize: (value: string) => startCase(camelCase(value)) })
   public name: string
 
   @column.dateTime({ autoCreate: true, serializeAs: null })

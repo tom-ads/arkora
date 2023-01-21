@@ -6,7 +6,9 @@ type User = {
   lastname: string
   email: string
   initials: string
-  role: UserRole
+  role: {
+    name: UserRole
+  }
 }
 
 export type { User }

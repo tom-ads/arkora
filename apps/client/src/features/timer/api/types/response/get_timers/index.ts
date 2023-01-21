@@ -1,6 +1,5 @@
-import { User } from '@/types'
-import TimeEntry from '@/types/TimeEntry'
+import { Timer } from '@/types/Timer'
 
-type GetTimersResponse = User & { timer?: TimeEntry }
+type GetTimersResponse = Timer[]
 
 export default GetTimersResponse

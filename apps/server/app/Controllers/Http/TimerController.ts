@@ -85,6 +85,7 @@ export default class TimerController {
     const result = await Promise.all(
       organisationTeam.map(async (member) => {
         const activeTimer = await member.getActiveTimer()
+
         return {
           ...member.serialize(),
           timer: activeTimer?.serialize() ?? null,

@@ -22,10 +22,12 @@ export default class TimesheetController {
       )
 
       const [budgets, tasks] = await Promise.all([
-        Budget.getBudgetsWithProjectFields(
-          timesheet.map((entry) => entry.budgetId),
-          'projects.name as project_name'
-        ),
+        Budget.query()
+          .preload('project')
+          .whereIn(
+            'id',
+            timesheet.map((entry) => entry.budgetId)
+          ),
         Task.query().whereIn(
           'id',
           timesheet.map((entry) => entry.taskId)
