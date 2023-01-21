@@ -1,4 +1,4 @@
-import { Divider } from '@/components/Divider'
+import { HorizontalDivider } from '@/components/Divider'
 import { CircleTick } from '@/components/Icons'
 import { Listbox } from '@headlessui/react'
 import classNames from 'classnames'
@@ -23,7 +23,7 @@ export const GroupOption = ({ name, group }: GroupOptionProps): JSX.Element => {
       <li className="text-base font-medium py-1 my-1 pointer-events-none capitalize text-gray-100">
         {name}
         <div className="pt-2">
-          <Divider />
+          <HorizontalDivider />
         </div>
       </li>
 

@@ -5,7 +5,7 @@ import {
   DescriptorInsights,
   Form,
   FormInput,
-  Divider,
+  HorizontalDivider,
 } from '@/components'
 import { FormControl } from '@/components/Forms/Control'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
@@ -102,7 +102,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
               </p>
             </div>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Profile Image */}
             <Descriptor>
@@ -115,7 +115,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
               </DescriptorContent>
             </Descriptor>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Your Details */}
             <Descriptor>

@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import { NavLink, useLocation } from 'react-router-dom'
-import { Divider } from '../Divider'
+import { HorizontalDivider } from '../Divider'
 import { ArkoraLogo } from '../Icons'
 import { TabGroup, TabItem } from '../Navigation'
 
@@ -52,7 +52,7 @@ export const Header = (): JSX.Element => {
 
       {isAuthenticated && (
         <>
-          <Divider />
+          <HorizontalDivider />
 
           {/* Sub Navi */}
           <div className="h-[51px] flex gap-x-6 max-w-[1440px] mx-auto px-7 lg:px-[46px]">
