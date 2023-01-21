@@ -1,10 +1,19 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  ModelQueryBuilderContract,
+  scope,
+} from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
 import Budget from './Budget'
 import Task from './Task'
 import { timerDifference } from 'Helpers/timer'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
+
+type TimeEntryBuilder = ModelQueryBuilderContract<typeof TimeEntry>
 
 export default class TimeEntry extends BaseModel {
   // Columns
@@ -51,7 +60,7 @@ export default class TimeEntry extends BaseModel {
 
   // Relations
 
-  @belongsTo(() => User)
+  @belongsTo(() => User, { serializeAs: null })
   public user: BelongsTo<typeof User>
 
   @belongsTo(() => Budget)
@@ -60,9 +69,26 @@ export default class TimeEntry extends BaseModel {
   @belongsTo(() => Task)
   public task: BelongsTo<typeof Task>
 
+  // Scopes
+
+  public static filterDate = scope(
+    (query: TimeEntryBuilder, startDate: DateTime | undefined, endDate: DateTime | undefined) => {
+      const isoStartDate = startDate?.toISODate()
+      const isoEndDate = endDate?.toISODate()
+
+      if (isoStartDate && isoEndDate) {
+        query.where('date', '>=', isoStartDate).where('date', '<=', isoEndDate)
+      } else if (isoStartDate) {
+        query.where('date', '>=', isoStartDate)
+      } else if (isoEndDate) {
+        query.where('date', '<=', isoEndDate)
+      }
+    }
+  )
+
   // Methods
 
-  public async deactivateTimer() {
+  public async stopTimer() {
     const diffMinutes = timerDifference(this.lastStartedAt)
     this.durationMinutes += diffMinutes
     this.lastStoppedAt = DateTime.now()
@@ -75,14 +101,27 @@ export default class TimeEntry extends BaseModel {
     this.save()
   }
 
-  public static async getTimesheet(user: User, startDate: string, endDate: string) {
-    let result = await TimeEntry.query()
+  public static async getUserTimesheet(user: User, startDate: string, endDate: string) {
+    return await TimeEntry.query()
       .where('user_id', user.id)
       .where('date', '>=', startDate)
       .where('date', '<=', endDate)
       .orderBy('date', 'asc')
       .exec()
+  }
 
-    return result
+  public static async getLastTimer(userId: number) {
+    return await TimeEntry.query().where('user_id', userId).orderBy('created_at', 'desc').first()
+  }
+
+  public static async getOrganisationTimers(organisationId: number) {
+    return await TimeEntry.query()
+      .select('*')
+      .join('time_entries', 'users.id', '=', 'time_entries.user_id')
+      .where('users.organisation_id', organisationId)
+      .whereNull('last_stopped_at')
+      .orderBy('users.name')
+      .groupBy('time_entries.id')
+      .exec()
   }
 }

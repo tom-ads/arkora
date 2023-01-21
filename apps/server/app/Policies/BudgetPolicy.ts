@@ -13,6 +13,8 @@ export default class BudgetPolicy extends BasePolicy {
       return false
     }
 
+    // TODO: Check organisation id of user vs budget
+
     return true
   }
 }

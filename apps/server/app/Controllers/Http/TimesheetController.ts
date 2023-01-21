@@ -15,7 +15,7 @@ export default class TimesheetController {
       const startDate = payload.start_date.toISO()
       const endDate = payload.end_date.toISO()
 
-      const timesheet = await TimeEntry.getTimesheet(
+      const timesheet = await TimeEntry.getUserTimesheet(
         ctx.auth.user!,
         payload.start_date.toISODate(),
         payload.end_date.toISODate()
