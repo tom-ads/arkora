@@ -1,6 +1,7 @@
 import { test } from '@japa/runner'
 import UserRole from 'App/Enum/UserRole'
 import { UserFactory } from 'Database/factories'
+import { camelCase, startCase } from 'lodash'
 
 test.group('Account: All Organisation Accounts', () => {
   test('organisation manager can index accounts', async ({ client, route }) => {
@@ -35,7 +36,7 @@ test.group('Account: All Organisation Accounts', () => {
           initials: 'BM',
           email: 'bob.marley@example.com',
           role: {
-            name: UserRole.MEMBER,
+            name: startCase(camelCase(UserRole.MEMBER)),
           },
         },
       ],
@@ -74,7 +75,7 @@ test.group('Account: All Organisation Accounts', () => {
           initials: 'BM',
           email: 'bob.marley@example.com',
           role: {
-            name: UserRole.MEMBER,
+            name: startCase(camelCase(UserRole.MEMBER)),
           },
         },
       ],
@@ -113,7 +114,7 @@ test.group('Account: All Organisation Accounts', () => {
           initials: 'BM',
           email: 'bob.marley@example.com',
           role: {
-            name: UserRole.MEMBER,
+            name: startCase(camelCase(UserRole.MEMBER)),
           },
         },
       ],
@@ -159,7 +160,7 @@ test.group('Account: All Organisation Accounts', () => {
           lastname: 'Marley',
           initials: 'BM',
           role: {
-            name: UserRole.MEMBER,
+            name: startCase(camelCase(UserRole.MEMBER)),
           },
         },
         {
@@ -168,7 +169,7 @@ test.group('Account: All Organisation Accounts', () => {
           lastname: 'Marley',
           initials: 'BM',
           role: {
-            name: UserRole.MEMBER,
+            name: startCase(camelCase(UserRole.MEMBER)),
           },
         },
       ],
@@ -255,7 +256,7 @@ test.group('Account: All Organisation Accounts', () => {
           initials: 'BM',
           email: 'bob.marley@example.com',
           role: {
-            name: UserRole.MEMBER,
+            name: startCase(camelCase(UserRole.MEMBER)),
           },
         },
       ],
