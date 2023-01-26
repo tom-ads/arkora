@@ -102,8 +102,8 @@ validator.rule(
     if (!exists || exists.id !== organisationId) {
       options.errorReporter.report(
         options.pointer,
-        'organisationProject.organisationId',
-        'organisationProject.organisationId validation failed',
+        'organisationProject',
+        'organisationProject validation failed',
         options.arrayExpressionPointer,
         { organisationId }
       )
