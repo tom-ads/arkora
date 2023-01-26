@@ -22,7 +22,7 @@ test.group('Timers: Index Timers', ({ each }) => {
     const commonTask = await TaskFactory.create()
 
     // Setup organisation budget and attach common tasks
-    const budget = await BudgetFactory.create()
+    const budget = await BudgetFactory.with('budgetType').create()
     await budget.related('tasks').attach([commonTask.id])
 
     // Create organisation members with active timers

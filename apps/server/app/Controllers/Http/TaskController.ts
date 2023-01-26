@@ -15,7 +15,7 @@ export default class TaskController {
     if (payload.budget_id) {
       const budget = await Budget.findOrFail(payload.budget_id)
 
-      await ctx.bouncer.with('BudgetsPolicy').authorize('view', budget)
+      await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
       await budget.load('tasks')
       tasks = budget.tasks

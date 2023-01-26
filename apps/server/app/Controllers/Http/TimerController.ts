@@ -35,7 +35,7 @@ export default class TimerController {
       Task.findOrFail(payload.task_id),
     ])
 
-    await ctx.bouncer.with('BudgetsPolicy').authorize('view', budget)
+    await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
     // Todo: prevent timers after a certain point
 

@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
 import {
+  afterCreate,
   BaseModel,
+  beforeCreate,
   beforeFetch,
   beforeFind,
   BelongsTo,
@@ -36,13 +38,13 @@ export default class Budget extends BaseModel {
   public name: string
 
   @column()
+  public colour: string
+
+  @column()
   public hourlyRate: number
 
   @column()
   public budget: number
-
-  @column({ serialize: Boolean })
-  public billable: boolean
 
   @column({ serialize: Boolean })
   public private: boolean
@@ -79,17 +81,12 @@ export default class Budget extends BaseModel {
 
   @beforeFind()
   @beforeFetch()
-  public static preloadRelations(query: BudgetBuilder) {
+  public static beforePreloads(query: BudgetBuilder) {
     query.preload('budgetType')
   }
 
-  // Scopes
-  public static async getBudgetsWithProjectFields(budgetIds: number[], projectFields: string) {
-    return await Budget.query()
-      .select('budgets.*', projectFields)
-      .join('projects', 'budgets.project_id', '=', 'projects.id')
-      .whereIn('budgets.id', budgetIds)
-      .preload('project')
-      .exec()
+  @afterCreate()
+  public static async afterPreloads(budget: Budget) {
+    await budget.load('budgetType')
   }
 }

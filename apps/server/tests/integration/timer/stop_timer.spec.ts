@@ -21,7 +21,7 @@ test.group('Timers : Stop Timer', ({ each }) => {
     const commonTask = await TaskFactory.create()
 
     // Setup organisation budget and attach common tasks
-    const budget = await BudgetFactory.create()
+    const budget = await BudgetFactory.with('budgetType').create()
     await budget.related('tasks').attach([commonTask.id])
 
     // Setup organisation owner

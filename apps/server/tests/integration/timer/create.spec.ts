@@ -23,7 +23,7 @@ test.group('Timer: Start Time Entry', ({ each }) => {
       return clientBuilder.with('projects', 2, (projectBuilder) => {
         return projectBuilder
           .merge([{ name: 'project-1' }, { name: 'project-2' }])
-          .with('budgets', 2)
+          .with('budgets', 2, (budgetQuery) => budgetQuery.with('budgetType'))
       })
     }).create()
 

@@ -4,5 +4,6 @@ declare module '@ioc:Adonis/Core/Validator' {
     currencyCode(): Rule
     workDays(): Rule
     // uniqueMember(): Rule
+    organisationProject(organisationId: number): Rule
   }
 }
