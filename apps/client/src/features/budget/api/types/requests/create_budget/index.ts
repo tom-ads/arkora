@@ -10,7 +10,7 @@ type CreateBudgetRequest = {
   hourly_rate?: number
   budget: number
   billable_type?: BillableType
-  fixedPrice?: number
+  fixed_price?: number
 }
 
 export default CreateBudgetRequest

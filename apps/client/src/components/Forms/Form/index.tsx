@@ -22,7 +22,7 @@ export type FormChangeCallback<TFormValues extends FieldValues> = (
 ) => void
 
 export type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType> = {
-  onChange?: (fields: TFormValues, methods?: UseFormReturn<TFormValues>) => void
+  onChange?: (fields: TFormValues, methods: UseFormReturn<TFormValues>) => void
   onSubmit: SubmitHandler<TFormValues>
   className?: string
   validationSchema?: ValidationSchema
@@ -78,7 +78,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
       methods.reset(defaultValues)
     }
   }, [defaultValues])
-
+  console.log(methods.formState.errors)
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">

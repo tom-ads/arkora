@@ -88,6 +88,8 @@ export const FormSelect = ({
           field.onChange(validChildren?.find((child) => child.id === selectedItem))
         }
 
+        const selectedItem = validChildren.find((item) => item === field.value)
+
         return (
           <div className="relative w-full">
             <Listbox value={field.value?.id} onChange={handleChange}>

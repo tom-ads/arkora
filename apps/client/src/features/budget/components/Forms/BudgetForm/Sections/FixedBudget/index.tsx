@@ -59,8 +59,12 @@ export const FixedBudgetSection = ({
           <FormCurrencyInput
             name="hourlyRate"
             suffix="£"
-            placeHolder="Enter rate"
-            error={!!errors.hourlyRate?.message}
+            placeHolder={
+              watch('billableType.id') === BillableType.TOTAL_HOURS ? '- - -' : 'Enter rate'
+            }
+            error={
+              !!errors.hourlyRate?.message && watch('billableType.id') !== BillableType.TOTAL_HOURS
+            }
             disabled={watch('billableType.id') === BillableType.TOTAL_HOURS}
           />
         </FormControl>
@@ -81,16 +85,15 @@ export const FixedBudgetSection = ({
           </FormSelect>
           {watch('billableType.id') === BillableType.TOTAL_COST ? (
             <FormCurrencyInput
-              name="budget"
+              name="fixedPrice"
               suffix="£"
-              placeHolder="Enter total cost"
-              error={!!errors.budget?.message}
+              disabled={watch('billableType.id') === BillableType.TOTAL_COST}
             />
           ) : (
             <FormNumberInput
               name="budget"
               placeHolder="Enter total hours"
-              error={!!errors?.name?.message}
+              error={!!errors?.budget?.message}
               suffix="/hrs"
             />
           )}

@@ -13,6 +13,7 @@ export const FormNumberInput = ({
   suffix,
   size,
   error,
+  disabled,
   placeHolder,
   className,
 }: FormNumberInputProps): JSX.Element => {
@@ -42,6 +43,7 @@ export const FormNumberInput = ({
           },
           className,
         )}
+        disabled={!!disabled}
         allowDecimals={false}
         placeholder={placeHolder}
         allowNegativeValue={false}

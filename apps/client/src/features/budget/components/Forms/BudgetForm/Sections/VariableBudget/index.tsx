@@ -78,7 +78,7 @@ export const VariableBudgetSection = ({
         </FormControl>
       </div>
 
-      <FormControl className="max-w-[300px]">
+      <FormControl className="max-w-[287px]">
         <FormLabel htmlFor="hourlyRate" className="mb-0">
           Rate (Hourly)
         </FormLabel>

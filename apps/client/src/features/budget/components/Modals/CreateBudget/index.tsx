@@ -37,6 +37,7 @@ export const CreateBudgetModal = ({
         budget: data.budget ?? 0,
         billable_type: data.billableType.id,
         budget_type: data.budgetType,
+        fixed_price: data.fixedPrice,
         hourly_rate: data.hourlyRate,
       })
         .unwrap()
@@ -70,7 +71,7 @@ export const CreateBudgetModal = ({
           name: '',
           colour: '#FFFFFF',
           private: true,
-          fixedCost: undefined,
+          fixedPrice: undefined,
           budgetType: BudgetType.VARIABLE,
           billableType: {
             id: BillableType.TOTAL_COST,
