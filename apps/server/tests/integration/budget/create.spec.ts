@@ -1,16 +1,33 @@
 import { test } from '@japa/runner'
 import { faker } from '@faker-js/faker'
 import BudgetKind from 'App/Enum/BudgetKind'
-import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factories'
+import {
+  BudgetFactory,
+  BudgetTypeFactory,
+  OrganisationFactory,
+  RoleFactory,
+  UserFactory,
+} from 'Database/factories'
 import User from 'App/Models/User'
 import Organisation from 'App/Models/Organisation'
 import Budget from 'App/Models/Budget'
+import BillableTypeFactory from 'Database/factories/BillableTypeFactory'
+import BillableType from 'App/Models/BillableType'
+import BillableKind from 'App/Enum/BillableKind'
 
-test.group('Budgets: Create Budget', ({ each }) => {
+test.group('Budgets : Create Budget', (group) => {
   let authUser: User
   let organisation: Organisation
+  let billableTypes: BillableType[]
 
-  each.setup(async () => {
+  group.setup(async () => {
+    billableTypes = await BillableTypeFactory.merge([
+      { name: BillableKind.TOTAL_COST },
+      { name: BillableKind.TOTAL_HOURS },
+    ]).createMany(2)
+  })
+
+  group.each.setup(async () => {
     organisation = await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       return clientBuilder.with('projects', 1, (projectBuilder) => {
         return projectBuilder.merge({ name: 'project-1' })
@@ -24,11 +41,12 @@ test.group('Budgets: Create Budget', ({ each }) => {
 
   test('organisation user can create a variable budget', async ({ client, route }) => {
     const payload = {
-      projectId: organisation.projects[0].id,
+      project_id: organisation.projects[0].id,
       name: faker.company.name(),
       colour: faker.color.rgb(),
       private: false,
       budget_type: BudgetKind.VARIABLE,
+      billable_type: billableTypes[0].name, // total cost
       hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
       budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
     }
@@ -55,11 +73,13 @@ test.group('Budgets: Create Budget', ({ each }) => {
 
   test('organisation user can create a fixed budget', async ({ client, route }) => {
     const payload = {
-      projectId: organisation.projects[0].id,
+      project_id: organisation.projects[0].id,
       name: faker.company.name(),
       colour: faker.color.rgb(),
       private: true,
       budget_type: BudgetKind.FIXED,
+      billable_type: billableTypes[0].name, // total cost
+      fixed_price: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
       hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
       budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
     }
@@ -86,7 +106,7 @@ test.group('Budgets: Create Budget', ({ each }) => {
 
   test('organisation user can create a non-billable budget', async ({ client, route }) => {
     const payload = {
-      projectId: organisation.projects[0].id,
+      project_id: organisation.projects[0].id,
       name: faker.company.name(),
       colour: faker.color.rgb(),
       private: true,
@@ -135,8 +155,62 @@ test.group('Budgets: Create Budget', ({ each }) => {
     assert,
   }) => {
     const payload = {
-      projectId: organisation.projects[0].id,
+      project_id: organisation.projects[0].id,
       name: faker.company.name(),
+      colour: faker.color.rgb(),
+      private: true,
+      budget_type: BudgetKind.VARIABLE,
+      billable_type: billableTypes[0].name, // total cost
+      hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
+      budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
+    }
+
+    const response = await client
+      .post(route('BudgetController.create'))
+      .form(payload)
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(200)
+    response.assertBodyContains({
+      name: payload.name,
+      private: payload.private,
+      colour: payload.colour,
+      budget: payload.budget,
+      hourly_rate: payload.hourly_rate,
+      budget_type: {
+        name: BudgetKind.VARIABLE,
+      },
+    })
+
+    // Load budget members
+    const budget = await Budget.find(response.body().id)
+    await budget?.load('members')
+
+    assert.notStrictEqual(
+      budget?.members.map((user) => user.serialize()),
+      [authUser.serialize()]
+    )
+  })
+
+  test('creating a project budget throws a 422 when project budget name is already taken', async ({
+    route,
+    client,
+  }) => {
+    const project = organisation.projects[0]
+    const budgetName = '10k-budget'
+
+    const budgetType = await BudgetTypeFactory.create()
+    await BudgetFactory.merge({
+      projectId: project.id,
+      budgetTypeId: budgetType.id,
+      name: budgetName,
+    }).create()
+
+    const payload = {
+      project_id: organisation.projects[0].id,
+      name: budgetName,
       colour: faker.color.rgb(),
       private: true,
       budget_type: BudgetKind.VARIABLE,
@@ -151,34 +225,24 @@ test.group('Budgets: Create Budget', ({ each }) => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    // Load budget members
-    const budget = await Budget.find(response.body().id)
-    await budget?.load('members')
-
-    response.assertStatus(200)
+    response.assertStatus(422)
     response.assertBodyContains({
-      name: payload.name,
-      private: payload.private,
-      colour: payload.colour,
-      budget: payload.budget,
-      hourly_rate: payload.hourly_rate,
-      budget_type: {
-        name: BudgetKind.VARIABLE,
-      },
+      errors: [
+        {
+          rule: 'unique',
+          field: 'name',
+          message: 'Name already taken',
+        },
+      ],
     })
-
-    assert.notStrictEqual(
-      budget?.members.map((user) => user.serialize()),
-      [authUser.serialize()]
-    )
   })
 
-  test('organisation user with diff organisation project id returns a 422', async ({
+  test('organisation user with diff organisation project id receives a 422', async ({
     client,
     route,
   }) => {
     const payload = {
-      projectId: 1000000000,
+      project_id: 1000000000,
       name: faker.company.name(),
       colour: faker.color.rgb(),
       private: true,
@@ -202,7 +266,7 @@ test.group('Budgets: Create Budget', ({ each }) => {
     route,
   }) => {
     const payload = {
-      projectId: organisation.projects[0].id,
+      project_id: organisation.projects[0].id,
       name: faker.company.name(),
       colour: faker.color.rgb(),
       private: true,

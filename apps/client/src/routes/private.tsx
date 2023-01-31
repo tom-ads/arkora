@@ -1,4 +1,5 @@
 import { MainLayout } from '@/components'
+import { ClientRoutes } from '@/features/client'
 import { ProjectRoutes } from '@/features/project'
 import { TeamRoutes } from '@/features/team'
 import { TimerRoute } from '@/features/timer'
@@ -27,6 +28,10 @@ export const privateRoutes = [
       {
         path: '/timer/*',
         element: <TimerRoute />,
+      },
+      {
+        path: '/clients/*',
+        element: <ClientRoutes />,
       },
       {
         path: '/team/*',

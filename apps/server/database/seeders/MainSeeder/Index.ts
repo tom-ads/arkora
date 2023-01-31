@@ -12,6 +12,7 @@ export default class extends BaseSeeder {
       this.runSeeder(await import('../Currency')),
       this.runSeeder(await import('../WorkDay')),
       this.runSeeder(await import('../BudgetType')),
+      this.runSeeder(await import('../BillableType')),
       this.runSeeder(await import('../Task')),
     ])
 

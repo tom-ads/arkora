@@ -1,9 +1,14 @@
 import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BudgetKind from 'App/Enum/BudgetKind'
+import BillableKind from 'App/Enum/BillableKind'
 
 export default class CreateBudgetValidator {
   constructor(protected ctx: HttpContextContract) {}
+
+  public refs = schema.refs({
+    projectId: this.ctx.request.body()?.project_id,
+  })
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
@@ -25,8 +30,18 @@ export default class CreateBudgetValidator {
    *    ```
    */
   public schema = schema.create({
-    projectId: schema.number([rules.organisationProject(this.ctx.organisation!.id)]),
-    name: schema.string([rules.trim(), rules.maxLength(50)]),
+    project_id: schema.number([rules.organisationProject(this.ctx.organisation!.id)]),
+    name: schema.string([
+      rules.trim(),
+      rules.maxLength(50),
+      rules.unique({
+        table: 'budgets',
+        column: 'name',
+        where: {
+          project_id: this.refs.projectId,
+        },
+      }),
+    ]),
     colour: schema.string(),
     private: schema.boolean(),
     budget_type: schema.enum(Object.values(BudgetKind), [
@@ -37,6 +52,14 @@ export default class CreateBudgetValidator {
     ]),
     hourly_rate: schema.number.optional(),
     budget: schema.number(),
+    billable_type: schema.enum.optional(Object.values(BillableKind), [
+      rules.exists({
+        table: 'billable_types',
+        column: 'name',
+      }),
+      rules.requiredWhen('budget_type', '!=', BudgetKind.NON_BILLABLE),
+    ]),
+    fixed_price: schema.number.optional([rules.requiredWhen('budget_type', '=', BudgetKind.FIXED)]),
   })
 
   /**
@@ -50,5 +73,7 @@ export default class CreateBudgetValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'name.unique': 'Name already taken',
+  }
 }

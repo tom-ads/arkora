@@ -7,6 +7,20 @@ import { setStep } from '@/stores/slices/registration'
 import { RootState } from '@/stores/store'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
+// const views = {
+//   details: {
+//     title: 'Your details',
+//     description: 'Let’s get started! We need to collect some details and setup your account',
+//     view: (handleStep: () => void) => <DetailsView onSuccess={handleStep} />,
+//   },
+//   organisation: {
+//     title: 'Create organisation',
+//     description:
+//       'Let’s setup your organisation. It’ll be home to everything your team does on Arkora',
+//     view: (handleStep: () => void) => <OrganisationsView onBack={} onSuccess={handleStep} />,
+//   },
+// }
+
 export const RegistrationPage = (): JSX.Element => {
   useDocumentTitle('Register')
 

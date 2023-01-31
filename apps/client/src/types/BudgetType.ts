@@ -1,4 +1,4 @@
-import BudgetKind from '@/enums/BudgetKind'
+import BudgetKind from '@/enums/BudgetType'
 
 export type BudgetType = {
   name: BudgetKind

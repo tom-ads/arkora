@@ -29,6 +29,7 @@ import { setOrganisation } from '@/stores/slices/registration'
 import { useLazyCheckSubdomainQuery } from '@/features/subdomain'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
+import hourlyRateSchema from '@/helpers/validation/hourly_rate'
 
 const OrganisationSchema = z
   .object({
@@ -45,22 +46,7 @@ const OrganisationSchema = z
       value: z.string(),
       children: z.string(),
     }),
-    hourlyRate: z.string().superRefine((val, ctx) => {
-      const hourlyRate = parseFloat(val)
-
-      const issues = [
-        { test: isNaN(hourlyRate), errorMessage: 'Valid rate required' },
-        { test: hourlyRate <= 0, errorMessage: 'Must be greater than 0' },
-        { test: hourlyRate > 20000, errorMessage: 'Cannot exceed 20,000' },
-      ]
-
-      if (Object.values(issues).some((i) => i.test)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: Object.values(issues).find((p) => p.test)?.errorMessage,
-        })
-      }
-    }),
+    hourlyRate: hourlyRateSchema,
   })
   .superRefine((val, ctx) => {
     const openingTime = DateTime.fromFormat(val.openingTime, 'HH:mm')
@@ -317,9 +303,8 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     </FormLabel>
                     <FormCurrencyInput
                       size="sm"
-                      prefix="£"
+                      suffix="£"
                       name="hourlyRate"
-                      control={control}
                       error={!!errors?.hourlyRate?.message}
                     />
                     {errors.hourlyRate?.message && (

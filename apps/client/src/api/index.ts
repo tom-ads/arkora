@@ -1,4 +1,5 @@
 import { transformResponse } from '@/helpers/transform'
+import { clearAuth } from '@/stores/slices/auth'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 /* 
@@ -16,8 +17,6 @@ const baseUrl = (): string => {
   return url.toString()
 }
 
-// add response interceptor to redirect on 401
-
 const prepareHeaders = (headers: Headers) => {
   const xsrfCookie = document.cookie.match(new RegExp('(XSRF-TOKEN)=([^;]*)'))
   if (xsrfCookie) {
@@ -32,17 +31,26 @@ const rootQuery = fetchBaseQuery({
   prepareHeaders: prepareHeaders,
 })
 
+const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) => {
+  const result = await rootQuery(args, api, extraOptions)
+
+  // Logout if response is 401
+  if (result.error && result.error?.status === 401 && api.endpoint !== 'getSession') {
+    api.dispatch(clearAuth())
+  }
+
+  // Recursively transform response result to camelCase
+  if (result.data) {
+    result.data = transformResponse(result.data)
+  }
+
+  return result
+}
+
 const appApi = createApi({
   reducerPath: 'arkoraApi',
   tagTypes: ['Project', 'Projects', 'TimeEntries'],
-  async baseQuery(...args) {
-    const result = await rootQuery(...args)
-    if (result.data) {
-      result.data = transformResponse(result.data)
-    }
-    return result
-  },
-
+  baseQuery: baseQueryInterceptor,
   endpoints: () => ({}),
 })
 

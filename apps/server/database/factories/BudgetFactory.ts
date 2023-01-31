@@ -3,6 +3,7 @@ import Factory from '@ioc:Adonis/Lucid/Factory'
 import TaskFactory from './TaskFactory'
 import UserFactory from './UserFactory'
 import BudgetTypeFactory from './BudgetTypeFactory'
+import BillableTypeFactory from './BillableTypeFactory'
 
 export default Factory.define(Budget, ({ faker }) => {
   return {
@@ -16,4 +17,5 @@ export default Factory.define(Budget, ({ faker }) => {
   .relation('tasks', () => TaskFactory)
   .relation('budgetType', () => BudgetTypeFactory)
   .relation('members', () => UserFactory)
+  .relation('billableType', () => BillableTypeFactory)
   .build()

@@ -1,11 +1,20 @@
+import { Budget } from '@/types'
 import appApi from 'api'
-import { GetBudgetsRequest } from './types/requests'
+import { CreateBudgetRequest, GetBudgetsRequest } from './types/requests'
 import { GetBudgetsResponse } from './types/response'
 
 const budgetBasePath = '/budgets'
 
 const budgetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
+    createBudget: build.mutation<Budget, CreateBudgetRequest>({
+      query: (body) => ({
+        url: budgetBasePath,
+        method: 'POST',
+        body,
+      }),
+    }),
+
     getBudgets: build.query<GetBudgetsResponse, GetBudgetsRequest>({
       query: (params) => ({
         url: budgetBasePath,
@@ -16,4 +25,4 @@ const budgetEndpoints = appApi.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useGetBudgetsQuery } = budgetEndpoints
+export const { useCreateBudgetMutation, useGetBudgetsQuery } = budgetEndpoints

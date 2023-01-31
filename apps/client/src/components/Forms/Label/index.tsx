@@ -1,4 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import classNames from 'classnames'
 import { HTMLAttributes } from 'react'
 
 const label = cva('font-medium text-gray-100 mb-2 w-max', {
@@ -19,9 +20,14 @@ interface FormInputProps extends HTMLAttributes<HTMLLabelElement>, VariantProps<
   htmlFor: string
 }
 
-export const FormLabel = ({ htmlFor, size = 'sm', children }: FormInputProps): JSX.Element => {
+export const FormLabel = ({
+  htmlFor,
+  size = 'sm',
+  className,
+  children,
+}: FormInputProps): JSX.Element => {
   return (
-    <label className={label({ size })} htmlFor={htmlFor}>
+    <label className={classNames(label({ size }), className)} htmlFor={htmlFor}>
       {children}
     </label>
   )
