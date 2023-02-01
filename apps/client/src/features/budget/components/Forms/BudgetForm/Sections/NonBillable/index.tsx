@@ -1,4 +1,5 @@
 import { FormControl, FormDescription, FormLabel, FormNumberInput } from '@/components'
+import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { Transition } from '@headlessui/react'
 
 type NonBillableSectionProps = {
@@ -24,16 +25,17 @@ export const NonBillableSection = ({
       afterLeave={afterLeave}
     >
       <FormControl className="max-w-[350px]">
-        <FormLabel htmlFor="hourlyRate" className="mb-0">
+        <FormLabel htmlFor="budget" className="mb-0">
           Tracking
         </FormLabel>
         <FormDescription>Specify the total number of hours for this budget</FormDescription>
         <FormNumberInput
           name="budget"
           placeHolder="Enter total hours"
-          error={!!errors?.bugdet?.message}
+          error={!!errors?.budget?.message}
           suffix="/hrs"
         />
+        {errors?.budget?.message && <FormErrorMessage>{errors.budget.message}</FormErrorMessage>}
       </FormControl>
     </Transition>
   )

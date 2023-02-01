@@ -6,6 +6,7 @@ import {
   FormNumberInput,
   FormSelect,
 } from '@/components'
+import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import BillableType from '@/enums/BillableType'
 import { Transition } from '@headlessui/react'
@@ -49,6 +50,9 @@ export const FixedBudgetSection = ({
             placeHolder="Enter price"
             error={!!errors.fixedPrice?.message}
           />
+          {errors?.fixedPrice?.message && (
+            <FormErrorMessage>{errors.fixedPrice.message}</FormErrorMessage>
+          )}
         </FormControl>
 
         <FormControl>
@@ -60,13 +64,16 @@ export const FixedBudgetSection = ({
             name="hourlyRate"
             suffix="£"
             placeHolder={
-              watch('billableType.id') === BillableType.TOTAL_HOURS ? '- - -' : 'Enter rate'
+              watch('billableType') === BillableType.TOTAL_HOURS ? '- - -' : 'Enter rate'
             }
             error={
-              !!errors.hourlyRate?.message && watch('billableType.id') !== BillableType.TOTAL_HOURS
+              !!errors.hourlyRate?.message && watch('billableType') !== BillableType.TOTAL_HOURS
             }
-            disabled={watch('billableType.id') === BillableType.TOTAL_HOURS}
+            disabled={watch('billableType') === BillableType.TOTAL_HOURS}
           />
+          {errors?.hourlyRate?.message && (
+            <FormErrorMessage>{errors.hourlyRate.message}</FormErrorMessage>
+          )}
         </FormControl>
       </div>
 
@@ -75,30 +82,39 @@ export const FixedBudgetSection = ({
           Tracking
         </FormLabel>
         <FormDescription>Determine the metric used to track budget progression</FormDescription>
-        <div className="flex gap-4">
+      </FormControl>
+
+      <div className="flex gap-4">
+        <FormControl>
           <FormSelect name="billableType" control={control} placeHolder="Select total" fullWidth>
             {billableTypeOption?.map((option) => (
-              <SelectOption id={option.id} key={option.id} value={option.value}>
-                {option?.display}
-              </SelectOption>
+              <SelectOption key={option.id}>{option?.display}</SelectOption>
             ))}
           </FormSelect>
-          {watch('billableType.id') === BillableType.TOTAL_COST ? (
+        </FormControl>
+
+        <FormControl>
+          {watch('billableType') === BillableType.TOTAL_COST ? (
             <FormCurrencyInput
               name="fixedPrice"
               suffix="£"
-              disabled={watch('billableType.id') === BillableType.TOTAL_COST}
+              disabled={watch('billableType') === BillableType.TOTAL_COST}
             />
           ) : (
-            <FormNumberInput
-              name="budget"
-              placeHolder="Enter total hours"
-              error={!!errors?.budget?.message}
-              suffix="/hrs"
-            />
+            <>
+              <FormNumberInput
+                name="budget"
+                placeHolder="Enter total hours"
+                error={!!errors?.budget?.message}
+                suffix="/hrs"
+              />
+              {errors?.budget?.message && (
+                <FormErrorMessage>{errors.budget.message}</FormErrorMessage>
+              )}
+            </>
           )}
-        </div>
-      </FormControl>
+        </FormControl>
+      </div>
     </Transition>
   )
 }

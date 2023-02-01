@@ -12,7 +12,13 @@ import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import BillableType from '@/enums/BillableType'
 import BudgetType from '@/enums/BudgetType'
+import {
+  validateBudgetField,
+  validateFixedPriceField,
+  validateHourlyRateField,
+} from '@/helpers/validation/fields'
 import hourlyRateSchema from '@/helpers/validation/hourly_rate'
+import validationIssuer from '@/helpers/validation/issuer'
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
 import { ReactNode, useState } from 'react'
@@ -40,60 +46,50 @@ export type BudgetFormFields = {
   colour: string
   private: boolean
   budgetType: BudgetType
-  budget: number | undefined
-  hourlyRate: number | undefined
-  fixedPrice: number | undefined
-  billableType: {
-    id: BillableType | undefined
-    value: BillableType | undefined
-    children: string | undefined
-  }
+  budget: number
+  hourlyRate: number
+  fixedPrice: number
+  billableType: BillableType
 }
 
-const budgetTypeUnion = z.discriminatedUnion('budgetType', [
-  z.object({
-    budgetType: z.literal(BudgetType.VARIABLE),
-    budget: z.number({ required_error: 'Budet is required' }),
-    hourlyRate: hourlyRateSchema,
-  }),
-  z.object({
-    budgetType: z.literal(BudgetType.FIXED),
-    budget: z.number({ required_error: 'Budet is required' }),
-    hourlyRate: hourlyRateSchema,
-  }),
-])
-
 const budgetSchema = z
+  .object({
+    budgetType: z.nativeEnum(BudgetType),
+    billableType: z.nativeEnum(BillableType),
+    budget: z.number().optional(),
+    fixedPrice: z.number().optional(),
+    hourlyRate: hourlyRateSchema.optional(),
+  })
+  .superRefine(({ budgetType, billableType, budget, fixedPrice, hourlyRate }, ctx) => {
+    const budgetResult = validateBudgetField(budget)
+    const fixedPriceResult = validateFixedPriceField(fixedPrice)
+    const hourlyRateResult = validateHourlyRateField(hourlyRate)
+
+    if (budgetType === BudgetType.VARIABLE) {
+      validationIssuer('budget', budgetResult, ctx)
+      validationIssuer('hourlyRate', hourlyRateResult, ctx)
+    }
+
+    if (budgetType === BudgetType.FIXED) {
+      billableType === BillableType.TOTAL_HOURS
+        ? validationIssuer('budget', budgetResult, ctx)
+        : validationIssuer('hourlyRate', hourlyRateResult, ctx)
+
+      validationIssuer('fixedPrice', fixedPriceResult, ctx)
+    }
+
+    if (budgetType === BudgetType.NON_BILLABLE) {
+      validationIssuer('budget', budgetResult, ctx)
+    }
+  })
+
+const budgetFormSchema = z
   .object({
     name: z.string().min(1, { message: 'Name is required' }),
     colour: z.string(),
     private: z.boolean(),
-    budgetType: z.nativeEnum(BudgetType),
-    budget: z
-      .number({ required_error: 'Budget is required' })
-      .transform((val) => (val === undefined ? 0 : val)),
-    hourlyRate: hourlyRateSchema,
-    fixedPrice: z.optional(z.number({ required_error: 'Fixed price is required' })),
-    billableType: z.object({
-      id: z.nativeEnum(BillableType),
-      value: z.nativeEnum(BillableType),
-      children: z.string(),
-    }),
   })
-  .superRefine(({ budgetType, billableType }, ctx) => {
-    if (budgetType === BudgetType.FIXED && billableType.id === BillableType.TOTAL_COST) {
-      return z.NEVER
-    }
-
-    const result = budgetSchema.safeParse('budget')
-    if (!result.success) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['budget'],
-        message: result.error.message,
-      })
-    }
-  })
+  .and(budgetSchema)
 
 type BudgetFormProps = {
   isOpen: boolean
@@ -119,6 +115,10 @@ export const BudgetForm = ({
     if (sectionTransition.type !== fields.budgetType) {
       methods.resetField('hourlyRate')
       methods.resetField('budget')
+      if (sectionTransition.type === BudgetType.FIXED) {
+        methods.resetField('fixedPrice')
+      }
+
       methods.clearErrors()
 
       setSectionTransition({
@@ -129,12 +129,12 @@ export const BudgetForm = ({
   }
 
   return (
-    <Form<BudgetFormFields, typeof budgetSchema>
+    <Form<BudgetFormFields, typeof budgetFormSchema>
       onSubmit={onSubmit}
       queryError={error}
       onChange={onChange}
       defaultValues={defaultValues}
-      validationSchema={budgetSchema}
+      validationSchema={budgetFormSchema}
       className="space-y-6"
     >
       {({ control, watch, formState: { errors } }) => (
