@@ -121,7 +121,6 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
   const currencyOptions = useMemo(() => {
     return Object.keys(currencies).map((currency) => ({
       id: currency,
-      value: currency,
       display: currencies[currency as keyof typeof currencies],
     }))
   }, [])
@@ -287,9 +286,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     </FormLabel>
                     <FormSelect name="currency" control={control} placeHolder="Select currency">
                       {currencyOptions?.map((option) => (
-                        <SelectOption key={option.id} value={option.value} id={option.id}>
-                          {option?.display}
-                        </SelectOption>
+                        <SelectOption key={option.id}>{option?.display}</SelectOption>
                       ))}
                     </FormSelect>
                     {errors.currency?.message && (

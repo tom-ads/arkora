@@ -3,8 +3,8 @@ import { CircleTick } from '@/components/Icons/CircleTick'
 import { Listbox, Transition } from '@headlessui/react'
 import { cva } from 'class-variance-authority'
 import classNames from 'classnames'
-import { Fragment, useState } from 'react'
-import { Controller } from 'react-hook-form'
+import { Fragment, useMemo, useState } from 'react'
+import { useController } from 'react-hook-form'
 
 type FormSelectProps = {
   name: string
@@ -71,108 +71,100 @@ export const FormSelect = ({
 }: FormSelectProps): JSX.Element => {
   const [focused, setFocused] = useState(false)
 
+  const {
+    field: { value, onChange },
+  } = useController({ name, control })
+
+  const validChildren = useMemo(
+    () =>
+      children
+        ?.filter((v) => v.key)
+        .map((child) => ({
+          id: child.key,
+          children: child?.props?.children,
+        })),
+    [children],
+  )
+
+  const selectedItem = validChildren?.find((item) => item.id === value)
+
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => {
-        const validChildren = children
-          ?.filter((v) => v.props?.value)
-          .map((child) => ({
-            id: child.props?.id,
-            value: child.props?.value,
-            children: child?.props?.children,
-          }))
-
-        const handleChange = (selectedItem: number) => {
-          field.onChange(validChildren?.find((child) => child.id === selectedItem))
-        }
-
-        const selectedItem = validChildren.find((item) => item === field.value)
-
-        return (
-          <div className="relative w-full">
-            <Listbox value={field.value?.id} onChange={handleChange}>
-              {({ open }) => (
-                <>
-                  <Listbox.Button className={listBoxButton({ size, error, focused })}>
-                    <span
-                      className={classNames('text-gray-60 text-start truncate capitalize', {
-                        'text-gray-90': field.value?.children,
-                      })}
-                    >
-                      {/* Child of SelectOption, a.k.a the display prop */}
-                      {field.value?.children ?? placeHolder}
-                    </span>
-                    <span
-                      aria-hidden
-                      className={classNames(
-                        'text-gray-100 ml-2 flex flex-shrink-0 pointer-events-none',
+    <div className="relative w-full">
+      <Listbox value={value} onChange={onChange}>
+        {({ open }) => (
+          <>
+            <Listbox.Button className={listBoxButton({ size, error, focused })}>
+              <span
+                className={classNames('text-gray-60 text-start truncate capitalize', {
+                  'text-gray-90': selectedItem?.children,
+                })}
+              >
+                {/* Child of SelectOption, a.k.a the display prop */}
+                {selectedItem?.children ?? placeHolder}
+              </span>
+              <span
+                aria-hidden
+                className={classNames('text-gray-100 ml-2 flex flex-shrink-0 pointer-events-none', {
+                  'w-5 h-5': size === 'xs' || size === 'sm' || size === 'md',
+                  'w-6 h-6': size === 'lg',
+                })}
+              >
+                <ChevronIcon
+                  className={classNames('transform transition-transform', {
+                    '-rotate-180': focused,
+                  })}
+                  aria-hidden="true"
+                />
+              </span>
+            </Listbox.Button>
+            <Transition
+              as={Fragment}
+              show={open}
+              enter="transition duration-200 ease-out"
+              enterFrom="transform translate-y-0 opacity-0"
+              enterTo="transform translate-y-1 opacity-100"
+              leave="transition duration-150 ease-in"
+              leaveFrom="transform translate-y-1 opacity-100"
+              leaveTo="transform translate-y-0 opacity-0"
+            >
+              <Listbox.Options
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                className={listBoxOptions({ fullWidth })}
+                static
+              >
+                {validChildren.map((child) => (
+                  <Listbox.Option
+                    key={child.id}
+                    value={child?.id}
+                    className={({ selected }) =>
+                      classNames(
+                        'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10 text-sm lg:text-base p-2 lg:p-3',
                         {
-                          'w-5 h-5': size === 'xs' || size === 'sm' || size === 'md',
-                          'w-6 h-6': size === 'lg',
+                          'bg-purple-10 !text-purple-90 hover:bg-purple-10': selected,
                         },
-                      )}
-                    >
-                      <ChevronIcon
-                        className={classNames('transform transition-transform', {
-                          '-rotate-180': focused,
-                        })}
-                        aria-hidden="true"
-                      />
-                    </span>
-                  </Listbox.Button>
-                  <Transition
-                    as={Fragment}
-                    show={open}
-                    enter="transition duration-200 ease-out"
-                    enterFrom="transform translate-y-0 opacity-0"
-                    enterTo="transform translate-y-1 opacity-100"
-                    leave="transition duration-150 ease-in"
-                    leaveFrom="transform translate-y-1 opacity-100"
-                    leaveTo="transform translate-y-0 opacity-0"
+                      )
+                    }
                   >
-                    <Listbox.Options
-                      onFocus={() => setFocused(true)}
-                      onBlur={() => setFocused(false)}
-                      className={listBoxOptions({ fullWidth })}
-                      static
-                    >
-                      {validChildren.map((child) => (
-                        <Listbox.Option
-                          key={child.id}
-                          value={child?.id}
-                          className={({ selected }) =>
-                            classNames(
-                              'text-gray-80 cursor-pointer outline-none w-full flex items-center justify-between rounded hover:bg-gray-10 text-sm lg:text-base p-2 lg:p-3',
-                              {
-                                'bg-purple-10 !text-purple-90 hover:bg-purple-10': selected,
-                              },
-                            )
-                          }
-                        >
-                          {({ selected }) => (
-                            <>
-                              <span className="truncate capitalize select-none pointer-events-none">
-                                {child?.children}
-                              </span>
-                              {selected && (
-                                <span className="w-4 h-4 shrink-0 mr-1" aria-hidden>
-                                  <CircleTick aria-hidden />
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </Transition>
-                </>
-              )}
-            </Listbox>
-          </div>
-        )
-      }}
-    />
+                    {({ selected }) => (
+                      <>
+                        <span className="truncate capitalize select-none pointer-events-none">
+                          {child?.children}
+                        </span>
+                        {selected && (
+                          <span className="w-4 h-4 shrink-0 mr-1" aria-hidden>
+                            <CircleTick aria-hidden />
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Transition>
+          </>
+        )}
+      </Listbox>
+    </div>
   )
 }

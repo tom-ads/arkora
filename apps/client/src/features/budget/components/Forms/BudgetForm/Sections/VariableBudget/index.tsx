@@ -51,15 +51,13 @@ export const VariableBudgetSection = ({
         <FormControl>
           <FormSelect name="billableType" control={control} placeHolder="Select total" fullWidth>
             {billableTypeOption?.map((option) => (
-              <SelectOption id={option.id} key={option.id} value={option.value}>
-                {option?.display}
-              </SelectOption>
+              <SelectOption key={option.id}>{option?.display}</SelectOption>
             ))}
           </FormSelect>
         </FormControl>
 
         <FormControl>
-          {watch('billableType.id') === BillableType.TOTAL_COST ? (
+          {watch('billableType') === BillableType.TOTAL_COST ? (
             <FormCurrencyInput
               name="budget"
               suffix="£"

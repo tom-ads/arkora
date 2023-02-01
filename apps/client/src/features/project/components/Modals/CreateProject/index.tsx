@@ -3,39 +3,7 @@ import { Modal, ModalFooter } from '@/components/Modal'
 import { useCreateProjectMutation } from '@/features/project'
 import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
-import { z } from 'zod'
-import { ProjectForm } from '../../Forms/ProjectForm'
-
-export type FormFields = {
-  name: string
-  client: {
-    id: number | undefined
-    value: string | undefined
-    children: string | undefined
-  }
-  private: boolean
-  hideCost: boolean
-  team: Array<{ id: number; value: string }>
-}
-
-export const projectSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  private: z.boolean(),
-  hideCost: z.boolean(),
-  client: z.object({
-    id: z.number(),
-    value: z.string({ required_error: 'Client is required' }),
-    children: z.string(),
-  }),
-  team: z
-    .array(
-      z.object({
-        id: z.number(),
-        value: z.string(),
-      }),
-    )
-    .optional(),
-})
+import { ProjectForm, ProjectFormFields } from '../../Forms/ProjectForm'
 
 type CreateProjectModalProps = ModalBaseProps
 
@@ -50,13 +18,13 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
     props.onClose()
   }
 
-  const onSubmit = async (data: FormFields) => {
-    if (data?.client?.id) {
+  const onSubmit = async (data: ProjectFormFields) => {
+    if (data?.client) {
       await createProject({
         name: data.name,
         show_cost: data.hideCost,
         private: data.private,
-        client_id: data.client.id,
+        client_id: data.client,
         team: data?.team?.map((member) => member.id),
       })
         .unwrap()
