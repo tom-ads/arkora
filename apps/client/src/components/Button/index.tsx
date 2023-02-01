@@ -4,7 +4,7 @@ import { Spinner } from '../Spinner'
 import { cva, VariantProps } from 'class-variance-authority'
 
 const button = cva(
-  'relative border rounded transition-all duration-100 outline-none font-semibold flex items-center justify-center my-auto min-h-[39px]',
+  'relative border rounded transition-all duration-100 outline-none font-semibold flex items-center justify-center my-auto min-h-[39px] whitespace-nowrap',
   {
     variants: {
       variant: {
