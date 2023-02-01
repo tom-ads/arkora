@@ -47,7 +47,7 @@ export const VariableBudgetSection = ({
         </FormDescription>
       </FormControl>
 
-      <div className="flex gap-4 mb-5">
+      <div className="flex flex-col sm:flex-row gap-4 mb-5">
         <FormControl>
           <FormSelect name="billableType" control={control} placeHolder="Select total" fullWidth>
             {billableTypeOption?.map((option) => (
@@ -76,7 +76,7 @@ export const VariableBudgetSection = ({
         </FormControl>
       </div>
 
-      <FormControl className="max-w-[287px]">
+      <FormControl className="sm:max-w-[287px]">
         <FormLabel htmlFor="hourlyRate" className="mb-0">
           Rate (Hourly)
         </FormLabel>

@@ -46,9 +46,9 @@ export type BudgetFormFields = {
   colour: string
   private: boolean
   budgetType: BudgetType
-  budget: number
-  hourlyRate: number
-  fixedPrice: number
+  budget: number | undefined
+  hourlyRate: number | undefined
+  fixedPrice: number | undefined
   billableType: BillableType
 }
 
@@ -92,7 +92,6 @@ const budgetFormSchema = z
   .and(budgetSchema)
 
 type BudgetFormProps = {
-  isOpen: boolean
   children?: ReactNode
   defaultValues?: BudgetFormFields
   error?: FetchBaseQueryError | SerializedError
@@ -100,7 +99,6 @@ type BudgetFormProps = {
 }
 
 export const BudgetForm = ({
-  isOpen,
   onSubmit,
   error,
   defaultValues,
@@ -147,7 +145,7 @@ export const BudgetForm = ({
 
           <FormControl>
             <FormLabel htmlFor="private">Visibility</FormLabel>
-            <FormStyledRadio name="private">
+            <FormStyledRadio className="flex-col sm:flex-row" name="private">
               <FormStyledRadioOption
                 title="Public"
                 icon={<OpenLockIcon className="stroke-[2px]" />}
@@ -169,7 +167,7 @@ export const BudgetForm = ({
             }
           />
 
-          <FormStyledRadio name="budgetType" className="gap-[6px]">
+          <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
             <FormStyledRadioOption
               title="Variable"
               description="Est. budget. Charge and track by the hour. Can overrun."

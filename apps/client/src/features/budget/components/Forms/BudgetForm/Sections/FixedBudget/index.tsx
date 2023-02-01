@@ -38,7 +38,7 @@ export const FixedBudgetSection = ({
       leaveTo="opacity-0"
       afterLeave={afterLeave}
     >
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row sm:gap-4 mb-4 sm:mb-0">
         <FormControl className="mb-5">
           <FormLabel htmlFor="fixedPrice" className="mb-0">
             Fixed Price
@@ -84,7 +84,7 @@ export const FixedBudgetSection = ({
         <FormDescription>Determine the metric used to track budget progression</FormDescription>
       </FormControl>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <FormControl>
           <FormSelect name="billableType" control={control} placeHolder="Select total" fullWidth>
             {billableTypeOption?.map((option) => (

@@ -8,7 +8,7 @@ type ModalFooterProps = {
 
 export const ModalFooter = ({ className, children }: ModalFooterProps): JSX.Element => {
   return (
-    <div className={classNames('w-full flex justify-between gap-x-2 mt-6', className)}>
+    <div className={classNames('w-full flex justify-between items-center gap-x-2 mt-6', className)}>
       {children}
     </div>
   )

@@ -10,11 +10,7 @@ import BillableType from '@/enums/BillableType'
 
 type CreateBudgetModalProps = ModalBaseProps
 
-export const CreateBudgetModal = ({
-  isOpen,
-  onClose,
-  loading,
-}: CreateBudgetModalProps): JSX.Element => {
+export const CreateBudgetModal = ({ isOpen, onClose }: CreateBudgetModalProps): JSX.Element => {
   const { projectId } = useParams()
 
   const { successToast, errorToast } = useToast()
@@ -64,7 +60,6 @@ export const CreateBudgetModal = ({
       className="max-w-[655px]"
     >
       <BudgetForm
-        isOpen={isOpen}
         onSubmit={onSubmit}
         error={error}
         defaultValues={{
@@ -82,7 +77,7 @@ export const CreateBudgetModal = ({
           <Button variant="blank" onClick={onClose}>
             Cancel
           </Button>
-          <Button size="xs" type="submit" loading={creatingBudget} className="max-w-[161px] w-full">
+          <Button size="xs" type="submit" loading={creatingBudget} className="max-w-[161px]">
             Create Budget
           </Button>
         </ModalFooter>
