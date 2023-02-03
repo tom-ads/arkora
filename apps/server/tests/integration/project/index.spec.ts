@@ -1,8 +1,6 @@
 import { test } from '@japa/runner'
 import { UserFactory } from 'Database/factories'
 
-const projectsRoute = '/projects'
-
 test.group('Projects: All Projects', () => {
   test('authenticated user can view organisations projects', async ({ client, route }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
@@ -43,7 +41,7 @@ test.group('Projects: All Projects', () => {
     response.assertStatus(401)
   })
 
-  test('diff organisation only receives related projects', async ({ client, assert }) => {
+  test('diff organisation only receives related projects', async ({ client, route, assert }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (builder) => {
         return builder.with('projects', 2)
@@ -61,7 +59,7 @@ test.group('Projects: All Projects', () => {
       .create()
 
     const response = await client
-      .get(projectsRoute)
+      .get(route('ProjectController.index'))
       .headers({ origin: `http://diff-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(diffUser)

@@ -12,6 +12,7 @@ import {
   ManyToMany,
   manyToMany,
   ModelQueryBuilderContract,
+  scope,
 } from '@ioc:Adonis/Lucid/Orm'
 import Project from './Project'
 import BudgetType from './BudgetType'
@@ -106,4 +107,12 @@ export default class Budget extends BaseModel {
       await budget.load('billableType')
     }
   }
+
+  // Scopes
+
+  public static relatedMember = scope((query: BudgetBuilder, userId: number) => {
+    return query.whereHas('members', (budgetBuilder) => {
+      budgetBuilder.where('user_id', userId)
+    })
+  })
 }

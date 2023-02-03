@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BillableType from 'App/Models/BillableType'
 import Budget from 'App/Models/Budget'
-import { groupBy } from 'lodash'
 import BudgetType from 'App/Models/BudgetType'
 import CreateBudgetValidator from 'App/Validators/Budget/CreateBudgetValidator'
 import GetBudgetsValidator from 'App/Validators/Budget/GetBudgetsValidator'
@@ -54,21 +53,11 @@ export default class BudgetController {
   public async index(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(GetBudgetsValidator)
 
-    // Load budgets related to user
-    await ctx.auth.user!.load('budgets')
-    const budgets = ctx.auth.user!.budgets
+    const budgets = await ctx.organisation?.getBudgets({
+      userId: payload?.user_id ?? ctx.auth.user!.id,
+      projectId: payload?.project_id,
+    })
 
-    if (payload.group_by === 'PROJECT') {
-      // Load budget projects and serailize each budget
-      await Promise.all(budgets.map(async (budget) => await budget.load('project')))
-      budgets.map((budget) => budget.serialize())
-
-      // Group serialized budgets by related projects
-      const groupedBudgets: Record<string, Budget[]> = groupBy(budgets, (p) => p.project.name)
-
-      return groupedBudgets
-    }
-
-    return budgets.map((budget) => budget.serialize())
+    return budgets?.map((budget) => budget.serialize())
   }
 }

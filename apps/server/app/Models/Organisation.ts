@@ -22,6 +22,11 @@ import Project from './Project'
 import Task from './Task'
 import UserRole from 'App/Enum/UserRole'
 
+type BudgetFilters = {
+  userId?: number
+  projectId?: number
+}
+
 type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 
 export default class Organisation extends BaseModel {
@@ -103,5 +108,26 @@ export default class Organisation extends BaseModel {
         roleQuery.whereIn('name', [UserRole.OWNER, UserRole.ORG_ADMIN, UserRole.MANAGER])
       })
       .exec()
+  }
+
+  public async getBudgets(this: Organisation, filters?: BudgetFilters) {
+    const projects = await this.related('projects')
+      .query()
+      .if(filters?.projectId, (projectBuilder) => {
+        projectBuilder.where('projects.id', filters!.projectId!)
+      })
+      // Ensure related projects have a member with specified user_id
+      .if(filters?.userId, (projectBuilder) => {
+        projectBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
+      })
+      .preload('budgets', (budgetQuery) => {
+        // Ensure related budgets have a member with specified user_id
+        budgetQuery.if(filters?.userId, (budgetBuilder) => {
+          budgetBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
+        })
+      })
+      .exec()
+
+    return projects?.map((project) => project?.budgets).flat()
   }
 }

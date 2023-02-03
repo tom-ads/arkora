@@ -9,12 +9,16 @@ import {
   hasMany,
   ManyToMany,
   manyToMany,
+  ModelQueryBuilderContract,
+  scope,
 } from '@ioc:Adonis/Lucid/Orm'
 import Client from './Client'
 import Status from 'App/Enum/Status'
 import Budget from './Budget'
 import User from './User'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+
+type ProjectBuilder = ModelQueryBuilderContract<typeof Project>
 
 export default class Project extends BaseModel {
   // Columns
@@ -63,6 +67,14 @@ export default class Project extends BaseModel {
     await project.related('budgets').query().delete()
     await project.related('members').query().delete()
   }
+
+  // Scopes
+
+  public static relatedMember = scope((query: ProjectBuilder, userId: number) => {
+    return query.whereHas('members', (projectBuilder) => {
+      projectBuilder.where('user_id', userId)
+    })
+  })
 
   // Methods
 
