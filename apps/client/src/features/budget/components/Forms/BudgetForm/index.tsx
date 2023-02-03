@@ -1,4 +1,5 @@
 import {
+  ColourPicker,
   Form,
   FormControl,
   FormInput,
@@ -137,11 +138,18 @@ export const BudgetForm = ({
     >
       {({ control, watch, formState: { errors } }) => (
         <>
-          <FormControl>
-            <FormLabel htmlFor="name">Name</FormLabel>
-            <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
-            {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
-          </FormControl>
+          <div className="flex gap-6">
+            <FormControl className="grow">
+              <FormLabel htmlFor="name">Name</FormLabel>
+              <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
+              {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
+            </FormControl>
+
+            <FormControl className="w-fit">
+              <FormLabel htmlFor="colour">Colour</FormLabel>
+              <ColourPicker name="colour" control={control} />
+            </FormControl>
+          </div>
 
           <FormControl>
             <FormLabel htmlFor="private">Visibility</FormLabel>
