@@ -109,5 +109,5 @@ validator.rule(
       )
     }
   },
-  ([organisationId]) => ({ async: true })
+  () => ({ async: true })
 )

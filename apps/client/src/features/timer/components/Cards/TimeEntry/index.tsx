@@ -67,7 +67,7 @@ export const TimeEntryCard = ({ entry, onToggle }: TimeEntryCardProps) => {
                 'text-gray-60': isActiveEntry,
               })}
             >
-              {entry.budget.billable ? 'Billable' : 'Non-Billable'}
+              {entry.task.isBillable ? 'Billable' : 'Non-Billable'}
             </p>
             <p className="text-xl lg:text-2xl text-gray-100 font-medium">{duration}</p>
           </div>
