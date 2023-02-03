@@ -1,2 +1,2 @@
-export * from './Progress'
-export * from './ProgressStep'
+export * from './Step'
+export * from './PasswordStrength'
