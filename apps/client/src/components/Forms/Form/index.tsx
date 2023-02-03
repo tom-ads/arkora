@@ -78,7 +78,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
       methods.reset(defaultValues)
     }
   }, [defaultValues])
-  console.log(methods.formState.errors)
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">
