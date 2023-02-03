@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Spinner } from './components'
-import { useSessionQuery } from './features/auth'
+import { useGetSessionQuery } from './features/auth'
 import { setAuth } from './stores/slices/auth'
 import { setOrganisation } from './stores/slices/organisation'
 import { startTimer } from './stores/slices/timer'
@@ -21,7 +21,7 @@ type AppProps = {
 const App = ({ children }: AppProps): JSX.Element => {
   const dispatch = useDispatch()
 
-  const { data: authResponse, isLoading } = useSessionQuery()
+  const { data: authResponse, isLoading } = useGetSessionQuery()
 
   useEffect(() => {
     if (authResponse) {

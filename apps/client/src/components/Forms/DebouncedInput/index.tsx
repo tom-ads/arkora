@@ -1,17 +1,12 @@
 import { useDebounce } from '@/hooks/useDebounce'
-import { VariantProps } from 'class-variance-authority'
-import { HTMLAttributes, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { input } from '../Input'
+import { FormInputBaseProps, inputStyling } from '../Input'
 
-interface FormDebouncedInputProps
-  extends Omit<HTMLAttributes<HTMLInputElement>, 'onChange'>,
-    VariantProps<typeof input> {
+export interface FormDebouncedInputProps extends Omit<FormInputBaseProps, 'onChange'> {
   name: string
-  placeHolder?: string
   value: string
-  // Override default onChange handler
-  onChange: (val: string) => void
+  onChange: (val: string) => void // Override default onChange handler
 }
 
 export const FormDebouncedInput = ({
@@ -22,9 +17,9 @@ export const FormDebouncedInput = ({
   value,
   onChange,
 }: FormDebouncedInputProps): JSX.Element => {
-  const { register } = useFormContext()
-
   const [inputVal, setInputVal] = useState<string>(value)
+
+  const { register } = useFormContext()
 
   const debouncedInput = useDebounce<string>(inputVal, 500)
 
@@ -40,7 +35,7 @@ export const FormDebouncedInput = ({
       value={inputVal}
       onChange={(e) => setInputVal(e.target.value)}
       placeholder={placeHolder}
-      className={input({ size, error })}
+      className={inputStyling({ size, error })}
     />
   )
 }

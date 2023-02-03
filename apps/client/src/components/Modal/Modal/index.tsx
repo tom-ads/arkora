@@ -5,10 +5,11 @@ import classNames from 'classnames'
 import { Fragment, ReactNode } from 'react'
 import { ModalHeader } from '../ModalHeader'
 
-type ModalRootProps = ModalBaseProps & {
+type ModalProps = ModalBaseProps & {
   icon: JSX.Element
   title: string
   description?: string
+  className?: string
   children: ReactNode
 }
 
@@ -19,8 +20,9 @@ export const Modal = ({
   isOpen,
   onClose,
   loading,
+  className,
   children,
-}: ModalRootProps): JSX.Element => {
+}: ModalProps): JSX.Element => {
   return (
     <Transition show={isOpen} as={Fragment} appear>
       <Dialog as="div" onClose={onClose} className="relative z-50">
@@ -49,7 +51,12 @@ export const Modal = ({
         >
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center lg:p-4">
-              <Dialog.Panel className="relative rounded bg-white mx-auto max-w-xl w-full flex flex-col divide-y divide-gray-30 shadow-glow min-h-[500px]">
+              <Dialog.Panel
+                className={classNames(
+                  'relative rounded bg-white mx-auto max-w-xl w-full flex flex-col divide-y divide-gray-30 shadow-glow min-h-[500px]',
+                  className,
+                )}
+              >
                 {loading ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Spinner className="text-purple-90 w-12 h-12 stroke-[10px]" />

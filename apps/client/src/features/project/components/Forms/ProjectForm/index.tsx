@@ -23,25 +23,17 @@ import { z } from 'zod'
 
 export type ProjectFormFields = {
   name: string
-  client: {
-    id: number | undefined
-    value: string | undefined
-    children: string | undefined
-  }
+  client: number | undefined
   private: boolean
   hideCost: boolean
   team: Array<{ id: number; value: string }>
 }
 
-const projectSchema = z.object({
+export const projectSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
   private: z.boolean(),
   hideCost: z.boolean(),
-  client: z.object({
-    id: z.number(),
-    value: z.string({ required_error: 'Client is required' }),
-    children: z.string(),
-  }),
+  client: z.string().transform((value) => (value ? Number(value) : undefined)),
   team: z
     .array(
       z.object({
@@ -86,7 +78,6 @@ export const ProjectForm = ({
     () =>
       orgClients?.clients.map((client) => ({
         id: client.id,
-        value: client.name,
         display: client.name,
       })) ?? [],
     [orgClients?.clients],
@@ -127,11 +118,7 @@ export const ProjectForm = ({
       queryError={error}
       defaultValues={{
         name: defaultState?.name ?? undefined,
-        client: {
-          id: defaultState?.client?.id ?? undefined,
-          value: defaultState?.client?.value ?? undefined,
-          children: defaultState?.client?.children ?? undefined,
-        },
+        client: defaultState?.client ?? undefined,
         private: defaultState?.private ?? false,
         hideCost: defaultState?.hideCost ?? false,
         team: defaultState?.team ?? [],
@@ -151,17 +138,15 @@ export const ProjectForm = ({
               name="client"
               control={control}
               placeHolder="Select client"
-              error={!!errors?.client?.value?.message}
+              error={!!errors?.client?.message}
               fullWidth
             >
               {clientOptions?.map((option) => (
-                <SelectOption id={option.id} key={option.id} value={option.value}>
-                  {option?.display}
-                </SelectOption>
+                <SelectOption key={option.id}>{option?.display}</SelectOption>
               ))}
             </FormSelect>
-            {errors?.client?.value?.message && (
-              <FormErrorMessage>{errors.client.value?.message}</FormErrorMessage>
+            {errors?.client?.message && (
+              <FormErrorMessage>{errors.client?.message}</FormErrorMessage>
             )}
           </FormControl>
 

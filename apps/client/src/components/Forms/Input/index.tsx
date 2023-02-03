@@ -1,9 +1,9 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import { InputHTMLAttributes } from 'react'
+import { HTMLAttributes } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-export const input = cva(
-  'border w-full rounded placeholder:text-gray-60 text-gray-80 font-normal transition-all outline-none appearance-none',
+export const inputStyling = cva(
+  'border w-full rounded placeholder:text-gray-60 text-gray-80 font-normal transition-all outline-none appearance-none disabled:bg-gray-20',
   {
     variants: {
       size: {
@@ -22,27 +22,34 @@ export const input = cva(
     },
     defaultVariants: {
       size: 'sm',
+      error: false,
+      disabled: false,
     },
   },
 )
 
-export interface FormInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'disabled' | 'size'>,
-    VariantProps<typeof input> {
-  name: string // prevent name from being optional
-  placeHolder: string
+export interface FormInputBaseProps
+  extends HTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof inputStyling> {
+  disabled?: boolean
+  placeHolder?: string
 }
 
-export const FormInput = ({ name, placeHolder, size, error }: FormInputProps) => {
+export interface FormInputProps extends FormInputBaseProps {
+  name: string // prevent name from being optional
+}
+
+export const FormInput = ({ name, placeHolder, size, error, ...props }: FormInputProps) => {
   const { register } = useFormContext()
 
   return (
     <input
+      {...props}
+      {...register(name)}
       id={name}
       placeholder={placeHolder}
       type="text"
-      className={input({ size, error })}
-      {...register(name)}
+      className={inputStyling({ size, error })}
     />
   )
 }

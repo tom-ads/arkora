@@ -22,4 +22,10 @@ export default class BudgetType extends BaseModel {
 
   @hasMany(() => Budget)
   public budgets: HasMany<typeof Budget>
+
+  // Static Methods
+
+  public static async getByName(name: BudgetKind) {
+    return await this.query().where('name', name).first()
+  }
 }

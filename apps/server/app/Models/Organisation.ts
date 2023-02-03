@@ -20,6 +20,7 @@ import WorkDay from './WorkDay'
 import Client from './Client'
 import Project from './Project'
 import Task from './Task'
+import UserRole from 'App/Enum/UserRole'
 
 type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 
@@ -91,5 +92,16 @@ export default class Organisation extends BaseModel {
   @beforeFetch()
   public static preloadRelations(query: OrganisationBuilder) {
     query.preload('currency').preload('workDays')
+  }
+
+  // Instance Methods
+
+  public async getPrivilegedUsers(this: Organisation) {
+    return await this.related('users')
+      .query()
+      .whereHas('role', (roleQuery) => {
+        roleQuery.whereIn('name', [UserRole.OWNER, UserRole.ORG_ADMIN, UserRole.MANAGER])
+      })
+      .exec()
   }
 }

@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import {
+  afterCreate,
   BaseModel,
   beforeFetch,
   beforeFind,
@@ -17,32 +18,39 @@ import BudgetType from './BudgetType'
 import User from './User'
 import Task from './Task'
 import TimeEntry from './TimeEntry'
+import BillableType from './BillableType'
 
 type BudgetBuilder = ModelQueryBuilderContract<typeof Budget>
 
 export default class Budget extends BaseModel {
-  // Columns
+  // Fields
 
   @column({ isPrimary: true })
   public id: number
 
   @column({ serializeAs: null })
+  public projectId: number
+
+  @column({ serializeAs: null })
   public budgetTypeId: number
 
   @column({ serializeAs: null })
-  public projectId: number
+  public billableTypeId: number | null
 
   @column()
   public name: string
 
   @column()
-  public hourlyRate: number
+  public colour: string
+
+  @column()
+  public hourlyRate: number | null
 
   @column()
   public budget: number
 
-  @column({ serialize: Boolean })
-  public billable: boolean
+  @column()
+  public fixedPrice: number | null
 
   @column({ serialize: Boolean })
   public private: boolean
@@ -53,13 +61,18 @@ export default class Budget extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   public updatedAt: DateTime
 
-  // Relations
+  // Relations - belongsTo
 
   @belongsTo(() => Project)
   public project: BelongsTo<typeof Project>
 
   @belongsTo(() => BudgetType, { serializeAs: 'budget_type' })
   public budgetType: BelongsTo<typeof BudgetType>
+
+  @belongsTo(() => BillableType)
+  public billableType: BelongsTo<typeof BillableType>
+
+  // Relations - manyToMany
 
   @manyToMany(() => User, {
     pivotTable: 'budget_members',
@@ -72,6 +85,8 @@ export default class Budget extends BaseModel {
   })
   public tasks: ManyToMany<typeof Task>
 
+  // Relations - hasMany
+
   @hasMany(() => TimeEntry)
   public timeEntries: HasMany<typeof TimeEntry>
 
@@ -79,17 +94,16 @@ export default class Budget extends BaseModel {
 
   @beforeFind()
   @beforeFetch()
-  public static preloadRelations(query: BudgetBuilder) {
-    query.preload('budgetType')
+  public static beforePreloads(query: BudgetBuilder) {
+    query.preload('budgetType').preload('billableType')
   }
 
-  // Scopes
-  public static async getBudgetsWithProjectFields(budgetIds: number[], projectFields: string) {
-    return await Budget.query()
-      .select('budgets.*', projectFields)
-      .join('projects', 'budgets.project_id', '=', 'projects.id')
-      .whereIn('budgets.id', budgetIds)
-      .preload('project')
-      .exec()
+  @afterCreate()
+  public static async afterPreloads(budget: Budget) {
+    await budget.load('budgetType')
+
+    if (budget.billableTypeId) {
+      await budget.load('billableType')
+    }
   }
 }

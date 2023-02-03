@@ -1,11 +1,11 @@
 import { VariantProps } from 'class-variance-authority'
 import { HTMLAttributes } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { input } from '../Input'
+import { inputStyling } from '../Input'
 
 interface FormTextAreaProps
   extends HTMLAttributes<HTMLTextAreaElement>,
-    VariantProps<typeof input> {
+    VariantProps<typeof inputStyling> {
   name: string
   row?: number
   disabled?: boolean
@@ -18,7 +18,7 @@ export const FormTextArea = ({ name, size, error, ...props }: FormTextAreaProps)
     <textarea
       id={name}
       rows={3}
-      className={input({ size, error })}
+      className={inputStyling({ size, error })}
       {...props}
       {...register(name)}
     />

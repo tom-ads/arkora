@@ -8,7 +8,9 @@ test.group('Projects: All Projects', () => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (builder) => {
         return builder.with('projects', 2, (projectBuilder) => {
-          return projectBuilder.with('members', 5).with('budgets', 5)
+          return projectBuilder
+            .with('members', 5)
+            .with('budgets', 5, (budgetQuery) => budgetQuery.with('budgetType'))
         })
       })
     })

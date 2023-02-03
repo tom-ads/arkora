@@ -28,7 +28,7 @@ test.group('Timers : Start Timer', ({ each }) => {
     await organisation.related('tasks').attach(commonTasks.map((task) => task.id))
 
     // Setup organisation budget and attach common tasks
-    const budget = await BudgetFactory.create()
+    const budget = await BudgetFactory.with('budgetType').create()
     await budget.related('tasks').attach(commonTasks.map((task) => task.id))
 
     // Setup organisation owner

@@ -4,6 +4,6 @@ import BudgetKind from 'App/Enum/BudgetKind'
 
 export default Factory.define(BudgetType, () => {
   return {
-    name: BudgetKind.HOURLY,
+    name: BudgetKind.VARIABLE,
   }
 }).build()

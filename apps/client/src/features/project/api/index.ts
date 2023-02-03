@@ -23,7 +23,7 @@ const projectEndpoints = appApi.injectEndpoints({
       query: () => projectsBasePath,
       providesTags: ['Projects'],
     }),
-    getProject: build.query<GetProjectResponse, number>({
+    getProject: build.query<GetProjectResponse, number | string>({
       query: (id) => `${projectsBasePath}/${id}`,
       providesTags: ['Project'],
     }),

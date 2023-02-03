@@ -1,8 +1,7 @@
 import { timeToMinutes } from '@/helpers/tracking'
-import { VariantProps } from 'class-variance-authority'
-import { ChangeEvent, HTMLAttributes } from 'react'
+import { ChangeEvent } from 'react'
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form'
-import { input } from '../Input'
+import { FormInputBaseProps, inputStyling } from '../Input'
 
 export interface TimeEntryResult {
   original: string
@@ -12,8 +11,7 @@ export interface TimeEntryResult {
 interface FormTrackingInputProps<
   TFieldValues extends FieldValues = FieldValues,
   TFieldName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-> extends HTMLAttributes<HTMLInputElement>,
-    VariantProps<typeof input> {
+> extends FormInputBaseProps {
   name: TFieldName
   control: Control<TFieldValues>
 }
@@ -52,7 +50,7 @@ export const FormTimeTrackingInput = <
             value={field.value?.original ?? '00:00'}
             onChange={onChange}
             type="time"
-            className={input({ size, error })}
+            className={inputStyling({ size, error })}
           />
         )
       }}

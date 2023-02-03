@@ -1,6 +1,7 @@
 import { validator } from '@ioc:Adonis/Core/Validator'
 import { CurrencyCode } from 'App/Enum/CurrencyCode'
 import WeekDay from 'App/Enum/WeekDay'
+import Organisation from 'App/Models/Organisation'
 
 /*
 |--------------------------------------------------------------------------
@@ -83,3 +84,30 @@ validator.rule('workDays', (workDays, _, options) => {
     )
   }
 })
+
+validator.rule(
+  'organisationProject',
+  async (projectId, [organisationId], options) => {
+    if (typeof organisationId !== 'number') {
+      throw new Error('"organisationProject" rule can only be used with a number schema type')
+    }
+
+    const exists = await Organisation.query()
+      .where('id', organisationId)
+      .whereHas('projects', (projectQuery) => {
+        projectQuery.where('projects.id', projectId)
+      })
+      .first()
+
+    if (!exists || exists.id !== organisationId) {
+      options.errorReporter.report(
+        options.pointer,
+        'organisationProject',
+        'organisationProject validation failed',
+        options.arrayExpressionPointer,
+        { organisationId }
+      )
+    }
+  },
+  ([organisationId]) => ({ async: true })
+)

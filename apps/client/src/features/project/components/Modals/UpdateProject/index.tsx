@@ -1,4 +1,4 @@
-import { Button, HouseIcon, Spinner } from '@/components'
+import { Button, HouseIcon } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
 import { ConfirmationModal } from '@/components/Modals'
 import {
@@ -39,7 +39,7 @@ export const UpdateProjectModal = ({
         name: data.name,
         show_cost: data.hideCost,
         private: data.private,
-        client_id: data.client.id!,
+        client_id: data.client!,
         team: data?.team?.map((member) => member.id),
       },
     })
@@ -75,11 +75,7 @@ export const UpdateProjectModal = ({
           isOpen={isOpen}
           defaultValues={{
             name: project?.name,
-            client: {
-              id: project?.client?.id,
-              value: project?.client?.name,
-              children: project?.client?.name,
-            },
+            client: project?.client?.id,
             private: project?.private,
             hideCost: project?.showCost,
             team: project?.members,

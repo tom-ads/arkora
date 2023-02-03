@@ -20,7 +20,13 @@
   "preloads": [
     "./start/routes",
     "./start/kernel",
-    "./start/validator",
+    {
+      "file": "./start/validator",
+      "environment": [
+        "web",
+        "test"
+      ]
+    },
     "./start/bouncer"
   ],
   "providers": [

@@ -13,10 +13,12 @@ export function useQueryError<TFields extends FieldValues>(
 ) {
   useEffect(() => {
     if (isFetchBaseQueryError(error)) {
-      const fields = error.data as { [key: string]: any }[]
-      Object.entries(fields).forEach(([field, message]) =>
-        setError(field as Path<TFields>, message),
-      )
+      const errorData: any = error.data
+      if (error.status === 422 && errorData && errorData?.errors) {
+        errorData.errors.forEach(({ field, message }: Record<string, string>) => {
+          setError(field as Path<TFields>, { message })
+        })
+      }
     }
   }, [error])
 }
