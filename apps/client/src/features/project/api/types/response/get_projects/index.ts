@@ -1,7 +1,5 @@
 import ProjectBudget from '@/types/ProjectBudget'
 
-type GetProjectsResponse = {
-  projects: ProjectBudget[]
-}
+type GetProjectsResponse = ProjectBudget[]
 
 export default GetProjectsResponse

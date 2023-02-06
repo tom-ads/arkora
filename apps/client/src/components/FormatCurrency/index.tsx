@@ -16,7 +16,7 @@ export const FormatCurrency = ({ value, currency = 'GBP' }: FormatCurrencyProps)
     })
   }, [currency])
 
-  if (!value) {
+  if (!value === undefined || value === null || isNaN(value)) {
     return <p>- - -</p>
   }
 

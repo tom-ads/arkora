@@ -5,5 +5,5 @@ type TableBodyProps = {
 }
 
 export const TableBody = ({ children }: TableBodyProps): JSX.Element => {
-  return <tbody>{children}</tbody>
+  return <tbody className="divide-y divide-gray-20">{children}</tbody>
 }

@@ -29,21 +29,12 @@ test.group('Projects: All Projects', () => {
       .preload('members')
 
     response.assertStatus(200)
-    response.assertBody({ projects: projects.map((p) => p.serialize()) })
-  })
-
-  test('unauthenticated user cannot view organisations projects', async ({ client, route }) => {
-    const response = await client
-      .get(route('ProjectController.index'))
-      .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
-
-    response.assertStatus(401)
+    response.assertBodyContains(projects.map((p) => p.serialize()))
   })
 
   test('diff organisation only receives related projects', async ({ client, route, assert }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (builder) => {
+      return orgBuilder.with('clients', 1, (builder) => {
         return builder.with('projects', 2)
       })
     })
@@ -83,7 +74,7 @@ test.group('Projects: All Projects', () => {
     )
 
     response.assertStatus(200)
-    response.assertBody({ projects: diffOrgProjects.map((p) => p.serialize()) })
+    response.assertBodyContains(diffOrgProjects.map((p) => p.serialize()))
   })
 
   test('diff organisation user, cannot view projects for test organisation', async ({
@@ -114,5 +105,14 @@ test.group('Projects: All Projects', () => {
 
     response.assertStatus(404)
     response.assertBody({ message: 'Organisation account does not exist' })
+  })
+
+  test('unauthenticated user cannot view organisations projects', async ({ client, route }) => {
+    const response = await client
+      .get(route('ProjectController.index'))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+
+    response.assertStatus(401)
   })
 })

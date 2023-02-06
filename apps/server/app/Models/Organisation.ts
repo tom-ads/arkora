@@ -22,10 +22,14 @@ import Project from './Project'
 import Task from './Task'
 import UserRole from 'App/Enum/UserRole'
 
-type BudgetFilters = {
-  userId?: number
-  projectId?: number
-}
+type BudgetFilters = Partial<{
+  userId: number
+  projectId: number
+}>
+
+type BudgetOptions = Partial<{
+  includeProject: boolean
+}>
 
 type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 
@@ -110,7 +114,7 @@ export default class Organisation extends BaseModel {
       .exec()
   }
 
-  public async getBudgets(this: Organisation, filters?: BudgetFilters) {
+  public async getBudgets(this: Organisation, filters?: BudgetFilters, options?: BudgetOptions) {
     const projects = await this.related('projects')
       .query()
       .if(filters?.projectId, (projectBuilder) => {
@@ -121,11 +125,17 @@ export default class Organisation extends BaseModel {
         projectBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
       })
       .preload('budgets', (budgetQuery) => {
-        // Ensure related budgets have a member with specified user_id
-        budgetQuery.if(filters?.userId, (budgetBuilder) => {
-          budgetBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
-        })
+        budgetQuery
+          // Ensure related budgets have a member with specified user_id
+          .if(filters?.userId, (budgetBuilder) => {
+            budgetBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
+          })
+          // Optionally include project to budget when retrieving
+          .if(options?.includeProject, (budgetBuilder) => {
+            budgetBuilder.preload('project')
+          })
       })
+      .orderBy('name', 'asc')
       .exec()
 
     return projects?.map((project) => project?.budgets).flat()

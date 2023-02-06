@@ -11,9 +11,8 @@ import {
 import User from 'App/Models/User'
 import Organisation from 'App/Models/Organisation'
 import Budget from 'App/Models/Budget'
-import BillableTypeFactory from 'Database/factories/BillableTypeFactory'
+import { createBillableTypes } from 'Database/factories/BillableTypeFactory'
 import BillableType from 'App/Models/BillableType'
-import BillableKind from 'App/Enum/BillableKind'
 
 test.group('Budgets : Create Budget', (group) => {
   let authUser: User
@@ -21,10 +20,7 @@ test.group('Budgets : Create Budget', (group) => {
   let billableTypes: BillableType[]
 
   group.setup(async () => {
-    billableTypes = await BillableTypeFactory.merge([
-      { name: BillableKind.TOTAL_COST },
-      { name: BillableKind.TOTAL_HOURS },
-    ]).createMany(2)
+    billableTypes = await createBillableTypes()
   })
 
   group.each.setup(async () => {

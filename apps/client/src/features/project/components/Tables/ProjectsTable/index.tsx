@@ -36,17 +36,17 @@ export const ProjectsTable = ({ onManage }: ProjectTableProps): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[32px]"></TableHeading>
+            <TableHeading className="w-[32px]" first></TableHeading>
             <TableHeading className="max-w-[355px]">NAME</TableHeading>
             <TableHeading className="max-w-[355px]">CLIENT</TableHeading>
             <TableHeading className="max-w-[255px]">TEAM</TableHeading>
             <TableHeading className="max-w-[255px]">STATUS</TableHeading>
             <TableHeading className="max-w-[100px]">VISIBILITY</TableHeading>
-            <TableHeading className="w-[86px]"></TableHeading>
+            <TableHeading className="w-[86px]" last></TableHeading>
           </TableRow>
         </TableHead>
         <TableBody>
-          {data?.projects?.map((project) => (
+          {data?.map((project) => (
             <Fragment key={`project-${project?.id}`}>
               <TableRow>
                 <TableData>

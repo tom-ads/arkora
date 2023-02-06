@@ -1,17 +1,11 @@
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
-import { CommonTask } from 'App/Enum/CommonTask'
 import UserRole from 'App/Enum/UserRole'
-import BudgetType from 'App/Models/BudgetType'
 import Role from 'App/Models/Role'
-import Task from 'App/Models/Task'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
+import { getBudgetTypes } from './BudgetType'
 
 export default class extends BaseSeeder {
   public static environment = ['development']
-
-  private async getCommonTask() {
-    return await Task.query().whereIn('name', Object.values(CommonTask))
-  }
 
   public async createUser(fields?: object, role?: UserRole) {
     const dbRole = await Role.findBy('name', role ?? UserRole.OWNER)
@@ -23,7 +17,7 @@ export default class extends BaseSeeder {
   }
 
   public async createOrganisation() {
-    const budgetTypes = await BudgetType.query()
+    const budgetTypes = await getBudgetTypes()
 
     return await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       clientBuilder.with('projects', 5, (projectBuilder) => {

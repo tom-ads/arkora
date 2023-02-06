@@ -53,10 +53,17 @@ export default class BudgetController {
   public async index(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(GetBudgetsValidator)
 
-    const budgets = await ctx.organisation?.getBudgets({
-      userId: payload?.user_id ?? ctx.auth.user!.id,
-      projectId: payload?.project_id,
-    })
+    let budgets = await ctx.organisation?.getBudgets(
+      {
+        userId: payload?.user_id ?? ctx.auth.user!.id,
+        projectId: payload?.project_id,
+      },
+      { includeProject: payload?.include_project }
+    )
+
+    if (payload.include_expenditure && budgets?.length) {
+      budgets = await Budget.getBudgetsTotalSpent(budgets.map((budget) => budget.id))
+    }
 
     return budgets?.map((budget) => budget.serialize())
   }

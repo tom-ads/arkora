@@ -64,6 +64,9 @@ module.exports = {
       },
     },
     extend: {
+      transitionProperty: {
+        width: 'width',
+      },
       fontFamily: {
         charis: ['Charis', 'serif'],
         inter: ['Inter', 'sans-serif'],

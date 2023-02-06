@@ -26,6 +26,8 @@ export default class GetBudgetsValidator {
   public schema = schema.create({
     user_id: schema.number.optional(),
     project_id: schema.number.optional(),
+    include_project: schema.boolean.optional(),
+    include_expenditure: schema.boolean.optional(),
   })
 
   /**

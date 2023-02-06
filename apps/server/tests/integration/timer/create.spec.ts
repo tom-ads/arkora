@@ -43,7 +43,9 @@ test.group('Timer: Start Time Entry', ({ each }) => {
 
     // Link tasks to budgets
     await Promise.all(
-      budgets.map((budget) => budget.related('tasks').attach(commonTasks.map((task) => task.id)))
+      budgets.map(
+        async (budget) => await budget.related('tasks').attach(commonTasks.map((task) => task.id))
+      )
     )
   })
 

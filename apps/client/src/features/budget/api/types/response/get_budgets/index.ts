@@ -1,5 +1,8 @@
 import { Budget } from '@/types'
+import Project from '@/types/Project'
 
-type GetBudgetsResponse = Budget[] | Record<string, Budget[]>
+type BudgetProject = Budget & { project?: Project }
+
+type GetBudgetsResponse = BudgetProject[]
 
 export default GetBudgetsResponse

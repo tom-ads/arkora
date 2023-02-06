@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom'
 import { BudgetForm, BudgetFormFields } from '../../Forms'
 import { useToast } from '@/hooks/useToast'
 import BillableType from '@/enums/BillableType'
+import { convertToPennies } from '@/helpers/currency'
 
 type CreateBudgetModalProps = ModalBaseProps
 
@@ -30,11 +31,11 @@ export const CreateBudgetModal = ({ isOpen, onClose }: CreateBudgetModalProps): 
         name: data.name,
         private: data.private,
         colour: data.colour,
-        budget: data.budget ?? 0,
+        budget: convertToPennies(data.budget ?? 0),
         billable_type: data.billableType,
         budget_type: data.budgetType,
-        fixed_price: data.fixedPrice,
-        hourly_rate: data.hourlyRate,
+        fixed_price: data.fixedPrice ? convertToPennies(data.fixedPrice) : null,
+        hourly_rate: data.hourlyRate ? convertToPennies(data.hourlyRate) : null,
       })
         .unwrap()
         .then(() => {
