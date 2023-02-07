@@ -173,7 +173,7 @@ export default class Budget extends BaseModel {
             billableTasks.map((task) => task.task_id)
           )
       })
-      .groupBy('budgets.id', 'time_entries.duration_minutes')
+      .groupBy('budgets.id')
       .orderBy('budgets.name', 'asc')
 
     return result
