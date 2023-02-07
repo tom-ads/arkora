@@ -9,7 +9,7 @@ import {
 } from '@/components'
 import { ToolTipContainer } from '@/components/ToolTip/container'
 import BudgetType from '@/enums/BudgetType'
-import { convertToPounds } from '@/helpers/currency'
+import { calculatePercentage, convertToPounds } from '@/helpers/currency'
 import { RootState } from '@/stores/store'
 import { Budget } from '@/types'
 import { useMemo } from 'react'
@@ -21,93 +21,90 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
   }))
 
   const allocatedBudget = useMemo(() => {
-    let allocation = null
-    if (BudgetType.VARIABLE) {
+    let allocation = 0
+    if (budget?.budgetType?.name === BudgetType.VARIABLE) {
       allocation = convertToPounds(budget.budget)
-    } else if (BudgetType.FIXED) {
+    } else if (budget?.budgetType?.name === BudgetType.FIXED) {
       allocation = convertToPounds(budget?.fixedPrice ?? 0)
     }
-
     return allocation
   }, [budget])
 
   return (
-    <>
-      <TableRow>
-        <TableData>
-          <div
-            className="w-2 h-9 flex flex-col grow rounded-lg"
-            style={{ backgroundColor: budget.colour ?? 'black' }}
-          ></div>
-        </TableData>
+    <TableRow>
+      <TableData>
+        <div
+          className="w-2 h-9 flex flex-col grow rounded-lg"
+          style={{ backgroundColor: budget.colour ?? 'black' }}
+        ></div>
+      </TableData>
 
-        <TableData>
-          <InlineLink className="font-medium" to={`/budgets/${budget.id}`}>
-            {budget.name}
-          </InlineLink>
-        </TableData>
+      <TableData>
+        <InlineLink className="font-medium" to={`/budgets/${budget.id}`}>
+          {budget.name}
+        </InlineLink>
+      </TableData>
 
-        <TableData>
-          <Badge variant="default">{budget?.budgetType?.name}</Badge>
-        </TableData>
+      <TableData>
+        <Badge variant="default">{budget?.budgetType?.name}</Badge>
+      </TableData>
 
-        <TableData>
-          {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-            <FormatCurrency value={budget.hourlyRate} currency={currency?.code} />
-          ) : (
-            <p>- - -</p>
-          )}
-        </TableData>
+      <TableData>
+        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
+          <FormatCurrency value={convertToPounds(budget.hourlyRate)} currency={currency?.code} />
+        ) : (
+          <p>- - -</p>
+        )}
+      </TableData>
 
-        <TableData>
-          {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-            <FormatCurrency value={allocatedBudget} currency={currency?.code} />
-          ) : (
-            <p>- - -</p>
-          )}
-        </TableData>
+      <TableData>
+        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
+          <FormatCurrency value={allocatedBudget} currency={currency?.code} />
+        ) : (
+          <p>- - -</p>
+        )}
+      </TableData>
 
-        <TableData>
-          {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-            <ToolTipContainer>
-              <ProgressLineIndicator
-                id={`spent-tooltip-${budget.id}`}
-                percent={(budget.totalSpent / budget.budget) * 100}
-              />
-              <ToolTip id={`spent-tooltip-${budget.id}`}>
-                <div className="divide-y divide-gray-40 divide-dashed">
-                  <div className="flex justify-between items-center py-1">
-                    <p className="font-medium text-xs text-gray-50">Total Budget</p>
-                    <p className="font-semibold text-xs text-gray-80">
-                      <FormatCurrency value={allocatedBudget} currency={currency?.code} />
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-center py-1">
-                    <p className="font-medium text-xs text-gray-50">Spent Budget</p>
-                    <p className="font-semibold text-xs text-gray-80">
-                      <FormatCurrency
-                        value={convertToPounds(budget.totalSpent)}
-                        currency={currency?.code}
-                      />
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-center py-1">
-                    <p className="font-medium text-xs text-gray-50">Remaining Budget</p>
-                    <p className="font-semibold text-xs text-gray-80">
-                      <FormatCurrency
-                        value={convertToPounds(budget.totalRemaining)}
-                        currency={currency?.code}
-                      />
-                    </p>
-                  </div>
+      <TableData>
+        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
+          <ToolTipContainer>
+            <ProgressLineIndicator
+              id={`spent-tooltip-${budget.id}`}
+              percent={calculatePercentage(convertToPounds(budget.totalSpent), allocatedBudget)}
+            />
+            <ToolTip id={`spent-tooltip-${budget.id}`}>
+              <div className="divide-y divide-gray-40 divide-dashed">
+                <div className="flex justify-between items-center py-1">
+                  <p className="font-medium text-xs text-gray-50">Total Budget</p>
+                  <p className="font-semibold text-xs text-gray-80">
+                    <FormatCurrency value={allocatedBudget} currency={currency?.code} />
+                  </p>
                 </div>
-              </ToolTip>
-            </ToolTipContainer>
-          ) : (
-            <p>- - -</p>
-          )}
-        </TableData>
-      </TableRow>
-    </>
+                <div className="flex justify-between items-center py-1">
+                  <p className="font-medium text-xs text-gray-50">Spent Budget</p>
+                  <p className="font-semibold text-xs text-gray-80">
+                    <FormatCurrency
+                      value={convertToPounds(budget.totalSpent)}
+                      currency={currency?.code}
+                    />
+                  </p>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <p className="font-medium text-xs text-gray-50">Remaining Budget</p>
+                  <p className="font-semibold text-xs text-gray-80">
+                    <FormatCurrency
+                      value={convertToPounds(budget.totalRemaining)}
+                      currency={currency?.code}
+                    />
+                  </p>
+                </div>
+              </div>
+            </ToolTip>
+          </ToolTipContainer>
+        ) : (
+          <p>- - -</p>
+        )}
+      </TableData>
+    </TableRow>
   )
 }
