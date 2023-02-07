@@ -73,7 +73,7 @@ export default class Budget extends BaseModel {
 
   @computed()
   public get totalRemaining() {
-    return this.budget - this.totalSpent
+    return (this.fixedPrice ? this.fixedPrice : this.budget) - this.totalSpent
   }
 
   // Relations - belongsTo
