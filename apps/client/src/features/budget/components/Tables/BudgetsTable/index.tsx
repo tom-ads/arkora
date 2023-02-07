@@ -11,9 +11,9 @@ export const BudgetsTable = ({ children }: { children: ReactNode }): JSX.Element
             <TableHeading className="w-[225px]">NAME</TableHeading>
             <TableHeading className="w-[160px]">TYPE</TableHeading>
             <TableHeading className="w-[130px]">RATE (HRS)</TableHeading>
-            <TableHeading className="max-w-[355px]">ALLOC. BUDGET</TableHeading>
+            <TableHeading>ALLOC. BUDGET</TableHeading>
             <TableHeading className="w-[230px]">SPENT</TableHeading>
-            <TableHeading className="max-w-[355px]">BILLABLE / NON-BILLABLE</TableHeading>
+            <TableHeading className="w-[230px]">BILLABLE / NON-BILLABLE</TableHeading>
             <TableHeading className="max-w-[355px]">VISIBILITY</TableHeading>
           </TableRow>
         </TableHead>

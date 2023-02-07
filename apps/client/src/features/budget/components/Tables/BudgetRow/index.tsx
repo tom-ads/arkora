@@ -75,13 +75,13 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
             <ToolTip id={`spent-tooltip-${budget.id}`}>
               <div className="divide-y divide-gray-40 divide-dashed">
                 <div className="flex justify-between items-center py-1">
-                  <p className="font-medium text-xs text-gray-50">Total Budget</p>
+                  <p className="font-medium text-xs text-gray-50">Total</p>
                   <p className="font-semibold text-xs text-gray-80">
                     <FormatCurrency value={allocatedBudget} currency={currency?.code} />
                   </p>
                 </div>
                 <div className="flex justify-between items-center py-1">
-                  <p className="font-medium text-xs text-gray-50">Spent Budget</p>
+                  <p className="font-medium text-xs text-gray-50">Spent</p>
                   <p className="font-semibold text-xs text-gray-80">
                     <FormatCurrency
                       value={convertToPounds(budget.totalSpent)}
@@ -90,7 +90,7 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
                   </p>
                 </div>
                 <div className="flex justify-between items-center py-1">
-                  <p className="font-medium text-xs text-gray-50">Remaining Budget</p>
+                  <p className="font-medium text-xs text-gray-50">Remaining</p>
                   <p className="font-semibold text-xs text-gray-80">
                     <FormatCurrency
                       value={convertToPounds(budget.totalRemaining)}
@@ -104,6 +104,14 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
         ) : (
           <p>- - -</p>
         )}
+      </TableData>
+
+      <TableData>
+        <p>- - -</p>
+      </TableData>
+
+      <TableData>
+        <p>{budget.private ? 'Private' : 'Public'}</p>
       </TableData>
     </TableRow>
   )
