@@ -258,7 +258,15 @@ test.group('Budgets: All Budgets', ({ each }) => {
 
     response.assertStatus(200)
     response.assertBodyContains([{ totalSpent: 20000 }])
-    response.assertBodyContains([{ totalSpent: 0 }])
+    response.assertBodyContains([
+      {
+        budget_id: budgets[0].id,
+        totalSpent: 20000,
+        totalBillable: 0,
+        totalRemaining: 9980000,
+        totalNonBillable: 20000,
+      },
+    ])
   })
 
   test('organisation user cannot index budgets for a different organisation', async ({

@@ -29,6 +29,7 @@ export default class BudgetController {
         budget: payload.budget,
         hourlyRate: payload.hourly_rate,
         private: payload.private,
+        fixedPrice: payload.fixed_price,
       })
 
       ctx.logger.info(`Created budget ${createdBudget.id} for tenant ${ctx.organisation!.id}`)
@@ -61,9 +62,11 @@ export default class BudgetController {
       { includeProject: payload?.include_project }
     )
 
-    if (payload.include_expenditure && budgets?.length) {
-      budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
+    if (!budgets?.length) {
+      return ctx.response.ok([])
     }
+
+    budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
 
     return budgets?.map((budget) => budget.serialize())
   }

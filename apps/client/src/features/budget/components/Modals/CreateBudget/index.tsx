@@ -26,12 +26,25 @@ export const CreateBudgetModal = ({ isOpen, onClose }: CreateBudgetModalProps): 
 
   const onSubmit = async (data: BudgetFormFields) => {
     if (projectId) {
+      let actualBudget = data.budget ?? 0
+      console.log(data)
+      if (data.budgetType === BudgetType.NON_BILLABLE) {
+        actualBudget = data.budget! * 60
+      } else if (
+        (data.budgetType === BudgetType.VARIABLE || data.budgetType === BudgetType.FIXED) &&
+        data.billableType === BillableType.TOTAL_HOURS
+      ) {
+        actualBudget = data.budget! * 60
+      } else {
+        actualBudget = convertToPennies(data.budget!)
+      }
+
       await createBudget({
         project_id: parseInt(projectId, 10),
         name: data.name,
         private: data.private,
         colour: data.colour,
-        budget: convertToPennies(data.budget ?? 0),
+        budget: actualBudget,
         billable_type: data.billableType,
         budget_type: data.budgetType,
         fixed_price: data.fixedPrice ? convertToPennies(data.fixedPrice) : null,

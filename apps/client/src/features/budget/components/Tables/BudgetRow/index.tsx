@@ -9,41 +9,34 @@ import {
   ToolTip,
 } from '@/components'
 import { ToolTipContainer } from '@/components/ToolTip/container'
+import BillableType from '@/enums/BillableType'
 import BudgetType from '@/enums/BudgetType'
 import { calculatePercentage, convertToPounds } from '@/helpers/currency'
+import { formatToHours } from '@/helpers/date'
 import { RootState } from '@/stores/store'
 import { Budget } from '@/types'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
-export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
+type BudgetRowProps = { budget: Budget }
+
+export const BudgetRow = ({ budget }: BudgetRowProps): JSX.Element => {
   const { currency } = useSelector((state: RootState) => ({
     currency: state.organisation.currency,
   }))
 
-  const allocatedBudget = useMemo(() => {
-    let allocation = 0
-    if (budget?.budgetType?.name === BudgetType.VARIABLE) {
-      allocation = convertToPounds(budget.budget)
-    } else if (budget?.budgetType?.name === BudgetType.FIXED) {
-      allocation = convertToPounds(budget?.fixedPrice ?? 0)
-    }
-    return allocation
-  }, [budget])
-
-  const formattedMetrics = useMemo(() => {
-    const metrics = {
-      totalBillable: budget.totalBillable,
-      totalNonBillable: budget.totalNonBillable,
-      totalSpent: budget.totalSpent,
-      totalRemaining: budget.totalRemaining,
-      hourlyRate: budget.hourlyRate,
+  const formattedBudget = useMemo(() => {
+    const formattedBudget = { ...budget }
+    if (budget) {
+      formattedBudget.totalCost = convertToPounds(budget.totalCost)
+      formattedBudget.totalBillable = convertToPounds(budget.totalBillable)
+      formattedBudget.totalNonBillable = convertToPounds(budget.totalNonBillable)
+      formattedBudget.totalSpent = convertToPounds(budget.totalSpent)
+      formattedBudget.totalRemaining = convertToPounds(budget.totalRemaining)
+      formattedBudget.hourlyRate = convertToPounds(budget.hourlyRate)
     }
 
-    return Object.entries(metrics).reduce(
-      (prev, [metric, value]) => ({ ...prev, [metric]: convertToPounds(value) }),
-      {},
-    ) as typeof metrics
+    return formattedBudget
   }, [budget])
 
   return (
@@ -62,12 +55,15 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
       </TableData>
 
       <TableData>
-        <Badge variant="default">{budget?.budgetType?.name}</Badge>
+        <Badge variant="default">
+          {budget?.budgetType?.name} -{' '}
+          {budget?.billableType?.name === BillableType.TOTAL_COST ? 'COST' : 'HOURS'}
+        </Badge>
       </TableData>
 
       <TableData>
-        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <FormatCurrency value={formattedMetrics?.hourlyRate} currency={currency?.code} />
+        {budget.budgetType?.name !== BudgetType.NON_BILLABLE && budget.hourlyRate ? (
+          <FormatCurrency value={formattedBudget?.hourlyRate} currency={currency?.code} />
         ) : (
           <p>- - -</p>
         )}
@@ -75,7 +71,7 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
 
       <TableData>
         {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <FormatCurrency value={allocatedBudget} currency={currency?.code} />
+          <FormatCurrency value={formattedBudget.totalCost} currency={currency?.code} />
         ) : (
           <p>- - -</p>
         )}
@@ -86,33 +82,55 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
           <ToolTipContainer>
             <ProgressLineIndicator
               id={`spent-tooltip-${budget.id}`}
-              percent={calculatePercentage(formattedMetrics.totalSpent, allocatedBudget)}
+              percent={calculatePercentage(formattedBudget.totalSpent, formattedBudget.totalCost)}
             />
-            <ToolTip id={`spent-tooltip-${budget.id}`}>
+            <ToolTip id={`spent-tooltip-${budget.id}`} className="!p-3">
               <div className="divide-y divide-gray-40 divide-dashed">
-                <div className="flex justify-between items-center py-1">
+                <div className="flex flex-col items-start pb-[6px]">
                   <p className="font-medium text-xs text-gray-50">Total</p>
-                  <p className="font-semibold text-xs text-gray-80">
-                    <FormatCurrency value={allocatedBudget} currency={currency?.code} />
-                  </p>
+                  <div className="flex justify-between w-full">
+                    <p className="font-semibold text-xs text-gray-80">
+                      <FormatCurrency value={formattedBudget.totalCost} currency={currency?.code} />
+                    </p>
+                    <p className="font-semibold text-xs text-gray-80">
+                      {formatToHours(budget.totalMinutes)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center py-1">
+
+                <div className="flex flex-col items-start py-[6px]">
                   <p className="font-medium text-xs text-gray-50">Spent</p>
-                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
-                    <FormatCurrency value={formattedMetrics.totalSpent} currency={currency?.code} />
-                    ({calculatePercentage(formattedMetrics.totalSpent, allocatedBudget)}%)
-                  </p>
+                  <div className="flex justify-between w-full">
+                    <p className="font-semibold text-xs text-gray-80 flex gap-1">
+                      <FormatCurrency
+                        value={formattedBudget.totalSpent}
+                        currency={currency?.code}
+                      />
+                      ({calculatePercentage(formattedBudget.totalSpent, formattedBudget.totalCost)}
+                      %)
+                    </p>
+                    <p className="font-semibold text-xs text-gray-80">
+                      {formatToHours(budget.totalBillableMinutes + budget.totalNonBillableMinutes)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center py-1">
+
+                <div className="flex flex-col items-start pt-[6px]">
                   <p className="font-medium text-xs text-gray-50">Remaining</p>
-                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
-                    <FormatCurrency
-                      value={formattedMetrics.totalRemaining}
-                      currency={currency?.code}
-                    />
-                    ({calculatePercentage(formattedMetrics.totalRemaining, allocatedBudget)}
-                    %)
-                  </p>
+                  <div className="flex justify-between w-full">
+                    <p className="font-semibold text-xs text-gray-80 flex gap-1">
+                      <FormatCurrency
+                        value={formattedBudget.totalRemaining}
+                        currency={currency?.code}
+                      />
+                      (
+                      {calculatePercentage(
+                        formattedBudget.totalRemaining,
+                        formattedBudget.totalCost,
+                      )}
+                      %)
+                    </p>
+                  </div>
                 </div>
               </div>
             </ToolTip>
@@ -128,12 +146,12 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
             <DoubleProgressLineIndicator
               id={`billable-tooltip-${budget.id}`}
               leftPercent={calculatePercentage(
-                formattedMetrics?.totalBillable,
-                formattedMetrics?.totalSpent,
+                formattedBudget?.totalBillable,
+                formattedBudget?.totalSpent,
               )}
               rightPercent={calculatePercentage(
-                formattedMetrics?.totalNonBillable,
-                formattedMetrics?.totalSpent,
+                formattedBudget?.totalNonBillable,
+                formattedBudget?.totalSpent,
               )}
             />
             <ToolTip id={`billable-tooltip-${budget.id}`}>
@@ -142,7 +160,7 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
                   <p className="font-medium text-xs text-green-90">Billable</p>
                   <p className="font-semibold text-xs text-gray-80">
                     <FormatCurrency
-                      value={formattedMetrics?.totalBillable}
+                      value={formattedBudget?.totalBillable}
                       currency={currency?.code}
                     />
                   </p>
@@ -151,7 +169,7 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
                   <p className="font-medium text-xs text-red-90">Non-Billable</p>
                   <p className="font-semibold text-xs text-gray-80">
                     <FormatCurrency
-                      value={formattedMetrics?.totalNonBillable}
+                      value={formattedBudget?.totalNonBillable}
                       currency={currency?.code}
                     />
                   </p>

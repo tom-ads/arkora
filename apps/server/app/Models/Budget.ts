@@ -22,6 +22,8 @@ import Task from './Task'
 import TimeEntry from './TimeEntry'
 import BillableType from './BillableType'
 import Database from '@ioc:Adonis/Lucid/Database'
+import BudgetKind from 'App/Enum/BudgetKind'
+import BillableKind from 'App/Enum/BillableKind'
 
 type BudgetBuilder = ModelQueryBuilderContract<typeof Budget>
 
@@ -49,7 +51,7 @@ export default class Budget extends BaseModel {
   @column()
   public hourlyRate: number | null
 
-  @column()
+  @column({ serializeAs: null })
   public budget: number
 
   @column()
@@ -67,23 +69,109 @@ export default class Budget extends BaseModel {
   // Computed
 
   @computed()
+  public get totalCost() {
+    // Non-billable budgets, do not have cost involved.
+    if (this.budgetType.name === BudgetKind.NON_BILLABLE) {
+      return
+    }
+
+    // Budget cost is the fixed price
+    if (this.budgetType.name === BudgetKind.FIXED) {
+      return this.fixedPrice
+    }
+
+    if (this.billableType?.name) {
+      // Hour based budgets need to calc total cost using: total_hours * rate
+      if (
+        this.budgetType.name === BudgetKind.VARIABLE &&
+        this.billableType.name === BillableKind.TOTAL_HOURS
+      ) {
+        return (this.budget / 60) * ((this.hourlyRate ?? 0) / 100)
+      }
+    }
+
+    return this.budget
+  }
+
+  @computed()
+  public get totalMinutes() {
+    if (this.hourlyRate) {
+      if (
+        this.budgetType.name === BudgetKind.FIXED &&
+        this.billableType.name === BillableKind.TOTAL_COST
+      ) {
+        return Math.round(Math.abs((this.fixedPrice ?? 0) / this.hourlyRate)) * 60
+      }
+
+      if (
+        this.budgetType.name === BudgetKind.VARIABLE &&
+        this.billableType.name === BillableKind.TOTAL_COST
+      ) {
+        return Math.round(Math.abs(this.budget / this.hourlyRate)) * 60
+      }
+    }
+
+    return this.budget
+  }
+
+  @computed()
   public get totalSpent() {
+    if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
+      return
+    }
+
     return parseInt(this.$extras.total_spent ?? 0, 10)
   }
 
   @computed()
   public get totalRemaining() {
-    return (this.fixedPrice ? this.fixedPrice : this.budget) - this.totalSpent
+    if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
+      return
+    }
+
+    if (
+      this.budgetType?.name === BudgetKind.VARIABLE &&
+      this.billableType?.name === BillableKind.TOTAL_HOURS
+    ) {
+      return this.totalCost! - this.totalSpent!
+    }
+
+    return (this.fixedPrice ? this.fixedPrice : this.budget) - this.totalSpent!
   }
 
   @computed()
   public get totalBillable() {
+    if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
+      return
+    }
+
     return parseInt(this.$extras.total_billable ?? 0, 10)
   }
 
   @computed()
+  public get totalBillableMinutes() {
+    if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
+      return
+    }
+
+    return parseInt(this.$extras.total_billable_minutes ?? 0, 10)
+  }
+
+  @computed()
   public get totalNonBillable() {
+    if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
+      return
+    }
+
     return parseInt(this.$extras.total_non_billable ?? 0, 10)
+  }
+
+  @computed()
+  public get totalNonBillableMinutes() {
+    if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
+      return
+    }
+    return parseInt(this.$extras.total_non_billable_minutes ?? 0, 10)
   }
 
   // Relations - belongsTo
@@ -167,7 +255,13 @@ export default class Budget extends BaseModel {
           'SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(ROUND(time_entries.duration_minutes / 60, 2), 0) * budgets.hourly_rate ELSE 0 END) AS total_billable'
         ),
         Database.raw(
+          'SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS total_billable_minutes'
+        ),
+        Database.raw(
           'SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(ROUND(time_entries.duration_minutes / 60, 2), 0) * budgets.hourly_rate ELSE 0 END) AS total_non_billable'
+        ),
+        Database.raw(
+          'SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS total_non_billable_minutes'
         )
       )
       .whereIn('budgets.id', budgetIds)

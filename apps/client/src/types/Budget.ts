@@ -1,3 +1,4 @@
+import BillableType from '@/enums/BillableType'
 import { BudgetType } from './BudgetType'
 
 export type Budget = {
@@ -5,12 +6,18 @@ export type Budget = {
   name: string
   colour: string
   fixedPrice?: number
-  budget: number
   hourlyRate: number
   private: boolean
   budgetType: BudgetType
+  billableType: {
+    name: BillableType
+  }
+  totalCost: number
+  totalMinutes: number
   totalSpent: number
   totalRemaining: number
   totalBillable: number
+  totalBillableMinutes: number
   totalNonBillable: number
+  totalNonBillableMinutes: number
 }

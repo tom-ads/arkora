@@ -1,8 +1,11 @@
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
+import BillableKind from 'App/Enum/BillableKind'
 import UserRole from 'App/Enum/UserRole'
 import Role from 'App/Models/Role'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
+import { getBillableTypes } from './BillableType'
 import { getBudgetTypes } from './BudgetType'
+import { getCommonTasks } from './Task'
 
 export default class extends BaseSeeder {
   public static environment = ['development']
@@ -18,6 +21,9 @@ export default class extends BaseSeeder {
 
   public async createOrganisation() {
     const budgetTypes = await getBudgetTypes()
+    const billableTypes = await getBillableTypes()
+
+    const totalCost = billableTypes.find((type) => type.name === BillableKind.TOTAL_COST)!
 
     return await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       clientBuilder.with('projects', 5, (projectBuilder) => {
@@ -26,7 +32,10 @@ export default class extends BaseSeeder {
             memberBuilder.merge({ organisationId: 1, roleId: 4 })
           })
           .with('budgets', 5, (budgetBuilder) => {
-            return budgetBuilder.merge({ budgetTypeId: budgetTypes?.[0].id })
+            return budgetBuilder.merge({
+              budgetTypeId: budgetTypes?.[0].id,
+              billableTypeId: totalCost.id,
+            })
           })
       })
     }).create()
@@ -39,7 +48,7 @@ export default class extends BaseSeeder {
         email: 'ta@example.com',
         password: 'newPassword123!',
       }),
-      this.getCommonTask(),
+      getCommonTasks(),
     ])
 
     // Load projects and budgets
