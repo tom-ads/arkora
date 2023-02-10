@@ -273,6 +273,7 @@ export default class Budget extends BaseModel {
       })
       .groupBy('budgets.id')
       .orderBy('budgets.name')
+      .preload('project')
 
     return result
   }
