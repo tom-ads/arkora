@@ -62,7 +62,7 @@ export default class BudgetController {
     )
 
     if (payload.include_expenditure && budgets?.length) {
-      budgets = await Budget.getBudgetsTotalSpent(budgets.map((budget) => budget.id))
+      budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
     }
 
     return budgets?.map((budget) => budget.serialize())

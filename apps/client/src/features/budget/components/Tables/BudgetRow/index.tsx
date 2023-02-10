@@ -1,5 +1,6 @@
 import {
   Badge,
+  DoubleProgressLineIndicator,
   FormatCurrency,
   InlineLink,
   ProgressLineIndicator,
@@ -30,6 +31,21 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
     return allocation
   }, [budget])
 
+  const formattedMetrics = useMemo(() => {
+    const metrics = {
+      totalBillable: budget.totalBillable,
+      totalNonBillable: budget.totalNonBillable,
+      totalSpent: budget.totalSpent,
+      totalRemaining: budget.totalRemaining,
+      hourlyRate: budget.hourlyRate,
+    }
+
+    return Object.entries(metrics).reduce(
+      (prev, [metric, value]) => ({ ...prev, [metric]: convertToPounds(value) }),
+      {},
+    ) as typeof metrics
+  }, [budget])
+
   return (
     <TableRow>
       <TableData>
@@ -51,7 +67,7 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
 
       <TableData>
         {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <FormatCurrency value={convertToPounds(budget.hourlyRate)} currency={currency?.code} />
+          <FormatCurrency value={formattedMetrics?.hourlyRate} currency={currency?.code} />
         ) : (
           <p>- - -</p>
         )}
@@ -70,7 +86,7 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
           <ToolTipContainer>
             <ProgressLineIndicator
               id={`spent-tooltip-${budget.id}`}
-              percent={calculatePercentage(convertToPounds(budget.totalSpent), allocatedBudget)}
+              percent={calculatePercentage(formattedMetrics.totalSpent, allocatedBudget)}
             />
             <ToolTip id={`spent-tooltip-${budget.id}`}>
               <div className="divide-y divide-gray-40 divide-dashed">
@@ -82,20 +98,20 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <p className="font-medium text-xs text-gray-50">Spent</p>
-                  <p className="font-semibold text-xs text-gray-80">
-                    <FormatCurrency
-                      value={convertToPounds(budget.totalSpent)}
-                      currency={currency?.code}
-                    />
+                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
+                    <FormatCurrency value={formattedMetrics.totalSpent} currency={currency?.code} />
+                    ({calculatePercentage(formattedMetrics.totalSpent, allocatedBudget)}%)
                   </p>
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <p className="font-medium text-xs text-gray-50">Remaining</p>
-                  <p className="font-semibold text-xs text-gray-80">
+                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
                     <FormatCurrency
-                      value={convertToPounds(budget.totalRemaining)}
+                      value={formattedMetrics.totalRemaining}
                       currency={currency?.code}
                     />
+                    ({calculatePercentage(formattedMetrics.totalRemaining, allocatedBudget)}
+                    %)
                   </p>
                 </div>
               </div>
@@ -107,7 +123,45 @@ export const BudgetRow = ({ budget }: { budget: Budget }): JSX.Element => {
       </TableData>
 
       <TableData>
-        <p>- - -</p>
+        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
+          <ToolTipContainer>
+            <DoubleProgressLineIndicator
+              id={`billable-tooltip-${budget.id}`}
+              leftPercent={calculatePercentage(
+                formattedMetrics?.totalBillable,
+                formattedMetrics?.totalSpent,
+              )}
+              rightPercent={calculatePercentage(
+                formattedMetrics?.totalNonBillable,
+                formattedMetrics?.totalSpent,
+              )}
+            />
+            <ToolTip id={`billable-tooltip-${budget.id}`}>
+              <div className="divide-y divide-gray-40 divide-dashed">
+                <div className="flex justify-between items-center py-1">
+                  <p className="font-medium text-xs text-green-90">Billable</p>
+                  <p className="font-semibold text-xs text-gray-80">
+                    <FormatCurrency
+                      value={formattedMetrics?.totalBillable}
+                      currency={currency?.code}
+                    />
+                  </p>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <p className="font-medium text-xs text-red-90">Non-Billable</p>
+                  <p className="font-semibold text-xs text-gray-80">
+                    <FormatCurrency
+                      value={formattedMetrics?.totalNonBillable}
+                      currency={currency?.code}
+                    />
+                  </p>
+                </div>
+              </div>
+            </ToolTip>
+          </ToolTipContainer>
+        ) : (
+          <p>- - -</p>
+        )}
       </TableData>
 
       <TableData>

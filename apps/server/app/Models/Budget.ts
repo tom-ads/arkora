@@ -76,6 +76,16 @@ export default class Budget extends BaseModel {
     return (this.fixedPrice ? this.fixedPrice : this.budget) - this.totalSpent
   }
 
+  @computed()
+  public get totalBillable() {
+    return parseInt(this.$extras.total_billable ?? 0, 10)
+  }
+
+  @computed()
+  public get totalNonBillable() {
+    return parseInt(this.$extras.total_non_billable ?? 0, 10)
+  }
+
   // Relations - belongsTo
 
   @belongsTo(() => Project)
@@ -146,35 +156,29 @@ export default class Budget extends BaseModel {
     - Active timers durations won't have been added to the TimeEntries durationMinutes, so these
       are not included in the output total_spent for each budget.
   */
-  public static async getBudgetsTotalSpent(budgetIds: number[]) {
-    const billableTasks = await Database.query()
-      .select('budget_id', 'task_id')
-      .from('budget_tasks')
-      .where('is_billable', true)
-      .whereIn('budget_id', budgetIds)
-
+  public static async getBudgetsMetrics(budgetIds: number[]) {
     const result = await Budget.query()
       .select(
         'budgets.*',
         Database.raw(
-          'IFNULL((ROUND(SUM(time_entries.duration_minutes) / 60, 2) * budgets.hourly_rate), 0) as total_spent'
+          'IFNULL(ROUND(SUM(time_entries.duration_minutes) / 60, 2), 0) * budgets.hourly_rate AS total_spent'
+        ),
+        Database.raw(
+          'SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(ROUND(time_entries.duration_minutes / 60, 2), 0) * budgets.hourly_rate ELSE 0 END) AS total_billable'
+        ),
+        Database.raw(
+          'SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(ROUND(time_entries.duration_minutes / 60, 2), 0) * budgets.hourly_rate ELSE 0 END) AS total_non_billable'
         )
       )
       .whereIn('budgets.id', budgetIds)
-      .leftJoin('time_entries', async (subQuery) => {
-        subQuery
-          .on('budgets.id', '=', 'time_entries.budget_id')
-          .andOnIn(
-            'time_entries.budget_id',
-            billableTasks.map((task) => task.budget_id)
-          )
-          .andOnIn(
-            'time_entries.task_id',
-            billableTasks.map((task) => task.task_id)
-          )
+      .leftJoin('time_entries', 'budgets.id', '=', 'time_entries.budget_id')
+      .leftJoin('budget_tasks', (sub) => {
+        sub
+          .on('time_entries.task_id', '=', 'budget_tasks.task_id')
+          .andOn('time_entries.budget_id', '=', 'budget_tasks.budget_id')
       })
       .groupBy('budgets.id')
-      .orderBy('budgets.name', 'asc')
+      .orderBy('budgets.name')
 
     return result
   }

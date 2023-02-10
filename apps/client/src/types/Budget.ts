@@ -11,4 +11,6 @@ export type Budget = {
   budgetType: BudgetType
   totalSpent: number
   totalRemaining: number
+  totalBillable: number
+  totalNonBillable: number
 }
