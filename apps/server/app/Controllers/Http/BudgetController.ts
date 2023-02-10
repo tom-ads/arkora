@@ -44,8 +44,16 @@ export default class BudgetController {
 
     // Assign organisation administrators as default budget members
     const pivilegedUsers = await ctx.organisation?.getPrivilegedUsers()
-    if (pivilegedUsers) {
+    if (pivilegedUsers?.length) {
       await createdBudget.related('members').attach(pivilegedUsers.map((member) => member.id))
+    }
+
+    await ctx.organisation?.load('tasks')
+
+    // Assign organisation default tasks to budget
+    const defaultTasks = ctx.organisation?.tasks
+    if (defaultTasks?.length) {
+      await createdBudget.related('tasks').attach(defaultTasks.map((task) => task.id))
     }
 
     return createdBudget.serialize()
