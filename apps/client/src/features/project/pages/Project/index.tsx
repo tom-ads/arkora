@@ -18,7 +18,7 @@ export const ProjectPage = (): JSX.Element => {
   const { projectId } = useParams()
 
   const { data: projectBudgets } = useGetBudgetsQuery(
-    { project_id: parseInt(projectId!, 10), include_expenditure: true },
+    { project_id: parseInt(projectId!, 10) },
     { skip: !projectId },
   )
 

@@ -28,7 +28,7 @@ export const FormNumberInput = ({
   return (
     <div className="relative w-full">
       <NumberInput
-        value={value}
+        value={value ?? ''}
         onValueChange={(_value, _formatted, options) => handleOnChange(options?.value)}
         className={classNames(
           inputStyling({ size, error }),
