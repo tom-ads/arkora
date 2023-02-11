@@ -53,7 +53,15 @@ export default class BudgetController {
     // Assign organisation default tasks to budget
     const defaultTasks = ctx.organisation?.tasks
     if (defaultTasks?.length) {
-      await createdBudget.related('tasks').attach(defaultTasks.map((task) => task.id))
+      await createdBudget.related('tasks').attach(
+        defaultTasks.reduce(
+          (prev, curr) => ({
+            ...prev,
+            [curr.id]: { is_billable: Boolean(curr.$extras.pivot_is_billable) },
+          }),
+          {}
+        )
+      )
     }
 
     return createdBudget.serialize()

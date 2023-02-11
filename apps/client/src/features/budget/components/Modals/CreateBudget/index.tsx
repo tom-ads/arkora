@@ -27,7 +27,7 @@ export const CreateBudgetModal = ({ isOpen, onClose }: CreateBudgetModalProps): 
   const onSubmit = async (data: BudgetFormFields) => {
     if (projectId) {
       let actualBudget = data.budget ?? 0
-      console.log(data)
+
       if (data.budgetType === BudgetType.NON_BILLABLE) {
         actualBudget = data.budget! * 60
       } else if (
