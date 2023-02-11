@@ -54,13 +54,10 @@ export default class BudgetController {
     const defaultTasks = ctx.organisation?.tasks
     if (defaultTasks?.length) {
       await createdBudget.related('tasks').attach(
-        defaultTasks.reduce(
-          (prev, curr) => ({
-            ...prev,
-            [curr.id]: { is_billable: Boolean(curr.$extras.pivot_is_billable) },
-          }),
-          {}
-        )
+        defaultTasks.reduce((prev, curr) => {
+          prev[curr.id] = { is_billable: Boolean(curr.$extras.pivot_is_billable) }
+          return prev
+        }, {})
       )
     }
 
@@ -84,6 +81,6 @@ export default class BudgetController {
 
     budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
 
-    return budgets?.map((budget) => budget.serialize())
+    return budgets
   }
 }

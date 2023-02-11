@@ -43,8 +43,8 @@ test.group('Budgets : Create Budget', (group) => {
       private: false,
       budget_type: BudgetKind.VARIABLE,
       billable_type: billableTypes[0].name, // total cost
-      hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
-      budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
+      hourly_rate: 10000, // £100
+      budget: 10000000, // £100,000
     }
 
     const response = await client
@@ -59,11 +59,21 @@ test.group('Budgets : Create Budget', (group) => {
       name: payload.name,
       private: payload.private,
       colour: payload.colour,
-      budget: payload.budget,
       hourly_rate: payload.hourly_rate,
       budget_type: {
         name: BudgetKind.VARIABLE,
       },
+      billable_type: {
+        name: billableTypes[0].name,
+      },
+      total_billable: 0,
+      total_billable_minutes: 0,
+      total_cost: 10000000,
+      total_minutes: 60000,
+      total_non_billable: 0,
+      total_non_billable_minutes: 0,
+      total_remaining: 10000000,
+      total_spent: 0,
     })
   })
 
@@ -72,12 +82,12 @@ test.group('Budgets : Create Budget', (group) => {
       project_id: organisation.projects[0].id,
       name: faker.company.name(),
       colour: faker.color.rgb(),
-      private: true,
+      private: false,
       budget_type: BudgetKind.FIXED,
       billable_type: billableTypes[0].name, // total cost
-      fixed_price: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
-      hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
-      budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
+      budget: 0,
+      hourly_rate: 10000, // £100
+      fixed_price: 10000000, // £100,000
     }
 
     const response = await client
@@ -92,11 +102,17 @@ test.group('Budgets : Create Budget', (group) => {
       name: payload.name,
       private: payload.private,
       colour: payload.colour,
-      budget: payload.budget,
       hourly_rate: payload.hourly_rate,
-      budget_type: {
-        name: BudgetKind.FIXED,
-      },
+      budget_type: { name: BudgetKind.FIXED },
+      billable_type: { name: billableTypes[0].name },
+      total_billable: 0,
+      total_billable_minutes: 0,
+      total_cost: 10000000,
+      total_minutes: 60000,
+      total_non_billable: 0,
+      total_non_billable_minutes: 0,
+      total_remaining: 10000000,
+      total_spent: 0,
     })
   })
 
@@ -105,12 +121,11 @@ test.group('Budgets : Create Budget', (group) => {
       project_id: organisation.projects[0].id,
       name: faker.company.name(),
       colour: faker.color.rgb(),
-      private: true,
+      private: false,
       budget_type: BudgetKind.NON_BILLABLE,
-      hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
-      budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
+      billable_type: billableTypes[1].name, // total hours
+      budget: 30000, // 500hrs
     }
-
     const response = await client
       .post(route('BudgetController.create'))
       .form(payload)
@@ -123,11 +138,9 @@ test.group('Budgets : Create Budget', (group) => {
       name: payload.name,
       private: payload.private,
       colour: payload.colour,
-      budget: payload.budget,
-      hourly_rate: payload.hourly_rate,
-      budget_type: {
-        name: BudgetKind.NON_BILLABLE,
-      },
+      budget_type: { name: BudgetKind.NON_BILLABLE },
+      billable_type: { name: billableTypes[1].name },
+      total_minutes: 30000,
     })
   })
 
@@ -154,11 +167,11 @@ test.group('Budgets : Create Budget', (group) => {
       project_id: organisation.projects[0].id,
       name: faker.company.name(),
       colour: faker.color.rgb(),
-      private: true,
+      private: false,
       budget_type: BudgetKind.VARIABLE,
       billable_type: billableTypes[0].name, // total cost
-      hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
-      budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
+      hourly_rate: 10000, // £100
+      budget: 10000000, // £100,000
     }
 
     const response = await client
@@ -173,11 +186,21 @@ test.group('Budgets : Create Budget', (group) => {
       name: payload.name,
       private: payload.private,
       colour: payload.colour,
-      budget: payload.budget,
       hourly_rate: payload.hourly_rate,
       budget_type: {
         name: BudgetKind.VARIABLE,
       },
+      billable_type: {
+        name: billableTypes[0].name,
+      },
+      total_billable: 0,
+      total_billable_minutes: 0,
+      total_cost: 10000000,
+      total_minutes: 60000,
+      total_non_billable: 0,
+      total_non_billable_minutes: 0,
+      total_remaining: 10000000,
+      total_spent: 0,
     })
 
     // Load budget members

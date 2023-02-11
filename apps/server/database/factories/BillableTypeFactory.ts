@@ -8,6 +8,7 @@ const BillableTypeFactory = Factory.define(BillableType, () => {
   }
 })
   .state('total_hours', (state) => (state.name = BillableKind.TOTAL_HOURS))
+  .state('total_cost', (state) => (state.name = BillableKind.TOTAL_COST))
   .build()
 
 export async function createBillableTypes() {

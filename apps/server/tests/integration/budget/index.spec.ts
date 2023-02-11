@@ -11,6 +11,7 @@ import {
   RoleFactory,
   UserFactory,
 } from 'Database/factories'
+import BillableTypeFactory from 'Database/factories/BillableTypeFactory'
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 
@@ -33,7 +34,8 @@ test.group('Budgets: All Budgets', ({ each }) => {
       { name: CommonTask.DISCOVERY },
     ]).createMany(3)
 
-    const budgetType = await BudgetTypeFactory.apply('nonBillable').create()
+    const budgetType = await BudgetTypeFactory.apply('variable').create()
+    const billableType = await BillableTypeFactory.apply('total_cost').create()
 
     organisation = await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       return clientBuilder.with('projects', 2, (projectBuilder) => {
@@ -41,6 +43,7 @@ test.group('Budgets: All Budgets', ({ each }) => {
           .merge([{ name: 'project-1' }, { name: 'project-2' }])
           .with('budgets', 2, (budgetQuery) =>
             budgetQuery.merge({
+              billableTypeId: billableType.id,
               budgetTypeId: budgetType.id,
               budget: 10000000, // £100,000
               hourlyRate: 10000, // £100
@@ -184,19 +187,22 @@ test.group('Budgets: All Budgets', ({ each }) => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody(testProject.budgets.map((budget) => budget.serialize()))
+
+    await Promise.all(testProject.budgets.map(async (budget) => await budget.load('project')))
+
+    response.assertBodyContains(testProject.budgets.map((budget) => budget.serialize()))
   })
 
   test('organisation user can filter by user_id', async ({ client, route }) => {
     const testProject = projects[0]
-    const testBudgets = testProject.budgets[0]
+    const testBudget = testProject.budgets[0]
 
     const memberUser = await UserFactory.merge({ organisationId: organisation.id })
       .with('role', 1, (roleBuilder) => roleBuilder.apply('member'))
       .create()
 
     await memberUser.related('projects').attach([testProject.id])
-    await memberUser.related('budgets').attach([testBudgets.id])
+    await memberUser.related('budgets').attach([testBudget.id])
 
     const response = await client
       .get(route('BudgetController.index'))
@@ -206,7 +212,9 @@ test.group('Budgets: All Budgets', ({ each }) => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody([testBudgets.serialize()])
+
+    await testBudget.load('project')
+    response.assertBody([testBudget.serialize()])
   })
 
   test('organisation user can retrieve budgets with projects', async ({ client, route }) => {
@@ -220,28 +228,21 @@ test.group('Budgets: All Budgets', ({ each }) => {
     const preloadedBudgets = await Budget.query().preload('project').exec()
 
     response.assertStatus(200)
-    response.assertBody(preloadedBudgets.map((budget) => budget.serialize()))
+    response.assertBodyContains(preloadedBudgets.map((budget) => budget.serialize()))
   })
 
-  test('organisation user can retrieve budgets with total_spent', async ({ client, route }) => {
-    // Alter budget[0] related budget_task (commonTask[0]) to a non-billable task for that budget
-    await budgets[0].related('tasks').sync({
-      [commonTasks[0].id]: {
-        is_billable: false,
-      },
-    })
-
+  test('organisation user can retrieve budgets with metrics', async ({ client, route }) => {
     await TimeEntryFactory.mergeRecursive({
       userId: authUser.id,
       taskId: commonTasks[0].id,
       durationMinutes: 60,
     })
       .merge([
-        { budgetId: budgets[0].id, taskId: commonTasks[0].id },
+        { budgetId: budgets[0].id },
         { budgetId: budgets[1].id },
         { budgetId: budgets[2].id },
         { budgetId: budgets[3].id },
-        { budgetId: budgets[0].id, taskId: commonTasks[0].id },
+        { budgetId: budgets[0].id },
         { budgetId: budgets[1].id },
         { budgetId: budgets[2].id },
         { budgetId: budgets[3].id },
@@ -251,22 +252,22 @@ test.group('Budgets: All Budgets', ({ each }) => {
 
     const response = await client
       .get(route('BudgetController.index'))
-      .qs({ include_expenditure: true })
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBodyContains([{ totalSpent: 20000 }])
-    response.assertBodyContains([
-      {
-        budget_id: budgets[0].id,
-        totalSpent: 20000,
-        totalBillable: 0,
-        totalRemaining: 9980000,
-        totalNonBillable: 20000,
-      },
-    ])
+
+    await Promise.all(budgets.map(async (budget) => await budget.load('project')))
+    response.assertBodyContains(
+      budgets.map((budget) => ({
+        ...budget.serialize(),
+        total_spent: 20000,
+        total_billable: 20000,
+        total_billable_minutes: 120,
+        total_remaining: 9980000,
+      }))
+    )
   })
 
   test('organisation user cannot index budgets for a different organisation', async ({

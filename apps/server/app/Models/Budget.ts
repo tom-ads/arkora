@@ -25,6 +25,12 @@ import Database from '@ioc:Adonis/Lucid/Database'
 import BudgetKind from 'App/Enum/BudgetKind'
 import BillableKind from 'App/Enum/BillableKind'
 
+type BudgetFilters = Partial<{
+  userId: number
+  projectId: number
+  page: number
+}>
+
 type BudgetBuilder = ModelQueryBuilderContract<typeof Budget>
 
 export default class Budget extends BaseModel {
@@ -68,7 +74,7 @@ export default class Budget extends BaseModel {
 
   // Computed
 
-  @computed()
+  @computed({ serializeAs: 'total_cost' })
   public get totalCost() {
     // Non-billable budgets, do not have cost involved.
     if (this.budgetType.name === BudgetKind.NON_BILLABLE) {
@@ -93,7 +99,7 @@ export default class Budget extends BaseModel {
     return this.budget
   }
 
-  @computed()
+  @computed({ serializeAs: 'total_minutes' })
   public get totalMinutes() {
     if (this.hourlyRate) {
       if (
@@ -105,7 +111,7 @@ export default class Budget extends BaseModel {
 
       if (
         this.budgetType.name === BudgetKind.VARIABLE &&
-        this.billableType.name === BillableKind.TOTAL_COST
+        this.billableType?.name === BillableKind.TOTAL_COST
       ) {
         return Math.round(Math.abs(this.budget / this.hourlyRate)) * 60
       }
@@ -114,7 +120,7 @@ export default class Budget extends BaseModel {
     return this.budget
   }
 
-  @computed()
+  @computed({ serializeAs: 'total_spent' })
   public get totalSpent() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
@@ -123,7 +129,7 @@ export default class Budget extends BaseModel {
     return parseInt(this.$extras.total_spent ?? 0, 10)
   }
 
-  @computed()
+  @computed({ serializeAs: 'total_remaining' })
   public get totalRemaining() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
@@ -139,7 +145,7 @@ export default class Budget extends BaseModel {
     return (this.fixedPrice ? this.fixedPrice : this.budget) - this.totalSpent!
   }
 
-  @computed()
+  @computed({ serializeAs: 'total_billable' })
   public get totalBillable() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
@@ -148,7 +154,7 @@ export default class Budget extends BaseModel {
     return parseInt(this.$extras.total_billable ?? 0, 10)
   }
 
-  @computed()
+  @computed({ serializeAs: 'total_billable_minutes' })
   public get totalBillableMinutes() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
@@ -157,7 +163,7 @@ export default class Budget extends BaseModel {
     return parseInt(this.$extras.total_billable_minutes ?? 0, 10)
   }
 
-  @computed()
+  @computed({ serializeAs: 'total_non_billable' })
   public get totalNonBillable() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
@@ -166,7 +172,7 @@ export default class Budget extends BaseModel {
     return parseInt(this.$extras.total_non_billable ?? 0, 10)
   }
 
-  @computed()
+  @computed({ serializeAs: 'total_non_billable_minutes' })
   public get totalNonBillableMinutes() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
@@ -182,7 +188,7 @@ export default class Budget extends BaseModel {
   @belongsTo(() => BudgetType, { serializeAs: 'budget_type' })
   public budgetType: BelongsTo<typeof BudgetType>
 
-  @belongsTo(() => BillableType)
+  @belongsTo(() => BillableType, { serializeAs: 'billable_type' })
   public billableType: BelongsTo<typeof BillableType>
 
   // Relations - manyToMany
@@ -244,7 +250,7 @@ export default class Budget extends BaseModel {
     - Active timers durations won't have been added to the TimeEntries durationMinutes, so these
       are not included in the output total_spent for each budget.
   */
-  public static async getBudgetsMetrics(budgetIds: number[]) {
+  public static async getBudgetsMetrics(budgetIds: number[], filters?: BudgetFilters) {
     const result = await Budget.query()
       .select(
         'budgets.*',
@@ -274,6 +280,11 @@ export default class Budget extends BaseModel {
       .groupBy('budgets.id')
       .orderBy('budgets.name')
       .preload('project')
+
+      // Filter - Pagination
+      .if(filters?.page, (builder) => {
+        builder.paginate(filters!.page!, 10)
+      })
 
     return result
   }
