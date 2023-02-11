@@ -2,7 +2,7 @@ import { z } from 'zod'
 import validationIssuer from '../issuer'
 
 export const validateFixedPriceField = (
-  fixedPrice: number | undefined,
+  fixedPrice: number | null | undefined,
   options?: { ctx?: z.RefinementCtx },
 ) => {
   const criteriaResult = [

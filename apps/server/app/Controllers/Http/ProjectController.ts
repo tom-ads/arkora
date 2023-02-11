@@ -95,10 +95,9 @@ export default class ProjectController {
       .preload('budgets')
       .preload('client')
       .preload('members')
+      .orderBy('name', 'asc')
 
-    return {
-      projects: projects?.map((project) => project.serialize()),
-    }
+    return projects?.map((project) => project.serialize())
   }
 
   /**

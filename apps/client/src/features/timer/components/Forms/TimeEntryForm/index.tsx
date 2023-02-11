@@ -14,7 +14,7 @@ import { useGetBudgetsQuery } from '../../../../budget/api'
 import { Budget, ModalBaseProps } from '@/types'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
-import { startCase } from 'lodash'
+import { groupBy, startCase } from 'lodash'
 import { useLazyGetTasksQuery } from '@/features/task'
 import Task from '@/types/Task'
 import { useCreateTimerMutation } from '../../../api'
@@ -23,7 +23,6 @@ import { useToast } from '@/hooks/useToast'
 import { UseFormReturn } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { startTimer } from '@/stores/slices/timer'
-import TimeEntry from '@/types/TimeEntry'
 
 export type TimeEntryFields = {
   budget: {
@@ -71,7 +70,7 @@ export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps)
 
   const [createTimer] = useCreateTimerMutation()
 
-  const { data: budgets } = useGetBudgetsQuery({ group_by: 'PROJECT' }, { skip: !isOpen })
+  const { data: budgets } = useGetBudgetsQuery({ include_project: true }, { skip: !isOpen })
 
   const [triggerTasks, { data: tasks }] = useLazyGetTasksQuery()
 
@@ -110,12 +109,10 @@ export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps)
   }, [budgetId])
 
   const budgetOptions: Record<string, GroupOption[]> = useMemo(() => {
-    if (!budgets) {
-      return {}
-    }
+    const groupedBudgets: Record<string, Budget[]> = groupBy(budgets, (p) => p.project?.name)
 
     return Object.fromEntries(
-      Object.entries(budgets).map(([key, value]) => [
+      Object.entries(groupedBudgets).map(([key, value]) => [
         startCase(key),
         value.map((budget: Budget) => ({
           id: budget.id,

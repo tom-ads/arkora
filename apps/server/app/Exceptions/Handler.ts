@@ -29,7 +29,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       })
     }
 
-    if (error.code === 'E_CANNOT_FIND_ROUTE') {
+    if (error.code === 'E_CANNOT_FIND_ROUTE' || error.code === 'E_ROUTE_NOT_FOUND') {
       return ctx.response.notFound({
         message: [{ message: 'Route not found' }],
       })

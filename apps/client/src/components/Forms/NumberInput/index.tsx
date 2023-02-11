@@ -22,20 +22,14 @@ export const FormNumberInput = ({
   } = useController({ name })
 
   const handleOnChange = (value: string | undefined): void => {
-    if (value) {
-      const removeSeperators = value.replace('.', '')
-      onChange(parseInt(removeSeperators, 10))
-      return
-    }
-
-    onChange(undefined)
+    onChange(value ? parseInt(value, 10) : null)
   }
 
   return (
     <div className="relative w-full">
       <NumberInput
-        value={value}
-        onValueChange={handleOnChange}
+        value={value ?? ''}
+        onValueChange={(_value, _formatted, options) => handleOnChange(options?.value)}
         className={classNames(
           inputStyling({ size, error }),
           {

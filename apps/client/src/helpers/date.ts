@@ -39,3 +39,13 @@ export function getDatesBetweenPeriod(startDate: DateTime, endDate: DateTime) {
     .splitBy({ day: 1 })
     .map((d) => d.start)
 }
+
+export function formatToHours(minutes: number) {
+  const totalHours = minutes / 60
+  const totalMinutes = minutes % 60
+
+  const formattedHours = totalHours < 10 ? `0${totalHours}` : totalHours
+  const formattedMinutes = totalMinutes < 10 ? `0${totalMinutes}` : totalMinutes
+
+  return `${formattedHours}h ${formattedMinutes}m`
+}

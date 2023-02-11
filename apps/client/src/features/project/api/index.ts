@@ -19,14 +19,17 @@ const projectEndpoints = appApi.injectEndpoints({
       }),
       invalidatesTags: ['Projects'],
     }),
+
     getProjects: build.query<GetProjectsResponse, void>({
       query: () => projectsBasePath,
       providesTags: ['Projects'],
     }),
+
     getProject: build.query<GetProjectResponse, number | string>({
       query: (id) => `${projectsBasePath}/${id}`,
       providesTags: ['Project'],
     }),
+
     updateProject: build.mutation<UpdateProjectResponse, UpdateProjectRequest>({
       query: ({ id, body }) => ({
         url: `${projectsBasePath}/${id}`,
@@ -35,6 +38,7 @@ const projectEndpoints = appApi.injectEndpoints({
       }),
       invalidatesTags: ['Projects', 'Project'],
     }),
+
     deleteProject: build.mutation<void, number>({
       query: (id) => ({
         url: `${projectsBasePath}/${id}`,

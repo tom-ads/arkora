@@ -7,7 +7,7 @@ type TableContainerProps = {
 export const TableContainer = ({ children }: TableContainerProps): JSX.Element => {
   return (
     <div className="p-6 bg-white rounded shadow-glow">
-      <div className="w-full overflow-y-hidden overflow-x-auto whitespace-nowrap scrollbar-hide rounded">
+      <div className="w-full whitespace-nowrap scrollbar-hide rounded overflow-x-auto">
         {children}
       </div>
     </div>

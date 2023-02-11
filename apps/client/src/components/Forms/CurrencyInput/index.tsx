@@ -26,13 +26,7 @@ export const FormCurrencyInput = ({
   } = useController({ name })
 
   const handleOnChange = (value: string | undefined): void => {
-    if (value) {
-      const removeSeperators = value.replace('.', '')
-      onChange(parseInt(removeSeperators, 10))
-      return
-    }
-
-    onChange(undefined)
+    onChange(value ? parseInt(value, 10) : null)
   }
 
   return (
@@ -42,9 +36,9 @@ export const FormCurrencyInput = ({
         allowNegativeValue={false}
         className={inputStyling({ size, error })}
         placeholder={placeHolder}
-        value={value}
         disabled={!!disabled}
-        onValueChange={handleOnChange}
+        value={value ?? ''}
+        onValueChange={(_value, _formatted, options) => handleOnChange(options?.value)}
       />
       {suffix && (
         <span

@@ -24,7 +24,9 @@ export default class GetBudgetsValidator {
    *    ```
    */
   public schema = schema.create({
-    group_by: schema.enum.optional(['PROJECT'] as const),
+    user_id: schema.number.optional(),
+    project_id: schema.number.optional(),
+    include_project: schema.boolean.optional(),
   })
 
   /**

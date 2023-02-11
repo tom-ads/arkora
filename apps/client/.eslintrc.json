@@ -38,6 +38,7 @@
       {
         "patterns": ["@/features/*/*"]
       }
-    ]
+    ],
+    "@typescript-eslint/ban-ts-comment": "off"
   }
 }

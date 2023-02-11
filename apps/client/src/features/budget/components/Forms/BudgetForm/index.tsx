@@ -18,7 +18,6 @@ import {
   validateFixedPriceField,
   validateHourlyRateField,
 } from '@/helpers/validation/fields'
-import hourlyRateSchema from '@/helpers/validation/hourly_rate'
 import validationIssuer from '@/helpers/validation/issuer'
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
@@ -57,9 +56,9 @@ const budgetSchema = z
   .object({
     budgetType: z.nativeEnum(BudgetType),
     billableType: z.nativeEnum(BillableType),
-    budget: z.number().optional(),
-    fixedPrice: z.number().optional(),
-    hourlyRate: hourlyRateSchema.optional(),
+    budget: z.number().nullable().optional(),
+    fixedPrice: z.number().nullable().optional(),
+    hourlyRate: z.number().nullable().optional(),
   })
   .superRefine(({ budgetType, billableType, budget, fixedPrice, hourlyRate }, ctx) => {
     const budgetResult = validateBudgetField(budget)
@@ -105,25 +104,49 @@ export const BudgetForm = ({
   defaultValues,
   children,
 }: BudgetFormProps): JSX.Element => {
-  const [sectionTransition, setSectionTransition] = useState<{
-    type: BudgetType
-    canTransition: boolean
-  }>({ type: BudgetType.VARIABLE, canTransition: true })
+  const [sectionTransition, setSectionTransition] = useState<
+    Partial<{
+      budgetType: BudgetType
+      billableType: BillableType
+      canTransition: boolean
+    }>
+  >({
+    budgetType: BudgetType.VARIABLE,
+    billableType: BillableType.TOTAL_COST,
+    canTransition: true,
+  })
 
   const onChange = (fields: BudgetFormFields, methods: UseFormReturn<BudgetFormFields>) => {
-    if (sectionTransition.type !== fields.budgetType) {
-      methods.resetField('hourlyRate')
+    if (sectionTransition.budgetType !== fields.budgetType) {
       methods.resetField('budget')
-      if (sectionTransition.type === BudgetType.FIXED) {
+
+      if (sectionTransition.budgetType === BudgetType.FIXED) {
         methods.resetField('fixedPrice')
+      }
+
+      if (sectionTransition.budgetType !== BudgetType.NON_BILLABLE) {
+        methods.resetField('hourlyRate')
+        methods.resetField('billableType')
       }
 
       methods.clearErrors()
 
       setSectionTransition({
-        type: fields.budgetType,
+        budgetType: fields.budgetType,
+        billableType: fields.billableType,
         canTransition: false,
       })
+    }
+
+    if (
+      sectionTransition.budgetType === BudgetType.FIXED &&
+      sectionTransition.billableType !== fields.billableType
+    ) {
+      methods.resetField('hourlyRate')
+      methods.resetField('budget')
+      methods.clearErrors(['hourlyRate', 'budget'])
+
+      setSectionTransition((state) => ({ ...state, billableType: fields.billableType }))
     }
   }
 
@@ -139,7 +162,7 @@ export const BudgetForm = ({
       {({ control, watch, formState: { errors } }) => (
         <>
           <div className="flex gap-6">
-            <FormControl className="grow">
+            <FormControl className="flex-grow">
               <FormLabel htmlFor="name">Name</FormLabel>
               <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
               {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
@@ -195,7 +218,9 @@ export const BudgetForm = ({
 
           <div className="min-h-[210px]">
             <VariableBudgetSection
-              show={watch('budgetType') === BudgetType.VARIABLE && sectionTransition.canTransition}
+              show={
+                watch('budgetType') === BudgetType.VARIABLE && !!sectionTransition.canTransition
+              }
               control={control}
               watch={watch}
               errors={errors}
@@ -203,7 +228,7 @@ export const BudgetForm = ({
             />
 
             <FixedBudgetSection
-              show={watch('budgetType') === BudgetType.FIXED && sectionTransition.canTransition}
+              show={watch('budgetType') === BudgetType.FIXED && !!sectionTransition.canTransition}
               control={control}
               watch={watch}
               errors={errors}
@@ -212,7 +237,7 @@ export const BudgetForm = ({
 
             <NonBillableSection
               show={
-                watch('budgetType') === BudgetType.NON_BILLABLE && sectionTransition.canTransition
+                watch('budgetType') === BudgetType.NON_BILLABLE && !!sectionTransition.canTransition
               }
               errors={errors}
               afterLeave={() => setSectionTransition((s) => ({ ...s, canTransition: true }))}

@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BillableType from 'App/Models/BillableType'
 import Budget from 'App/Models/Budget'
-import { groupBy } from 'lodash'
 import BudgetType from 'App/Models/BudgetType'
 import CreateBudgetValidator from 'App/Validators/Budget/CreateBudgetValidator'
 import GetBudgetsValidator from 'App/Validators/Budget/GetBudgetsValidator'
@@ -30,6 +29,7 @@ export default class BudgetController {
         budget: payload.budget,
         hourlyRate: payload.hourly_rate,
         private: payload.private,
+        fixedPrice: payload.fixed_price,
       })
 
       ctx.logger.info(`Created budget ${createdBudget.id} for tenant ${ctx.organisation!.id}`)
@@ -44,8 +44,21 @@ export default class BudgetController {
 
     // Assign organisation administrators as default budget members
     const pivilegedUsers = await ctx.organisation?.getPrivilegedUsers()
-    if (pivilegedUsers) {
+    if (pivilegedUsers?.length) {
       await createdBudget.related('members').attach(pivilegedUsers.map((member) => member.id))
+    }
+
+    await ctx.organisation?.load('tasks')
+
+    // Assign organisation default tasks to budget
+    const defaultTasks = ctx.organisation?.tasks
+    if (defaultTasks?.length) {
+      await createdBudget.related('tasks').attach(
+        defaultTasks.reduce((prev, curr) => {
+          prev[curr.id] = { is_billable: Boolean(curr.$extras.pivot_is_billable) }
+          return prev
+        }, {})
+      )
     }
 
     return createdBudget.serialize()
@@ -54,21 +67,20 @@ export default class BudgetController {
   public async index(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(GetBudgetsValidator)
 
-    // Load budgets related to user
-    await ctx.auth.user!.load('budgets')
-    const budgets = ctx.auth.user!.budgets
+    let budgets = await ctx.organisation?.getBudgets(
+      {
+        userId: payload?.user_id ?? ctx.auth.user!.id,
+        projectId: payload?.project_id,
+      },
+      { includeProject: payload?.include_project }
+    )
 
-    if (payload.group_by === 'PROJECT') {
-      // Load budget projects and serailize each budget
-      await Promise.all(budgets.map(async (budget) => await budget.load('project')))
-      budgets.map((budget) => budget.serialize())
-
-      // Group serialized budgets by related projects
-      const groupedBudgets: Record<string, Budget[]> = groupBy(budgets, (p) => p.project.name)
-
-      return groupedBudgets
+    if (!budgets?.length) {
+      return ctx.response.ok([])
     }
 
-    return budgets.map((budget) => budget.serialize())
+    budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
+
+    return budgets
   }
 }

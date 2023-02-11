@@ -13,6 +13,7 @@ const budgetEndpoints = appApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Budgets', 'Budget'],
     }),
 
     getBudgets: build.query<GetBudgetsResponse, GetBudgetsRequest>({
@@ -20,6 +21,7 @@ const budgetEndpoints = appApi.injectEndpoints({
         url: budgetBasePath,
         params,
       }),
+      providesTags: ['Budgets'],
     }),
   }),
   overrideExisting: false,

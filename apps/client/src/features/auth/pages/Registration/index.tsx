@@ -1,11 +1,10 @@
-import Progress from '@/components/Indicators/Progress'
-import { ProgressStep } from '@/components/Indicators/ProgressStep'
 import { DetailsView, OrganisationsView, TeamView } from '../../components/Registration'
 import { RegistrationSteps } from '../../types'
 import { useDispatch, useSelector } from 'react-redux'
 import { setStep } from '@/stores/slices/registration'
 import { RootState } from '@/stores/store'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { Step, StepIndicator } from '@/components'
 
 // const views = {
 //   details: {
@@ -36,11 +35,11 @@ export const RegistrationPage = (): JSX.Element => {
 
   return (
     <div className="flex flex-col py-11">
-      <Progress activeStep={activeStep} defaultStep="details">
-        <ProgressStep id="details" text="Your details" />
-        <ProgressStep id="organisation" text="Create organisation" />
-        <ProgressStep id="team" text="Invite the team" />
-      </Progress>
+      <StepIndicator activeStep={activeStep} defaultStep="details">
+        <Step id="details" text="Your details" />
+        <Step id="organisation" text="Create organisation" />
+        <Step id="team" text="Invite the team" />
+      </StepIndicator>
 
       <div className="my-8">
         {activeStep === 'details' && <DetailsView onSuccess={handleStep} />}
