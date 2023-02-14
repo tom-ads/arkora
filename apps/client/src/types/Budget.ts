@@ -3,6 +3,7 @@ import { BudgetType } from './BudgetType'
 
 export type Budget = {
   id: number
+  projectId: number
   name: string
   colour: string
   fixedPrice?: number

@@ -3,7 +3,7 @@ declare module '@ioc:Adonis/Core/Validator' {
     password(): Rule
     currencyCode(): Rule
     workDays(): Rule
-    // uniqueMember(): Rule
+    budgetName(projectId: number, exceptCurrentName?: boolean): Rule
     organisationProject(organisationId: number): Rule
   }
 }

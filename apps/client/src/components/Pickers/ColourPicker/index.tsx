@@ -33,10 +33,10 @@ export const ColourPicker = ({ name, control }: ColourPickerProps): JSX.Element 
   )
 
   useEffect(() => {
-    if (colours) {
+    if (!value && colours?.length) {
       onChange(colours[0])
     }
-  }, [colours])
+  }, [value, colours])
 
   return (
     <Popover className="relative">

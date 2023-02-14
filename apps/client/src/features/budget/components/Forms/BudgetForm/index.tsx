@@ -21,7 +21,7 @@ import {
 import validationIssuer from '@/helpers/validation/issuer'
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import { FixedBudgetSection } from './Sections/FixedBudget'
@@ -47,12 +47,12 @@ export type BudgetFormFields = {
   private: boolean
   budgetType: BudgetType
   budget: number | undefined
-  hourlyRate: number | undefined
-  fixedPrice: number | undefined
+  hourlyRate: number | null | undefined
+  fixedPrice: number | null | undefined
   billableType: BillableType
 }
 
-const budgetSchema = z
+export const budgetSchema = z
   .object({
     budgetType: z.nativeEnum(BudgetType),
     billableType: z.nativeEnum(BillableType),
@@ -91,9 +91,36 @@ const budgetFormSchema = z
   })
   .and(budgetSchema)
 
+const FormWrapper = ({
+  reset,
+  setValue,
+  state,
+  children,
+}: {
+  reset: any
+  setValue: any
+  state?: BudgetFormFields
+  children: JSX.Element
+}): JSX.Element => {
+  useEffect(() => {
+    if (state) {
+      setValue('budgetType', state.budgetType)
+      setValue('billableType', state.billableType)
+      // Object.keys(state).forEach((field) => {
+      //   const mappedField = field as keyof typeof state
+      //   setValue(mappedField, state[mappedField])
+      // })
+      // setValue('hourlyRate', state.hourlyRate ?? null)
+    }
+  }, [state])
+
+  return children
+}
+
 type BudgetFormProps = {
   children?: ReactNode
   defaultValues?: BudgetFormFields
+  state?: BudgetFormFields
   error?: FetchBaseQueryError | SerializedError
   onSubmit: (data: BudgetFormFields) => void
 }
@@ -102,51 +129,41 @@ export const BudgetForm = ({
   onSubmit,
   error,
   defaultValues,
+  state,
   children,
 }: BudgetFormProps): JSX.Element => {
-  const [sectionTransition, setSectionTransition] = useState<
-    Partial<{
-      budgetType: BudgetType
-      billableType: BillableType
-      canTransition: boolean
-    }>
-  >({
+  const [previousState, setPreviousState] = useState<Partial<BudgetFormFields>>({
     budgetType: BudgetType.VARIABLE,
     billableType: BillableType.TOTAL_COST,
-    canTransition: true,
   })
 
   const onChange = (fields: BudgetFormFields, methods: UseFormReturn<BudgetFormFields>) => {
-    if (sectionTransition.budgetType !== fields.budgetType) {
+    if (previousState.budgetType !== fields.budgetType) {
       methods.resetField('budget')
 
-      if (sectionTransition.budgetType === BudgetType.FIXED) {
+      if (previousState.budgetType === BudgetType.FIXED) {
         methods.resetField('fixedPrice')
       }
 
-      if (sectionTransition.budgetType !== BudgetType.NON_BILLABLE) {
+      if (previousState.budgetType !== BudgetType.NON_BILLABLE) {
         methods.resetField('hourlyRate')
         methods.resetField('billableType')
       }
 
       methods.clearErrors()
 
-      setSectionTransition({
-        budgetType: fields.budgetType,
-        billableType: fields.billableType,
-        canTransition: false,
-      })
+      setPreviousState(fields)
     }
 
     if (
-      sectionTransition.budgetType === BudgetType.FIXED &&
-      sectionTransition.billableType !== fields.billableType
+      previousState.budgetType === BudgetType.FIXED &&
+      previousState.billableType !== fields.billableType
     ) {
       methods.resetField('hourlyRate')
       methods.resetField('budget')
       methods.clearErrors(['hourlyRate', 'budget'])
 
-      setSectionTransition((state) => ({ ...state, billableType: fields.billableType }))
+      setPreviousState(fields)
     }
   }
 
@@ -159,93 +176,83 @@ export const BudgetForm = ({
       validationSchema={budgetFormSchema}
       className="space-y-6"
     >
-      {({ control, watch, formState: { errors } }) => (
-        <>
-          <div className="flex gap-6">
-            <FormControl className="flex-grow">
-              <FormLabel htmlFor="name">Name</FormLabel>
-              <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
-              {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
+      {({ control, setValue, watch, reset, formState: { errors } }) => (
+        <FormWrapper reset={reset} state={state} setValue={setValue}>
+          <>
+            <div className="flex gap-6">
+              <FormControl className="flex-grow">
+                <FormLabel htmlFor="name">Name</FormLabel>
+                <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
+                {errors?.name?.message && (
+                  <FormErrorMessage>{errors.name.message}</FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl className="w-fit">
+                <FormLabel htmlFor="colour">Colour</FormLabel>
+                <ColourPicker name="colour" control={control} />
+              </FormControl>
+            </div>
+
+            <FormControl>
+              <FormLabel htmlFor="private">Visibility</FormLabel>
+              <FormStyledRadio className="flex-col sm:flex-row" name="private">
+                <FormStyledRadioOption
+                  title="Public"
+                  icon={<OpenLockIcon className="stroke-[2px]" />}
+                  description="All assigned project members will be able to view this budget"
+                  value={false}
+                />
+                <FormStyledRadioOption
+                  title="Private"
+                  icon={<LockIcon className="stroke-[2px]" />}
+                  description="Only assigned project members will be able to view this budget"
+                  value={true}
+                />
+              </FormStyledRadio>
             </FormControl>
 
-            <FormControl className="w-fit">
-              <FormLabel htmlFor="colour">Colour</FormLabel>
-              <ColourPicker name="colour" control={control} />
-            </FormControl>
-          </div>
+            <HorizontalDivider
+              contentLeft={
+                <p className="whitespace-nowrap font-medium text-base text-gray-100">Budget Type</p>
+              }
+            />
 
-          <FormControl>
-            <FormLabel htmlFor="private">Visibility</FormLabel>
-            <FormStyledRadio className="flex-col sm:flex-row" name="private">
+            <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
               <FormStyledRadioOption
-                title="Public"
-                icon={<OpenLockIcon className="stroke-[2px]" />}
-                description="All assigned project members will be able to view this budget"
-                value={false}
+                title="Variable"
+                description="Est. budget. Charge and track by the hour. Can overrun."
+                value={BudgetType.VARIABLE}
               />
               <FormStyledRadioOption
-                title="Private"
-                icon={<LockIcon className="stroke-[2px]" />}
-                description="Only assigned project members will be able to view this budget"
-                value={true}
+                title="Fixed"
+                description="Set budget or cost. Tracked by the hour, cannot overrun"
+                value={BudgetType.FIXED}
+              />
+              <FormStyledRadioOption
+                title="Non-Billable"
+                description="No cost, budget hours only. Track by hour, can overrun."
+                value={BudgetType.NON_BILLABLE}
               />
             </FormStyledRadio>
-          </FormControl>
 
-          <HorizontalDivider
-            contentLeft={
-              <p className="whitespace-nowrap font-medium text-base text-gray-100">Budget Type</p>
-            }
-          />
+            <div className="min-h-[210px]">
+              {watch('budgetType') === BudgetType.VARIABLE && (
+                <VariableBudgetSection control={control} watch={watch} errors={errors} />
+              )}
 
-          <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
-            <FormStyledRadioOption
-              title="Variable"
-              description="Est. budget. Charge and track by the hour. Can overrun."
-              value={BudgetType.VARIABLE}
-            />
-            <FormStyledRadioOption
-              title="Fixed"
-              description="Set budget or cost. Tracked by the hour, cannot overrun"
-              value={BudgetType.FIXED}
-            />
-            <FormStyledRadioOption
-              title="Non-Billable"
-              description="No cost, budget hours only. Track by hour, can overrun."
-              value={BudgetType.NON_BILLABLE}
-            />
-          </FormStyledRadio>
+              {watch('budgetType') === BudgetType.FIXED && (
+                <FixedBudgetSection control={control} watch={watch} errors={errors} />
+              )}
 
-          <div className="min-h-[210px]">
-            <VariableBudgetSection
-              show={
-                watch('budgetType') === BudgetType.VARIABLE && !!sectionTransition.canTransition
-              }
-              control={control}
-              watch={watch}
-              errors={errors}
-              afterLeave={() => setSectionTransition((s) => ({ ...s, canTransition: true }))}
-            />
+              {watch('budgetType') === BudgetType.NON_BILLABLE && (
+                <NonBillableSection errors={errors} />
+              )}
+            </div>
 
-            <FixedBudgetSection
-              show={watch('budgetType') === BudgetType.FIXED && !!sectionTransition.canTransition}
-              control={control}
-              watch={watch}
-              errors={errors}
-              afterLeave={() => setSectionTransition((s) => ({ ...s, canTransition: true }))}
-            />
-
-            <NonBillableSection
-              show={
-                watch('budgetType') === BudgetType.NON_BILLABLE && !!sectionTransition.canTransition
-              }
-              errors={errors}
-              afterLeave={() => setSectionTransition((s) => ({ ...s, canTransition: true }))}
-            />
-          </div>
-
-          {children}
-        </>
+            {children}
+          </>
+        </FormWrapper>
       )}
     </Form>
   )

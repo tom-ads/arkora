@@ -14,13 +14,45 @@ export default class BudgetPolicy extends BasePolicy {
       return false
     }
 
-    // TODO: Check organisation id of user vs budget
-
     return true
   }
 
   public async create(user: User) {
     if (user.role.name === UserRole.MEMBER) {
+      return false
+    }
+
+    return true
+  }
+
+  public async delete(user: User, budget: Budget) {
+    if (!user?.id || !budget?.id) {
+      return false
+    }
+
+    if (user.role?.name === UserRole.MEMBER) {
+      return false
+    }
+
+    const exists = await budget.related('members').query().where('user_id', user.id).first()
+    if (!exists) {
+      return false
+    }
+
+    return true
+  }
+
+  public async update(user: User, budget: Budget) {
+    if (!user?.id || !budget?.id) {
+      return false
+    }
+
+    if (user.role?.name === UserRole.MEMBER) {
+      return false
+    }
+
+    const exists = await budget.related('members').query().where('user_id', user.id).first()
+    if (!exists) {
       return false
     }
 

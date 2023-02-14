@@ -2,6 +2,7 @@ import { validator } from '@ioc:Adonis/Core/Validator'
 import { CurrencyCode } from 'App/Enum/CurrencyCode'
 import WeekDay from 'App/Enum/WeekDay'
 import Organisation from 'App/Models/Organisation'
+import Project from 'App/Models/Project'
 
 /*
 |--------------------------------------------------------------------------
@@ -106,6 +107,37 @@ validator.rule(
         'organisationProject validation failed',
         options.arrayExpressionPointer,
         { organisationId }
+      )
+    }
+  },
+  () => ({ async: true })
+)
+
+validator.rule(
+  'budgetName',
+  async (name, [projectId, exceptCurrentName], options) => {
+    if (typeof projectId !== 'number') {
+      throw new Error('"budgetName" rule can only be used with a string schema type')
+    }
+
+    const exists = await Project.query()
+      .where('id', projectId)
+      .whereHas('budgets', (budgetQuery) => {
+        budgetQuery.where('name', name)
+      })
+      .first()
+
+    /* 
+      Validator can optionally handle the case of needing to not include 
+      the current name from the check
+    */
+    if (exists && !exceptCurrentName) {
+      options.errorReporter.report(
+        options.pointer,
+        'budgetName',
+        'budgetName validation failed',
+        options.arrayExpressionPointer,
+        { projectId, exceptCurrentName }
       )
     }
   },

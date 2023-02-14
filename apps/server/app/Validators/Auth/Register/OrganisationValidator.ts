@@ -32,6 +32,7 @@ export default class OrganisationValidator {
         table: 'organisations',
         column: 'subdomain',
       }),
+      // TODO: check for reserved words, ie. Arkora/arkora
     ]),
     work_days: schema
       .array([rules.minLength(1), rules.maxLength(7), rules.workDays()])

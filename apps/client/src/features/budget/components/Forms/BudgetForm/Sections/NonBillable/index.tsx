@@ -1,29 +1,13 @@
 import { FormControl, FormDescription, FormLabel, FormNumberInput } from '@/components'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
-import { Transition } from '@headlessui/react'
 
 type NonBillableSectionProps = {
   errors: any
-  show: boolean
-  afterLeave: () => void
 }
 
-export const NonBillableSection = ({
-  show,
-  errors,
-  afterLeave,
-}: NonBillableSectionProps): JSX.Element => {
+export const NonBillableSection = ({ errors }: NonBillableSectionProps): JSX.Element => {
   return (
-    <Transition
-      show={show}
-      enter="transition duration-75"
-      enterFrom="opacity-0"
-      enterTo="opacity-100"
-      leave="transition duration-150 opacity-100"
-      leaveFrom="opacity-100"
-      leaveTo="opacity-0"
-      afterLeave={afterLeave}
-    >
+    <>
       <FormControl className="max-w-[350px]">
         <FormLabel htmlFor="budget" className="mb-0">
           Tracking
@@ -37,6 +21,6 @@ export const NonBillableSection = ({
         />
         {errors?.budget?.message && <FormErrorMessage>{errors.budget.message}</FormErrorMessage>}
       </FormControl>
-    </Transition>
+    </>
   )
 }
