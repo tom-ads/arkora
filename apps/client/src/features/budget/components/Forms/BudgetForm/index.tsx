@@ -21,7 +21,7 @@ import {
 import validationIssuer from '@/helpers/validation/issuer'
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import { FixedBudgetSection } from './Sections/FixedBudget'
@@ -91,36 +91,9 @@ const budgetFormSchema = z
   })
   .and(budgetSchema)
 
-const FormWrapper = ({
-  reset,
-  setValue,
-  state,
-  children,
-}: {
-  reset: any
-  setValue: any
-  state?: BudgetFormFields
-  children: JSX.Element
-}): JSX.Element => {
-  useEffect(() => {
-    if (state) {
-      setValue('budgetType', state.budgetType)
-      setValue('billableType', state.billableType)
-      // Object.keys(state).forEach((field) => {
-      //   const mappedField = field as keyof typeof state
-      //   setValue(mappedField, state[mappedField])
-      // })
-      // setValue('hourlyRate', state.hourlyRate ?? null)
-    }
-  }, [state])
-
-  return children
-}
-
 type BudgetFormProps = {
   children?: ReactNode
   defaultValues?: BudgetFormFields
-  state?: BudgetFormFields
   error?: FetchBaseQueryError | SerializedError
   onSubmit: (data: BudgetFormFields) => void
 }
@@ -129,7 +102,6 @@ export const BudgetForm = ({
   onSubmit,
   error,
   defaultValues,
-  state,
   children,
 }: BudgetFormProps): JSX.Element => {
   const [previousState, setPreviousState] = useState<Partial<BudgetFormFields>>({
@@ -176,83 +148,79 @@ export const BudgetForm = ({
       validationSchema={budgetFormSchema}
       className="space-y-6"
     >
-      {({ control, setValue, watch, reset, formState: { errors } }) => (
-        <FormWrapper reset={reset} state={state} setValue={setValue}>
-          <>
-            <div className="flex gap-6">
-              <FormControl className="flex-grow">
-                <FormLabel htmlFor="name">Name</FormLabel>
-                <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
-                {errors?.name?.message && (
-                  <FormErrorMessage>{errors.name.message}</FormErrorMessage>
-                )}
-              </FormControl>
-
-              <FormControl className="w-fit">
-                <FormLabel htmlFor="colour">Colour</FormLabel>
-                <ColourPicker name="colour" control={control} />
-              </FormControl>
-            </div>
-
-            <FormControl>
-              <FormLabel htmlFor="private">Visibility</FormLabel>
-              <FormStyledRadio className="flex-col sm:flex-row" name="private">
-                <FormStyledRadioOption
-                  title="Public"
-                  icon={<OpenLockIcon className="stroke-[2px]" />}
-                  description="All assigned project members will be able to view this budget"
-                  value={false}
-                />
-                <FormStyledRadioOption
-                  title="Private"
-                  icon={<LockIcon className="stroke-[2px]" />}
-                  description="Only assigned project members will be able to view this budget"
-                  value={true}
-                />
-              </FormStyledRadio>
+      {({ control, watch, formState: { errors } }) => (
+        <>
+          <div className="flex gap-6">
+            <FormControl className="flex-grow">
+              <FormLabel htmlFor="name">Name</FormLabel>
+              <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
+              {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
             </FormControl>
 
-            <HorizontalDivider
-              contentLeft={
-                <p className="whitespace-nowrap font-medium text-base text-gray-100">Budget Type</p>
-              }
-            />
+            <FormControl className="w-fit">
+              <FormLabel htmlFor="colour">Colour</FormLabel>
+              <ColourPicker name="colour" control={control} />
+            </FormControl>
+          </div>
 
-            <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
+          <FormControl>
+            <FormLabel htmlFor="private">Visibility</FormLabel>
+            <FormStyledRadio className="flex-col sm:flex-row" name="private">
               <FormStyledRadioOption
-                title="Variable"
-                description="Est. budget. Charge and track by the hour. Can overrun."
-                value={BudgetType.VARIABLE}
+                title="Public"
+                icon={<OpenLockIcon className="stroke-[2px]" />}
+                description="All assigned project members will be able to view this budget"
+                value={false}
               />
               <FormStyledRadioOption
-                title="Fixed"
-                description="Set budget or cost. Tracked by the hour, cannot overrun"
-                value={BudgetType.FIXED}
-              />
-              <FormStyledRadioOption
-                title="Non-Billable"
-                description="No cost, budget hours only. Track by hour, can overrun."
-                value={BudgetType.NON_BILLABLE}
+                title="Private"
+                icon={<LockIcon className="stroke-[2px]" />}
+                description="Only assigned project members will be able to view this budget"
+                value={true}
               />
             </FormStyledRadio>
+          </FormControl>
 
-            <div className="min-h-[210px]">
-              {watch('budgetType') === BudgetType.VARIABLE && (
-                <VariableBudgetSection control={control} watch={watch} errors={errors} />
-              )}
+          <HorizontalDivider
+            contentLeft={
+              <p className="whitespace-nowrap font-medium text-base text-gray-100">Budget Type</p>
+            }
+          />
 
-              {watch('budgetType') === BudgetType.FIXED && (
-                <FixedBudgetSection control={control} watch={watch} errors={errors} />
-              )}
+          <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
+            <FormStyledRadioOption
+              title="Variable"
+              description="Est. budget. Charge and track by the hour. Can overrun."
+              value={BudgetType.VARIABLE}
+            />
+            <FormStyledRadioOption
+              title="Fixed"
+              description="Set budget or cost. Tracked by the hour, cannot overrun"
+              value={BudgetType.FIXED}
+            />
+            <FormStyledRadioOption
+              title="Non-Billable"
+              description="No cost, budget hours only. Track by hour, can overrun."
+              value={BudgetType.NON_BILLABLE}
+            />
+          </FormStyledRadio>
 
-              {watch('budgetType') === BudgetType.NON_BILLABLE && (
-                <NonBillableSection errors={errors} />
-              )}
-            </div>
+          <div className="min-h-[210px]">
+            {watch('budgetType') === BudgetType.VARIABLE && (
+              <VariableBudgetSection control={control} watch={watch} errors={errors} />
+            )}
 
-            {children}
-          </>
-        </FormWrapper>
+            {watch('budgetType') === BudgetType.FIXED && (
+              <FixedBudgetSection control={control} watch={watch} errors={errors} />
+            )}
+
+            {watch('budgetType') === BudgetType.NON_BILLABLE && (
+              <NonBillableSection errors={errors} />
+            )}
+          </div>
+
+          {children}
+        </>
       )}
     </Form>
   )
