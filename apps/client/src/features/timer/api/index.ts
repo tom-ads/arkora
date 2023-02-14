@@ -8,6 +8,7 @@ const taskEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
     getTimers: build.query<GetTimersResponse, void>({
       query: () => timerBasePath,
+      providesTags: ['TimeEntries'],
     }),
 
     createTimer: build.mutation<TimeEntry, CreateTimerRequest>({
@@ -15,6 +16,14 @@ const taskEndpoints = appApi.injectEndpoints({
         url: timerBasePath,
         method: 'POST',
         body,
+      }),
+      invalidatesTags: ['TimeEntries'],
+    }),
+
+    deleteTimer: build.mutation<void, number>({
+      query: (id) => ({
+        url: `${timerBasePath}/${id}`,
+        method: 'DELETE',
       }),
       invalidatesTags: ['TimeEntries'],
     }),
@@ -43,6 +52,7 @@ const taskEndpoints = appApi.injectEndpoints({
 export const {
   useCreateTimerMutation,
   useGetTimersQuery,
+  useDeleteTimerMutation,
   useStartTimerMutation,
   useStopTimerMutation,
 } = taskEndpoints

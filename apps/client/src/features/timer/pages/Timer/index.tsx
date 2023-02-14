@@ -17,11 +17,17 @@ import { Transition } from '@headlessui/react'
 import { DateTime } from 'luxon'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { TimeEntryCard, TimesheetPeriod, WeekDaySelect } from '../../components'
+import {
+  ManageTimeEntryModal,
+  TimeEntryCard,
+  TimesheetPeriod,
+  WeekDaySelect,
+} from '../../components'
 import { NewTimeEntryModal } from '../../components/Modals/NewTimeEntry'
 
 export const TimerPage = (): JSX.Element => {
   const [openNewTimeEntryModal, setOpenNewTimeEntryModal] = useState(false)
+  const [timeEntryId, setTimeEntryId] = useState<number | null>(null)
 
   const { timesheet, timer } = useSelector((state: RootState) => ({
     timesheet: state.timer.timesheet,
@@ -137,6 +143,7 @@ export const TimerPage = (): JSX.Element => {
                 entry={entry}
                 minutes={minutes}
                 onToggle={handleTracking}
+                onManage={(id) => setTimeEntryId(id)}
               />
             ))}
           </div>
@@ -146,6 +153,11 @@ export const TimerPage = (): JSX.Element => {
       <NewTimeEntryModal
         isOpen={openNewTimeEntryModal}
         onClose={() => setOpenNewTimeEntryModal((state) => !state)}
+      />
+      <ManageTimeEntryModal
+        entryId={timeEntryId}
+        isOpen={!!timeEntryId}
+        onClose={() => setTimeEntryId(null)}
       />
     </Page>
   )
