@@ -78,7 +78,7 @@ export const CreateBudgetModal = ({ isOpen, onClose }: CreateBudgetModalProps): 
         error={error}
         defaultValues={{
           name: '',
-          colour: '#FFFFFF',
+          colour: '',
           private: true,
           fixedPrice: undefined,
           budgetType: BudgetType.VARIABLE,

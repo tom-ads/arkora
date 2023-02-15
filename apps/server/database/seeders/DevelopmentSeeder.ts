@@ -61,14 +61,16 @@ export default class extends BaseSeeder {
     // Link common tasks to each organisation and budget
     await Promise.all([
       organisation.related('tasks').attach(commonTasks.map((task) => task.id)),
-      budgets.map((budget) => budget.related('tasks').attach(commonTasks.map((task) => task.id))),
+      ...budgets.map(
+        async (budget) => await budget.related('tasks').attach(commonTasks.map((task) => task.id))
+      ),
     ])
 
     // Link testUser to organisation and relations
     await Promise.all([
       testUser.related('organisation').associate(organisation),
-      projects.map(async (project) => await project.related('members').attach([testUser.id])),
-      budgets.map(async (budget) => await budget.related('members').attach([testUser.id])),
+      ...projects.map(async (project) => await project.related('members').attach([testUser.id])),
+      ...budgets.map(async (budget) => await budget.related('members').attach([testUser.id])),
     ])
   }
 }

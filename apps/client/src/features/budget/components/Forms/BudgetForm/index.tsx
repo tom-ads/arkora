@@ -47,12 +47,12 @@ export type BudgetFormFields = {
   private: boolean
   budgetType: BudgetType
   budget: number | undefined
-  hourlyRate: number | undefined
-  fixedPrice: number | undefined
+  hourlyRate: number | null | undefined
+  fixedPrice: number | null | undefined
   billableType: BillableType
 }
 
-const budgetSchema = z
+export const budgetSchema = z
   .object({
     budgetType: z.nativeEnum(BudgetType),
     billableType: z.nativeEnum(BillableType),
@@ -104,49 +104,38 @@ export const BudgetForm = ({
   defaultValues,
   children,
 }: BudgetFormProps): JSX.Element => {
-  const [sectionTransition, setSectionTransition] = useState<
-    Partial<{
-      budgetType: BudgetType
-      billableType: BillableType
-      canTransition: boolean
-    }>
-  >({
+  const [previousState, setPreviousState] = useState<Partial<BudgetFormFields>>({
     budgetType: BudgetType.VARIABLE,
     billableType: BillableType.TOTAL_COST,
-    canTransition: true,
   })
 
   const onChange = (fields: BudgetFormFields, methods: UseFormReturn<BudgetFormFields>) => {
-    if (sectionTransition.budgetType !== fields.budgetType) {
+    if (previousState.budgetType !== fields.budgetType) {
       methods.resetField('budget')
 
-      if (sectionTransition.budgetType === BudgetType.FIXED) {
+      if (previousState.budgetType === BudgetType.FIXED) {
         methods.resetField('fixedPrice')
       }
 
-      if (sectionTransition.budgetType !== BudgetType.NON_BILLABLE) {
+      if (previousState.budgetType !== BudgetType.NON_BILLABLE) {
         methods.resetField('hourlyRate')
         methods.resetField('billableType')
       }
 
       methods.clearErrors()
 
-      setSectionTransition({
-        budgetType: fields.budgetType,
-        billableType: fields.billableType,
-        canTransition: false,
-      })
+      setPreviousState(fields)
     }
 
     if (
-      sectionTransition.budgetType === BudgetType.FIXED &&
-      sectionTransition.billableType !== fields.billableType
+      previousState.budgetType === BudgetType.FIXED &&
+      previousState.billableType !== fields.billableType
     ) {
       methods.resetField('hourlyRate')
       methods.resetField('budget')
       methods.clearErrors(['hourlyRate', 'budget'])
 
-      setSectionTransition((state) => ({ ...state, billableType: fields.billableType }))
+      setPreviousState(fields)
     }
   }
 
@@ -217,31 +206,17 @@ export const BudgetForm = ({
           </FormStyledRadio>
 
           <div className="min-h-[210px]">
-            <VariableBudgetSection
-              show={
-                watch('budgetType') === BudgetType.VARIABLE && !!sectionTransition.canTransition
-              }
-              control={control}
-              watch={watch}
-              errors={errors}
-              afterLeave={() => setSectionTransition((s) => ({ ...s, canTransition: true }))}
-            />
+            {watch('budgetType') === BudgetType.VARIABLE && (
+              <VariableBudgetSection control={control} watch={watch} errors={errors} />
+            )}
 
-            <FixedBudgetSection
-              show={watch('budgetType') === BudgetType.FIXED && !!sectionTransition.canTransition}
-              control={control}
-              watch={watch}
-              errors={errors}
-              afterLeave={() => setSectionTransition((s) => ({ ...s, canTransition: true }))}
-            />
+            {watch('budgetType') === BudgetType.FIXED && (
+              <FixedBudgetSection control={control} watch={watch} errors={errors} />
+            )}
 
-            <NonBillableSection
-              show={
-                watch('budgetType') === BudgetType.NON_BILLABLE && !!sectionTransition.canTransition
-              }
-              errors={errors}
-              afterLeave={() => setSectionTransition((s) => ({ ...s, canTransition: true }))}
-            />
+            {watch('budgetType') === BudgetType.NON_BILLABLE && (
+              <NonBillableSection errors={errors} />
+            )}
           </div>
 
           {children}

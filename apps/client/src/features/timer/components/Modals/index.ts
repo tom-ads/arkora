@@ -1,2 +1,2 @@
-export * from './ManageTimer'
+export * from './ManageTimeEntry'
 export * from './NewTimeEntry'

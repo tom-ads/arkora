@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import {
   afterCreate,
   BaseModel,
+  beforeDelete,
   beforeFetch,
   beforeFind,
   BelongsTo,
@@ -26,8 +27,6 @@ import BudgetKind from 'App/Enum/BudgetKind'
 import BillableKind from 'App/Enum/BillableKind'
 
 type BudgetFilters = Partial<{
-  userId: number
-  projectId: number
   page: number
 }>
 
@@ -39,7 +38,7 @@ export default class Budget extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column({ serializeAs: null })
+  @column()
   public projectId: number
 
   @column({ serializeAs: null })
@@ -225,6 +224,16 @@ export default class Budget extends BaseModel {
     }
   }
 
+  @beforeDelete()
+  public static async beforeDelete(budget: Budget) {
+    // TODO: use onDelete('cascade') instead on db
+    await Promise.all([
+      budget.related('members').detach(),
+      budget.related('timeEntries').query().delete(),
+      budget.related('tasks').detach(),
+    ])
+  }
+
   // Scopes
 
   public static relatedMember = scope((query: BudgetBuilder, userId: number) => {
@@ -233,25 +242,8 @@ export default class Budget extends BaseModel {
     })
   })
 
-  // Methods - Static
-
-  /*
-    This method returns a total_spent field for each specified budget, where each budget can have
-    zero to many linked time entries where their task_id is related to a billable task. These
-    TimeEntries contain a durationMinutes field, which we can use to determine the total number of
-    hours used, and thus multiplied by the hourly_rate set on each budget, giving us the total
-    expenditure.
-
-    Does cover
-    - Time entries that have task/budget pivot record is_billable flag set to true, will
-      return only those time entries.
-
-    Does not cover:
-    - Active timers durations won't have been added to the TimeEntries durationMinutes, so these
-      are not included in the output total_spent for each budget.
-  */
-  public static async getBudgetsMetrics(budgetIds: number[], filters?: BudgetFilters) {
-    const result = await Budget.query()
+  public static budgetMetrics = scope((query: BudgetBuilder, budgetIds: number[]) => {
+    return query
       .select(
         'budgets.*',
         Database.raw(
@@ -279,12 +271,42 @@ export default class Budget extends BaseModel {
       })
       .groupBy('budgets.id')
       .orderBy('budgets.name')
+  })
+
+  // Methods - Static
+
+  /*
+    This method returns a total_spent field for each specified budget, where each budget can have
+    zero to many linked time entries where their task_id is related to a billable task. These
+    TimeEntries contain a durationMinutes field, which we can use to determine the total number of
+    hours used, and thus multiplied by the hourly_rate set on each budget, giving us the total
+    expenditure.
+
+    Does cover
+    - Time entries that have task/budget pivot record is_billable flag set to true, will
+      return only those time entries.
+
+    Does not cover:
+    - Active timers durations won't have been added to the TimeEntries durationMinutes, so these
+      are not included in the output total_spent for each budget.
+  */
+  public static async getBudgetsMetrics(budgetIds: number[], filters?: BudgetFilters) {
+    const result = await Budget.query()
+      .withScopes((scopes) => scopes.budgetMetrics(budgetIds))
       .preload('project')
 
       // Filter - Pagination
       .if(filters?.page, (builder) => {
         builder.paginate(filters!.page!, 10)
       })
+
+    return result
+  }
+
+  public static async getBudgetMetrics(budgetId: number) {
+    const result = await Budget.query()
+      .withScopes((scopes) => scopes.budgetMetrics([budgetId]))
+      .first()
 
     return result
   }

@@ -3,11 +3,12 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BudgetKind from 'App/Enum/BudgetKind'
 import BillableKind from 'App/Enum/BillableKind'
 
-export default class CreateBudgetValidator {
+export default class UpdateBudgetValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public refs = schema.refs({
-    projectId: this.ctx.request.body()?.project_id,
+    projectId: this.ctx.request.body()?.project_id as number,
+    budgetId: this.ctx.request.body()?.budget_id as number,
   })
 
   /*
@@ -30,6 +31,7 @@ export default class CreateBudgetValidator {
    *    ```
    */
   public schema = schema.create({
+    budget_id: schema.number(),
     project_id: schema.number([rules.organisationProject(this.ctx.organisation!.id)]),
     name: schema.string([
       rules.trim(),
@@ -39,6 +41,9 @@ export default class CreateBudgetValidator {
         column: 'name',
         where: {
           project_id: this.refs.projectId.value,
+        },
+        whereNot: {
+          id: this.refs.budgetId.value,
         },
       }),
     ]),

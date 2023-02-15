@@ -7,12 +7,18 @@ import {
   PageHeader,
   PageTitle,
 } from '@/components'
-import { BudgetsTable, CreateBudgetModal, useGetBudgetsQuery } from '@/features/budget'
+import {
+  BudgetsTable,
+  CreateBudgetModal,
+  ManageBudgetModal,
+  useGetBudgetsQuery,
+} from '@/features/budget'
 import { BudgetRow } from '@/features/budget'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 export const ProjectPage = (): JSX.Element => {
+  const [budgetId, setBudgetId] = useState<number | null>(null)
   const [openCreateBudgetModal, setOpenCreateBudgetModal] = useState(false)
 
   const { projectId } = useParams()
@@ -39,13 +45,24 @@ export const ProjectPage = (): JSX.Element => {
 
         <BudgetsTable>
           {projectBudgets?.map((budget) => (
-            <BudgetRow key={budget.id} budget={budget} />
+            <BudgetRow
+              key={budget.id}
+              budget={budget}
+              onManage={(budgetId) => setBudgetId(budgetId)}
+            />
           ))}
         </BudgetsTable>
       </PageContent>
+
       <CreateBudgetModal
         isOpen={openCreateBudgetModal}
         onClose={() => setOpenCreateBudgetModal(false)}
+      />
+      <ManageBudgetModal
+        projectId={projectId ? parseInt(projectId, 10) : null}
+        budgetId={budgetId}
+        isOpen={!!budgetId}
+        onClose={() => setBudgetId(null)}
       />
     </Page>
   )

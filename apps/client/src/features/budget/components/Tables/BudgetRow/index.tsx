@@ -1,5 +1,6 @@
 import {
   Badge,
+  Button,
   DoubleProgressLineIndicator,
   FormatCurrency,
   InlineLink,
@@ -9,7 +10,6 @@ import {
   ToolTip,
 } from '@/components'
 import { ToolTipContainer } from '@/components/ToolTip/container'
-import BillableType from '@/enums/BillableType'
 import BudgetType from '@/enums/BudgetType'
 import { calculatePercentage, convertToPounds } from '@/helpers/currency'
 import { formatToHours } from '@/helpers/date'
@@ -18,9 +18,12 @@ import { Budget } from '@/types'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
-type BudgetRowProps = { budget: Budget }
+type BudgetRowProps = {
+  onManage: (id: number) => void
+  budget: Budget
+}
 
-export const BudgetRow = ({ budget }: BudgetRowProps): JSX.Element => {
+export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => {
   const { currency } = useSelector((state: RootState) => ({
     currency: state.organisation.currency,
   }))
@@ -48,17 +51,14 @@ export const BudgetRow = ({ budget }: BudgetRowProps): JSX.Element => {
         ></div>
       </TableData>
 
-      <TableData>
-        <InlineLink className="font-medium" to={`/budgets/${budget.id}`}>
+      <TableData className="truncate">
+        <InlineLink className="font-medium truncate" to={`/budgets/${budget.id}`}>
           {budget.name}
         </InlineLink>
       </TableData>
 
       <TableData>
-        <Badge variant="default">
-          {budget?.budgetType?.name} -{' '}
-          {budget?.billableType?.name === BillableType.TOTAL_COST ? 'COST' : 'HOURS'}
-        </Badge>
+        <Badge variant="default">{budget?.budgetType?.name}</Badge>
       </TableData>
 
       <TableData>
@@ -184,6 +184,12 @@ export const BudgetRow = ({ budget }: BudgetRowProps): JSX.Element => {
 
       <TableData>
         <p>{budget.private ? 'Private' : 'Public'}</p>
+      </TableData>
+
+      <TableData>
+        <Button variant="blank" onClick={() => onManage(budget.id)}>
+          Manage
+        </Button>
       </TableData>
     </TableRow>
   )

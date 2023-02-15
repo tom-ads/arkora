@@ -9,35 +9,23 @@ import {
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import BillableType from '@/enums/BillableType'
-import { Transition } from '@headlessui/react'
+import { useEffect } from 'react'
+
 import { billableTypeOption } from '../..'
 
 type FixedBudgetSectionProps = {
   watch: any
   control: any
   errors: any
-  show: boolean
-  afterLeave: () => void
 }
 
 export const FixedBudgetSection = ({
-  show,
   control,
   watch,
   errors,
-  afterLeave,
 }: FixedBudgetSectionProps): JSX.Element => {
   return (
-    <Transition
-      show={show}
-      enter="transition duration-75"
-      enterFrom="opacity-0"
-      enterTo="opacity-100"
-      leave="transition duration-150 opacity-100"
-      leaveFrom="opacity-100"
-      leaveTo="opacity-0"
-      afterLeave={afterLeave}
-    >
+    <>
       <div className="flex flex-col sm:flex-row sm:gap-4 mb-4 sm:mb-0">
         <FormControl className="mb-5">
           <FormLabel htmlFor="fixedPrice" className="mb-0">
@@ -113,6 +101,6 @@ export const FixedBudgetSection = ({
           )}
         </FormControl>
       </div>
-    </Transition>
+    </>
   )
 }

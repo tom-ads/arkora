@@ -1,3 +1,4 @@
+import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 import Budget from 'App/Models/Budget'
@@ -139,6 +140,24 @@ export default class TimerController {
       last_stopped_at: null,
       description: timeEntry.description ?? null,
     }
+  }
+
+  /**
+   * @route DELETE api/v1/timers/:timeEntryId
+   * @description Delete a specific time entry
+   *
+   * @successStatus 204 - No Content
+   *
+   * @errorResponse (401)  Unauthorized  Only authenticated users can delete an entry
+   * @errorResponse (403)  Forbidden     Only admins can delete other team members entries
+   */
+  @bind()
+  public async delete(ctx: HttpContextContract, entry: TimeEntry) {
+    await ctx.bouncer.with('TimeEntryPolicy').authorize('delete', entry)
+
+    await entry.delete()
+
+    return ctx.response.noContent()
   }
 
   /**

@@ -21,6 +21,23 @@ export default class TimeEntryPolicy extends BasePolicy {
     return true
   }
 
+  public async delete(user: User, timeEntry: TimeEntry) {
+    if (!timeEntry) {
+      return false
+    }
+
+    await timeEntry.load('user')
+    if (user?.organisationId !== timeEntry.user?.organisationId) {
+      return false
+    }
+
+    if (user.role?.name === UserRole.MEMBER && user.id !== timeEntry.user?.id) {
+      return false
+    }
+
+    return true
+  }
+
   public async index(user: User) {
     if (user.role?.name === UserRole.MEMBER) {
       return false

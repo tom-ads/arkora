@@ -140,4 +140,15 @@ export default class Organisation extends BaseModel {
 
     return projects?.map((project) => project?.budgets).flat()
   }
+
+  public async isRelatedBudget(this: Organisation, budgetId: number) {
+    const result = await this.related('projects')
+      .query()
+      .whereHas('budgets', (budgetBuilder) => {
+        budgetBuilder.where('id', budgetId)
+      })
+      .first()
+
+    return !!result
+  }
 }

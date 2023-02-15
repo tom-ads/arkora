@@ -9,9 +9,10 @@ type TimeEntryCardProps = {
   entry: TimeEntry
   minutes: number
   onToggle: (timerId?: number) => void
+  onManage: (timerId: number) => void
 }
 
-export const TimeEntryCard = ({ entry, onToggle }: TimeEntryCardProps) => {
+export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps) => {
   const isActiveEntry = !entry.lastStoppedAt
 
   const duration = useMemo(() => {
@@ -74,7 +75,7 @@ export const TimeEntryCard = ({ entry, onToggle }: TimeEntryCardProps) => {
         </div>
 
         <div className="self-end">
-          <Button variant="blank" className="min-h-0 text-base">
+          <Button variant="blank" onClick={() => onManage(entry?.id)} className="min-h-0 text-base">
             Manage
           </Button>
         </div>

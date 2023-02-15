@@ -6,7 +6,7 @@ import { ProjectsTable } from '../../components/Tables/ProjectsTable'
 export const ProjectsPage = (): JSX.Element => {
   const [openCreateProjectModal, setOpenCreateProjectModal] = useState(false)
 
-  const [projectId, setProjectId] = useState<null | number>(null)
+  const [projectId, setProjectId] = useState<number | null>(null)
 
   return (
     <Page>

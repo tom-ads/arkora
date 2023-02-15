@@ -5,6 +5,7 @@ export const TimerRoute = (): JSX.Element => {
   return (
     <Routes>
       <Route index element={<TimerPage />} />
+      <Route path=":timeEntryId" element={<TimerPage />} />
     </Routes>
   )
 }
