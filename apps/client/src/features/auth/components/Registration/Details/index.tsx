@@ -5,12 +5,12 @@ import {
   DescriptorInsights,
   Form,
   FormInput,
-  Divider,
+  HorizontalDivider,
 } from '@/components'
 import { FormControl } from '@/components/Forms/Control'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormLabel } from '@/components/Forms/Label'
-import { PasswordInput } from '@/components/Forms/PasswordInput'
+import { FormPasswordInput } from '@/components/Forms/PasswordInput'
 import { PasswordStrength } from '@/components/Indicators/PasswordStrength'
 import { useVerifyDetailsMutation } from '../../../api'
 import { setDetails } from '@/stores/slices/registration'
@@ -96,13 +96,13 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
             <div className="space-y-2 pb-6">
-              <h1 className="font-semibold text-[32px] text-gray-100">Your details</h1>
+              <h1 className="font-semibold text-3xl text-gray-100">Your details</h1>
               <p className="text-base text-gray-80">
                 Let&apos;s get started! We need to collect some details to setup your account
               </p>
             </div>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Profile Image */}
             <Descriptor>
@@ -115,7 +115,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
               </DescriptorContent>
             </Descriptor>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Your Details */}
             <Descriptor>
@@ -176,10 +176,9 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                   <FormLabel htmlFor="password" size="sm">
                     Password
                   </FormLabel>
-                  <PasswordInput
+                  <FormPasswordInput
                     name="password"
                     placeHolder="Enter password"
-                    size="sm"
                     error={!!errors?.password}
                   />
                   <PasswordStrength password={watch('password')} isError={!!errors?.password} />
@@ -189,10 +188,9 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
                   <FormLabel htmlFor="passwordConfirmation" size="sm">
                     Confirm Password
                   </FormLabel>
-                  <PasswordInput
+                  <FormPasswordInput
                     name="passwordConfirmation"
                     placeHolder="Enter confirmation"
-                    size="sm"
                     error={!!errors.passwordConfirmation?.message}
                   />
                   {errors.passwordConfirmation?.message && (
@@ -204,12 +202,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
           </div>
 
           <div className="flex justify-end mt-12">
-            <Button
-              size="sm"
-              className="max-w-[220px] w-full"
-              type="submit"
-              isLoading={isVerifying}
-            >
+            <Button size="sm" className="max-w-[220px] w-full" type="submit" loading={isVerifying}>
               Next step
             </Button>
           </div>

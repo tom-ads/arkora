@@ -13,7 +13,7 @@ export const MainLayout = (): JSX.Element => {
       <main
         className={classNames('mx-auto w-full h-full', {
           'max-w-[889px] px-8': !isAuthenticated,
-          'max-w-[1440px] mx-auto px-[46px]': isAuthenticated,
+          'max-w-[1440px] mx-auto px-7 lg:px-[46px]': isAuthenticated,
         })}
       >
         <Outlet />

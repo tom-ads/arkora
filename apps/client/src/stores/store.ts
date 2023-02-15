@@ -4,11 +4,13 @@ import appApi from 'api'
 import AuthReducer from './slices/auth'
 import RegistrationReducer from './slices/registration'
 import OrganisationReducer from './slices/organisation'
+import TimerReducer from './slices/timer'
 
 const appReducers = {
   auth: AuthReducer,
   registration: RegistrationReducer,
   organisation: OrganisationReducer,
+  timer: TimerReducer,
 }
 
 export const store = configureStore({

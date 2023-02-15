@@ -82,7 +82,6 @@ export const InviteTeam = ({
         .filter((r) => r !== UserRole.OWNER)
         .map((role) => ({
           id: role,
-          value: role,
           display: role.toLowerCase()?.replace('_', ' '),
         })),
     [],
@@ -106,9 +105,7 @@ export const InviteTeam = ({
           </FormLabel>
           <FormSelect name="role" control={control} placeHolder="Select role">
             {roleOptions?.map((option) => (
-              <SelectOption key={option.id} value={option.value}>
-                {option?.display}
-              </SelectOption>
+              <SelectOption key={option.id}>{option?.display}</SelectOption>
             ))}
           </FormSelect>
           {errors.role?.message && (
@@ -156,9 +153,7 @@ export const InviteTeam = ({
                   size="xs"
                 >
                   {roleOptions?.map((option) => (
-                    <SelectOption key={option.id} value={option.value}>
-                      {option?.display}
-                    </SelectOption>
+                    <SelectOption key={option.id}>{option?.display}</SelectOption>
                   ))}
                 </FormSelect>
               </td>

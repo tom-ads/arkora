@@ -16,7 +16,7 @@ import Budget from './Budget'
 export default class Client extends BaseModel {
   // Columns
 
-  @column({ isPrimary: true, serializeAs: null })
+  @column({ isPrimary: true })
   public id: number
 
   @column({ serializeAs: null })

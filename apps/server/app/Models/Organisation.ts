@@ -19,8 +19,19 @@ import Currency from './Currency'
 import WorkDay from './WorkDay'
 import Client from './Client'
 import Project from './Project'
+import Task from './Task'
+import UserRole from 'App/Enum/UserRole'
 
-type OrganisationQueryBuilder = ModelQueryBuilderContract<typeof Organisation>
+type BudgetFilters = Partial<{
+  userId: number
+  projectId: number
+}>
+
+type BudgetOptions = Partial<{
+  includeProject: boolean
+}>
+
+type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 
 export default class Organisation extends BaseModel {
   // Columns
@@ -72,6 +83,12 @@ export default class Organisation extends BaseModel {
   })
   public workDays: ManyToMany<typeof WorkDay>
 
+  @manyToMany(() => Task, {
+    pivotTable: 'common_tasks',
+    pivotColumns: ['is_billable'],
+  })
+  public tasks: ManyToMany<typeof Task>
+
   @hasMany(() => Client)
   public clients: HasMany<typeof Client>
 
@@ -82,7 +99,56 @@ export default class Organisation extends BaseModel {
 
   @beforeFind()
   @beforeFetch()
-  public static preloadRelations(query: OrganisationQueryBuilder) {
+  public static preloadRelations(query: OrganisationBuilder) {
     query.preload('currency').preload('workDays')
+  }
+
+  // Instance Methods
+
+  public async getPrivilegedUsers(this: Organisation) {
+    return await this.related('users')
+      .query()
+      .whereHas('role', (roleQuery) => {
+        roleQuery.whereIn('name', [UserRole.OWNER, UserRole.ORG_ADMIN, UserRole.MANAGER])
+      })
+      .exec()
+  }
+
+  public async getBudgets(this: Organisation, filters?: BudgetFilters, options?: BudgetOptions) {
+    const projects = await this.related('projects')
+      .query()
+      .if(filters?.projectId, (projectBuilder) => {
+        projectBuilder.where('projects.id', filters!.projectId!)
+      })
+      // Ensure related projects have a member with specified user_id
+      .if(filters?.userId, (projectBuilder) => {
+        projectBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
+      })
+      .preload('budgets', (budgetQuery) => {
+        budgetQuery
+          // Ensure related budgets have a member with specified user_id
+          .if(filters?.userId, (budgetBuilder) => {
+            budgetBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
+          })
+          // Optionally include project to budget when retrieving
+          .if(options?.includeProject, (budgetBuilder) => {
+            budgetBuilder.preload('project')
+          })
+      })
+      .orderBy('name', 'asc')
+      .exec()
+
+    return projects?.map((project) => project?.budgets).flat()
+  }
+
+  public async isRelatedBudget(this: Organisation, budgetId: number) {
+    const result = await this.related('projects')
+      .query()
+      .whereHas('budgets', (budgetBuilder) => {
+        budgetBuilder.where('id', budgetId)
+      })
+      .first()
+
+    return !!result
   }
 }

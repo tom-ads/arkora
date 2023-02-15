@@ -1,3 +1,5 @@
+import { transformResponse } from '@/helpers/transform'
+import { clearAuth } from '@/stores/slices/auth'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 /* 
@@ -23,16 +25,32 @@ const prepareHeaders = (headers: Headers) => {
   return headers
 }
 
-const baseQuery = fetchBaseQuery({
+const rootQuery = fetchBaseQuery({
   baseUrl: baseUrl(),
   credentials: 'include',
   prepareHeaders: prepareHeaders,
 })
 
+const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) => {
+  const result = await rootQuery(args, api, extraOptions)
+
+  // Logout if response is 401
+  if (result.error && result.error?.status === 401 && api.endpoint !== 'getSession') {
+    api.dispatch(clearAuth())
+  }
+
+  // Recursively transform response result to camelCase
+  if (result.data) {
+    result.data = transformResponse(result.data)
+  }
+
+  return result
+}
+
 const appApi = createApi({
   reducerPath: 'arkoraApi',
-  baseQuery,
-
+  tagTypes: ['Project', 'Projects', 'TimeEntries', 'Budgets', 'Budget'],
+  baseQuery: baseQueryInterceptor,
   endpoints: () => ({}),
 })
 

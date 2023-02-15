@@ -2,9 +2,9 @@ import {
   ArkoraLogo,
   FormControl,
   FormInput,
+  FormPasswordInput,
   FormLabel,
   Form,
-  PasswordInput,
   Button,
   InlineLink,
 } from '@/components'
@@ -12,6 +12,7 @@ import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { setAuth } from '@/stores/slices/auth'
 import { setOrganisation } from '@/stores/slices/organisation'
+import { startTimer } from '@/stores/slices/timer'
 import { RootState } from '@/stores/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -32,10 +33,10 @@ type FormFields = {
 }
 
 export const LoginPage = (): JSX.Element => {
+  useDocumentTitle('Login')
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
-
-  useDocumentTitle('Login')
 
   const organisation = useSelector((state: RootState) => state.organisation)
 
@@ -47,13 +48,16 @@ export const LoginPage = (): JSX.Element => {
       .then((response) => {
         dispatch(setAuth(response.user))
         dispatch(setOrganisation(response.organisation))
+        if (response.timer) {
+          dispatch(startTimer(response.timer))
+        }
 
         navigate('/projects', { replace: true })
       })
   }
 
   return (
-    <div className="flex flex-col justify-center pt-40">
+    <div className="flex flex-col justify-center self-center">
       <div className="flex items-center flex-wrap gap-4 pb-6">
         <ArkoraLogo className="w-24 h-24 flex-shrink-0" />
         <div className="flex flex-col justify-start">
@@ -76,13 +80,10 @@ export const LoginPage = (): JSX.Element => {
         {({ formState: { errors } }) => (
           <>
             <FormControl>
-              <FormLabel htmlFor="email" size="sm">
-                Email
-              </FormLabel>
+              <FormLabel htmlFor="email">Email</FormLabel>
               <FormInput
                 name="email"
-                placeHolder="Enter email address"
-                size="sm"
+                placeHolder="Enter email"
                 error={!!errors.email}
                 className="h-11 text-[15px]"
               />
@@ -95,12 +96,12 @@ export const LoginPage = (): JSX.Element => {
               <FormLabel htmlFor="password" size="sm">
                 Password
               </FormLabel>
-              <PasswordInput
+              <FormPasswordInput
                 name="password"
                 placeHolder="Enter password"
                 size="sm"
                 error={!!errors?.password}
-                className="h-11 text-[15px]"
+                className="h-11"
               />
               {errors.password?.message && (
                 <FormErrorMessage size="sm">{errors.password?.message}</FormErrorMessage>
@@ -112,11 +113,13 @@ export const LoginPage = (): JSX.Element => {
               )}
             </FormControl>
 
-            <InlineLink className="font-semibold text-sm" to="/forgot-password">
-              Forgot Password?
-            </InlineLink>
+            <div>
+              <InlineLink className="font-semibold text-sm" to="/forgot-password">
+                Forgot Password?
+              </InlineLink>
+            </div>
 
-            <Button type="submit" size="sm" className="mt-8" isLoading={isLoggingIn}>
+            <Button type="submit" size="sm" className="mt-8" loading={isLoggingIn}>
               Login
             </Button>
           </>

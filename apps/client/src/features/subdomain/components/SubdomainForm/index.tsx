@@ -27,6 +27,7 @@ export const SubdomainForm = (): JSX.Element => {
           window.location.host = `${data.subdomain}.${import.meta.env.VITE_ARKORA_STATIC_HOSTNAME}`
         }
       })
+      .catch() // TODO: handle exception
   }
 
   return (
@@ -43,7 +44,6 @@ export const SubdomainForm = (): JSX.Element => {
               <FormInput
                 name="subdomain"
                 placeHolder="domain"
-                size="md"
                 error={!!errors.subdomain || (data?.exists !== undefined ? !data?.exists : false)}
               />
               <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
@@ -55,7 +55,7 @@ export const SubdomainForm = (): JSX.Element => {
             )}
           </div>
 
-          <Button className="mt-6" type="submit" isLoading={isLoading} size="sm" block>
+          <Button className="mt-6" type="submit" loading={isLoading} size="sm" block>
             Continue
           </Button>
         </>

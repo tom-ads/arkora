@@ -3,7 +3,7 @@ import { SubdomainForm } from '../../components/SubdomainForm'
 
 export const SubdomainPage = (): JSX.Element => {
   return (
-    <div className="pb-28 flex flex-col justify-center w-full">
+    <div className="pb-4 flex flex-col justify-center w-full">
       <div className="pb-10">
         <div className="flex flex-col items-center gap-2 pb-3">
           <ArkoraLogo className="w-40 h-40" />

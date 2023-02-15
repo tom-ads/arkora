@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import UserRole from 'App/Enum/UserRole'
 import User from './User'
+import { camelCase, startCase } from 'lodash'
 
 export default class Role extends BaseModel {
   // Columns
@@ -9,7 +10,7 @@ export default class Role extends BaseModel {
   @column({ isPrimary: true, serializeAs: null })
   public id: number
 
-  @column()
+  @column({ serialize: (value: UserRole) => startCase(camelCase(value)) })
   public name: UserRole
 
   @column.dateTime({ autoCreate: true, serializeAs: null })

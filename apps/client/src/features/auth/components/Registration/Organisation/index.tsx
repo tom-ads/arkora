@@ -9,7 +9,7 @@ import {
   FormInput,
   FormSelect,
   FormTimeInput,
-  Divider,
+  HorizontalDivider,
   FormDebouncedInput,
 } from '@/components'
 import FormErrorMessage from '@/components/Forms/ErrorMessage'
@@ -29,6 +29,7 @@ import { setOrganisation } from '@/stores/slices/registration'
 import { useLazyCheckSubdomainQuery } from '@/features/subdomain'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
+import hourlyRateSchema from '@/helpers/validation/hourly_rate'
 
 const OrganisationSchema = z
   .object({
@@ -45,22 +46,7 @@ const OrganisationSchema = z
       value: z.string(),
       children: z.string(),
     }),
-    hourlyRate: z.string().superRefine((val, ctx) => {
-      const hourlyRate = parseFloat(val)
-
-      const issues = [
-        { test: isNaN(hourlyRate), errorMessage: 'Valid rate required' },
-        { test: hourlyRate <= 0, errorMessage: 'Must be greater than 0' },
-        { test: hourlyRate > 20000, errorMessage: 'Cannot exceed 20,000' },
-      ]
-
-      if (Object.values(issues).some((i) => i.test)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: Object.values(issues).find((p) => p.test)?.errorMessage,
-        })
-      }
-    }),
+    hourlyRate: hourlyRateSchema,
   })
   .superRefine((val, ctx) => {
     const openingTime = DateTime.fromFormat(val.openingTime, 'HH:mm')
@@ -135,7 +121,6 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
   const currencyOptions = useMemo(() => {
     return Object.keys(currencies).map((currency) => ({
       id: currency,
-      value: currency,
       display: currencies[currency as keyof typeof currencies],
     }))
   }, [])
@@ -163,14 +148,14 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
         <>
           <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
             <div className="space-y-2 pb-6">
-              <h1 className="font-semibold text-[32px] text-gray-100">Create organisation</h1>
+              <h1 className="font-semibold text-3xl text-gray-100">Create organisation</h1>
               <p className="text-base text-gray-80">
                 Let&apos;s setup your organisation. It&apos;ll be home to everything your team does
                 with Arkora
               </p>
             </div>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Organisation Details */}
             <Descriptor>
@@ -237,7 +222,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
               </DescriptorContent>
             </Descriptor>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Operating Hours */}
             <Descriptor>
@@ -282,7 +267,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
               </DescriptorContent>
             </Descriptor>
 
-            <Divider />
+            <HorizontalDivider />
 
             {/* Rates and Cost */}
             <Descriptor>
@@ -301,9 +286,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     </FormLabel>
                     <FormSelect name="currency" control={control} placeHolder="Select currency">
                       {currencyOptions?.map((option) => (
-                        <SelectOption key={option.id} value={option.value}>
-                          {option?.display}
-                        </SelectOption>
+                        <SelectOption key={option.id}>{option?.display}</SelectOption>
                       ))}
                     </FormSelect>
                     {errors.currency?.message && (
@@ -317,9 +300,8 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     </FormLabel>
                     <FormCurrencyInput
                       size="sm"
-                      prefix="£"
+                      suffix="£"
                       name="hourlyRate"
-                      control={control}
                       error={!!errors?.hourlyRate?.message}
                     />
                     {errors.hourlyRate?.message && (
@@ -339,12 +321,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
             >
               Previous Step
             </button>
-            <Button
-              size="sm"
-              className="max-w-[220px] w-full"
-              type="submit"
-              isLoading={isVerifying}
-            >
+            <Button size="sm" className="max-w-[220px] w-full" type="submit" loading={isVerifying}>
               Next step
             </Button>
           </div>

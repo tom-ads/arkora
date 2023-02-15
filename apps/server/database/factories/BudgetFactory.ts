@@ -1,15 +1,23 @@
 import Budget from 'App/Models/Budget'
 import Factory from '@ioc:Adonis/Lucid/Factory'
-import BudgetType from 'App/Models/BudgetType'
+import TaskFactory from './TaskFactory'
+import UserFactory from './UserFactory'
+import BudgetTypeFactory from './BudgetTypeFactory'
+import BillableTypeFactory from './BillableTypeFactory'
+import TimeEntryFactory from './TimeEntryFactory'
 
 export default Factory.define(Budget, ({ faker }) => {
   return {
     name: faker.commerce.productName(),
+    colour: faker.color.rgb(),
     hourlyRate: 10000,
     budget: 1000000,
-    billable: true,
     private: true,
   }
 })
-  .relation('budgetType', () => BudgetType)
+  .relation('tasks', () => TaskFactory)
+  .relation('budgetType', () => BudgetTypeFactory)
+  .relation('members', () => UserFactory)
+  .relation('billableType', () => BillableTypeFactory)
+  .relation('timeEntries', () => TimeEntryFactory)
   .build()

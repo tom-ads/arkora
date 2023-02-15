@@ -2,9 +2,10 @@ import { RootState } from '@/stores/store'
 import classNames from 'classnames'
 import { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
-import { NavLink } from 'react-router-dom'
-import { Divider } from '../Divider'
+import { NavLink, useLocation } from 'react-router-dom'
+import { HorizontalDivider } from '../Divider'
 import { ArkoraLogo } from '../Icons'
+import { TabGroup, TabItem } from '../Navigation'
 
 const NavItem = ({ to, children }: { to: string; children: ReactNode }) => {
   return (
@@ -26,21 +27,24 @@ const NavItem = ({ to, children }: { to: string; children: ReactNode }) => {
 }
 
 export const Header = (): JSX.Element => {
+  const location = useLocation()
+
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
   return (
     <header className="w-full bg-white">
       {/* Main Navi */}
-      <div className="flex gap-x-6 max-w-[1440px] mx-auto py-4 px-[46px]">
+      <div className="flex gap-x-6 max-w-[1440px] mx-auto py-4 px-7 lg:px-[46px]">
         <div className="flex items-center gap-2 pr-3">
           <ArkoraLogo className="w-[38px] h-[39px]" />
           <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
         </div>
 
         {isAuthenticated && (
-          <nav className="flex gap-2 px-3 items-center">
+          <nav className="sm:flex gap-2 px-3 items-center hidden">
+            <NavItem to="timer">Timer</NavItem>
             <NavItem to="projects">Projects</NavItem>
-            <NavItem to="team">Clients</NavItem>
+            <NavItem to="clients">Clients</NavItem>
             <NavItem to="team">Team</NavItem>
           </nav>
         )}
@@ -48,10 +52,17 @@ export const Header = (): JSX.Element => {
 
       {isAuthenticated && (
         <>
-          <Divider />
+          <HorizontalDivider />
 
           {/* Sub Navi */}
-          <div className="h-[51px] flex gap-x-6 max-w-[1440px] mx-auto px-[46px]"></div>
+          <div className="h-[51px] flex gap-x-6 max-w-[1440px] mx-auto px-7 lg:px-[46px]">
+            {location.pathname.includes('team') && (
+              <TabGroup>
+                <TabItem to="/team/members">Members</TabItem>
+                <TabItem to="/team/timers">Timers</TabItem>
+              </TabGroup>
+            )}
+          </div>
         </>
       )}
     </header>

@@ -1,6 +1,6 @@
 enum BudgetKind {
-  HOURLY = 'HOURLY',
-  FIXED_COST = 'FIXED_COST',
+  VARIABLE = 'VARIABLE',
+  FIXED = 'FIXED',
   NON_BILLABLE = 'NON_BILLABLE',
 }
 

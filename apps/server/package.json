@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.9.3",
+    "@adonisjs/bouncer": "^2.3.0",
     "@japa/preset-adonis": "^1.2.0",
     "@japa/runner": "^2.2.1",
     "@types/luxon": "^3.1.0",
@@ -41,19 +42,24 @@
   },
   "dependencies": {
     "@adonisjs/auth": "^8.2.3",
+    "@adonisjs/bouncer": "^2.3.0",
     "@adonisjs/core": "^5.8.0",
     "@adonisjs/lucid": "^18.2.0",
     "@adonisjs/repl": "^3.1.0",
+    "@adonisjs/route-model-binding": "^1.0.1",
     "@adonisjs/session": "^6.4.0",
     "@adonisjs/shield": "^7.1.0",
     "@reduxjs/toolkit": "^1.8.6",
+    "@types/lodash": "^4.14.191",
     "@types/luxon": "^3.0.3",
     "@types/node": "^18.11.3",
+    "lodash": "^4.17.21",
     "luxon": "^3.0.4",
     "mysql2": "^2.3.3",
     "phc-bcrypt": "^1.0.8",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "sqlite3": "^5.1.2"
   }
 }
