@@ -21,10 +21,18 @@ import Client from './Client'
 import Project from './Project'
 import Task from './Task'
 import UserRole from 'App/Enum/UserRole'
+import Verify from 'App/Enum/Verify'
 
 type BudgetFilters = Partial<{
   userId: number
   projectId: number
+}>
+
+type TeamFilters = Partial<{
+  search: string
+  role: UserRole
+  status: Verify
+  page: number
 }>
 
 type BudgetOptions = Partial<{
@@ -150,5 +158,41 @@ export default class Organisation extends BaseModel {
       .first()
 
     return !!result
+  }
+
+  public async getTeamMembers(this: Organisation, userId: number, filters?: TeamFilters) {
+    const result = await this.related('users')
+      .query()
+      .select('users.*')
+      .where((builder) => {
+        builder
+          .whereNot('users.id', userId)
+          .if(filters?.search, (builder) => {
+            builder
+              .whereILike('users.firstname', `%${filters!.search!}%`)
+              .orWhereILike('users.lastname', `%${filters!.search!}%`)
+          })
+          .match(
+            [
+              filters?.status === Verify.INVITE_ACCEPTED,
+              (userBuilder) => userBuilder.whereNotNull('verified_at'),
+            ],
+            [
+              filters?.status === Verify.INVITE_PENDING,
+              (userBuilder) => userBuilder.whereNull('verified_at'),
+            ]
+          )
+      })
+      .if(filters?.role, (userBuilder) =>
+        userBuilder.join('roles', (builder) => {
+          builder.on('users.role_id', '=', 'roles.id').andOnVal('roles.name', filters!.role!)
+        })
+      )
+      .if(filters?.page, (userBuilder) => {
+        userBuilder.forPage(filters!.page!, 10)
+      })
+      .orderBy('users.lastname')
+
+    return result
   }
 }

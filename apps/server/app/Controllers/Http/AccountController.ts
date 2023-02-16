@@ -1,22 +1,20 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import IndexValidator from 'App/Validators/Accounts/IndexValidator'
+import GetAccountsValidator from 'App/Validators/Accounts/GetAccountsValidator'
 
 export default class AccountController {
   public async index(ctx: HttpContextContract) {
     await ctx.bouncer.with('AccountPolicy').authorize('viewList')
 
-    const payload = await ctx.request.validate(IndexValidator)
+    const payload = await ctx.request.validate(GetAccountsValidator)
 
-    const organisationAccounts = await ctx.organisation
-      ?.related('users')
-      .query()
-      .if(payload.role, (query) =>
-        query.whereHas('role', (roleQuery) => roleQuery.where('name', payload.role!))
+    try {
+      const team = await ctx.organisation!.getTeamMembers(ctx.auth.user!.id, payload)
+      return team.map((member) => member.serialize())
+    } catch (error) {
+      ctx.logger.error(
+        `Failed to fetch tenant(${ctx.organisation!.id}) team members, due to ${error.message}`
       )
-      .whereNot('id', ctx.auth.user!.id)
-
-    return {
-      accounts: organisationAccounts?.map((member) => member.serialize()) ?? [],
+      return ctx.response.internalServerError()
     }
   }
 }

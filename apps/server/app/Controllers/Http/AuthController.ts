@@ -12,6 +12,7 @@ import TeamValidator from 'App/Validators/Auth/Register/TeamValidator'
 import { getOriginSubdomain } from 'Helpers/subdomain'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Task from 'App/Models/Task'
+import { string } from '@ioc:Adonis/Core/Helpers'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -71,9 +72,12 @@ export default class AuthController {
         lastname: details.lastname,
         email: details.email,
         password: details.password,
+        verificationCode: string.generateRandom(32),
       })
       await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
       await owner.related('organisation').associate(createdOrganisation)
+
+      // TODO: send owner a verification link
 
       ctx.logger.info(`Created tenant Owner with id: ${owner.id}`)
     } catch (err) {
@@ -91,6 +95,7 @@ export default class AuthController {
       const invitedMembers = await User.createMany(
         filteredMembers.map((member) => ({
           email: member.email,
+          verificationCode: string.generateRandom(32),
         }))
       )
 
