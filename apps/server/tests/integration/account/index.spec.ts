@@ -37,6 +37,7 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
+        verified_at: null,
       },
     ])
   })
@@ -74,6 +75,7 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
+        verified_at: null,
       },
     ])
   })
@@ -111,15 +113,12 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
+        verified_at: null,
       },
     ])
   })
 
-  test('authorised user can filter organisation accounts by role', async ({
-    client,
-    route,
-    assert,
-  }) => {
+  test('organisation admin can filter team members by role', async ({ client, route, assert }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('users', 2, (userBuilder) => {
         return userBuilder
@@ -155,6 +154,7 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
+        verified_at: null,
       },
       {
         id: 2,
@@ -164,6 +164,7 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
+        verified_at: null,
       },
     ])
   })
@@ -249,6 +250,7 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
+        verified_at: null,
       },
     ])
   })
