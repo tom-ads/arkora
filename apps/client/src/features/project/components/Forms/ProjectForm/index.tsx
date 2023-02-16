@@ -85,7 +85,7 @@ export const ProjectForm = ({
 
   const teamOptions = useMemo(
     () =>
-      orgAccounts?.accounts.map((account) => {
+      orgAccounts?.map((account) => {
         const fullName = `${account.firstname} ${account.lastname}`
         return {
           id: account.id,
@@ -96,7 +96,7 @@ export const ProjectForm = ({
           },
         }
       }) ?? [],
-    [orgAccounts?.accounts],
+    [orgAccounts],
   )
 
   const defaultState = useMemo(() => {

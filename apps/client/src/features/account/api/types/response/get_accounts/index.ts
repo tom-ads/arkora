@@ -1,7 +1,5 @@
 import { User } from '@/types'
 
-type GetAccountsResponse = {
-  accounts: User[]
-}
+type GetAccountsResponse = User[]
 
 export default GetAccountsResponse

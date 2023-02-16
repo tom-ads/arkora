@@ -1,8 +1,9 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import UserRole from 'App/Enum/UserRole'
+import Verify from 'App/Enum/Verify'
 
-export default class IndexValidator {
+export default class GetAccountsValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -25,7 +26,10 @@ export default class IndexValidator {
    *    ```
    */
   public schema = schema.create({
+    search: schema.string.optional([rules.trim()]),
     role: schema.enum.optional(Object.values(UserRole)),
+    status: schema.enum.optional(Object.values(Verify)),
+    page: schema.number.optional(),
   })
 
   /**

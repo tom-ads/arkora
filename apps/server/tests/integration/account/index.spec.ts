@@ -27,20 +27,19 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBody([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: startCase(camelCase(UserRole.MEMBER)),
         },
-      ],
-    })
+        verified_at: null,
+      },
+    ])
   })
 
   test('organisation org_admin can index accounts', async ({ client, route }) => {
@@ -66,20 +65,19 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBody([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: startCase(camelCase(UserRole.MEMBER)),
         },
-      ],
-    })
+        verified_at: null,
+      },
+    ])
   })
 
   test('organisation owner can index accounts', async ({ client, route }) => {
@@ -105,27 +103,22 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBody([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: startCase(camelCase(UserRole.MEMBER)),
         },
-      ],
-    })
+        verified_at: null,
+      },
+    ])
   })
 
-  test('authorised user can filter organisation accounts by role', async ({
-    client,
-    route,
-    assert,
-  }) => {
+  test('organisation admin can filter team members by role', async ({ client, route, assert }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('users', 2, (userBuilder) => {
         return userBuilder
@@ -149,31 +142,31 @@ test.group('Account: All Organisation Accounts', () => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    assert.isTrue(response.body()?.accounts?.length === 2)
+    assert.isTrue(response.body()?.length === 2)
 
     response.assertStatus(200)
-    response.assertBodyContains({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBodyContains([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        role: {
+          name: startCase(camelCase(UserRole.MEMBER)),
         },
-        {
-          id: 2,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+        verified_at: null,
+      },
+      {
+        id: 2,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        role: {
+          name: startCase(camelCase(UserRole.MEMBER)),
         },
-      ],
-    })
+        verified_at: null,
+      },
+    ])
   })
 
   test('organisation member cannot index accounts', async ({ client, route }) => {
@@ -247,20 +240,19 @@ test.group('Account: All Organisation Accounts', () => {
     )
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 3,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBody([
+      {
+        id: 3,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: startCase(camelCase(UserRole.MEMBER)),
         },
-      ],
-    })
+        verified_at: null,
+      },
+    ])
   })
 
   test('diff organisation user, cannot view accounts for test organisation', async ({

@@ -9,7 +9,11 @@ const accountEndpoints = appApi.injectEndpoints({
     getAccounts: build.query<GetAccountsResponse, GetAccountsRequest>({
       query: (params) => ({
         url: accountBasePath,
-        params,
+        params: {
+          ...(params?.role && { role: params.role }),
+          ...(params?.status && { status: params.status }),
+          ...(params?.search && { search: params.search }),
+        },
       }),
     }),
   }),

@@ -27,6 +27,7 @@ export default class GetBudgetsValidator {
     user_id: schema.number.optional(),
     project_id: schema.number.optional(),
     include_project: schema.boolean.optional(),
+    page: schema.number.optional(),
   })
 
   /**

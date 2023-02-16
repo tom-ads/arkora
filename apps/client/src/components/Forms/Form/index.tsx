@@ -23,7 +23,7 @@ export type FormChangeCallback<TFormValues extends FieldValues> = (
 
 export type FormProps<TFormValues extends FieldValues, ValidationSchema extends ZodType> = {
   onChange?: (fields: TFormValues, methods: UseFormReturn<TFormValues>) => void
-  onSubmit: SubmitHandler<TFormValues>
+  onSubmit?: (fields: TFormValues, methods: UseFormReturn<TFormValues>) => void
   className?: string
   validationSchema?: ValidationSchema
   children: (methods: UseFormReturn<TFormValues>) => ReactNode
@@ -79,9 +79,15 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
     }
   }, [defaultValues])
 
+  const handleSubmit: SubmitHandler<TFormValues> = (fields: TFormValues) => {
+    if (onSubmit) {
+      onSubmit(fields, methods)
+    }
+  }
+
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">
+      <form onSubmit={methods.handleSubmit(handleSubmit)} className="w-full">
         <fieldset className={classNames('flex flex-col w-full', className)}>
           {children(methods)}
         </fieldset>

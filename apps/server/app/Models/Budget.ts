@@ -295,9 +295,8 @@ export default class Budget extends BaseModel {
       .withScopes((scopes) => scopes.budgetMetrics(budgetIds))
       .preload('project')
 
-      // Filter - Pagination
       .if(filters?.page, (builder) => {
-        builder.paginate(filters!.page!, 10)
+        builder.forPage(filters!.page!, 10)
       })
 
     return result

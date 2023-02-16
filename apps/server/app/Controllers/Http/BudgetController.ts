@@ -81,7 +81,10 @@ export default class BudgetController {
       return ctx.response.ok([])
     }
 
-    budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
+    budgets = await Budget.getBudgetsMetrics(
+      budgets.map((budget) => budget.id),
+      { page: payload.page }
+    )
 
     return budgets
   }

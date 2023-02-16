@@ -50,6 +50,12 @@ export default class User extends BaseModel {
   public password: string
 
   @column({ serializeAs: null })
+  public verificationCode: string | null
+
+  @column.dateTime()
+  public verifiedAt: DateTime | null
+
+  @column({ serializeAs: null })
   public rememberMeToken: string | null
 
   @column.dateTime({ autoCreate: true, serializeAs: null })
