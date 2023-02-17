@@ -2,7 +2,7 @@ import { cva, VariantProps } from 'class-variance-authority'
 import { MouseEvent } from 'react'
 import { CrossIcon } from '../Icons'
 
-const toast = cva('shadow-glow p-3 text-sm rounded flex gap-x-3 min-w-[300px]', {
+const toast = cva('shadow-glow p-3 text-sm rounded flex gap-x-3 w-[300px]', {
   variants: {
     variant: {
       default: 'bg-gray-10 text-gray-70 shadow-gray-10',
