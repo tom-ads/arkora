@@ -48,7 +48,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
     resolver: validationSchema && zodResolver(validationSchema),
   })
 
-  useQueryError<TFormValues>(methods.setError, queryError)
+  useQueryError<TFormValues>({ setError: methods.setError, error: queryError })
 
   /*
     Using watch() in useEffect isn't the most optimal solution,
