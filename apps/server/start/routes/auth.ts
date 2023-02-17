@@ -3,6 +3,7 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.group(() => {
   Route.group(() => {
     Route.post('/login', 'AuthController.login')
+    Route.post('/verifyInvitation', 'AuthController.verifyInvitation')
 
     Route.group(() => {
       Route.post('/', 'AuthController.register')

@@ -123,6 +123,7 @@ export default class BudgetController {
     }
 
     if (payload.private !== budget.private) {
+      // TODO: remove members who aren't assigned?
       budget.private = payload.private
     }
 

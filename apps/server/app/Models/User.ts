@@ -110,6 +110,13 @@ export default class User extends BaseModel {
     }
   }
 
+  @beforeSave()
+  public static async hashVerificationCode(user: User) {
+    if (user.verificationCode && user.$dirty.verificationCode) {
+      user.verificationCode = await Hash.make(user.verificationCode)
+    }
+  }
+
   // Scopes
 
   public static organisationUser = scope((query: UserBuilder, email: string, subdomain: string) => {

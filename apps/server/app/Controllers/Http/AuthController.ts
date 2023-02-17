@@ -8,11 +8,15 @@ import WorkDay from 'App/Models/WorkDay'
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
 import DetailsValidator from 'App/Validators/Auth/Register/DetailsValidator'
 import OrganisationValidator from 'App/Validators/Auth/Register/OrganisationValidator'
+import InvitationValidator from 'App/Validators/Auth/InvitationValidator'
 import TeamValidator from 'App/Validators/Auth/Register/TeamValidator'
-import { getOriginSubdomain } from 'Helpers/subdomain'
+import { getOriginSubdomain, getTenantHostname } from 'Helpers/subdomain'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Task from 'App/Models/Task'
 import { string } from '@ioc:Adonis/Core/Helpers'
+import { DateTime } from 'luxon'
+import OrganisationInvitation from 'App/Mailers/OrganisationInvitation'
+import { generateInvitiationUrl } from 'Helpers/links'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -108,7 +112,15 @@ export default class AuthController {
           await member.related('role').associate(role!)
           await member.related('organisation').associate(createdOrganisation)
 
-          // TODO: Invite notification
+          await new OrganisationInvitation(
+            ctx.organisation!,
+            ctx.auth.user!,
+            generateInvitiationUrl(
+              getTenantHostname(ctx.organisation!.subdomain),
+              ctx.auth.user!.email,
+              string.generateRandom(32)
+            )
+          ).send()
         })
       )
     }
@@ -160,6 +172,50 @@ export default class AuthController {
       user: ctx.auth.user,
       organisation: ctx.auth.user?.organisation,
       timer: await ctx.auth.user!.getActiveTimer(),
+    }
+  }
+
+  public async verifyInvitation(ctx: HttpContextContract) {
+    const originSubdomain = getOriginSubdomain(ctx.request.header('origin')!)
+    if (!originSubdomain) {
+      ctx.response.notFound({ message: 'Origin header not present' })
+      return
+    }
+
+    const organisation = await Organisation.findByOrFail('subdomain', originSubdomain)
+
+    const payload = await ctx.request.validate(InvitationValidator)
+
+    // Verification code expires 1 day after its creation
+    const invitedUser = await User.query()
+      .where('email', payload.email)
+      .where('updated_at', '>', DateTime.now().minus({ day: 1 }).toSQL())
+      .first()
+
+    if (invitedUser?.verifiedAt) {
+      return ctx.response.badRequest({ message: 'Account already verified' })
+    }
+
+    if (!invitedUser || !(await Hash.verify(invitedUser.verificationCode!, payload.token))) {
+      return ctx.response.badRequest({
+        message: `${
+          !invitedUser ? 'Your invitation has expired' : 'Unable to verify link'
+        }. Please contact your administrator`,
+      })
+    }
+
+    invitedUser.verificationCode = null
+    invitedUser.verifiedAt = DateTime.now().set({ millisecond: 0 })
+    invitedUser.firstname = payload.firstname
+    invitedUser.lastname = payload.lastname
+    invitedUser.password = payload.password // hook will hash automatically
+    await invitedUser.save()
+
+    await ctx.auth.login(invitedUser)
+
+    return {
+      user: invitedUser.serialize(),
+      organisation: organisation.serialize(),
     }
   }
 }

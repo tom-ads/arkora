@@ -5,7 +5,8 @@
     "@adonisjs/core/build/commands/index.js",
     "@adonisjs/repl/build/commands",
     "@adonisjs/lucid/build/commands",
-    "@adonisjs/bouncer/build/commands"
+    "@adonisjs/bouncer/build/commands",
+    "@adonisjs/mail/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "aliases": {
@@ -22,10 +23,7 @@
     "./start/kernel",
     {
       "file": "./start/validator",
-      "environment": [
-        "web",
-        "test"
-      ]
+      "environment": ["web", "test"]
     },
     "./start/bouncer"
   ],
@@ -37,31 +35,30 @@
     "@adonisjs/session",
     "@adonisjs/shield",
     "@adonisjs/bouncer",
-    "@adonisjs/route-model-binding/build/providers/RmbProvider"
+    "@adonisjs/route-model-binding/build/providers/RmbProvider",
+    "@adonisjs/mail",
+    "@adonisjs/view"
   ],
-  "aceProviders": [
-    "@adonisjs/repl"
-  ],
+  "aceProviders": ["@adonisjs/repl"],
   "tests": {
     "suites": [
       {
         "name": "integration",
-        "files": [
-          "tests/integration/**/*.spec(.ts|.js)"
-        ],
+        "files": ["tests/integration/**/*.spec(.ts|.js)"],
         "timeout": 60000
       },
       {
         "name": "unit",
-        "files": [
-          "tests/unit/**/*.spec(.ts|.js)"
-        ],
+        "files": ["tests/unit/**/*.spec(.ts|.js)"],
         "timeout": 60000
       }
     ]
   },
-  "testProviders": [
-    "@japa/preset-adonis/TestsProvider",
-    "./providers/TestRouteProvider"
+  "testProviders": ["@japa/preset-adonis/TestsProvider", "./providers/TestRouteProvider"],
+  "metaFiles": [
+    {
+      "pattern": "resources/views/**/*.edge",
+      "reloadServer": true
+    }
   ]
 }
