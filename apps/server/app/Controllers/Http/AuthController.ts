@@ -10,13 +10,13 @@ import DetailsValidator from 'App/Validators/Auth/Register/DetailsValidator'
 import OrganisationValidator from 'App/Validators/Auth/Register/OrganisationValidator'
 import InvitationValidator from 'App/Validators/Auth/InvitationValidator'
 import TeamValidator from 'App/Validators/Auth/Register/TeamValidator'
-import { getOriginSubdomain, getTenantHostname } from 'Helpers/subdomain'
+import { getOriginSubdomain } from 'Helpers/subdomain'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Task from 'App/Models/Task'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import { DateTime } from 'luxon'
 import OrganisationInvitation from 'App/Mailers/OrganisationInvitation'
-import { generateInvitiationUrl } from 'Helpers/links'
+import ResendInvitationValidator from 'App/Validators/Auth/ResendInvitationValidator'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -99,7 +99,6 @@ export default class AuthController {
       const invitedMembers = await User.createMany(
         filteredMembers.map((member) => ({
           email: member.email,
-          verificationCode: string.generateRandom(32),
         }))
       )
 
@@ -112,20 +111,16 @@ export default class AuthController {
           await member.related('role').associate(role!)
           await member.related('organisation').associate(createdOrganisation)
 
-          await new OrganisationInvitation(
-            ctx.organisation!,
-            ctx.auth.user!,
-            generateInvitiationUrl(
-              getTenantHostname(ctx.organisation!.subdomain),
-              ctx.auth.user!.email,
-              string.generateRandom(32)
-            )
-          ).send()
+          const invitationCode = string.generateRandom(32)
+          member.verificationCode = invitationCode
+          await member.save()
+
+          await new OrganisationInvitation(createdOrganisation, member, invitationCode).send()
         })
       )
     }
 
-    ctx.logger.info(`Tenant (${createdOrganisation.subdomain}) has been onboarded`)
+    ctx.logger.info(`Tenant(${createdOrganisation.subdomain}) has been onboarded`)
 
     await ctx.auth.login(owner)
 
@@ -175,6 +170,26 @@ export default class AuthController {
     }
   }
 
+  public async resendInvitation(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(ResendInvitationValidator)
+
+    const user = await User.findOrFail(payload.userId)
+
+    await ctx.bouncer.with('UserPolicy').authorize('update', user)
+
+    if (user?.verifiedAt) {
+      return ctx.response.badRequest({ message: 'Account already verified' })
+    }
+
+    const invitationCode = string.generateRandom(32)
+    user.verificationCode = invitationCode
+    await user.save()
+
+    await new OrganisationInvitation(ctx.organisation!, user, invitationCode).send()
+
+    return ctx.response.noContent()
+  }
+
   public async verifyInvitation(ctx: HttpContextContract) {
     const originSubdomain = getOriginSubdomain(ctx.request.header('origin')!)
     if (!originSubdomain) {
@@ -190,6 +205,9 @@ export default class AuthController {
     const invitedUser = await User.query()
       .where('email', payload.email)
       .where('updated_at', '>', DateTime.now().minus({ day: 1 }).toSQL())
+      .whereHas('organisation', (subQuery) => {
+        subQuery.where('id', organisation.id)
+      })
       .first()
 
     if (invitedUser?.verifiedAt) {
@@ -204,12 +222,24 @@ export default class AuthController {
       })
     }
 
-    invitedUser.verificationCode = null
-    invitedUser.verifiedAt = DateTime.now().set({ millisecond: 0 })
-    invitedUser.firstname = payload.firstname
-    invitedUser.lastname = payload.lastname
-    invitedUser.password = payload.password // hook will hash automatically
-    await invitedUser.save()
+    try {
+      invitedUser.verificationCode = null
+      invitedUser.verifiedAt = DateTime.now().set({ millisecond: 0 })
+      invitedUser.firstname = payload.firstname
+      invitedUser.lastname = payload.lastname
+      invitedUser.password = payload.password // hook will hash automatically
+      await invitedUser.save()
+
+      ctx.logger.info(
+        `Invited user(${invitedUser.id}) of tenant(${organisation!.subdomain}) has been onboarded`
+      )
+    } catch (error) {
+      ctx.logger.error(
+        `Failed to onboard user(${invitedUser.id}) of tenant(${organisation!.id}) due to: ${
+          error.message
+        }`
+      )
+    }
 
     await ctx.auth.login(invitedUser)
 

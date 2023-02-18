@@ -2,13 +2,15 @@ import { BaseMailer, MessageContract } from '@ioc:Adonis/Addons/Mail'
 import View from '@ioc:Adonis/Core/View'
 import Organisation from 'App/Models/Organisation'
 import User from 'App/Models/User'
+import { generateInvitiationUrl } from 'Helpers/links'
+import { getTenantHostname } from 'Helpers/subdomain'
 import mjml from 'mjml'
 
 export default class OrganisationInvitation extends BaseMailer {
   constructor(
     private readonly organisation: Organisation,
     private readonly user: User,
-    private inviteUrl: string
+    private readonly verificationCode: string
   ) {
     super()
   }
@@ -30,10 +32,16 @@ export default class OrganisationInvitation extends BaseMailer {
    * also be async.
    */
   public async prepare(message: MessageContract) {
+    const invitationUrl = generateInvitiationUrl(
+      getTenantHostname(this.organisation.subdomain),
+      this.user.email,
+      this.verificationCode
+    )
+
     const renderedView = await View.render(this.template, {
       organisation: this.organisation,
       user: this.user,
-      inviteUrl: this.inviteUrl,
+      inviteUrl: invitationUrl,
     })
 
     const htmlResult = mjml(renderedView).html
