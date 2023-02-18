@@ -14,9 +14,10 @@ Route.group(() => {
     .prefix('/auth')
     .middleware('blockAuth')
 
-  Route.get('/session', 'AuthController.session').prefix('/auth').middleware('auth')
-  Route.post('/resendInvitation', 'AuthController.resendInvitation').middleware([
-    'auth',
-    'subdomain',
-  ])
+  Route.group(() => {
+    Route.get('/session', 'AuthController.session')
+    Route.post('/resendInvitation', 'AuthController.resendInvitation').middleware('subdomain')
+  })
+    .prefix('/auth')
+    .middleware('auth')
 })

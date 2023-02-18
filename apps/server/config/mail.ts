@@ -8,6 +8,8 @@
 import Env from '@ioc:Adonis/Core/Env'
 import { mailConfig } from '@adonisjs/mail/build/config'
 
+export const mailFrom: string = Env.get('MAIL_FROM')
+
 export default mailConfig({
   /*
   |--------------------------------------------------------------------------

@@ -2,6 +2,7 @@ import { BaseMailer, MessageContract } from '@ioc:Adonis/Addons/Mail'
 import View from '@ioc:Adonis/Core/View'
 import Organisation from 'App/Models/Organisation'
 import User from 'App/Models/User'
+import { mailFrom } from 'Config/mail'
 import { generateInvitiationUrl } from 'Helpers/links'
 import { getTenantHostname } from 'Helpers/subdomain'
 import mjml from 'mjml'
@@ -46,10 +47,6 @@ export default class OrganisationInvitation extends BaseMailer {
 
     const htmlResult = mjml(renderedView).html
 
-    message
-      .subject('Join Organisation')
-      .from('admin@example.com')
-      .to('user@example.com')
-      .html(htmlResult)
+    message.subject('Join Organisation').from(mailFrom).to(this.user.email).html(htmlResult)
   }
 }
