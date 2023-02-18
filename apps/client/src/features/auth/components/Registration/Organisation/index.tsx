@@ -42,10 +42,7 @@ const OrganisationSchema = z
     workDays: z.array(z.string()).nonempty({ message: 'At least 1 work day required' }),
     openingTime: z.string().trim().min(1, { message: 'Opening time is required' }),
     closingTime: z.string().trim().min(1, { message: 'Closing time is required' }),
-    currency: z.object({
-      value: z.string(),
-      children: z.string(),
-    }),
+    currency: z.string(),
     hourlyRate: hourlyRateSchema,
   })
   .superRefine((val, ctx) => {
@@ -75,10 +72,7 @@ type FormFields = {
   workDays: WeekDay[]
   openingTime: string
   closingTime: string
-  currency: {
-    value: CurrencyCode
-    children: string
-  }
+  currency: CurrencyCode
   hourlyRate: string
 }
 
@@ -103,7 +97,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
       subdomain: data.subdomain,
       opening_time: data.openingTime,
       closing_time: data.closingTime,
-      currency: data.currency.value,
+      currency: data.currency,
       work_days: data.workDays,
       hourly_rate: parseFloat(data.hourlyRate),
     })
@@ -137,10 +131,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
         workDays: organisation?.workDays ?? [],
         openingTime: organisation?.openingTime ?? '',
         closingTime: organisation?.closingTime ?? '',
-        currency: {
-          value: organisation?.currency?.value ?? '',
-          children: organisation?.currency?.children ?? '',
-        },
+        currency: organisation?.currency ?? 'GBP',
         hourlyRate: organisation?.hourlyRate ?? '',
       }}
     >
