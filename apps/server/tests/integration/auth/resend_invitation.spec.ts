@@ -4,7 +4,6 @@ import User from 'App/Models/User'
 import { OrganisationFactory } from 'Database/factories'
 import UserFactory from 'Database/factories/UserFactory'
 import { string } from '@ioc:Adonis/Core/Helpers'
-import Hash from '@ioc:Adonis/Core/Hash'
 import Mail from '@ioc:Adonis/Addons/Mail'
 
 test.group('Auth : Resend Invitation', (group) => {
