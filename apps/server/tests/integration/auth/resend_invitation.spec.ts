@@ -5,6 +5,7 @@ import { OrganisationFactory } from 'Database/factories'
 import UserFactory from 'Database/factories/UserFactory'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Hash from '@ioc:Adonis/Core/Hash'
+import Mail from '@ioc:Adonis/Addons/Mail'
 
 test.group('Auth : Resend Invitation', (group) => {
   let authUser: User
@@ -28,8 +29,8 @@ test.group('Auth : Resend Invitation', (group) => {
       .create()
   })
 
-  test('organisation admin can resend an invitation', async ({ client, route }) => {
-    Hash.fake()
+  test('organisation admin can resend an invitation', async ({ client, route, assert }) => {
+    const mailer = Mail.fake()
 
     const payload = {
       userId: invitedUser.id,
@@ -43,8 +44,13 @@ test.group('Auth : Resend Invitation', (group) => {
       .loginAs(authUser)
 
     response.assertStatus(204)
+    assert.isTrue(
+      mailer.exists((mail) => {
+        return mail.subject === 'Join Organisation'
+      })
+    )
 
-    Hash.restore()
+    Mail.restore()
   })
 
   test('organisation member cannot resend an invitation', async ({ client, route }) => {
