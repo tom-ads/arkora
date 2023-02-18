@@ -16,7 +16,7 @@ test.group('Auth : Verify Invitation', (group) => {
 
     token = string.generateRandom(32)
 
-    // Setup organisation owner
+    // Setup invited member
     invitedUser = await UserFactory.merge({
       organisationId: organisation.id,
       verificationCode: token,
@@ -30,7 +30,7 @@ test.group('Auth : Verify Invitation', (group) => {
   test('organisation invitee can verify and create their account', async ({ client, route }) => {
     const payload = {
       token,
-      userId: invitedUser.id,
+      email: invitedUser.email,
       firstname: 'bob',
       lastname: 'marley',
       password: 'testPassword123!',
@@ -62,7 +62,7 @@ test.group('Auth : Verify Invitation', (group) => {
 
     const payload = {
       token,
-      userId: invitedUser.id,
+      email: invitedUser.email,
       firstname: 'bob',
       lastname: 'marley',
       password: 'testPassword123!',
@@ -82,7 +82,7 @@ test.group('Auth : Verify Invitation', (group) => {
   test('organisation invitee cannot verify if token is malformed', async ({ client, route }) => {
     const payload = {
       token: string.generateRandom(32),
-      userId: invitedUser.id,
+      email: invitedUser.email,
       firstname: 'bob',
       lastname: 'marley',
       password: 'testPassword123!',

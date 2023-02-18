@@ -10,10 +10,12 @@ export default class UserPolicy extends BasePolicy {
     }
 
     // authUser and user are of the same tenant
-    const isSameTenant = await authUser.organisation
-      .related('users')
+    const isSameTenant = await authUser
+      .related('organisation')
       .query()
-      .where('id', user.id)
+      .whereHas('users', (subQuery) => {
+        subQuery.where('id', user.id)
+      })
       .first()
     if (!isSameTenant) {
       return false
