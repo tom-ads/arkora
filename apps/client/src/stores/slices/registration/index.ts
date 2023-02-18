@@ -21,10 +21,7 @@ interface RegisterOrganisation {
   workDays: WeekDay[]
   openingTime: string
   closingTime: string
-  currency: {
-    value: CurrencyCode
-    children: string
-  }
+  currency: CurrencyCode
   hourlyRate: string
 }
 
@@ -58,10 +55,7 @@ const initialState: RegistrationState = JSON.parse(
     "workDays": [],
     "openingTime": "",
     "closingTime": "",
-    "currency": {
-      "value": "GBP",
-      "children": "British Pound Sterling"
-    },
+    "currency": "GBP",
     "hourlyRate": ""
   },
   "team": []
@@ -121,10 +115,7 @@ const registrationSlice = createSlice({
         workDays: [],
         openingTime: '',
         closingTime: '',
-        currency: {
-          value: 'GBP',
-          children: 'British Pound Sterling',
-        },
+        currency: 'GBP',
         hourlyRate: '',
       }
       currentState.team = []

@@ -41,7 +41,9 @@
       "@adonisjs/session",
       "@adonisjs/shield",
       "@adonisjs/bouncer",
-      "@adonisjs/route-model-binding/build/adonis-typings"
+      "@adonisjs/route-model-binding/build/adonis-typings",
+      "@adonisjs/mail",
+      "@adonisjs/view"
     ]
   }
 }

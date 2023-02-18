@@ -126,6 +126,7 @@ test.group('Budgets : Create Budget', (group) => {
       billable_type: billableTypes[1].name, // total hours
       budget: 30000, // 500hrs
     }
+
     const response = await client
       .post(route('BudgetController.create'))
       .form(payload)

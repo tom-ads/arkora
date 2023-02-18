@@ -29,7 +29,6 @@ import { NonBillableSection } from '../BudgetForm/Sections/NonBillable'
 import { VariableBudgetSection } from '../BudgetForm/Sections/VariableBudget'
 import { convertToPennies, convertToPounds } from '@/helpers/currency'
 import { useQueryError } from '@/hooks/useQueryError'
-import { formatToHours } from '@/helpers/date'
 
 type UpdateBudgetFormProps = {
   onClose: () => void
@@ -69,7 +68,7 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
     formState: { errors },
   } = methods
 
-  useQueryError<BudgetFormFields>(methods.setError, error)
+  useQueryError<BudgetFormFields>({ setError: methods.setError, error })
 
   const onSubmit = async (data: BudgetFormFields) => {
     let actualBudget = data.budget ?? 0

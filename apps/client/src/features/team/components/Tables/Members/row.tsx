@@ -8,14 +8,25 @@ import {
   TableRow,
   UsersIcon,
 } from '@/components'
+import { useLazyTimeout } from '@/hooks/useLazyTimeout'
 import { User } from '@/types'
 import { DateTime } from 'luxon'
 
 type TeamMembersTableRow = {
+  onResend: () => void
   value: User
 }
 
-export const TeamMembersTableRow = ({ value }: TeamMembersTableRow): JSX.Element => {
+export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRow): JSX.Element => {
+  const [toggled, triggerResend] = useLazyTimeout({ delay: 10000 })
+
+  const handleResendInvite = () => {
+    if (!toggled) {
+      onResend()
+      triggerResend()
+    }
+  }
+
   return (
     <TableRow>
       <TableData>
@@ -48,7 +59,16 @@ export const TeamMembersTableRow = ({ value }: TeamMembersTableRow): JSX.Element
             <FormatDateTime value={value.verifiedAt} format={DateTime.DATE_MED} />
           </p>
         ) : (
-          <p className="text-yellow-60">Pending</p>
+          <>
+            {!value?.verifiedAt && (
+              <div className="flex items-center gap-1">
+                <p className="text-yellow-60">Pending</p>
+                <Button variant="blank" onClick={() => handleResendInvite()} disabled={toggled}>
+                  ({toggled ? 'Resent' : 'Resend Invite'})
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </TableData>
 

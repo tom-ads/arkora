@@ -1,5 +1,5 @@
 import { AuthLayout, MainLayout, Spinner } from '@/components'
-import { LoginPage, RegistrationPage } from '@/features/auth'
+import { InvitationPage, LoginPage, RegistrationPage } from '@/features/auth'
 import { SubdomainPage, SubdomainNotFoundPage, useCheckSubdomainQuery } from '@/features/subdomain'
 import { setOrganisation } from '@/stores/slices/organisation'
 import { RootState } from '@/stores/store'
@@ -22,28 +22,30 @@ export const PublicRoutes = (): JSX.Element => {
 
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
-  const { data, isSuccess, isLoading } = useCheckSubdomainQuery({
-    subdomain: window?.location.host?.split('.')?.[0],
-  })
+  const subdomain = window?.location.host?.split('.')?.[0]
+
+  const { data, isLoading: isCheckingSubdomain } = useCheckSubdomainQuery({ subdomain })
 
   useEffect(() => {
-    if (isSuccess && location.pathname !== '/register') {
-      if (data.exists) {
+    if (location.pathname !== '/register') {
+      if (data?.exists) {
         disptach(setOrganisation({ ...data.organisation }))
+
+        if (location.pathname !== '/invitation') {
+          navigate(data?.exists ? '/login' : '/', { replace: true })
+        }
       }
-      navigate(data?.exists ? '/login' : '/', { replace: true })
     }
   }, [data?.exists, location?.pathname])
 
-  if (isLoading) {
+  if (isCheckingSubdomain) {
     return <Loader />
   }
 
   if (
-    data?.exists !== undefined &&
     !data?.exists &&
-    window?.location.host?.split('.')?.[0] !== import.meta.env.VITE_ARKORA_STATIC_HOSTNAME &&
-    window?.location.host?.split('.')?.[0] !== 'arkora'
+    subdomain !== import.meta.env.VITE_ARKORA_STATIC_HOSTNAME &&
+    subdomain !== 'arkora'
   ) {
     return <SubdomainNotFoundPage />
   }
@@ -53,7 +55,11 @@ export const PublicRoutes = (): JSX.Element => {
     return <Navigate to={to} replace />
   }
 
-  return location.pathname === '/register' ? <MainLayout /> : <AuthLayout />
+  if (location.pathname === '/register' || location.pathname === '/invitation') {
+    return <MainLayout />
+  }
+
+  return <AuthLayout />
 }
 
 export const publicRoutes = [
@@ -71,6 +77,10 @@ export const publicRoutes = [
       {
         path: '/login',
         element: <LoginPage />,
+      },
+      {
+        path: '/invitation',
+        element: <InvitationPage />,
       },
     ],
   },

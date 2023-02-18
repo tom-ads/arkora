@@ -2,7 +2,8 @@ import { RootState } from '@/stores/store'
 import classNames from 'classnames'
 import { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { Button } from '../Button'
 import { HorizontalDivider } from '../Divider'
 import { ArkoraLogo } from '../Icons'
 import { TabGroup, TabItem } from '../Navigation'
@@ -28,6 +29,7 @@ const NavItem = ({ to, children }: { to: string; children: ReactNode }) => {
 
 export const Header = (): JSX.Element => {
   const location = useLocation()
+  const navigate = useNavigate()
 
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
@@ -36,8 +38,10 @@ export const Header = (): JSX.Element => {
       {/* Main Navi */}
       <div className="flex gap-x-6 max-w-[1440px] mx-auto py-4 px-7 lg:px-[46px]">
         <div className="flex items-center gap-2 pr-3">
-          <ArkoraLogo className="w-[38px] h-[39px]" />
-          <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
+          <Button onClick={() => navigate(isAuthenticated ? '/timer' : '/')} variant="blank">
+            <ArkoraLogo className="w-[38px] h-[39px]" />
+            <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
+          </Button>
         </div>
 
         {isAuthenticated && (

@@ -1,0 +1,14 @@
+@layout('layouts/email')
+
+@section('content')
+  <mj-section>
+    <mj-column>
+      <mj-text font-size="24px" color="#121926">Hello,</mj-text>
+      <mj-text font-size="16px" color="#364152">
+        <p>You have been invited to join <span style="font-weight: 600;">{{ organisation.name }}</span> to track your time!</p>
+      </mj-text>
+
+      <mj-button font-size="20px" color="#FFFFFF" background-color="#352C98" font-weight="600" href="{{ inviteUrl }}">Join Organisation</mj-button>
+    </mj-column>
+  </mj-section>
+@end

@@ -18,6 +18,7 @@ import { isEqual } from 'lodash'
 import { useNavigate } from 'react-router-dom'
 import { setAuth } from '@/stores/slices/auth'
 import { setOrganisation } from '@/stores/slices/organisation'
+import { convertToPennies } from '@/helpers/currency'
 
 export interface TeamProps {
   team: Array<{
@@ -35,10 +36,7 @@ const TeamFormSchema = z.object({
   team: z.array(
     z.object({
       email: z.string(),
-      role: z.object({
-        value: z.nativeEnum(UserRole),
-        children: z.string(),
-      }),
+      role: z.nativeEnum(UserRole),
     }),
   ),
 })
@@ -69,17 +67,17 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       opening_time: organisation.openingTime,
       closing_time: organisation.closingTime,
       work_days: organisation.workDays,
-      currency: organisation.currency.value,
-      hourly_rate: parseInt(organisation.hourlyRate, 10),
+      currency: organisation.currency,
+      hourly_rate: convertToPennies(parseInt(organisation.hourlyRate, 10)),
 
       members: team.map((member) => ({
         email: member.email,
-        role: member.role.value,
+        role: member.role,
       })),
     })
       .unwrap()
       .then((response) => {
-        navigate('/projects', { replace: true, state: { location: '/' } })
+        navigate('/timer', { replace: true, state: { location: '/' } })
         window.location.host = `${organisation.subdomain}.${
           import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
         }`
@@ -104,10 +102,7 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       validationSchema={TeamFormSchema}
       defaultValues={{
         email: '',
-        role: {
-          value: UserRole.MEMBER,
-          children: 'Member',
-        },
+        role: UserRole.MEMBER,
         team: team ?? [],
       }}
     >

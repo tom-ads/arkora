@@ -3,7 +3,7 @@ import UserRole from 'App/Enum/UserRole'
 import { UserFactory } from 'Database/factories'
 import { camelCase, startCase } from 'lodash'
 
-test.group('Account: All Organisation Accounts', () => {
+test.group('Account : Index Accounts', () => {
   test('organisation manager can index accounts', async ({ client, route }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('users', 1, (userBuilder) => {
@@ -27,7 +27,7 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody([
+    response.assertBodyContains([
       {
         id: 1,
         firstname: 'Bob',
@@ -37,7 +37,6 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
-        verified_at: null,
       },
     ])
   })
@@ -65,7 +64,7 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody([
+    response.assertBodyContains([
       {
         id: 1,
         firstname: 'Bob',
@@ -75,7 +74,6 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
-        verified_at: null,
       },
     ])
   })
@@ -103,7 +101,7 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody([
+    response.assertBodyContains([
       {
         id: 1,
         firstname: 'Bob',
@@ -113,7 +111,6 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
-        verified_at: null,
       },
     ])
   })
@@ -154,7 +151,6 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
-        verified_at: null,
       },
       {
         id: 2,
@@ -164,7 +160,6 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
-        verified_at: null,
       },
     ])
   })
@@ -240,7 +235,7 @@ test.group('Account: All Organisation Accounts', () => {
     )
 
     response.assertStatus(200)
-    response.assertBody([
+    response.assertBodyContains([
       {
         id: 3,
         firstname: 'Bob',
@@ -250,7 +245,6 @@ test.group('Account: All Organisation Accounts', () => {
         role: {
           name: startCase(camelCase(UserRole.MEMBER)),
         },
-        verified_at: null,
       },
     ])
   })

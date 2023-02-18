@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components'
 import { useGetAccountsQuery } from '@/features/account'
+import { useResendInvitationMutation } from '@/features/auth'
 import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
@@ -29,12 +30,18 @@ export const TeamMembersTable = (): JSX.Element => {
     statusFilter: state.teamMemberFilters.status,
   }))
 
+  const [triggerResend] = useResendInvitationMutation()
+
   const { data: members } = useGetAccountsQuery({
     page: 1,
     role: roleFilter,
     search: searchFilter,
     status: statusFilter,
   })
+
+  const handleAction = async (userId: number) => {
+    await triggerResend({ userId })
+  }
 
   return (
     <TableContainer>
@@ -56,7 +63,11 @@ export const TeamMembersTable = (): JSX.Element => {
             </TableHead>
             <TableBody>
               {members?.map((member) => (
-                <TeamMembersTableRow key={member.id} value={member} />
+                <TeamMembersTableRow
+                  key={member.id}
+                  value={member}
+                  onResend={() => handleAction(member.id)}
+                />
               ))}
             </TableBody>
           </Table>

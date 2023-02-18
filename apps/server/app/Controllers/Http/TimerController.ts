@@ -81,7 +81,13 @@ export default class TimerController {
   public async index(ctx: HttpContextContract) {
     await ctx.bouncer.with('TimeEntryPolicy').authorize('index')
 
-    const organisationTeam = await ctx.organisation!.related('users').query()
+    const organisationTeam = await ctx
+      .organisation!.related('users')
+      .query()
+      .where((query) => {
+        query.whereNot('id', ctx.auth.user!.id).whereNotNull('verifiedAt')
+      })
+      .orderBy('lastname', 'asc')
 
     const result = await Promise.all(
       organisationTeam.map(async (member) => {

@@ -3,16 +3,16 @@ import { TickIcon } from '@/components/Icons/TickIcon'
 import { useIsDirty } from '@/hooks/useIsDirty'
 import { Transition } from '@headlessui/react'
 import classNames from 'classnames'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
-type TCriteriaFields = {
+type CriteriaFields = {
   achieved: boolean
   suggestion: string
 }
 
-type TCriteria = { [k: string]: TCriteriaFields }
+type Criteria = Record<string, CriteriaFields>
 
-const CriteriaSuggestion = ({ criteria }: { criteria: TCriteriaFields }) => {
+const CriteriaSuggestion = ({ criteria }: { criteria: CriteriaFields }) => {
   return (
     <div className="flex items-center gap-x-2 transition-all duration-1000">
       <div
@@ -59,38 +59,45 @@ type PasswordStrengthProps = {
 }
 
 export const PasswordStrength = ({ password, isError }: PasswordStrengthProps): JSX.Element => {
-  const isDirty = useIsDirty(password)
+  const [isDirty, { reset }] = useIsDirty(password)
 
   const { scoreFactor, criterias } = useMemo(() => {
     let scoreFactor = 0
 
-    const criterias: TCriteria = {
+    const criterias: Criteria = {
       charCount: {
         achieved: password?.length >= 8,
-        suggestion: 'At least 8 characters long',
+        suggestion: 'Contains at least 8 characters',
       },
       uppercase: {
         achieved: /[A-Z]+/.test(password),
-        suggestion: 'Contain one uppercase character',
+        suggestion: 'Contains one uppercase character',
       },
       lowercase: {
+        // NOTE: this will return true as JS uses type coercion to convert it into "undefined"
         achieved: /[a-z]+/.test(password),
-        suggestion: 'Contain one lowercase character',
+        suggestion: 'Contains one lowercase character',
       },
       number: {
         achieved: /[0-9]+/.test(password),
-        suggestion: 'Contain one number',
+        suggestion: 'Contains one number',
       },
       symbol: {
         achieved: /[~!@#$£%^&*]+/.test(password),
-        suggestion: 'Contain one special character ([ ~ ! @ # $ £ % ^ & *)',
+        suggestion: 'Contains one special character ([ ~ ! @ # $ £ % ^ & *)',
       },
     }
 
-    scoreFactor = Object.values(criterias).filter((p) => p.achieved)?.length
+    scoreFactor = password ? Object.values(criterias).filter((p) => p.achieved)?.length : 0
 
     return { scoreFactor, criterias }
   }, [password])
+
+  useEffect(() => {
+    if (isDirty && !password) {
+      reset()
+    }
+  }, [isDirty, password])
 
   return (
     <div className="flex flex-col w-full gap-y-3 mt-2">
