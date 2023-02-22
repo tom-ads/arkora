@@ -8,15 +8,10 @@ import WorkDay from 'App/Models/WorkDay'
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
 import DetailsValidator from 'App/Validators/Auth/Register/DetailsValidator'
 import OrganisationValidator from 'App/Validators/Auth/Register/OrganisationValidator'
-import InvitationValidator from 'App/Validators/Auth/InvitationValidator'
 import TeamValidator from 'App/Validators/Auth/Register/TeamValidator'
 import { getOriginSubdomain } from 'Helpers/subdomain'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Task from 'App/Models/Task'
-import { string } from '@ioc:Adonis/Core/Helpers'
-import { DateTime } from 'luxon'
-import OrganisationInvitation from 'App/Mailers/OrganisationInvitation'
-import ResendInvitationValidator from 'App/Validators/Auth/ResendInvitationValidator'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -76,17 +71,16 @@ export default class AuthController {
         lastname: details.lastname,
         email: details.email,
         password: details.password,
-        verificationCode: string.generateRandom(32),
       })
       await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
       await owner.related('organisation').associate(createdOrganisation)
 
       // TODO: send owner a verification link
 
-      ctx.logger.info(`Created tenant Owner with id: ${owner.id}`)
+      ctx.logger.info(`Created owner(${owner.id}) for tenant(${createdOrganisation.subdomain})`)
     } catch (err) {
       ctx.logger.error(
-        `Registering tenant (${createdOrganisation.subdomain}) Owner account failed due to: ${err.message}`
+        `Registering tenant(${createdOrganisation.subdomain}) Owner account failed due to: ${err.message}`
       )
       return ctx.response.internalServerError()
     }
@@ -94,30 +88,15 @@ export default class AuthController {
     // Prevent member list from trying to create owner again
     const filteredMembers = team.members?.filter((member) => member.email !== details.email)
 
-    // Create & Invite Team members
+    // Invite team members to organisation
     if (filteredMembers?.length) {
-      const invitedMembers = await User.createMany(
-        filteredMembers.map((member) => ({
-          email: member.email,
-        }))
-      )
-
-      await Promise.all(
-        invitedMembers.map(async (member) => {
-          const role = userRoles.find(
-            (role) => role.name === filteredMembers?.find((m) => m.email === member.email)?.role
-          )
-
-          await member.related('role').associate(role!)
-          await member.related('organisation').associate(createdOrganisation)
-
-          const invitationCode = string.generateRandom(32)
-          member.verificationCode = invitationCode
-          await member.save()
-
-          await new OrganisationInvitation(createdOrganisation, member, invitationCode).send()
-        })
-      )
+      try {
+        await createdOrganisation.inviteMembers(filteredMembers)
+      } catch (error) {
+        ctx.logger.error(
+          `Error occured while inviting members to tenant(${createdOrganisation.subdomain}) due to: ${error.message}`
+        )
+      }
     }
 
     ctx.logger.info(`Tenant(${createdOrganisation.subdomain}) has been onboarded`)
@@ -167,85 +146,6 @@ export default class AuthController {
       user: ctx.auth.user,
       organisation: ctx.auth.user?.organisation,
       timer: await ctx.auth.user!.getActiveTimer(),
-    }
-  }
-
-  public async resendInvitation(ctx: HttpContextContract) {
-    const payload = await ctx.request.validate(ResendInvitationValidator)
-
-    const user = await User.findOrFail(payload.userId)
-
-    await ctx.bouncer.with('UserPolicy').authorize('update', user)
-
-    if (user?.verifiedAt) {
-      return ctx.response.badRequest({ message: 'Account already verified' })
-    }
-
-    const invitationCode = string.generateRandom(32)
-    user.verificationCode = invitationCode
-    await user.save()
-
-    await new OrganisationInvitation(ctx.organisation!, user, invitationCode).send()
-
-    return ctx.response.noContent()
-  }
-
-  public async verifyInvitation(ctx: HttpContextContract) {
-    const originSubdomain = getOriginSubdomain(ctx.request.header('origin')!)
-    if (!originSubdomain) {
-      ctx.response.notFound({ message: 'Origin header not present' })
-      return
-    }
-
-    const organisation = await Organisation.findByOrFail('subdomain', originSubdomain)
-
-    const payload = await ctx.request.validate(InvitationValidator)
-
-    // Verification code expires 1 day after its creation
-    const invitedUser = await User.query()
-      .where('email', payload.email)
-      .where('updated_at', '>', DateTime.now().minus({ day: 1 }).toSQL())
-      .whereHas('organisation', (subQuery) => {
-        subQuery.where('id', organisation.id)
-      })
-      .first()
-
-    if (invitedUser?.verifiedAt) {
-      return ctx.response.badRequest({ message: 'Account already verified' })
-    }
-
-    if (!invitedUser || !(await Hash.verify(invitedUser.verificationCode!, payload.token))) {
-      return ctx.response.badRequest({
-        message: `${
-          !invitedUser ? 'Your invitation has expired' : 'Unable to verify link'
-        }. Please contact your administrator`,
-      })
-    }
-
-    try {
-      invitedUser.verificationCode = null
-      invitedUser.verifiedAt = DateTime.now().set({ millisecond: 0 })
-      invitedUser.firstname = payload.firstname
-      invitedUser.lastname = payload.lastname
-      invitedUser.password = payload.password // hook will hash automatically
-      await invitedUser.save()
-
-      ctx.logger.info(
-        `Invited user(${invitedUser.id}) of tenant(${organisation!.subdomain}) has been onboarded`
-      )
-    } catch (error) {
-      ctx.logger.error(
-        `Failed to onboard user(${invitedUser.id}) of tenant(${organisation!.id}) due to: ${
-          error.message
-        }`
-      )
-    }
-
-    await ctx.auth.login(invitedUser)
-
-    return {
-      user: invitedUser.serialize(),
-      organisation: organisation.serialize(),
     }
   }
 }

@@ -12,12 +12,13 @@ type FormSelectProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg'
   placeHolder?: string
   error?: boolean
+  disabled?: boolean
   fullWidth?: boolean
   children: JSX.Element[]
 }
 
 const listBoxButton = cva(
-  'relative border w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0',
+  'relative border w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0 disabled:bg-gray-20',
   {
     variants: {
       size: {
@@ -34,6 +35,7 @@ const listBoxButton = cva(
         true: 'border-purple-90 shadow-purple-70 shadow-sm',
         false: 'focus:shadow-purple-70 focus:border-purple-90 border-gray-40',
       },
+      disabled: { true: '', false: '' },
     },
     compoundVariants: [
       {
@@ -44,6 +46,9 @@ const listBoxButton = cva(
     ],
     defaultVariants: {
       size: 'sm',
+      error: false,
+      focused: false,
+      disabled: false,
     },
   },
 )
@@ -63,6 +68,7 @@ const listBoxOptions = cva(
 export const FormSelect = ({
   name,
   control,
+  disabled,
   size = 'sm',
   placeHolder = 'Select option',
   error,
@@ -90,7 +96,7 @@ export const FormSelect = ({
 
   return (
     <div className="relative w-full">
-      <Listbox value={value} onChange={onChange}>
+      <Listbox value={value} onChange={onChange} disabled={disabled}>
         {({ open }) => (
           <>
             <Listbox.Button className={listBoxButton({ size, error, focused })}>
@@ -112,6 +118,7 @@ export const FormSelect = ({
                 <ChevronIcon
                   className={classNames('transform transition-transform', {
                     '-rotate-180': focused,
+                    'text-gray-60': disabled,
                   })}
                   aria-hidden="true"
                 />

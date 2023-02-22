@@ -6,6 +6,7 @@ import {
   RegisterRequest,
   LoginRequest,
   ResendInvitationRequest,
+  InviteMembersRequest,
 } from './types/requests'
 import {
   RegisterResponse,
@@ -36,7 +37,7 @@ const authEndpoints = appApi.injectEndpoints({
 
     verifyInvitation: build.mutation<VerifyInvitationResponse, VerifyInvitationRequest>({
       query: (body) => ({
-        url: `${authBasePath}/verifyInvitation`,
+        url: `${authBasePath}/invitations/verify`,
         method: 'POST',
         body,
       }),
@@ -44,7 +45,15 @@ const authEndpoints = appApi.injectEndpoints({
 
     resendInvitation: build.mutation<void, ResendInvitationRequest>({
       query: (body) => ({
-        url: `${authBasePath}/resendInvitation`,
+        url: `${authBasePath}/invitations/resend`,
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    inviteMembers: build.mutation<void, InviteMembersRequest>({
+      query: (body) => ({
+        url: `${authBasePath}/invitations`,
         method: 'POST',
         body,
       }),
@@ -78,6 +87,7 @@ export const {
   useVerifyOrganisationMutation,
   useVerifyInvitationMutation,
   useResendInvitationMutation,
+  useInviteMembersMutation,
   useRegisterMutation,
   useLoginMutation,
   useGetSessionQuery,

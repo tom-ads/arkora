@@ -3,7 +3,7 @@ import { HTMLAttributes } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 const checkBox = cva(
-  'checked:checkbox cursor-pointer p-1 border-gray-40 rounded border bg-white checked:bg-purple-90 checked:border-purple-90 focus:shadow-purple-70 focus:border-purple-90 focus:outline-none focus-visible:shadow-purple-70 focus-visible:border-purple-90 appearance-none transition duration-200',
+  'checked:checkbox cursor-pointer p-1 border-gray-40 rounded border bg-white checked:bg-purple-90 checked:border-purple-90 focus:shadow-purple-70 focus:border-purple-90 focus:outline-none focus-visible:shadow-purple-70 focus-visible:border-purple-90 appearance-none transition duration-200 disabled:bg-gray-20 disabled:cursor-default',
   {
     variants: {
       size: {
@@ -16,21 +16,34 @@ const checkBox = cva(
         true: 'border-red-90 focus:shadow-md focus:!shadow-red-90 checked:border-red-90 checked:bg-red-90 focus-visible:border-red-90',
         false: 'focus:shadow-purple-70 focus:border-purple-90',
       },
+      disabled: {
+        true: '',
+        false: '',
+      },
     },
     defaultVariants: {
       size: 'sm',
+      error: false,
+      disabled: false,
     },
   },
 )
 
 interface CheckboxProps extends HTMLAttributes<HTMLInputElement>, VariantProps<typeof checkBox> {
   name: string
+  disabled?: boolean
 }
 
-export const FormCheckbox = ({ name, size, error }: CheckboxProps): JSX.Element => {
+export const FormCheckbox = ({ name, size, error, disabled }: CheckboxProps): JSX.Element => {
   const { register } = useFormContext()
 
   return (
-    <input id={name} type="checkbox" className={checkBox({ size, error })} {...register(name)} />
+    <input
+      id={name}
+      type="checkbox"
+      disabled={disabled}
+      className={checkBox({ size, error })}
+      {...register(name)}
+    />
   )
 }

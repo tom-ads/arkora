@@ -6,7 +6,7 @@ import UserFactory from 'Database/factories/UserFactory'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import { DateTime } from 'luxon'
 
-test.group('Auth : Verify Invitation', (group) => {
+test.group('Invitation : Verify', (group) => {
   let invitedUser: User
   let organisation: Organisation
   let token: string
@@ -38,7 +38,7 @@ test.group('Auth : Verify Invitation', (group) => {
     }
 
     const response = await client
-      .post(route('AuthController.verifyInvitation'))
+      .post(route('InvitationController.verify'))
       .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
@@ -70,7 +70,7 @@ test.group('Auth : Verify Invitation', (group) => {
     }
 
     const response = await client
-      .post(route('AuthController.verifyInvitation'))
+      .post(route('InvitationController.verify'))
       .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
@@ -90,7 +90,7 @@ test.group('Auth : Verify Invitation', (group) => {
     }
 
     const response = await client
-      .post(route('AuthController.verifyInvitation'))
+      .post(route('InvitationController.verify'))
       .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()

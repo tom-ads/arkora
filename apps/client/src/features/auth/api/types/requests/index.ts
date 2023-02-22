@@ -4,6 +4,7 @@ import RegisterRequest from './register'
 import LoginRequest from './login'
 import VerifyInvitationRequest from './verify_invitation'
 import ResendInvitationRequest from './resend_invitation'
+import InviteMembersRequest from './invite_members'
 
 export type {
   LoginRequest,
@@ -12,4 +13,5 @@ export type {
   VerifyInvitationRequest,
   RegisterRequest,
   ResendInvitationRequest,
+  InviteMembersRequest,
 }

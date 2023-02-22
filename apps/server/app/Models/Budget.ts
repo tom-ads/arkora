@@ -242,6 +242,14 @@ export default class Budget extends BaseModel {
     })
   })
 
+  public static privateBudget = scope((query: BudgetBuilder) => {
+    return query.where('private', true)
+  })
+
+  public static publicBudget = scope((query: BudgetBuilder) => {
+    return query.where('private', false)
+  })
+
   public static budgetMetrics = scope((query: BudgetBuilder, budgetIds: number[]) => {
     return query
       .select(

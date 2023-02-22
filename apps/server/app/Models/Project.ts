@@ -76,6 +76,14 @@ export default class Project extends BaseModel {
     })
   })
 
+  public static privateProject = scope((query: ProjectBuilder) => {
+    return query.where('private', true)
+  })
+
+  public static publicProject = scope((query: ProjectBuilder) => {
+    return query.where('private', false)
+  })
+
   // Methods
 
   public async assignProjectMembers(ctx: HttpContextContract, project: Project, members: number[]) {
