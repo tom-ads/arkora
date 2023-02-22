@@ -8,20 +8,3 @@ export async function parseCSV(file: File, header?: 'A' | number | string[]) {
 
   return json
 }
-
-/* 
-  codes 65 - 90
-*/
-export function getColumnLetters(n: number): string[] {
-  const letters = []
-  let dividend = n
-  let modulo
-
-  while (dividend > 0) {
-    modulo = (dividend - 1) % 26
-    letters.unshift(String.fromCharCode(65 + modulo))
-    dividend = Math.floor((dividend - modulo) / 26)
-  }
-
-  return letters
-}

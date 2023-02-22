@@ -15,6 +15,7 @@ const accountEndpoints = appApi.injectEndpoints({
           ...(params?.search && { search: params.search }),
         },
       }),
+      providesTags: ['Members'],
     }),
   }),
   overrideExisting: false,

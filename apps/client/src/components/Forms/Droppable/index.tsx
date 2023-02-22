@@ -40,7 +40,7 @@ const FormDroppable = ({
                 case ErrorCode.TooManyFiles:
                   return `You can only upload a maximum of ${maxFiles} files.`
                 case ErrorCode.FileInvalidType:
-                  return 'File type must be PNG or JPEG.'
+                  return 'Invalid file type.'
                 default:
                   return ''
               }

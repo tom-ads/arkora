@@ -107,7 +107,7 @@ export const InviteMemberFields = ({
 
         <p className="text-gray-80 text-sm text-center">
           <span className="font-medium">XLXS</span> or <span className="font-medium">CSV</span>{' '}
-          Format - Max Size (12MB)
+          Format - Max Size (2MB)
         </p>
       </FormDroppable>
 

@@ -57,6 +57,7 @@ const authEndpoints = appApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Members'],
     }),
 
     register: build.mutation<RegisterResponse, RegisterRequest>({
