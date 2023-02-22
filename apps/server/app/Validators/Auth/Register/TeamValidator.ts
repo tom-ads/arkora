@@ -27,15 +27,8 @@ export default class TeamValidator {
   public schema = schema.create({
     members: schema.array.optional([rules.minLength(0)]).members(
       schema.object().members({
-        email: schema.string({ trim: true }, [rules.email()]),
-        role: schema.string({ trim: true }, [
-          rules.exists({
-            table: 'roles',
-            column: 'name',
-          }),
-          // Invited members cannot be the owner of the organisation
-          rules.notIn([UserRole.OWNER]),
-        ]),
+        email: schema.string([rules.trim(), rules.email()]),
+        role: schema.enum(Object.values(UserRole).filter((v) => v !== UserRole.OWNER)),
       })
     ),
   })

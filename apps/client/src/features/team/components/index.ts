@@ -1,2 +1,6 @@
 export * from './Cards'
 export * from './Lists'
+export * from './Modals'
+export * from './Modals'
+export * from './SelectedFile'
+export * from './Tables'

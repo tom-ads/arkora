@@ -6,7 +6,7 @@ import UserFactory from 'Database/factories/UserFactory'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Mail from '@ioc:Adonis/Addons/Mail'
 
-test.group('Auth : Resend Invitation', (group) => {
+test.group('Invitation : Resend', (group) => {
   let authUser: User
   let invitedUser: User
   let organisation: Organisation
@@ -36,7 +36,7 @@ test.group('Auth : Resend Invitation', (group) => {
     }
 
     const response = await client
-      .post(route('AuthController.resendInvitation'))
+      .post(route('InvitationController.resend'))
       .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
@@ -62,7 +62,7 @@ test.group('Auth : Resend Invitation', (group) => {
     }
 
     const response = await client
-      .post(route('AuthController.resendInvitation'))
+      .post(route('InvitationController.resend'))
       .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()

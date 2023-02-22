@@ -27,6 +27,8 @@ export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRow): J
     }
   }
 
+  const fullName = `${value?.firstname ?? ''}${value?.lastname ? ` ${value.lastname}` : ''}`
+
   return (
     <TableRow>
       <TableData>
@@ -34,15 +36,13 @@ export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRow): J
       </TableData>
 
       <TableData className="px-1">
-        <Avatar className="w-9 h-9">
-          <UsersIcon className="w-5 h-5" />
+        <Avatar className="w-9 h-9 uppercase">
+          {value.initials || <UsersIcon className="w-5 h-5" />}
         </Avatar>
       </TableData>
 
       <TableData>
-        <p className="text-gray-80 font-medium">
-          {value.firstname} {value.lastname}
-        </p>
+        <p className="text-gray-80 font-medium">{fullName || '- - -'}</p>
       </TableData>
 
       <TableData>

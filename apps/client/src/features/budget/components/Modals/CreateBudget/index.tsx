@@ -56,7 +56,7 @@ export const CreateBudgetModal = ({ isOpen, onClose }: CreateBudgetModalProps): 
           reset()
         })
         .catch((error) => {
-          if (error.status === 422) return
+          if (error?.status === 422) return
 
           reset()
           errorToast('Unable to create budget, please try again later.')

@@ -10,7 +10,7 @@ export const Avatar = ({ className, children }: AvatarProps): JSX.Element => {
   return (
     <div
       className={classNames(
-        'rounded-full bg-purple-20 w-8 h-8 grid place-content-center shrink-0',
+        'rounded-full bg-purple-10 w-8 h-8 grid place-content-center shrink-0',
         className,
       )}
     >

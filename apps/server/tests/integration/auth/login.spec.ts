@@ -2,22 +2,22 @@ import { test } from '@japa/runner'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 import Hash from '@ioc:Adonis/Core/Hash'
 
-const loginRoute = '/auth/login'
-
 test.group('Auth: Login', () => {
-  test('user can login to their organisation account', async ({ client }) => {
+  test('user can login to their organisation account', async ({ client, route }) => {
     Hash.fake()
 
     const user = await UserFactory.merge({ password: 'newPassword123!' })
       .with('organisation', 1, (builder) => builder.merge({ subdomain: 'test-org' }))
       .create()
 
+    const payload = {
+      email: user.email,
+      password: 'newPassword123!',
+    }
+
     const response = await client
-      .post(loginRoute)
-      .form({
-        email: user.email,
-        password: 'newPassword123!',
-      })
+      .post(route('AuthController.login'))
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 
@@ -30,17 +30,19 @@ test.group('Auth: Login', () => {
     Hash.restore()
   })
 
-  test('user with invalid credentials receives 400 w/ message', async ({ client }) => {
+  test('user with invalid credentials receives 400', async ({ client, route }) => {
     Hash.fake()
 
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
+    const payload = {
+      email: 'doesNotExist@example.com',
+      password: 'newPassword123!',
+    }
+
     const response = await client
-      .post(loginRoute)
-      .form({
-        email: 'doesNotExist@example.com',
-        password: 'newPassword123!',
-      })
+      .post(route('AuthController.login'))
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 
@@ -50,7 +52,7 @@ test.group('Auth: Login', () => {
     Hash.restore()
   })
 
-  test('user from diff organisation, cannot login to organisation', async ({ client }) => {
+  test('user from diff organisation, cannot login to organisation', async ({ client, route }) => {
     Hash.fake()
 
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
@@ -64,12 +66,12 @@ test.group('Auth: Login', () => {
       .create()
 
     const response = await client
-      .post(loginRoute)
+      .post(route('AuthController.login'))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
       .form({
         email: 'sameemail@example.com',
         password: 'newPassword123!',
       })
-      .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 
     response.assertStatus(400)
@@ -81,6 +83,7 @@ test.group('Auth: Login', () => {
   test('user with same credentials, but diff organisation, cannot login to organisation', async ({
     client,
     assert,
+    route,
   }) => {
     Hash.fake()
 
@@ -98,13 +101,15 @@ test.group('Auth: Login', () => {
       .with('organisation', 1, (builder) => builder.merge({ subdomain: 'diff-org' }))
       .create()
 
+    const payload = {
+      email: 'sameemail@example.com',
+      password: 'newPassword123!',
+    }
+
     const response = await client
-      .post(loginRoute)
-      .form({
-        email: 'sameemail@example.com',
-        password: 'newPassword123!',
-      })
+      .post(route('AuthController.login'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
+      .form(payload)
       .withCsrfToken()
 
     response.assertStatus(200)
@@ -122,20 +127,25 @@ test.group('Auth: Login', () => {
     Hash.restore()
   })
 
-  test('user login request without Origin header responds with bad request', async ({ client }) => {
-    const response = await client
-      .post(loginRoute)
-      .form({
-        email: 'sameemail@example.com',
-        password: 'newPassword123!',
-      })
-      .withCsrfToken()
+  test('user login request without Origin header responds with bad request', async ({
+    client,
+    route,
+  }) => {
+    const payload = {
+      email: 'sameemail@example.com',
+      password: 'newPassword123!',
+    }
+
+    const response = await client.post(route('AuthController.login')).form(payload).withCsrfToken()
 
     response.assertStatus(404)
     response.assertBody({ message: 'Origin header not present' })
   })
 
-  test('auth user gets forbidden route when trying to hit login route', async ({ client }) => {
+  test('auth user gets forbidden route when trying to hit login route', async ({
+    client,
+    route,
+  }) => {
     const user = await UserFactory.merge({
       email: 'sameemail@example.com',
       password: 'newPassword123!',
@@ -143,12 +153,14 @@ test.group('Auth: Login', () => {
       .with('organisation', 1, (builder) => builder.merge({ subdomain: 'test-org' }))
       .create()
 
+    const payload = {
+      email: user.email,
+      password: user.password,
+    }
+
     const response = await client
-      .post(loginRoute)
-      .form({
-        email: user.email,
-        password: user.password,
-      })
+      .post(route('AuthController.login'))
+      .form(payload)
       .loginAs(user)
       .withCsrfToken()
 

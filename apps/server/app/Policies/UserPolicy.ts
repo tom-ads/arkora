@@ -3,6 +3,14 @@ import UserRole from 'App/Enum/UserRole'
 import User from 'App/Models/User'
 
 export default class UserPolicy extends BasePolicy {
+  public async create(authUser: User) {
+    if (!authUser || authUser.role?.name === UserRole.MEMBER) {
+      return false
+    }
+
+    return true
+  }
+
   public async update(authUser: User, user: User) {
     // User can update themselves
     if (authUser.id === user.id) {
@@ -21,10 +29,10 @@ export default class UserPolicy extends BasePolicy {
       return false
     }
 
-    /* 
-		Members cannot update other tenant users and admins can
-		only update tenant users of their own role or below.
-	*/
+    /*
+      Members cannot update other tenant users and admins can
+      only update tenant users of their own role or below.
+    */
     const authUserRole = authUser.role?.name
     const userRole = user.role?.name
     if (authUserRole === UserRole.MEMBER) {

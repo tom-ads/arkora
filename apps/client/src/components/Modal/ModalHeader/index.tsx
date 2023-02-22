@@ -5,7 +5,7 @@ import { ModalTitle } from '../ModalTitle'
 type ModalHeaderProps = {
   title: string
   description?: string
-  icon: JSX.Element
+  icon?: JSX.Element
   onClose: () => void
 }
 
@@ -18,9 +18,12 @@ export const ModalHeader = ({
   return (
     <div className="w-full flex justify-between gap-x-4 px-8 pt-8 pb-6">
       <div className="flex gap-x-6">
-        <div className="bg-purple-10 text-purple-90 h-14 w-14 rounded-full sm:place-content-center flex-shrink-0 hidden sm:grid">
-          <span className="w-7 h-7">{icon}</span>
-        </div>
+        {icon && (
+          <div className="bg-purple-10 text-purple-90 h-14 w-14 rounded-full sm:place-content-center flex-shrink-0 hidden sm:grid">
+            <span className="w-7 h-7">{icon}</span>
+          </div>
+        )}
+
         <div className="space-y-[2px]">
           <ModalTitle>{title}</ModalTitle>
           {description && <ModalDescription>{description}</ModalDescription>}
@@ -30,7 +33,7 @@ export const ModalHeader = ({
       <button
         type="button"
         onClick={onClose}
-        className="outline-none text-gray-100 mb-auto p-1 rounded hover:bg-gray-20 transition-colors duration-150"
+        className="outline-none text-gray-100 mb-auto p-1 rounded hover:bg-gray-10 transition-colors duration-150"
       >
         <CrossIcon className="w-6 h-6" aria-hidden />
       </button>
