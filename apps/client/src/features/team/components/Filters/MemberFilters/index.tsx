@@ -110,7 +110,9 @@ export const MemberFilters = (): JSX.Element => {
               <FormControl className="w-[200px]">
                 <FormSelect name="role" control={control} placeHolder="Filter Role" fullWidth>
                   {roleOptions?.map((option) => (
-                    <SelectOption key={option.id}>{option?.display}</SelectOption>
+                    <SelectOption key={option.id} id={option.id}>
+                      {option?.display}
+                    </SelectOption>
                   ))}
                 </FormSelect>
               </FormControl>
@@ -118,7 +120,9 @@ export const MemberFilters = (): JSX.Element => {
               <FormControl className="w-[100p] md:w-[200px]">
                 <FormSelect name="status" control={control} placeHolder="Filter Status" fullWidth>
                   {statusOptions?.map((option) => (
-                    <SelectOption key={option.id}>{option?.display}</SelectOption>
+                    <SelectOption key={option.id} id={option.id}>
+                      {option?.display}
+                    </SelectOption>
                   ))}
                 </FormSelect>
               </FormControl>

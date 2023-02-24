@@ -31,7 +31,7 @@ const projectEndpoints = appApi.injectEndpoints({
     }),
 
     updateProject: build.mutation<UpdateProjectResponse, UpdateProjectRequest>({
-      query: ({ id, body }) => ({
+      query: ({ id, ...body }) => ({
         url: `${projectsBasePath}/${id}`,
         method: 'PUT',
         body,

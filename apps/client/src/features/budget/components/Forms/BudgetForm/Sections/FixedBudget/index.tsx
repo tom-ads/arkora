@@ -74,7 +74,9 @@ export const FixedBudgetSection = ({
         <FormControl>
           <FormSelect name="billableType" control={control} placeHolder="Select total" fullWidth>
             {billableTypeOption?.map((option) => (
-              <SelectOption key={option.id}>{option?.display}</SelectOption>
+              <SelectOption key={option.id} id={option.id}>
+                {option?.display}
+              </SelectOption>
             ))}
           </FormSelect>
         </FormControl>

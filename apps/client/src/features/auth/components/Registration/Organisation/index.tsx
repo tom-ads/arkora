@@ -277,7 +277,9 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
                     </FormLabel>
                     <FormSelect name="currency" control={control} placeHolder="Select currency">
                       {currencyOptions?.map((option) => (
-                        <SelectOption key={option.id}>{option?.display}</SelectOption>
+                        <SelectOption key={option.id} id={option.id}>
+                          {option?.display}
+                        </SelectOption>
                       ))}
                     </FormSelect>
                     {errors.currency?.message && (

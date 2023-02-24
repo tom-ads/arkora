@@ -16,7 +16,7 @@ import Client from './Client'
 import Status from 'App/Enum/Status'
 import Budget from './Budget'
 import User from './User'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Organisation from './Organisation'
 
 type ProjectBuilder = ModelQueryBuilderContract<typeof Project>
 
@@ -86,27 +86,21 @@ export default class Project extends BaseModel {
 
   // Methods
 
-  public async assignProjectMembers(ctx: HttpContextContract, project: Project, members: number[]) {
+  public async assignProjectMembers(
+    organisation: Organisation,
+    project: Project,
+    members: number[]
+  ) {
     await project.related('members').detach()
 
-    let projectMembers: number[]
-    if (project.private) {
-      const organisationAdmins = await ctx
-        .organisation!.related('users')
-        .query()
-        .withScopes((scopes) => scopes.organisationAdmins())
-        .whereNotIn('id', members)
-      projectMembers = organisationAdmins.map((admin) => admin.id).concat(members)
-    } else {
-      const organisationUsers = await ctx.organisation!.related('users').query()
-      projectMembers = organisationUsers.map((member) => member.id)
-    }
-
-    // Link project members to the new project
-    await Promise.all(
-      projectMembers.map(async (userId) => {
-        await project.related('members').attach([userId])
+    const projectMembers: User[] = await organisation
+      .related('users')
+      .query()
+      .if(project.private, (query) => {
+        query.withScopes((scopes) => scopes.organisationAdmins())
       })
-    )
+      .exec()
+
+    await project.related('members').attach(projectMembers.map((member) => member.id))
   }
 }

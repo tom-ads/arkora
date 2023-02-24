@@ -88,7 +88,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
   const onConfirm = async () => {
     const name = member?.firstname ?? 'Member'
     await deleteMember(member!.id)
-      .then(() => successToast(`${name} has been deleted`))
+      .then(() => successToast(`${name} has been removed from the organisation`))
       .catch(() => errorToast(`Unable to remove ${name}, please try again later.`))
 
     setOpenConfirmationModal(false)
@@ -193,7 +193,9 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
               {authUserRole === UserRole.ORG_ADMIN || authUserRole === UserRole.OWNER ? (
                 <FormSelect name="role" control={control} placeHolder="Select role" fullWidth>
                   {roleOptions?.map((option) => (
-                    <SelectOption key={option.id}>{option?.display}</SelectOption>
+                    <SelectOption key={option.id} id={option.id}>
+                      {option?.display}
+                    </SelectOption>
                   ))}
                 </FormSelect>
               ) : (
@@ -227,8 +229,8 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
               onClose={() => setOpenConfirmationModal(false)}
               onConfirm={onConfirm}
               loading={deletingMember}
-              title={`You're about to delete ${member?.firstname ?? 'a Member'}`}
-              btnText={`Delete ${member?.firstname ?? 'Member'}`}
+              title={`You're about to remove ${member?.firstname ?? 'a Member'}`}
+              btnText={`Remove ${member?.firstname ?? 'Member'}`}
               description="Performing this action will permanently delete all related time entries. It cannot be recovered."
             />
           </>

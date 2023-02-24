@@ -105,7 +105,9 @@ export const InviteTeam = ({
           </FormLabel>
           <FormSelect name="role" control={control} placeHolder="Select role">
             {roleOptions?.map((option) => (
-              <SelectOption key={option.id}>{option?.display}</SelectOption>
+              <SelectOption key={option.id} id={option.id}>
+                {option?.display}
+              </SelectOption>
             ))}
           </FormSelect>
           {errors.role?.message && (
@@ -153,7 +155,9 @@ export const InviteTeam = ({
                   size="xs"
                 >
                   {roleOptions?.map((option) => (
-                    <SelectOption key={option.id}>{option?.display}</SelectOption>
+                    <SelectOption key={option.id} id={option.id}>
+                      {option?.display}
+                    </SelectOption>
                   ))}
                 </FormSelect>
               </td>

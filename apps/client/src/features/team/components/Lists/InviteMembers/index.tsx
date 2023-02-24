@@ -49,7 +49,9 @@ export const InviteMemberList = ({ watch, control }: { watch: any; control: any 
                 size="xs"
               >
                 {roleOptions?.map((option) => (
-                  <SelectOption key={option.id}>{option?.display}</SelectOption>
+                  <SelectOption key={option.id} id={option.id}>
+                    {option?.display}
+                  </SelectOption>
                 ))}
               </FormSelect>
             </FormControl>

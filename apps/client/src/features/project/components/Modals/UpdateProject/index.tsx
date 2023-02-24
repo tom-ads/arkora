@@ -28,36 +28,31 @@ export const UpdateProjectModal = ({
     skip: !projectId,
   })
 
-  const [triggerUpdate, { isLoading: updatingProject }] = useUpdateProjectMutation()
+  const [updateProject, { isLoading: updatingProject }] = useUpdateProjectMutation()
 
-  const [triggerDelete, { isLoading: deletingProject }] = useDeleteProjectMutation()
+  const [deleteProject, { isLoading: deletingProject }] = useDeleteProjectMutation()
 
   const onSubmit = async (data: ProjectFormFields) => {
-    await triggerUpdate({
+    await updateProject({
       id: projectId!,
-      body: {
-        name: data.name,
-        show_cost: data.hideCost,
-        private: data.private,
-        client_id: data.client!,
-        team: data?.team?.map((member) => member.id),
-      },
+      name: data.name!,
+      show_cost: data.hideCost,
+      private: data.private,
+      client_id: data.client!,
     })
       .unwrap()
-      .then(() => {
-        onClose()
-        successToast('Project has been updated')
-      })
+      .then(() => successToast('Project has been updated'))
       .catch(() => errorToast('Unable to update project, please try again later.'))
+
+    onClose()
   }
 
   const onConfirm = async () => {
+    await deleteProject(projectId!)
+      .then(() => successToast('Project has been removed'))
+      .catch(() => errorToast('Unable to remove project, please try again later.'))
+
     setOpenConfirmationModal(false)
-
-    await triggerDelete(projectId!)
-      .then(() => successToast('Project has been deleted'))
-      .catch(() => errorToast('Unable to delete project, please try again later.'))
-
     onClose()
   }
 
@@ -73,17 +68,21 @@ export const UpdateProjectModal = ({
       >
         <ProjectForm
           isOpen={isOpen}
+          onSubmit={onSubmit}
           defaultValues={{
             name: project?.name,
             client: project?.client?.id,
-            private: project?.private,
-            hideCost: project?.showCost,
-            team: project?.members,
+            private: project?.private ?? false,
+            hideCost: project?.showCost ?? true,
           }}
-          onSubmit={onSubmit}
         >
-          <ModalFooter className="!mt-36">
-            <Button variant="blank" onClick={() => setOpenConfirmationModal(true)} danger>
+          <ModalFooter className="!mt-20">
+            <Button
+              variant="blank"
+              onClick={() => setOpenConfirmationModal(true)}
+              disabled={loadingProject || deletingProject || updatingProject}
+              danger
+            >
               Delete
             </Button>
             <Button
@@ -91,6 +90,7 @@ export const UpdateProjectModal = ({
               type="submit"
               className="max-w-[161px] w-full"
               loading={updatingProject}
+              disabled={deletingProject || loadingProject}
             >
               Update Project
             </Button>

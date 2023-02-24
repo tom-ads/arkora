@@ -141,7 +141,9 @@ export const ImportMemberModal = ({
             fullWidth
           >
             {headingOptions.map((option) => (
-              <SelectOption key={option.id}>{option?.display}</SelectOption>
+              <SelectOption key={option.id} id={option.id}>
+                {option?.display}
+              </SelectOption>
             ))}
           </FormSelect>
         </FormControl>

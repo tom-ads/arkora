@@ -84,9 +84,9 @@ export const FormSelect = ({
   const validChildren = useMemo(
     () =>
       children
-        ?.filter((v) => v.key)
+        ?.filter((v) => v.props?.id)
         .map((child) => ({
-          id: child.key,
+          id: child?.props?.id,
           children: child?.props?.children,
         })),
     [children],

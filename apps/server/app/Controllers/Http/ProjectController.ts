@@ -3,6 +3,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Status from 'App/Enum/Status'
 import Client from 'App/Models/Client'
 import Project from 'App/Models/Project'
+import User from 'App/Models/User'
 import CreateProjectValidator from 'App/Validators/Project/CreateProjectValidator'
 import UpdateProjectValidator from 'App/Validators/Project/UpdateProjectValidator'
 
@@ -35,7 +36,9 @@ export default class ProjectController {
       .where('projects.name', payload.name)
 
     if (nameExists?.length) {
-      ctx.response.unprocessableEntity({ name: { message: 'Project name already exists' } })
+      ctx.response.unprocessableEntity({
+        errors: [{ field: 'name', message: 'Name already exists' }],
+      })
       return
     }
 
@@ -49,30 +52,14 @@ export default class ProjectController {
     })
     await createdProject.related('client').associate(projectClient)
 
-    let projectMembers: number[]
-
-    // Get org users who need to be assigned to the new project
-    if (payload.private) {
-      const organisationAdmins = await ctx
-        .organisation!.related('users')
-        .query()
-        .withScopes((scopes) => scopes.organisationAdmins())
-        .whereNotIn('id', [ctx.auth.user!.id, ...(payload.team ?? [])])
-      projectMembers = organisationAdmins.map((admin) => admin.id).concat(payload.team ?? [])
-    } else {
-      const organisationUsers = await ctx
-        .organisation!.related('users')
-        .query()
-        .whereNot('id', ctx.auth.user!.id)
-      projectMembers = organisationUsers.map((member) => member.id)
-    }
+    const projectMembers: User[] = await ctx
+      .organisation!.related('users')
+      .query()
+      .if(payload.private, (query) => query.withScopes((scope) => scope.organisationAdmins()))
+      .exec()
 
     // Link project members to the new project
-    await Promise.all(
-      projectMembers.map(async (userId) => {
-        await createdProject.related('members').attach([userId])
-      })
-    )
+    await createdProject.related('members').attach(projectMembers.map((member) => member.id))
 
     return createdProject.serialize()
   }
@@ -136,7 +123,9 @@ export default class ProjectController {
       project.showCost = payload.show_cost
     }
 
-    await project.assignProjectMembers(ctx, project, payload.team ?? [])
+    if (payload?.team?.length) {
+      await project.assignProjectMembers(ctx.organisation!, project, payload.team ?? [])
+    }
 
     await project.save()
 
