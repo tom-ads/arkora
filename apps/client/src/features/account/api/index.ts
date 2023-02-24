@@ -1,6 +1,7 @@
+import { User } from '@/types'
 import appApi from 'api'
-import { GetAccountsRequest } from './types/requests'
-import { GetAccountsResponse } from './types/response'
+import { GetAccountsRequest, GetAccountRequest, UpdateAccountRequest } from './types/requests'
+import { GetAccountResponse, GetAccountsResponse } from './types/response'
 
 const accountBasePath = '/accounts'
 
@@ -17,8 +18,35 @@ const accountEndpoints = appApi.injectEndpoints({
       }),
       providesTags: ['Members'],
     }),
+
+    getAccount: build.query<GetAccountResponse, GetAccountRequest>({
+      query: (id) => `${accountBasePath}/${id}`,
+      providesTags: ['Member'],
+    }),
+
+    updateAccount: build.mutation<User, UpdateAccountRequest>({
+      query: ({ id, ...body }) => ({
+        url: `${accountBasePath}/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['Members'],
+    }),
+
+    deleteAccount: build.mutation<void, number>({
+      query: (id) => ({
+        url: `${accountBasePath}/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Members', 'Member'],
+    }),
   }),
   overrideExisting: false,
 })
 
-export const { useGetAccountsQuery } = accountEndpoints
+export const {
+  useGetAccountsQuery,
+  useGetAccountQuery,
+  useUpdateAccountMutation,
+  useDeleteAccountMutation,
+} = accountEndpoints

@@ -1,9 +1,10 @@
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { FieldValues, Path, UseFormSetError } from 'react-hook-form'
+import { useToast } from './useToast'
 
-function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+export function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
   return typeof error === 'object' && error != null && 'status' in error
 }
 
@@ -14,7 +15,7 @@ export function useQueryError<TFields extends FieldValues>({
   setError?: UseFormSetError<TFields>
   error?: FetchBaseQueryError | SerializedError
 }) {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { errorToast } = useToast()
 
   useEffect(() => {
     if (isFetchBaseQueryError(error)) {
@@ -24,10 +25,8 @@ export function useQueryError<TFields extends FieldValues>({
           setError(field as Path<TFields>, { message })
         })
       } else if (errorData?.message) {
-        setErrorMessage(errorData?.message as string)
+        errorToast(errorData?.message?.[0]?.message)
       }
     }
-  }, [error, setError])
-
-  return [errorMessage]
+  }, [error])
 }

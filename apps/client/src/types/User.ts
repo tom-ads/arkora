@@ -10,6 +10,7 @@ type User = {
   role: {
     name: UserRole
   }
+  lastActiveAt: string
 }
 
 export type { User }

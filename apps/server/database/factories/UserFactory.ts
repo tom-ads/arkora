@@ -13,6 +13,7 @@ export default Factory.define(User, ({ faker }) => {
     email: faker.internet.email(),
     password: faker.internet.password(),
     verifiedAt: DateTime.now().set({ millisecond: 0 }),
+    lastActiveAt: DateTime.now().set({ millisecond: 0 }),
   }
 })
   .relation('budgets', () => BudgetFactory)
