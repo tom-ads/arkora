@@ -61,7 +61,7 @@ export const ManageTimeEntryModal = ({
         loading={deletingEntry}
         title="You're about to delete a time entry"
         btnText="Delete Entry"
-        description="Performing this action will permenently delete all time tracked for this entry. It cannot be recovered."
+        description="Performing this action will permanently delete all time tracked for this entry. It cannot be recovered."
       />
     </>
   )

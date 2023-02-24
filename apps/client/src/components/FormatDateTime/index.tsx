@@ -1,7 +1,7 @@
 import { DateTime, DateTimeFormatOptions } from 'luxon'
 
 type FormatDateTimeProps = {
-  value: DateTime | string
+  value: DateTime | string | null | undefined
   format: DateTimeFormatOptions | string
   className?: string
 }

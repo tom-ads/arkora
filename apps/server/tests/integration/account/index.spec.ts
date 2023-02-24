@@ -1,7 +1,6 @@
 import { test } from '@japa/runner'
 import UserRole from 'App/Enum/UserRole'
 import { UserFactory } from 'Database/factories'
-import { camelCase, startCase } from 'lodash'
 
 test.group('Account : Index Accounts', () => {
   test('organisation manager can index accounts', async ({ client, route }) => {
@@ -35,7 +34,7 @@ test.group('Account : Index Accounts', () => {
         initials: 'BM',
         email: 'bob.marley@example.com',
         role: {
-          name: startCase(camelCase(UserRole.MEMBER)),
+          name: UserRole.MEMBER,
         },
       },
     ])
@@ -72,7 +71,7 @@ test.group('Account : Index Accounts', () => {
         initials: 'BM',
         email: 'bob.marley@example.com',
         role: {
-          name: startCase(camelCase(UserRole.MEMBER)),
+          name: UserRole.MEMBER,
         },
       },
     ])
@@ -109,7 +108,7 @@ test.group('Account : Index Accounts', () => {
         initials: 'BM',
         email: 'bob.marley@example.com',
         role: {
-          name: startCase(camelCase(UserRole.MEMBER)),
+          name: UserRole.MEMBER,
         },
       },
     ])
@@ -149,7 +148,7 @@ test.group('Account : Index Accounts', () => {
         lastname: 'Marley',
         initials: 'BM',
         role: {
-          name: startCase(camelCase(UserRole.MEMBER)),
+          name: UserRole.MEMBER,
         },
       },
       {
@@ -158,7 +157,7 @@ test.group('Account : Index Accounts', () => {
         lastname: 'Marley',
         initials: 'BM',
         role: {
-          name: startCase(camelCase(UserRole.MEMBER)),
+          name: UserRole.MEMBER,
         },
       },
     ])
@@ -243,7 +242,7 @@ test.group('Account : Index Accounts', () => {
         initials: 'BM',
         email: 'bob.marley@example.com',
         role: {
-          name: startCase(camelCase(UserRole.MEMBER)),
+          name: UserRole.MEMBER,
         },
       },
     ])

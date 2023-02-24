@@ -5,8 +5,8 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.integer('organisation_id').unsigned().references('organisations.id')
-      table.integer('workday_id').unsigned().references('work_days.id')
+      table.integer('organisation_id').unsigned().references('organisations.id').onDelete('CASCADE')
+      table.integer('workday_id').unsigned().references('work_days.id').onDelete('CASCADE')
 
       table.unique(['organisation_id', 'workday_id'])
     })

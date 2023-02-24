@@ -15,6 +15,7 @@ import {
   computed,
   hasMany,
   HasMany,
+  beforeDelete,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
@@ -57,6 +58,9 @@ export default class User extends BaseModel {
 
   @column({ serializeAs: null })
   public rememberMeToken: string | null
+
+  @column.dateTime()
+  public lastActiveAt: DateTime
 
   @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime

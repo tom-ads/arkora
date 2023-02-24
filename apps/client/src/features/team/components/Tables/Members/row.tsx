@@ -11,13 +11,16 @@ import {
 import { useLazyTimeout } from '@/hooks/useLazyTimeout'
 import { User } from '@/types'
 import { DateTime } from 'luxon'
+import { useNavigate } from 'react-router-dom'
 
-type TeamMembersTableRow = {
+type TeamMembersTableRowProps = {
   onResend: () => void
   value: User
 }
 
-export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRow): JSX.Element => {
+export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRowProps): JSX.Element => {
+  const navigate = useNavigate()
+
   const [toggled, triggerResend] = useLazyTimeout({ delay: 10000 })
 
   const handleResendInvite = () => {
@@ -73,7 +76,9 @@ export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRow): J
       </TableData>
 
       <TableData>
-        <Button variant="blank">Manage</Button>
+        <Button variant="blank" onClick={() => navigate(`/team/members/${value.id}`)}>
+          Manage
+        </Button>
       </TableData>
     </TableRow>
   )

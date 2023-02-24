@@ -1,10 +1,15 @@
 import { Button, Page, PageContent, PageDescription, PageHeader, PageTitle } from '@/components'
 import { useState } from 'react'
-import { InviteMembersModal } from '../../components'
+import { useNavigate, useParams } from 'react-router-dom'
+import { InviteMembersModal, ManageMemberModal } from '../../components'
 import { MemberFilters } from '../../components/Filters/MemberFilters'
 import { TeamMembersTable } from '../../components/Tables'
 
 export const MembersPage = (): JSX.Element => {
+  const navigate = useNavigate()
+
+  const { memberId } = useParams()
+
   const [openInviteMembersModal, setOpenInviteMembersModal] = useState(false)
 
   return (
@@ -28,6 +33,7 @@ export const MembersPage = (): JSX.Element => {
         onClose={() => setOpenInviteMembersModal(false)}
         isOpen={openInviteMembersModal}
       />
+      <ManageMemberModal isOpen={!!memberId} onClose={() => navigate('/team/members')} />
     </Page>
   )
 }

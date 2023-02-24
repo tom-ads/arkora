@@ -105,7 +105,7 @@ export const UpdateProjectModal = ({
         loading={deletingProject}
         title="You're about to delete a project"
         btnText="Delete Project"
-        description="Performing this action will permenently delete any budgets, tasks and tracked time associated with this project. It cannot be recovered."
+        description="Performing this action will permanently delete any budgets, tasks and tracked time associated with this project. It cannot be recovered."
       />
     </>
   )

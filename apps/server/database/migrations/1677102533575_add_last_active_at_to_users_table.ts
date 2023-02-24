@@ -5,15 +5,13 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.string('verification_code').nullable().after('password')
-      table.timestamp('verified_at').nullable().after('verification_code')
+      table.timestamp('last_active_at').after('remember_me_token').nullable()
     })
   }
 
   public async down() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.dropColumn('verified_at')
-      table.dropColumn('verification_code')
+      table.dropColumn('last_active_at')
     })
   }
 }
