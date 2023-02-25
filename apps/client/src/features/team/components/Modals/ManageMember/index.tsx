@@ -1,7 +1,7 @@
 import {
   FormControl,
   FormLabel,
-  UsersIcon,
+  UserIcon,
   Form,
   FormInput,
   ReadOnly,
@@ -88,7 +88,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
   const onConfirm = async () => {
     const name = member?.firstname ?? 'Member'
     await deleteMember(member!.id)
-      .then(() => successToast(`${name} has been removed from the organisation`))
+      .then(() => successToast(`${name} has been removed`))
       .catch(() => errorToast(`Unable to remove ${name}, please try again later.`))
 
     setOpenConfirmationModal(false)
@@ -118,7 +118,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
     <Modal
       title={`Manage ${member?.firstname ?? 'Member'}`}
       description="Update members information"
-      icon={<UsersIcon />}
+      icon={<UserIcon />}
       isOpen={props.isOpen}
       onClose={props.onClose}
       loading={fetchingMember}
@@ -220,7 +220,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
                 disabled={deletingMember}
                 block
               >
-                Update
+                Update {member?.firstname ?? 'Member'}
               </Button>
             </ModalFooter>
 

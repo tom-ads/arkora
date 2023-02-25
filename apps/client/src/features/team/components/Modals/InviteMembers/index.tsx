@@ -1,4 +1,4 @@
-import { UsersIcon } from '@/components'
+import { UserIcon } from '@/components'
 import { Modal } from '@/components/Modal'
 import { ModalBaseProps } from '@/types'
 import { InviteMembersForm } from '../../Forms'
@@ -10,7 +10,7 @@ export const InviteMembersModal = (props: InviteMembersModalProps): JSX.Element 
     <Modal
       title="Invite Members"
       description="Upload or Manually Add Members"
-      icon={<UsersIcon />}
+      icon={<UserIcon />}
       isOpen={props.isOpen}
       onClose={props.onClose}
       className="min-h-[700px] h-full"

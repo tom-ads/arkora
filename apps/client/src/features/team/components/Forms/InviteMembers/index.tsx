@@ -193,7 +193,7 @@ export const InviteMembersForm = ({ onClose }: InviteMembersFormProps): JSX.Elem
           <InviteMemberFields {...methods} />
 
           <ModalFooter>
-            <Button variant="blank" danger>
+            <Button variant="blank" onClick={onClose} danger>
               Cancel
             </Button>
             <Button

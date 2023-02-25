@@ -1,4 +1,4 @@
-import { Avatar, BinIcon, Button, FormControl, FormSelect, List, UsersIcon } from '@/components'
+import { Avatar, BinIcon, Button, FormControl, FormSelect, List, UserIcon } from '@/components'
 import { SelectOption } from '@/components/Forms/Select/option'
 import UserRole from '@/enums/UserRole'
 import { useMemo } from 'react'
@@ -35,7 +35,7 @@ export const InviteMemberList = ({ watch, control }: { watch: any; control: any 
         <>
           <div className="flex items-center">
             <Avatar className="w-7 h-7 mr-3">
-              <UsersIcon className="w-4 h-4" />
+              <UserIcon className="w-4 h-4" />
             </Avatar>
             <p className="text-gray-80 text-sm font-medium truncate max-w-[250px]">{field.email}</p>
           </div>

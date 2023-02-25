@@ -6,7 +6,7 @@ import {
   FormCheckbox,
   TableData,
   TableRow,
-  UsersIcon,
+  UserIcon,
 } from '@/components'
 import { useLazyTimeout } from '@/hooks/useLazyTimeout'
 import { User } from '@/types'
@@ -40,7 +40,7 @@ export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRowProp
 
       <TableData className="px-1">
         <Avatar className="w-9 h-9 uppercase">
-          {value.initials || <UsersIcon className="w-5 h-5" />}
+          {value.initials || <UserIcon className="w-5 h-5" />}
         </Avatar>
       </TableData>
 
