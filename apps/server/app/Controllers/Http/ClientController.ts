@@ -15,7 +15,6 @@ export default class ClientController {
 
   @bind()
   public async view(ctx: HttpContextContract, client: Client) {
-    console.log(client)
     await ctx.bouncer.with('ClientPolicy').authorize('view', client)
 
     return client.serialize()

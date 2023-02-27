@@ -37,7 +37,7 @@ export default class ClientPolicy extends BasePolicy {
       return false
     }
 
-    if (authUser?.role?.name === UserRole.MEMBER || authUser?.role?.name === UserRole.MANAGER) {
+    if (authUser?.role?.name === UserRole.MEMBER) {
       return false
     }
 

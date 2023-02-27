@@ -1,8 +1,8 @@
 import { test } from '@japa/runner'
 import User from 'App/Models/User'
-import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factories'
+import { RoleFactory, UserFactory } from 'Database/factories'
 
-test.group('Client : Index Clients', ({ each }) => {
+test.group('Clients : Index', ({ each }) => {
   let authUser: User
 
   each.setup(async () => {
