@@ -11,10 +11,9 @@ import {
   FormTimeInput,
   HorizontalDivider,
   FormDebouncedInput,
+  FormErrorMessage,
+  FormLabel,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
-import { FormLabel } from '@/components/Forms/Label'
-import { RegistrationSteps } from '../../../types'
 import { WeekDaysSelect } from '@/components/WeekDays'
 import { WeekDay } from '@/enums/WeekDay'
 import { SelectOption } from '@/components/Forms/Select/option'
@@ -25,7 +24,7 @@ import { DateTime } from 'luxon'
 import { useVerifyOrganisationMutation } from '../../../api'
 import { CurrencyCode } from '@/types/CurrencyCode'
 import { useDispatch, useSelector } from 'react-redux'
-import { setOrganisation } from '@/stores/slices/registration'
+import { setOrganisation, setStep } from '@/stores/slices/registration'
 import { useLazyCheckSubdomainQuery } from '@/features/subdomain'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
@@ -76,12 +75,7 @@ type FormFields = {
   hourlyRate: string
 }
 
-type OrganisationsViewProps = {
-  onBack: (prevStep: RegistrationSteps) => void
-  onSuccess: (nextStep: RegistrationSteps) => void
-}
-
-export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps): JSX.Element => {
+export const OrganisationsView = (): JSX.Element => {
   const dispatch = useDispatch()
 
   const organisation = useSelector((state: RootState) => state.registration.organisation)
@@ -102,7 +96,7 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
       hourly_rate: parseFloat(data.hourlyRate),
     })
       .unwrap()
-      .then(() => onSuccess('team'))
+      .then(() => dispatch(setStep({ step: 'team' })))
       .catch()
   }
 
@@ -113,9 +107,9 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
   }
 
   const currencyOptions = useMemo(() => {
-    return Object.keys(currencies).map((currency) => ({
-      id: currency,
-      display: currencies[currency as keyof typeof currencies],
+    return Object.keys(currencies).map((currencyCode) => ({
+      id: currencyCode,
+      display: currencies[currencyCode as keyof typeof currencies],
     }))
   }, [])
 
@@ -137,180 +131,163 @@ export const OrganisationsView = ({ onBack, onSuccess }: OrganisationsViewProps)
     >
       {({ control, setValue, watch, trigger, formState: { errors } }) => (
         <>
-          <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
-            <div className="space-y-2 pb-6">
-              <h1 className="font-semibold text-3xl text-gray-100">Create organisation</h1>
-              <p className="text-base text-gray-80">
-                Let&apos;s setup your organisation. It&apos;ll be home to everything your team does
-                with Arkora
-              </p>
-            </div>
+          {/* Organisation Details */}
+          <Descriptor>
+            <DescriptorInsights
+              title="Organisation Details"
+              description="Determine the name that your team will visit"
+              className="max-w-md md:max-w-[325px]"
+            />
+            <DescriptorContent className="max-w-[405px]">
+              <div className="flex justify-between gap-3">
+                <FormControl>
+                  <FormLabel htmlFor="name" size="sm">
+                    Name
+                  </FormLabel>
 
-            <HorizontalDivider />
-
-            {/* Organisation Details */}
-            <Descriptor>
-              <DescriptorInsights
-                title="Organisation Details"
-                description="Determine the name that your team will visit"
-                className="max-w-md md:max-w-[325px]"
-              />
-              <DescriptorContent className="max-w-[405px]">
-                <div className="flex justify-between gap-3">
-                  <FormControl>
-                    <FormLabel htmlFor="name" size="sm">
-                      Name
-                    </FormLabel>
-
-                    <FormInput
-                      name="name"
-                      placeHolder="Enter name"
-                      size="sm"
-                      error={!!errors.name}
-                    />
-                    {errors.name?.message && (
-                      <FormErrorMessage size="sm">{errors.name?.message}</FormErrorMessage>
-                    )}
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel htmlFor="subdomain" size="sm">
-                      Subdomain
-                    </FormLabel>
-                    <FormDebouncedInput
-                      name="subdomain"
-                      placeHolder="Enter subdomain"
-                      size="sm"
-                      error={
-                        !!errors.subdomain ||
-                        (checkSubdomainResult?.exists !== undefined
-                          ? checkSubdomainResult?.exists
-                          : false)
-                      }
-                      value={watch('subdomain')}
-                      onChange={async (value) => {
-                        setValue('subdomain', value)
-                        if (value) {
-                          /* 
+                  <FormInput name="name" placeHolder="Enter name" size="sm" error={!!errors.name} />
+                  {errors.name?.message && (
+                    <FormErrorMessage size="sm">{errors.name?.message}</FormErrorMessage>
+                  )}
+                </FormControl>
+                <FormControl>
+                  <FormLabel htmlFor="subdomain" size="sm">
+                    Subdomain
+                  </FormLabel>
+                  <FormDebouncedInput
+                    name="subdomain"
+                    placeHolder="Enter subdomain"
+                    size="sm"
+                    error={
+                      !!errors.subdomain ||
+                      (checkSubdomainResult?.exists !== undefined
+                        ? checkSubdomainResult?.exists
+                        : false)
+                    }
+                    value={watch('subdomain')}
+                    onChange={async (value) => {
+                      setValue('subdomain', value)
+                      if (value) {
+                        /* 
                             We need to manually trigger onChange as the component
                             overrides the register method onChange function and
                             react-hook-form is unable to track it properly.
                           */
-                          await trigger('subdomain')
-                          checkSubdomainTrigger({ subdomain: value })
-                        }
-                      }}
-                    />
-                    {(errors.subdomain?.message ||
-                      (checkSubdomainResult?.exists !== undefined
-                        ? checkSubdomainResult?.exists
-                        : false)) && (
-                      <FormErrorMessage size="sm">
-                        {errors.subdomain?.message ?? 'Subdomain already taken'}
-                      </FormErrorMessage>
-                    )}
-                  </FormControl>
-                </div>
-              </DescriptorContent>
-            </Descriptor>
-
-            <HorizontalDivider />
-
-            {/* Operating Hours */}
-            <Descriptor>
-              <DescriptorInsights
-                title="Operating Hours"
-                description="Specify your organisations working days and
-                hours. This lets Arkora know when to send
-                notifications, stop timers and more"
-                className="max-w-md md:max-w-[325px]"
-              />
-              <DescriptorContent className="max-w-[405px]">
-                <FormControl>
-                  <FormLabel htmlFor="workDays" size="sm">
-                    Work Days
-                  </FormLabel>
-                  <WeekDaysSelect name="workDays" control={control} />
-                  {errors.workDays?.message && (
-                    <FormErrorMessage size="sm">{errors.workDays?.message}</FormErrorMessage>
+                        await trigger('subdomain')
+                        checkSubdomainTrigger({ subdomain: value })
+                      }
+                    }}
+                  />
+                  {(errors.subdomain?.message ||
+                    (checkSubdomainResult?.exists !== undefined
+                      ? checkSubdomainResult?.exists
+                      : false)) && (
+                    <FormErrorMessage size="sm">
+                      {errors.subdomain?.message ?? 'Subdomain already taken'}
+                    </FormErrorMessage>
                   )}
                 </FormControl>
-                <div className="flex justify-between gap-3">
-                  <FormControl>
-                    <FormLabel htmlFor="openingTime" size="sm">
-                      Opening Time
-                    </FormLabel>
-                    <FormTimeInput name="openingTime" size="sm" error={!!errors.openingTime} />
-                    {errors.openingTime?.message && (
-                      <FormErrorMessage size="sm">{errors.openingTime?.message}</FormErrorMessage>
-                    )}
-                  </FormControl>
+              </div>
+            </DescriptorContent>
+          </Descriptor>
 
-                  <FormControl>
-                    <FormLabel htmlFor="closngTime" size="sm">
-                      Closing Time
-                    </FormLabel>
-                    <FormTimeInput name="closingTime" size="sm" error={!!errors.closingTime} />
-                    {errors.closingTime?.message && (
-                      <FormErrorMessage size="sm">{errors.closingTime?.message}</FormErrorMessage>
-                    )}
-                  </FormControl>
-                </div>
-              </DescriptorContent>
-            </Descriptor>
+          <HorizontalDivider />
 
-            <HorizontalDivider />
+          {/* Operating Hours */}
+          <Descriptor>
+            <DescriptorInsights
+              title="Operating Hours"
+              description="Specify your organisations working days and
+                hours. This lets Arkora know when to send
+                notifications, stop timers and more"
+              className="max-w-md md:max-w-[325px]"
+            />
+            <DescriptorContent className="max-w-[405px]">
+              <FormControl>
+                <FormLabel htmlFor="workDays" size="sm">
+                  Work Days
+                </FormLabel>
+                <WeekDaysSelect name="workDays" control={control} />
+                {errors.workDays?.message && (
+                  <FormErrorMessage size="sm">{errors.workDays?.message}</FormErrorMessage>
+                )}
+              </FormControl>
+              <div className="flex justify-between gap-3">
+                <FormControl>
+                  <FormLabel htmlFor="openingTime" size="sm">
+                    Opening Time
+                  </FormLabel>
+                  <FormTimeInput name="openingTime" size="sm" error={!!errors.openingTime} />
+                  {errors.openingTime?.message && (
+                    <FormErrorMessage size="sm">{errors.openingTime?.message}</FormErrorMessage>
+                  )}
+                </FormControl>
 
-            {/* Rates and Cost */}
-            <Descriptor>
-              <DescriptorInsights
-                title="Rates and Cost"
-                description="Project budgets can be billable on an hourly
+                <FormControl>
+                  <FormLabel htmlFor="closngTime" size="sm">
+                    Closing Time
+                  </FormLabel>
+                  <FormTimeInput name="closingTime" size="sm" error={!!errors.closingTime} />
+                  {errors.closingTime?.message && (
+                    <FormErrorMessage size="sm">{errors.closingTime?.message}</FormErrorMessage>
+                  )}
+                </FormControl>
+              </div>
+            </DescriptorContent>
+          </Descriptor>
+
+          <HorizontalDivider />
+
+          {/* Rates and Cost */}
+          <Descriptor>
+            <DescriptorInsights
+              title="Rates and Cost"
+              description="Project budgets can be billable on an hourly
                 rate, you can even set fixed cost on any
                 budget instead"
-                className="max-w-md md:max-w-[325px]"
-              />
-              <DescriptorContent className="max-w-[405px]">
-                <div className="flex justify-between gap-3">
-                  <FormControl className="flex-grow">
-                    <FormLabel htmlFor="currency" size="sm">
-                      Currency
-                    </FormLabel>
-                    <FormSelect name="currency" control={control} placeHolder="Select currency">
-                      {currencyOptions?.map((option) => (
-                        <SelectOption key={option.id} id={option.id}>
-                          {option?.display}
-                        </SelectOption>
-                      ))}
-                    </FormSelect>
-                    {errors.currency?.message && (
-                      <FormErrorMessage size="sm">{errors.currency?.message}</FormErrorMessage>
-                    )}
-                  </FormControl>
+              className="max-w-md md:max-w-[325px]"
+            />
+            <DescriptorContent className="max-w-[405px]">
+              <div className="space-y-6">
+                <FormControl className="flex-grow">
+                  <FormLabel htmlFor="currency" size="sm">
+                    Currency
+                  </FormLabel>
+                  <FormSelect name="currency" control={control} placeHolder="Select currency">
+                    {currencyOptions?.map((option) => (
+                      <SelectOption key={option.id} id={option.id}>
+                        {option?.display}
+                      </SelectOption>
+                    ))}
+                  </FormSelect>
+                  {errors.currency?.message && (
+                    <FormErrorMessage size="sm">{errors.currency?.message}</FormErrorMessage>
+                  )}
+                </FormControl>
 
-                  <FormControl className="max-w-[130px] w-full">
-                    <FormLabel htmlFor="hourlyRate" size="sm">
-                      Hourly Rate
-                    </FormLabel>
-                    <FormCurrencyInput
-                      size="sm"
-                      suffix="£"
-                      name="hourlyRate"
-                      error={!!errors?.hourlyRate?.message}
-                    />
-                    {errors.hourlyRate?.message && (
-                      <FormErrorMessage size="sm">{errors.hourlyRate?.message}</FormErrorMessage>
-                    )}
-                  </FormControl>
-                </div>
-              </DescriptorContent>
-            </Descriptor>
-          </div>
+                <FormControl>
+                  <FormLabel htmlFor="hourlyRate" size="sm">
+                    Hourly Rate
+                  </FormLabel>
+                  <FormCurrencyInput
+                    size="sm"
+                    currency={watch('currency')}
+                    name="hourlyRate"
+                    error={!!errors?.hourlyRate?.message}
+                  />
+                  {errors.hourlyRate?.message && (
+                    <FormErrorMessage size="sm">{errors.hourlyRate?.message}</FormErrorMessage>
+                  )}
+                </FormControl>
+              </div>
+            </DescriptorContent>
+          </Descriptor>
 
           <div className="flex justify-between mt-12">
             <button
               type="button"
               className="outline-none text-purple-90 font-semibold text-base hover:text-purple-70"
-              onClick={() => onBack('details')}
+              onClick={() => dispatch(setStep({ step: 'details' }))}
             >
               Previous Step
             </button>

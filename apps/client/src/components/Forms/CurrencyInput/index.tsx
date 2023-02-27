@@ -9,13 +9,13 @@ interface FormCurrencyInputProps
   extends HTMLAttributes<HTMLInputElement>,
     VariantProps<typeof inputStyling> {
   name: string
-  suffix: string
+  currency?: string
   placeHolder?: string
 }
 
 export const FormCurrencyInput = ({
   name,
-  suffix,
+  currency,
   size,
   placeHolder = '00',
   error,
@@ -40,7 +40,7 @@ export const FormCurrencyInput = ({
         value={value ?? ''}
         onValueChange={(_value, _formatted, options) => handleOnChange(options?.value)}
       />
-      {suffix && (
+      {currency && (
         <span
           className={classNames(
             'absolute inset-y-0 right-4 font-medium text-gray-100 grid place-content-center',
@@ -51,7 +51,7 @@ export const FormCurrencyInput = ({
             },
           )}
         >
-          {suffix}
+          {currency}
         </span>
       )}
     </div>

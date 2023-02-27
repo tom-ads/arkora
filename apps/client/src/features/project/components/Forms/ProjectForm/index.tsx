@@ -9,8 +9,8 @@ import {
   InfoCircleIcon,
   LockIcon,
   OpenLockIcon,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import { useGetClientsQuery } from '@/features/client'

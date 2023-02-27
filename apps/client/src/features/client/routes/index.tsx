@@ -5,6 +5,7 @@ export const ClientRoutes = (): JSX.Element => {
   return (
     <Routes>
       <Route index element={<ClientsPage />} />
+      <Route path=":clientId" element={<ClientsPage />} />
     </Routes>
   )
 }

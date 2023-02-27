@@ -4,9 +4,11 @@ import {
   Table,
   TableBody,
   TableContainer,
+  TableEmpty,
   TableHead,
   TableHeading,
   TableRow,
+  UserIcon,
 } from '@/components'
 import { useGetAccountsQuery } from '@/features/account'
 import { useResendInvitationMutation } from '@/features/auth'
@@ -23,7 +25,11 @@ const membersTableSchema = z.object({
   selectedMembers: z.array(z.number()).nullable(),
 })
 
-export const TeamMembersTable = (): JSX.Element => {
+type TeamMembersTableProps = {
+  onCreate: () => void
+}
+
+export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Element => {
   const { searchFilter, roleFilter, statusFilter } = useSelector((state: RootState) => ({
     searchFilter: state.teamMemberFilters.search,
     roleFilter: state.teamMemberFilters.role,
@@ -44,35 +50,47 @@ export const TeamMembersTable = (): JSX.Element => {
   }
 
   return (
-    <TableContainer>
-      <Form<FormFields, typeof membersTableSchema>>
-        {() => (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeading className="w-[32px]" first>
-                  <FormCheckbox name="select-all" />
-                </TableHeading>
-                <TableHeading className="w-[30px]"></TableHeading>
-                <TableHeading className="w-[150px]">NAME</TableHeading>
-                <TableHeading className="w-[200px]">EMAIL</TableHeading>
-                <TableHeading className="w-[100px]">ROLE</TableHeading>
-                <TableHeading className="w-[100px]">JOINED</TableHeading>
-                <TableHeading className="w-[60px]" last></TableHeading>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {members?.map((member) => (
-                <TeamMembersTableRow
-                  key={member.id}
-                  value={member}
-                  onResend={() => handleAction(member.id)}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Form>
-    </TableContainer>
+    <>
+      {members && members?.length > 0 ? (
+        <TableContainer>
+          <Form<FormFields, typeof membersTableSchema>>
+            {() => (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeading className="w-[32px]" first>
+                      <FormCheckbox name="select-all" />
+                    </TableHeading>
+                    <TableHeading className="w-[30px]"></TableHeading>
+                    <TableHeading className="w-[150px]">NAME</TableHeading>
+                    <TableHeading className="w-[200px]">EMAIL</TableHeading>
+                    <TableHeading className="w-[100px]">ROLE</TableHeading>
+                    <TableHeading className="w-[100px]">JOINED</TableHeading>
+                    <TableHeading className="w-[60px]" last></TableHeading>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {members?.map((member) => (
+                    <TeamMembersTableRow
+                      key={member.id}
+                      value={member}
+                      onResend={() => handleAction(member.id)}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </Form>
+        </TableContainer>
+      ) : (
+        <TableEmpty
+          icon={<UserIcon />}
+          title="Team"
+          btnText="Invite Members"
+          btnOnClick={onCreate}
+          description="Invite team members to assign them to client projects and monitor their time and cost"
+        />
+      )}
+    </>
   )
 }

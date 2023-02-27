@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const hourlyRateSchema = z
-  .number({ required_error: 'Rate is required' })
+  .number({ required_error: 'Rate is required', invalid_type_error: 'Rate is required' })
   .superRefine((hourlyRate, ctx) => {
     const issues = [
       { test: isNaN(hourlyRate), errorMessage: 'Valid rate required' },

@@ -7,8 +7,8 @@ import {
   Form,
   Button,
   InlineLink,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { setAuth } from '@/stores/slices/auth'
 import { setOrganisation } from '@/stores/slices/organisation'

@@ -12,8 +12,8 @@ import {
   LockIcon,
   OpenLockIcon,
   Spinner,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import { ModalFooter } from '@/components/Modal'
 import { ConfirmationModal } from '@/components/Modals'

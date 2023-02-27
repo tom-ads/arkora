@@ -26,7 +26,7 @@ export const MembersPage = (): JSX.Element => {
       <PageContent className="space-y-5">
         <MemberFilters />
 
-        <TeamMembersTable />
+        <TeamMembersTable onCreate={() => setOpenInviteMembersModal(true)} />
       </PageContent>
 
       <InviteMembersModal
