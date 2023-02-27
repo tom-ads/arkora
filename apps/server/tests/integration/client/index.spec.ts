@@ -1,22 +1,23 @@
 import { test } from '@japa/runner'
-import UserRole from 'App/Enum/UserRole'
-import { OrganisationFactory, UserFactory } from 'Database/factories'
+import User from 'App/Models/User'
+import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factories'
 
-/* 
-  Organisation manager can view all clients
-  organisation org_admin can view all clients
-  organisation owner can view all clients
-  organisation member cannot view all clients 
-*/
-test.group('Clients: All Clients', () => {
-  test('organisation manager can index clients', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
+test.group('Client : Index Clients', ({ each }) => {
+  let authUser: User
+
+  each.setup(async () => {
+    authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
+      return orgBuilder.with('clients', 1, (clientBuilder) => {
         return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
       })
     })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.MANAGER }))
+      .with('role')
       .create()
+  })
+
+  test('organisation manager can index clients', async ({ client, route }) => {
+    const managerRole = await RoleFactory.apply('manager').create()
+    await authUser.related('role').associate(managerRole)
 
     const response = await client
       .get(route('ClientController.index'))
@@ -25,24 +26,17 @@ test.group('Clients: All Clients', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      clients: [
-        {
-          id: 1,
-          name: 'Bobs Burger',
-        },
-      ],
-    })
+    response.assertBodyContains([
+      {
+        id: 1,
+        name: 'Bobs Burger',
+      },
+    ])
   })
 
   test('organisation org_admin can index clients', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.ORG_ADMIN }))
-      .create()
+    const orgAdminRole = await RoleFactory.apply('orgAdmin').create()
+    await authUser.related('role').associate(orgAdminRole)
 
     const response = await client
       .get(route('ClientController.index'))
@@ -51,25 +45,15 @@ test.group('Clients: All Clients', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      clients: [
-        {
-          id: 1,
-          name: 'Bobs Burger',
-        },
-      ],
-    })
+    response.assertBodyContains([
+      {
+        id: 1,
+        name: 'Bobs Burger',
+      },
+    ])
   })
 
   test('organisation owner can index clients', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.OWNER }))
-      .create()
-
     const response = await client
       .get(route('ClientController.index'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
@@ -77,24 +61,17 @@ test.group('Clients: All Clients', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      clients: [
-        {
-          id: 1,
-          name: 'Bobs Burger',
-        },
-      ],
-    })
+    response.assertBodyContains([
+      {
+        id: 1,
+        name: 'Bobs Burger',
+      },
+    ])
   })
 
   test('organisation member cannot index clients', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.MEMBER }))
-      .create()
+    const memberRole = await RoleFactory.apply('member').create()
+    await authUser.related('role').associate(memberRole)
 
     const response = await client
       .get(route('ClientController.index'))
@@ -106,15 +83,6 @@ test.group('Clients: All Clients', () => {
   })
 
   test('unauthenticated user cannot index clients', async ({ client, route }) => {
-    await OrganisationFactory.merge({ subdomain: 'test-org' })
-      .with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({
-          organisationId: clientBuilder.parent.id,
-          name: 'Bob Burgers',
-        })
-      })
-      .create()
-
     const response = await client
       .get(route('ClientController.index'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
@@ -124,14 +92,6 @@ test.group('Clients: All Clients', () => {
   })
 
   test('diff organisation only receives related clients', async ({ client, route, assert }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
-      })
-    })
-      .with('role')
-      .create()
-
     const diffUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'diff-org' }).with('clients', 1, (clientBuilder) => {
         return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
@@ -155,28 +115,18 @@ test.group('Clients: All Clients', () => {
     )
 
     response.assertStatus(200)
-    response.assertBody({
-      clients: [
-        {
-          id: 2,
-          name: 'Bobs Burger',
-        },
-      ],
-    })
+    response.assertBodyContains([
+      {
+        id: 2,
+        name: 'Bobs Burger',
+      },
+    ])
   })
 
   test('diff organisation user, cannot view clients for test organisation', async ({
     client,
     route,
   }) => {
-    await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })
-      })
-    })
-      .with('role')
-      .create()
-
     const diffUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'diff-org' }).with('clients', 1, (clientBuilder) => {
         return clientBuilder.merge({ organisationId: clientBuilder.parent.id, name: 'Bobs Burger' })

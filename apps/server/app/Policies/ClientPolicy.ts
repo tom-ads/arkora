@@ -4,11 +4,12 @@ import Client from 'App/Models/Client'
 import User from 'App/Models/User'
 
 export default class ClientPolicy extends BasePolicy {
-  /* 
- 	  Check auth user can index organisation client
-  */
-  public async index(user: User) {
-    if (user.role.name === UserRole.MEMBER) {
+  public async index(authUser: User) {
+    if (!authUser || !authUser?.role?.name) {
+      return false
+    }
+
+    if (authUser.role.name === UserRole.MEMBER) {
       return false
     }
 
@@ -16,6 +17,10 @@ export default class ClientPolicy extends BasePolicy {
   }
 
   public async create(authUser: User) {
+    if (!authUser || !authUser?.role?.name) {
+      return false
+    }
+
     if (authUser?.role?.name === UserRole.MEMBER || authUser?.role?.name === UserRole.MANAGER) {
       return false
     }
@@ -24,6 +29,10 @@ export default class ClientPolicy extends BasePolicy {
   }
 
   public async view(authUser: User, client: Client) {
+    if (!authUser || !authUser?.role?.name || !client) {
+      return false
+    }
+
     if (authUser?.organisationId !== client?.organisationId) {
       return false
     }
@@ -36,6 +45,10 @@ export default class ClientPolicy extends BasePolicy {
   }
 
   public async update(authUser: User, client: Client) {
+    if (!authUser || !authUser?.role?.name || !client) {
+      return false
+    }
+
     if (authUser.organisationId !== client.organisationId) {
       return false
     }
@@ -48,6 +61,10 @@ export default class ClientPolicy extends BasePolicy {
   }
 
   public async delete(authUser: User, client: Client) {
+    if (!authUser || !authUser?.role?.name || !client) {
+      return false
+    }
+
     if (authUser.organisationId !== client.organisationId) {
       return false
     }
