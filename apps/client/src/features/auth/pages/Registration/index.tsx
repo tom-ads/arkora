@@ -1,50 +1,63 @@
 import { DetailsView, OrganisationsView, TeamView } from '../../components/Registration'
-import { RegistrationSteps } from '../../types'
-import { useDispatch, useSelector } from 'react-redux'
-import { setStep } from '@/stores/slices/registration'
+import { useSelector } from 'react-redux'
 import { RootState } from '@/stores/store'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import { Step, StepIndicator } from '@/components'
+import { HorizontalDivider, Step, Stepper } from '@/components'
+import { useMemo } from 'react'
 
-// const views = {
-//   details: {
-//     title: 'Your details',
-//     description: 'Let’s get started! We need to collect some details and setup your account',
-//     view: (handleStep: () => void) => <DetailsView onSuccess={handleStep} />,
-//   },
-//   organisation: {
-//     title: 'Create organisation',
-//     description:
-//       'Let’s setup your organisation. It’ll be home to everything your team does on Arkora',
-//     view: (handleStep: () => void) => <OrganisationsView onBack={} onSuccess={handleStep} />,
-//   },
-// }
+const registrationViews = {
+  details: {
+    id: 0,
+    title: 'Your details',
+    description: 'Let’s get started! We need to collect some details and setup your account',
+    view: <DetailsView />,
+  },
+  organisation: {
+    id: 1,
+    title: 'Create organisation',
+    description:
+      'Let’s setup your organisation. It’ll be home to everything your team does on Arkora',
+    view: <OrganisationsView />,
+  },
+  team: {
+    id: 2,
+    title: 'Invite the team',
+    description: 'Almost there! Define your organisation teams and invite your team members',
+    view: <TeamView />,
+  },
+}
 
 export const RegistrationPage = (): JSX.Element => {
   useDocumentTitle('Register')
 
-  const dispatch = useDispatch()
+  const step = useSelector((state: RootState) => state.registration.misc.step)
 
-  const activeStep = useSelector((state: RootState) => state.registration.misc?.step)
-
-  const handleStep = (step: RegistrationSteps) => {
-    dispatch(setStep({ step }))
-  }
+  const activeView = useMemo(() => {
+    const id = step === 'details' ? 0 : step === 'organisation' ? 1 : 2
+    return Object.values(registrationViews)?.[id]
+  }, [step])
 
   return (
     <div className="flex flex-col py-11">
-      <StepIndicator activeStep={activeStep} defaultStep="details">
-        <Step id="details" text="Your details" />
-        <Step id="organisation" text="Create organisation" />
-        <Step id="team" text="Invite the team" />
-      </StepIndicator>
+      <Stepper activeStep={activeView.id} className="px-3">
+        {Object.values(registrationViews).map((step, idx) => (
+          <Step key={step.title} id={idx}>
+            {step.title}
+          </Step>
+        ))}
+      </Stepper>
 
       <div className="my-8">
-        {activeStep === 'details' && <DetailsView onSuccess={handleStep} />}
-        {activeStep === 'organisation' && (
-          <OrganisationsView onBack={handleStep} onSuccess={handleStep} />
-        )}
-        {activeStep === 'team' && <TeamView onBack={handleStep} />}
+        <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
+          <div className="space-y-2 pb-5">
+            <h1 className="font-semibold text-3xl text-gray-100">{activeView.title}</h1>
+            <p className="text-base text-gray-80">{activeView.description}</p>
+          </div>
+
+          <HorizontalDivider />
+
+          {activeView.view}
+        </div>
       </div>
     </div>
   )

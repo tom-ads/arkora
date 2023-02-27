@@ -7,7 +7,7 @@ type FormErrorMessageProps = {
   children: ReactNode
 }
 
-const FormErrorMessage = ({
+export const FormErrorMessage = ({
   size = 'md',
   className,
   children,
@@ -24,5 +24,3 @@ const FormErrorMessage = ({
     </p>
   )
 }
-
-export default FormErrorMessage

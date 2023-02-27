@@ -11,16 +11,16 @@ import { SelectOption } from '@/components/Forms/Select/option'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import { Modal, ModalFooter } from '@/components/Modal'
 import UserRole from '@/enums/UserRole'
+import { InviteFormFields, SelectedMember } from '../../../types'
 import { parseCSV } from '@/helpers/file'
 import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
 import { unionBy } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { UseFormReturn } from 'react-hook-form'
-import { InviteMemberFormFields, SelectedMember } from '../../Forms'
 import { SelectedFile } from '../../SelectedFile'
 
-type ImportMemberModalProps = ModalBaseProps & UseFormReturn<InviteMemberFormFields>
+type ImportMemberModalProps = ModalBaseProps & UseFormReturn<InviteFormFields>
 
 export const ImportMemberModal = ({
   isOpen,

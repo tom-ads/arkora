@@ -8,8 +8,8 @@ import {
   Button,
   FormatDateTime,
   FormSelect,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import { Modal, ModalFooter } from '@/components/Modal'
 import { ConfirmationModal } from '@/components/Modals'

@@ -5,34 +5,21 @@ import {
   FormInput,
   HorizontalDivider,
   MouseIcon,
-  UploadIcon,
+  FormErrorMessage,
 } from '@/components'
-import FormDroppable from '@/components/Forms/Droppable'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { ModalFooter } from '@/components/Modal'
 import UserRole from '@/enums/UserRole'
 import { useInviteMembersMutation } from '@/features/auth'
+import { InviteFormFields } from '../../../types'
 import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
 import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
+import { DroppableInvite } from '../../DroppableInvite'
 import { InviteMemberList } from '../../Lists/InviteMembers'
 import { ImportMemberModal } from '../../Modals'
 
-export type SelectedMember = {
-  email: string
-  role: Omit<UserRole, 'Owner'>
-}
-
-export type InviteMemberFormFields = {
-  email: string | null
-  selectedFile: File | null
-  containsHeaders: boolean
-  selectedHeader: string | null
-  members: SelectedMember[]
-}
-
-const inviteMembersSchema = z.object({
+export const inviteMembersSchema = z.object({
   email: z.string().nullable(),
   members: z.array(
     z.object({
@@ -49,7 +36,7 @@ export const InviteMemberFields = ({
   setError,
   watch,
   formState: { errors },
-}: UseFormReturn<InviteMemberFormFields>): JSX.Element => {
+}: UseFormReturn<InviteFormFields>): JSX.Element => {
   const handleAddInvite = () => {
     const email = getValues('email')?.toLowerCase()
     const emailValidation = z.string().email()
@@ -88,28 +75,10 @@ export const InviteMemberFields = ({
 
   return (
     <>
-      <FormDroppable
-        containerStyling="h-36"
+      <DroppableInvite
+        className="h-36"
         onChange={(file: File[]) => setValue('selectedFile', file?.[0])}
-        acceptedMimes={{
-          'text/csv': ['.csv'],
-          'application/vnd.ms-excel': ['.xls'],
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-        }}
-      >
-        <div className="flex items-center justify-center gap-1 mb-1 text-purple-90">
-          <UploadIcon className="w-7 h-7 flex-shrink-0" />
-          <p className="text-gray-100 text-md">
-            <span className="font-semibold">Click</span> or{' '}
-            <span className="font-semibold">Drag</span> To Upload
-          </p>
-        </div>
-
-        <p className="text-gray-80 text-sm text-center">
-          <span className="font-medium">XLXS</span> or <span className="font-medium">CSV</span>{' '}
-          Format - Max Size (2MB)
-        </p>
-      </FormDroppable>
+      />
 
       <div className="py-4 flex items-center gap-2">
         <HorizontalDivider />
@@ -127,7 +96,7 @@ export const InviteMemberFields = ({
           />
           <Button size="xs" onClick={handleAddInvite} disabled={!watch('email')}>
             Invite Member
-          </Button>{' '}
+          </Button>
         </div>
         {!!errors.email?.message && (
           <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
@@ -160,7 +129,7 @@ export const InviteMembersForm = ({ onClose }: InviteMembersFormProps): JSX.Elem
 
   const [triggerInvite] = useInviteMembersMutation()
 
-  const handleSubmit = async (data: InviteMemberFormFields) => {
+  const handleSubmit = async (data: InviteFormFields) => {
     await triggerInvite({ members: data.members })
       .unwrap()
       .then(() => {
@@ -176,7 +145,7 @@ export const InviteMembersForm = ({ onClose }: InviteMembersFormProps): JSX.Elem
   }
 
   return (
-    <Form<InviteMemberFormFields, typeof inviteMembersSchema>
+    <Form<InviteFormFields, typeof inviteMembersSchema>
       className="flex-grow"
       onSubmit={handleSubmit}
       validationSchema={inviteMembersSchema}

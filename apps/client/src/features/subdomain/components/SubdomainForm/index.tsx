@@ -1,5 +1,4 @@
-import { Button, Form, FormInput } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
+import { Button, Form, FormInput, FormErrorMessage } from '@/components'
 import { setOrganisation } from '@/stores/slices/organisation'
 import { useDispatch } from 'react-redux'
 import * as z from 'zod'

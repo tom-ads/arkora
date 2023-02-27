@@ -5,8 +5,8 @@ import {
   FormLabel,
   FormNumberInput,
   FormSelect,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import BillableType from '@/enums/BillableType'
 import { billableTypeOption } from '../..'
@@ -48,7 +48,7 @@ export const VariableBudgetSection = ({
           {watch('billableType') === BillableType.TOTAL_COST ? (
             <FormCurrencyInput
               name="budget"
-              suffix="£"
+              currency="£"
               placeHolder="Enter total cost"
               error={!!errors.budget?.message}
             />
@@ -71,7 +71,7 @@ export const VariableBudgetSection = ({
         <FormDescription>Specify the rate to bill the client per hour</FormDescription>
         <FormCurrencyInput
           name="hourlyRate"
-          suffix="£"
+          currency="£"
           placeHolder="Enter rate"
           error={!!errors.hourlyRate?.message}
         />

@@ -1,9 +1,9 @@
-import UserRole from '@/enums/UserRole'
+import { SelectedRole } from './../../../../types'
 
 type InviteMembersRequest = {
   members: {
     email: string
-    role: Omit<UserRole, 'Owner'>
+    role: SelectedRole
   }[]
 }
 

@@ -1,8 +1,8 @@
 import { Avatar, BinIcon, Button, FormControl, FormSelect, List, UserIcon } from '@/components'
 import { SelectOption } from '@/components/Forms/Select/option'
 import UserRole from '@/enums/UserRole'
+import { InviteFormFields } from '../../../types'
 import { useMemo } from 'react'
-import { InviteMemberFormFields } from '../../Forms'
 
 export const InviteMemberList = ({ watch, control }: { watch: any; control: any }): JSX.Element => {
   const roleOptions = useMemo(
@@ -25,7 +25,7 @@ export const InviteMemberList = ({ watch, control }: { watch: any; control: any 
   }
 
   return (
-    <List<InviteMemberFormFields, 'members'>
+    <List<InviteFormFields, 'members'>
       name="members"
       control={control}
       listClassName="h-[250px] overflow-y-auto scrollbar-hide scroll-smooth snap-y"

@@ -12,8 +12,8 @@ import {
   HorizontalDivider,
   PasswordStrength,
   ReadOnly,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { useSearchParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { useVerifyInvitationMutation } from '../../api'
