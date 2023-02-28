@@ -81,7 +81,9 @@ export default class ProjectController {
       .query()
       .preload('budgets')
       .preload('client')
-      .preload('members')
+      .preload('members', (query) => {
+        query.whereNotNull('verified_at')
+      })
       .orderBy('name', 'asc')
 
     return projects?.map((project) => project.serialize())
