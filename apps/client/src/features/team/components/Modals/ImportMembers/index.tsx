@@ -19,6 +19,7 @@ import { unionBy } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { SelectedFile } from '../../SelectedFile'
+import { SelectedRole } from '@/features/auth'
 
 type ImportMemberModalProps = ModalBaseProps & UseFormReturn<InviteFormFields>
 
@@ -46,7 +47,7 @@ export const ImportMemberModal = ({
       .map((row) => row[headerValue as keyof typeof row])
       .map((cell: string) => ({
         email: cell,
-        role: UserRole.MEMBER,
+        role: UserRole.MEMBER as SelectedRole,
       }))
       .filter((v) => v.email)
 

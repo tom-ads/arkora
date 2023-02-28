@@ -15,7 +15,6 @@ import {
   computed,
   hasMany,
   HasMany,
-  beforeDelete,
 } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
 import Organisation from './Organisation'
