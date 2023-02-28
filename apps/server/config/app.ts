@@ -33,7 +33,7 @@ export const appHostname: string = Env.get('APP_HOSTNAME')
 
 export const staticAppHostname: string = Env.get('STATIC_APP_HOSTNAME')
 
-export const maxHourlyRate = 20000
+export const maxHourlyRate = 2000000 // £20,000
 
 /*
 |--------------------------------------------------------------------------

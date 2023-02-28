@@ -35,7 +35,7 @@ const listBoxButton = cva(
         true: 'border-purple-90 shadow-purple-70 shadow-sm',
         false: 'focus:shadow-purple-70 focus:border-purple-90 border-gray-40',
       },
-      disabled: { true: '' },
+      disabled: { true: '', false: '' },
     },
     compoundVariants: [
       {
@@ -50,6 +50,9 @@ const listBoxButton = cva(
     ],
     defaultVariants: {
       size: 'sm',
+      disabled: false,
+      focused: false,
+      error: false,
     },
   },
 )
@@ -98,7 +101,7 @@ export const FormGroupSelect = ({
   return (
     <div className="relative w-full">
       {/* Listbox will not change last selected if passed undefined, so we need to pass null instead */}
-      <Listbox disabled={disabled} value={field.value?.id ?? null} onChange={handleChange}>
+      <Listbox value={field.value?.id ?? null} onChange={handleChange} disabled={disabled}>
         {({ open }) => (
           <>
             <Listbox.Button className={listBoxButton({ size, error, focused, disabled })}>

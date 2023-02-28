@@ -1,57 +1,42 @@
 import {
-  Avatar,
   Form,
-  FormCheckbox,
   FormControl,
   FormInput,
   FormLabel,
-  FormMultiSelect,
   FormSelect,
-  UsersIcon,
+  FormStyledRadio,
+  HorizontalDivider,
+  InfoCircleIcon,
+  LockIcon,
+  OpenLockIcon,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
-import UserRole from '@/enums/UserRole'
-import { useGetAccountsQuery } from '@/features/account'
+import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import { useGetClientsQuery } from '@/features/client'
-import { User } from '@/types'
-import { Transition } from '@headlessui/react'
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
 import { ReactNode, useMemo } from 'react'
 import { z } from 'zod'
 
 export type ProjectFormFields = {
-  name: string
+  name: string | undefined
   client: number | undefined
   private: boolean
   hideCost: boolean
-  team: Array<{ id: number; value: string }>
 }
 
 export const projectSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
   private: z.boolean(),
   hideCost: z.boolean(),
-  client: z.string().transform((value) => (value ? Number(value) : undefined)),
-  team: z
-    .array(
-      z.object({
-        id: z.number(),
-        value: z.string(),
-      }),
-    )
-    .optional(),
+  client: z.number(),
 })
 
 type ProjectFormProps = {
   isOpen: boolean
   children: ReactNode
-  defaultValues?: Partial<
-    Omit<ProjectFormFields, 'team'> & {
-      team: User[]
-    }
-  >
+  defaultValues?: ProjectFormFields
   error?: FetchBaseQueryError | SerializedError
   onSubmit: (data: ProjectFormFields) => void
 }
@@ -63,52 +48,18 @@ export const ProjectForm = ({
   defaultValues,
   children,
 }: ProjectFormProps): JSX.Element => {
-  const { data: orgClients } = useGetClientsQuery(undefined, {
+  const { data: clients } = useGetClientsQuery(undefined, {
     skip: !isOpen,
   })
 
-  const { data: orgAccounts } = useGetAccountsQuery(
-    { role: UserRole.MEMBER },
-    {
-      skip: !isOpen,
-    },
-  )
-
   const clientOptions = useMemo(
     () =>
-      orgClients?.clients.map((client) => ({
+      clients?.map((client) => ({
         id: client.id,
         display: client.name,
       })) ?? [],
-    [orgClients?.clients],
+    [clients],
   )
-
-  const teamOptions = useMemo(
-    () =>
-      orgAccounts?.accounts.map((account) => {
-        const fullName = `${account.firstname} ${account.lastname}`
-        return {
-          id: account.id,
-          value: fullName,
-          display: fullName,
-          info: {
-            email: account.email,
-          },
-        }
-      }) ?? [],
-    [orgAccounts?.accounts],
-  )
-
-  const defaultState = useMemo(() => {
-    const teamMembers = teamOptions?.filter((member) =>
-      defaultValues?.team?.some((selected) => selected?.id === member?.id),
-    )
-
-    return {
-      ...defaultValues,
-      team: teamMembers,
-    }
-  }, [defaultValues, teamOptions, clientOptions])
 
   return (
     <Form<ProjectFormFields, typeof projectSchema>
@@ -117,11 +68,10 @@ export const ProjectForm = ({
       validationSchema={projectSchema}
       queryError={error}
       defaultValues={{
-        name: defaultState?.name ?? undefined,
-        client: defaultState?.client ?? undefined,
-        private: defaultState?.private ?? false,
-        hideCost: defaultState?.hideCost ?? false,
-        team: defaultState?.team ?? [],
+        name: defaultValues?.name ?? undefined,
+        client: defaultValues?.client ?? undefined,
+        private: defaultValues?.private ?? false,
+        hideCost: defaultValues?.hideCost ?? true,
       }}
     >
       {({ control, watch, formState: { errors } }) => (
@@ -142,7 +92,9 @@ export const ProjectForm = ({
               fullWidth
             >
               {clientOptions?.map((option) => (
-                <SelectOption key={option.id}>{option?.display}</SelectOption>
+                <SelectOption key={option.id} id={option.id}>
+                  {option?.display}
+                </SelectOption>
               ))}
             </FormSelect>
             {errors?.client?.message && (
@@ -150,57 +102,57 @@ export const ProjectForm = ({
             )}
           </FormControl>
 
-          <div className="flex flex-grow-0 max-w-[250px]">
-            <FormControl className="!flex-row gap-x-3">
-              <FormCheckbox name="private" error={!!errors?.private?.message} />
-              <FormLabel htmlFor="private">Private?</FormLabel>
+          <div className="space-y-3">
+            <FormControl>
+              <FormLabel htmlFor="private">Visibility</FormLabel>
+              <FormStyledRadio className="flex-col sm:flex-row" name="private">
+                <FormStyledRadioOption
+                  title="Public"
+                  icon={<OpenLockIcon />}
+                  description="All organisation team members can view this project"
+                  value={false}
+                />
+                <FormStyledRadioOption
+                  title="Private"
+                  icon={<LockIcon />}
+                  description="Only assigned team members can view this project"
+                  value={true}
+                />
+              </FormStyledRadio>
             </FormControl>
 
-            <FormControl className="!flex-row gap-x-3">
-              <FormCheckbox name="hideCost" error={!!errors?.hideCost?.message} />
-              <FormLabel htmlFor="hideCost">Hide Cost?</FormLabel>
-            </FormControl>
+            {!!watch('private') && (
+              <div className="flex items-center gap-2">
+                <InfoCircleIcon className="w-5 h-5" />
+                <p className="text-gray-80 text-sm">
+                  Members can be assigned after project has been created
+                </p>
+              </div>
+            )}
           </div>
 
-          <Transition
-            show={watch('private')}
-            enter="transition duration-300 ease-out"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition duration-200 ease-in"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <FormControl>
-              <FormLabel htmlFor="team">Team</FormLabel>
-              <FormMultiSelect
-                name="team"
-                control={control}
-                placeHolder="Select members"
-                error={!!errors?.team?.message}
-                fullWidth
-              >
-                {teamOptions?.map((option) => (
-                  <SelectOption
-                    id={option.id}
-                    key={`team-select-${option.id}`}
-                    value={option.value}
-                  >
-                    <div className="flex gap-x-4 items-center">
-                      <Avatar className="w-[34px] h-[34px]">
-                        <UsersIcon className="w-5 h-5" />
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold ">{option.display}</p>
-                        <p className="text-xs max-w-[350px] truncate">{option.info.email}</p>
-                      </div>
-                    </div>
-                  </SelectOption>
-                ))}
-              </FormMultiSelect>
-              {errors?.team?.message && <FormErrorMessage>{errors.team.message}</FormErrorMessage>}
-            </FormControl>
-          </Transition>
+          <HorizontalDivider
+            contentLeft={
+              <p className="whitespace-nowrap font-medium text-base text-gray-100">Project Cost</p>
+            }
+          />
+
+          <FormControl>
+            <FormStyledRadio className="flex-col sm:flex-row" name="hideCost">
+              <FormStyledRadioOption
+                title="Show"
+                icon={<OpenLockIcon />}
+                description="Assigned project members can view project and budget costs"
+                value={false}
+              />
+              <FormStyledRadioOption
+                title="Hide"
+                icon={<LockIcon />}
+                description="Only managers and admins can view project and budget costs"
+                value={true}
+              />
+            </FormStyledRadio>
+          </FormControl>
 
           {children}
         </>

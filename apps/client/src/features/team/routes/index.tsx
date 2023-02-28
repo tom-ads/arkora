@@ -22,7 +22,11 @@ export const TeamRoutes = (): JSX.Element => {
   return (
     <Routes>
       <Route index element={<TeamRedirect />} />
-      <Route path="members" element={<MembersPage />} />
+      <Route path="members">
+        <Route path="" element={<MembersPage />} />
+        <Route path=":memberId" element={<MembersPage />} />
+      </Route>
+
       <Route path="timers" element={<TimersPage />} />
     </Routes>
   )

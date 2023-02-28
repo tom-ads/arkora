@@ -5,18 +5,16 @@ import {
   DescriptorInsights,
   Form,
   FormInput,
-  HorizontalDivider,
+  FormErrorMessage,
 } from '@/components'
 import { FormControl } from '@/components/Forms/Control'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormLabel } from '@/components/Forms/Label'
 import { FormPasswordInput } from '@/components/Forms/PasswordInput'
 import { PasswordStrength } from '@/components/Indicators/PasswordStrength'
 import { useVerifyDetailsMutation } from '../../../api'
-import { setDetails } from '@/stores/slices/registration'
+import { setDetails, setStep } from '@/stores/slices/registration'
 import { useDispatch, useSelector } from 'react-redux'
 import * as z from 'zod'
-import { RegistrationSteps } from '../../../types'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
 
@@ -50,11 +48,7 @@ type FormFields = {
   passwordConfirmation: string
 }
 
-type DetailsViewProps = {
-  onSuccess: (nextStep: RegistrationSteps) => void
-}
-
-export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
+export const DetailsView = (): JSX.Element => {
   const dispatch = useDispatch()
 
   const details = useSelector((state: RootState) => state.registration.details)
@@ -69,7 +63,7 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
       email: data.email,
       password: data.password,
       password_confirmation: data.passwordConfirmation,
-    }).then(() => onSuccess('organisation'))
+    }).then(() => dispatch(setStep({ step: 'organisation' })))
   }
 
   const handleFormChange = (data: FormFields) => {
@@ -94,112 +88,100 @@ export const DetailsView = ({ onSuccess }: DetailsViewProps): JSX.Element => {
     >
       {({ watch, formState: { errors } }) => (
         <>
-          <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20">
-            <div className="space-y-2 pb-6">
-              <h1 className="font-semibold text-3xl text-gray-100">Your details</h1>
-              <p className="text-base text-gray-80">
-                Let&apos;s get started! We need to collect some details to setup your account
-              </p>
-            </div>
+          {/* Profile Image */}
+          {/* <Descriptor>
+            <DescriptorInsights
+              title="Profile Image"
+              description="Displayed on your profile for others to see"
+            />
+            <DescriptorContent className="flex justify-between gap-3 max-w-[402px]">
+              <div></div>
+            </DescriptorContent>
+          </Descriptor>
 
-            <HorizontalDivider />
+          <HorizontalDivider /> */}
 
-            {/* Profile Image */}
-            <Descriptor>
-              <DescriptorInsights
-                title="Profile Image"
-                description="Displayed on your profile for others to see"
-              />
-              <DescriptorContent className="flex justify-between gap-3 max-w-[402px]">
-                <div></div>
-              </DescriptorContent>
-            </Descriptor>
-
-            <HorizontalDivider />
-
-            {/* Your Details */}
-            <Descriptor>
-              <DescriptorInsights
-                title="Your Details"
-                description="Basic details about you that are displayed across
-                    your account and to other team members."
-              />
-              <DescriptorContent className="max-w-[402px]">
-                <div className="flex justify-between gap-3">
-                  <FormControl>
-                    <FormLabel htmlFor="firstname" size="sm">
-                      Firstname
-                    </FormLabel>
-                    <FormInput
-                      name="firstname"
-                      placeHolder="Enter firstname"
-                      size="sm"
-                      error={!!errors.firstname}
-                    />
-                    {errors.firstname?.message && (
-                      <FormErrorMessage size="sm">{errors.firstname?.message}</FormErrorMessage>
-                    )}
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel htmlFor="lastname" size="sm">
-                      Lastname
-                    </FormLabel>
-                    <FormInput
-                      name="lastname"
-                      placeHolder="Enter lastname"
-                      size="sm"
-                      error={!!errors.lastname}
-                    />
-                    {errors.lastname?.message && (
-                      <FormErrorMessage size="sm">{errors.lastname?.message}</FormErrorMessage>
-                    )}
-                  </FormControl>
-                </div>
-
+          {/* Your Details */}
+          <Descriptor>
+            <DescriptorInsights
+              title="Your Details"
+              description="Basic details about you that are displayed across your account and to other team members."
+            />
+            <DescriptorContent className="max-w-[402px]">
+              <div className="flex justify-between gap-3">
                 <FormControl>
-                  <FormLabel htmlFor="email" size="sm">
-                    Email
+                  <FormLabel htmlFor="firstname" size="sm">
+                    Firstname
                   </FormLabel>
                   <FormInput
-                    name="email"
-                    placeHolder="Enter email address"
+                    name="firstname"
+                    placeHolder="Enter firstname"
                     size="sm"
-                    error={!!errors.email}
+                    error={!!errors.firstname}
                   />
-                  {errors.email?.message && (
-                    <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
+                  {errors.firstname?.message && (
+                    <FormErrorMessage size="sm">{errors.firstname?.message}</FormErrorMessage>
                   )}
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel htmlFor="password" size="sm">
-                    Password
+                  <FormLabel htmlFor="lastname" size="sm">
+                    Lastname
                   </FormLabel>
-                  <FormPasswordInput
-                    name="password"
-                    placeHolder="Enter password"
-                    error={!!errors?.password}
+                  <FormInput
+                    name="lastname"
+                    placeHolder="Enter lastname"
+                    size="sm"
+                    error={!!errors.lastname}
                   />
-                  <PasswordStrength password={watch('password')} isError={!!errors?.password} />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel htmlFor="passwordConfirmation" size="sm">
-                    Confirm Password
-                  </FormLabel>
-                  <FormPasswordInput
-                    name="passwordConfirmation"
-                    placeHolder="Enter confirmation"
-                    error={!!errors.passwordConfirmation?.message}
-                  />
-                  {errors.passwordConfirmation?.message && (
-                    <FormErrorMessage>{errors.passwordConfirmation?.message}</FormErrorMessage>
+                  {errors.lastname?.message && (
+                    <FormErrorMessage size="sm">{errors.lastname?.message}</FormErrorMessage>
                   )}
                 </FormControl>
-              </DescriptorContent>
-            </Descriptor>
-          </div>
+              </div>
+
+              <FormControl>
+                <FormLabel htmlFor="email" size="sm">
+                  Email
+                </FormLabel>
+                <FormInput
+                  name="email"
+                  placeHolder="Enter email address"
+                  size="sm"
+                  error={!!errors.email}
+                />
+                {errors.email?.message && (
+                  <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel htmlFor="password" size="sm">
+                  Password
+                </FormLabel>
+                <FormPasswordInput
+                  name="password"
+                  placeHolder="Enter password"
+                  error={!!errors?.password}
+                />
+                <PasswordStrength password={watch('password')} isError={!!errors?.password} />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel htmlFor="passwordConfirmation" size="sm">
+                  Confirm Password
+                </FormLabel>
+                <FormPasswordInput
+                  name="passwordConfirmation"
+                  placeHolder="Enter confirmation"
+                  error={!!errors.passwordConfirmation?.message}
+                />
+                {errors.passwordConfirmation?.message && (
+                  <FormErrorMessage>{errors.passwordConfirmation?.message}</FormErrorMessage>
+                )}
+              </FormControl>
+            </DescriptorContent>
+          </Descriptor>
 
           <div className="flex justify-end mt-12">
             <Button size="sm" className="max-w-[220px] w-full" type="submit" loading={isVerifying}>

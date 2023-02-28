@@ -25,7 +25,7 @@ export default class Client extends BaseModel {
   @column()
   public name: string
 
-  @column.dateTime({ autoCreate: true, serializeAs: null })
+  @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
@@ -41,4 +41,15 @@ export default class Client extends BaseModel {
 
   @hasManyThrough([() => Budget, () => Project])
   public budgets: HasManyThrough<typeof Budget>
+
+  // Static Methods
+
+  public static async isNameTaken(organisationId: number, name: string) {
+    const result = await Client.query()
+      .where('organisation_id', organisationId)
+      .where('name', name)
+      .first()
+
+    return !!result
+  }
 }

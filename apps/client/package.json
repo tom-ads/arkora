@@ -28,12 +28,14 @@
     "react-color": "^2.19.3",
     "react-currency-input-field": "^3.6.9",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-headless-notifier": "^0.1.6",
     "react-hook-form": "^7.37.0",
     "react-redux": "^8.0.4",
     "react-router-dom": "6.4.2",
     "react-tooltip": "^5.7.4",
     "tinycolor2": "^1.5.2",
+    "xlsx": "^0.18.5",
     "zod": "^3.20.2"
   },
   "devDependencies": {
@@ -44,6 +46,8 @@
     "@types/react": "^18.0.17",
     "@types/react-color": "^3.0.6",
     "@types/react-dom": "^18.0.6",
+    "@types/react-dropzone": "^5.1.0",
+    "@types/tailwindcss": "^3.1.0",
     "@types/tinycolor2": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",

@@ -4,6 +4,7 @@ import OrganisationFactory from './OrganisationFactory'
 import RoleFactory from './RoleFactory'
 import TimeEntryFactory from './TimeEntryFactory'
 import BudgetFactory from './BudgetFactory'
+import { DateTime } from 'luxon'
 
 export default Factory.define(User, ({ faker }) => {
   return {
@@ -11,6 +12,8 @@ export default Factory.define(User, ({ faker }) => {
     lastname: faker.name.lastName(),
     email: faker.internet.email(),
     password: faker.internet.password(),
+    verifiedAt: DateTime.now().set({ millisecond: 0 }),
+    lastActiveAt: DateTime.now().set({ millisecond: 0 }),
   }
 })
   .relation('budgets', () => BudgetFactory)

@@ -1,4 +1,5 @@
 import { staticAppHostname } from 'Config/app'
+import Env from '@ioc:Adonis/Core/Env'
 
 function getOriginSubdomain(origin: string): string | undefined {
   if (!origin) return
@@ -9,4 +10,9 @@ function getOriginSubdomain(origin: string): string | undefined {
   return partialSubdomain
 }
 
-export { getOriginSubdomain }
+function getTenantHostname(subdomain: string) {
+  const protocol: 'http' | 'https' = Env.get('NODE_ENV') === 'development' ? 'http' : 'https'
+  return `${protocol}://${subdomain}.${staticAppHostname}`
+}
+
+export { getOriginSubdomain, getTenantHostname }

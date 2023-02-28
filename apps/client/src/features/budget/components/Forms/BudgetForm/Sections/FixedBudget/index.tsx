@@ -5,11 +5,10 @@ import {
   FormLabel,
   FormNumberInput,
   FormSelect,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { SelectOption } from '@/components/Forms/Select/option'
 import BillableType from '@/enums/BillableType'
-import { useEffect } from 'react'
 
 import { billableTypeOption } from '../..'
 
@@ -34,7 +33,7 @@ export const FixedBudgetSection = ({
           <FormDescription>The fixed amount to charge the client</FormDescription>
           <FormCurrencyInput
             name="fixedPrice"
-            suffix="£"
+            currency="£"
             placeHolder="Enter price"
             error={!!errors.fixedPrice?.message}
           />
@@ -50,7 +49,7 @@ export const FixedBudgetSection = ({
           <FormDescription>Specify the rate to track progress</FormDescription>
           <FormCurrencyInput
             name="hourlyRate"
-            suffix="£"
+            currency="£"
             placeHolder={
               watch('billableType') === BillableType.TOTAL_HOURS ? '- - -' : 'Enter rate'
             }
@@ -74,7 +73,9 @@ export const FixedBudgetSection = ({
         <FormControl>
           <FormSelect name="billableType" control={control} placeHolder="Select total" fullWidth>
             {billableTypeOption?.map((option) => (
-              <SelectOption key={option.id}>{option?.display}</SelectOption>
+              <SelectOption key={option.id} id={option.id}>
+                {option?.display}
+              </SelectOption>
             ))}
           </FormSelect>
         </FormControl>
@@ -83,7 +84,7 @@ export const FixedBudgetSection = ({
           {watch('billableType') === BillableType.TOTAL_COST ? (
             <FormCurrencyInput
               name="fixedPrice"
-              suffix="£"
+              currency="£"
               disabled={watch('billableType') === BillableType.TOTAL_COST}
             />
           ) : (

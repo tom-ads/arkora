@@ -8,8 +8,8 @@ import {
   HorizontalDivider,
   LockIcon,
   OpenLockIcon,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import BillableType from '@/enums/BillableType'
 import BudgetType from '@/enums/BudgetType'

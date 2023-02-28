@@ -6,8 +6,8 @@ import {
   FormTextArea,
   FormTimeTrackingInput,
   TimeEntryResult,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormGroupSelect } from '@/components/Forms/GroupSelect'
 import { GroupOption } from '@/components/Forms/GroupSelect/option'
 import { useGetBudgetsQuery } from '../../../../budget/api'

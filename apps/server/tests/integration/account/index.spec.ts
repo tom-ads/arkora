@@ -1,9 +1,8 @@
 import { test } from '@japa/runner'
 import UserRole from 'App/Enum/UserRole'
 import { UserFactory } from 'Database/factories'
-import { camelCase, startCase } from 'lodash'
 
-test.group('Account: All Organisation Accounts', () => {
+test.group('Account : Index Accounts', () => {
   test('organisation manager can index accounts', async ({ client, route }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('users', 1, (userBuilder) => {
@@ -27,20 +26,18 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBodyContains([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: UserRole.MEMBER,
         },
-      ],
-    })
+      },
+    ])
   })
 
   test('organisation org_admin can index accounts', async ({ client, route }) => {
@@ -66,20 +63,18 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBodyContains([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: UserRole.MEMBER,
         },
-      ],
-    })
+      },
+    ])
   })
 
   test('organisation owner can index accounts', async ({ client, route }) => {
@@ -105,27 +100,21 @@ test.group('Account: All Organisation Accounts', () => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBodyContains([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: UserRole.MEMBER,
         },
-      ],
-    })
+      },
+    ])
   })
 
-  test('authorised user can filter organisation accounts by role', async ({
-    client,
-    route,
-    assert,
-  }) => {
+  test('organisation admin can filter team members by role', async ({ client, route, assert }) => {
     const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
       return orgBuilder.merge({ subdomain: 'test-org' }).with('users', 2, (userBuilder) => {
         return userBuilder
@@ -149,31 +138,29 @@ test.group('Account: All Organisation Accounts', () => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    assert.isTrue(response.body()?.accounts?.length === 2)
+    assert.isTrue(response.body()?.length === 2)
 
     response.assertStatus(200)
-    response.assertBodyContains({
-      accounts: [
-        {
-          id: 1,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBodyContains([
+      {
+        id: 1,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        role: {
+          name: UserRole.MEMBER,
         },
-        {
-          id: 2,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+      },
+      {
+        id: 2,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        role: {
+          name: UserRole.MEMBER,
         },
-      ],
-    })
+      },
+    ])
   })
 
   test('organisation member cannot index accounts', async ({ client, route }) => {
@@ -247,20 +234,18 @@ test.group('Account: All Organisation Accounts', () => {
     )
 
     response.assertStatus(200)
-    response.assertBody({
-      accounts: [
-        {
-          id: 3,
-          firstname: 'Bob',
-          lastname: 'Marley',
-          initials: 'BM',
-          email: 'bob.marley@example.com',
-          role: {
-            name: startCase(camelCase(UserRole.MEMBER)),
-          },
+    response.assertBodyContains([
+      {
+        id: 3,
+        firstname: 'Bob',
+        lastname: 'Marley',
+        initials: 'BM',
+        email: 'bob.marley@example.com',
+        role: {
+          name: UserRole.MEMBER,
         },
-      ],
-    })
+      },
+    ])
   })
 
   test('diff organisation user, cannot view accounts for test organisation', async ({

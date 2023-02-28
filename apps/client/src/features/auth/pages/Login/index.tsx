@@ -7,15 +7,15 @@ import {
   Form,
   Button,
   InlineLink,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { setAuth } from '@/stores/slices/auth'
 import { setOrganisation } from '@/stores/slices/organisation'
 import { startTimer } from '@/stores/slices/timer'
 import { RootState } from '@/stores/store'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { useLoginMutation } from '../../api'
 
@@ -52,8 +52,15 @@ export const LoginPage = (): JSX.Element => {
           dispatch(startTimer(response.timer))
         }
 
-        navigate('/projects', { replace: true })
+        navigate('/timer', { replace: true })
       })
+      .catch(() => {
+        /* */
+      })
+  }
+
+  if (!organisation?.subdomain) {
+    return <Navigate to="/" />
   }
 
   return (

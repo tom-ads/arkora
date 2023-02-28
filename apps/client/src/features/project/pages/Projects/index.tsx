@@ -21,7 +21,10 @@ export const ProjectsPage = (): JSX.Element => {
       </PageHeader>
 
       <PageContent>
-        <ProjectsTable onManage={(id) => setProjectId(id)} />
+        <ProjectsTable
+          onCreate={() => setOpenCreateProjectModal(true)}
+          onManage={(id) => setProjectId(id)}
+        />
       </PageContent>
 
       {/* Modals */}

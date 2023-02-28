@@ -242,6 +242,14 @@ export default class Budget extends BaseModel {
     })
   })
 
+  public static privateBudget = scope((query: BudgetBuilder) => {
+    return query.where('private', true)
+  })
+
+  public static publicBudget = scope((query: BudgetBuilder) => {
+    return query.where('private', false)
+  })
+
   public static budgetMetrics = scope((query: BudgetBuilder, budgetIds: number[]) => {
     return query
       .select(
@@ -264,8 +272,8 @@ export default class Budget extends BaseModel {
       )
       .whereIn('budgets.id', budgetIds)
       .leftJoin('time_entries', 'budgets.id', '=', 'time_entries.budget_id')
-      .leftJoin('budget_tasks', (sub) => {
-        sub
+      .leftJoin('budget_tasks', (subQuery) => {
+        subQuery
           .on('time_entries.task_id', '=', 'budget_tasks.task_id')
           .andOn('time_entries.budget_id', '=', 'budget_tasks.budget_id')
       })
@@ -295,9 +303,8 @@ export default class Budget extends BaseModel {
       .withScopes((scopes) => scopes.budgetMetrics(budgetIds))
       .preload('project')
 
-      // Filter - Pagination
       .if(filters?.page, (builder) => {
-        builder.paginate(filters!.page!, 10)
+        builder.forPage(filters!.page!, 10)
       })
 
     return result

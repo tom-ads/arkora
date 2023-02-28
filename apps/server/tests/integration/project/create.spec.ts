@@ -155,7 +155,7 @@ test.group('Projects: Create Project', () => {
       .loginAs(authUser)
 
     response.assertStatus(422)
-    response.assertBody({ name: { message: 'Project name already exists' } })
+    response.assertBody({ errors: [{ field: 'name', message: 'Name already exists' }] })
   })
 
   test('unauthenticated user cannot create a project', async ({ client, route }) => {

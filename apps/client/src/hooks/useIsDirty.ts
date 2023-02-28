@@ -1,6 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-export const useIsDirty = (value: string) => {
+export interface UseIsDirtyControls {
+  reset: () => void
+}
+
+export type UseIsDirtyReturn = [boolean, UseIsDirtyControls]
+
+export const useIsDirty = (value: string): UseIsDirtyReturn => {
   const defaultValue = useRef(value)
 
   const [isDirty, setIsDirty] = useState(false)
@@ -11,5 +17,7 @@ export const useIsDirty = (value: string) => {
     }
   }, [value])
 
-  return isDirty
+  const reset = useCallback(() => setIsDirty(false), [])
+
+  return [isDirty, { reset }]
 }

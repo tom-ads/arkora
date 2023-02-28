@@ -5,49 +5,194 @@ import {
   DescriptorInsights,
   HorizontalDivider,
   Form,
+  FormControl,
+  FormInput,
+  FormErrorMessage,
+  MouseIcon,
+  List,
+  Avatar,
+  UserIcon,
+  FormSelect,
+  BinIcon,
 } from '@/components'
 import UserRole from '@/enums/UserRole'
 import { useRegisterMutation } from './../../../api'
-import { clearRegistration, setTeam } from '@/stores/slices/registration'
+import { clearRegistration, setStep, setTeam } from '@/stores/slices/registration'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
-import { InviteTeam } from '../../Team/InviteTeam'
-import { RegistrationSteps, SelectedRole } from './../../../types'
 import { RootState } from '@/stores/store'
-import { isEqual } from 'lodash'
 import { useNavigate } from 'react-router-dom'
 import { setAuth } from '@/stores/slices/auth'
 import { setOrganisation } from '@/stores/slices/organisation'
+import { convertToPennies } from '@/helpers/currency'
+import {
+  DroppableInvite,
+  ImportMemberModal,
+  InviteFormFields,
+  inviteMembersSchema,
+} from '@/features/team'
+import { UseFormReturn } from 'react-hook-form'
+import { useMemo } from 'react'
+import { SelectOption } from '@/components/Forms/Select/option'
+import { isEqual } from 'lodash'
 
-export interface TeamProps {
-  team: Array<{
-    email: string
-    role: SelectedRole
-  }>
+const InviteMemberList = ({ watch, control }: { watch: any; control: any }): JSX.Element => {
+  const roleOptions = useMemo(
+    () =>
+      Object.values(UserRole)
+        .filter((r) => r !== UserRole.OWNER)
+        .map((role) => ({
+          id: role,
+          display: role.toLowerCase()?.replace('_', ' '),
+        })),
+    [],
+  )
+
+  if (!watch('members')?.length) {
+    return (
+      <div className="py-5 w-full text-center min-h-[169px]">
+        <p className="font-medium text-md text-gray-50 whitespace-nowrap">No Member Invites</p>
+      </div>
+    )
+  }
+  return (
+    <List<InviteFormFields, 'members'>
+      name="members"
+      control={control}
+      listClassName="h-[250px] overflow-y-auto scrollbar-hide scroll-smooth snap-y"
+      itemClassName="border border-gray-40 rounded px-3 py-2 w-full flex items-center justify-between"
+    >
+      {({ field, itemIdx, methods }) => (
+        <>
+          <div className="flex items-center">
+            <Avatar className="w-7 h-7 mr-3">
+              <UserIcon className="w-4 h-4" />
+            </Avatar>
+            <p className="text-gray-80 text-sm font-medium truncate max-w-[170px]">{field.email}</p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <FormControl className="w-[135px]">
+              <FormSelect
+                name={`members.${itemIdx}.role`}
+                control={control}
+                placeHolder="Select role"
+                size="xs"
+              >
+                {roleOptions?.map((option) => (
+                  <SelectOption key={option.id} id={option.id}>
+                    {option?.display}
+                  </SelectOption>
+                ))}
+              </FormSelect>
+            </FormControl>
+            <Button variant="blank" onClick={() => methods?.remove(itemIdx)}>
+              <BinIcon className="w-5 text-red-90 hover:text-red-40 focus:text-red-90 focus-visible:text-red-40" />
+            </Button>
+          </div>
+        </>
+      )}
+    </List>
+  )
 }
 
-type FormFields = {
-  email: string
-  role: SelectedRole
-} & TeamProps
+const InviteTeamFormFields = ({
+  getValues,
+  setValue,
+  control,
+  setError,
+  watch,
+  formState: { errors },
+}: UseFormReturn<InviteFormFields>): JSX.Element => {
+  const handleAddInvite = () => {
+    const email = getValues('email')?.toLowerCase()
+    const emailValidation = z.string().email()
 
-const TeamFormSchema = z.object({
-  team: z.array(
-    z.object({
-      email: z.string(),
-      role: z.object({
-        value: z.nativeEnum(UserRole),
-        children: z.string(),
-      }),
-    }),
-  ),
-})
+    const validation = Object.values({
+      required: {
+        test: email,
+        errorMessage: 'Email is required',
+      },
+      valid: {
+        test: emailValidation.safeParse(getValues('email'))?.success,
+        errorMessage: 'Valid email required',
+      },
+      alreadyExists: {
+        test: !getValues('members')?.some((member) => member.email?.toLowerCase() === email),
+        errorMessage: 'Team member already in invite list',
+      },
+    })?.filter((v) => !v.test)
 
-type TeamViewProps = {
-  onBack: (prevStep: RegistrationSteps) => void
+    if (validation?.length) {
+      // Only return first error message each time
+      setError('email', { message: validation?.[0]?.errorMessage })
+      return
+    }
+
+    setValue('members', [
+      ...getValues('members'),
+      {
+        email: getValues('email')!,
+        role: UserRole.MEMBER,
+      },
+    ])
+
+    setValue('email', null)
+  }
+
+  return (
+    <>
+      <DroppableInvite onChange={(file: File[]) => setValue('selectedFile', file?.[0])} />
+
+      <div className="flex items-center gap-2">
+        <HorizontalDivider />
+        <span className="font-semibold text-sm text-gray-60">OR</span>
+        <HorizontalDivider />
+      </div>
+
+      <FormControl>
+        <div className="flex w-full gap-3">
+          <FormInput
+            size="xs"
+            name="email"
+            placeHolder="Enter email"
+            error={!!errors?.email?.message}
+          />
+          <Button
+            size="xs"
+            onClick={handleAddInvite}
+            disabled={!watch('email')}
+            className="max-w-[100px]"
+            block
+          >
+            Add
+          </Button>
+        </div>
+        {!!errors.email?.message && (
+          <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
+        )}
+      </FormControl>
+
+      <div className="pb-4">
+        <HorizontalDivider
+          contentLeft={
+            <p className="whitespace-nowrap font-medium text-base text-gray-100">Invites</p>
+          }
+          contentRight={
+            <div className="flex items-center gap-1 text-gray-80">
+              <MouseIcon className="w-5 h-5 shrink-0" />
+              <p className="whitespace-nowrap text-sm font-medium">Scroll list</p>
+            </div>
+          }
+        />
+      </div>
+
+      <InviteMemberList watch={watch} control={control} />
+    </>
+  )
 }
 
-export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
+export const TeamView = (): JSX.Element => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -55,8 +200,8 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
 
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
 
-  const handleSubmit = async (data: FormFields) => {
-    dispatch(setTeam({ ...data.team }))
+  const handleSubmit = async (data: InviteFormFields) => {
+    dispatch(setTeam({ ...data.members }))
     await register({
       firstname: details.firstname,
       lastname: details.lastname,
@@ -69,17 +214,17 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       opening_time: organisation.openingTime,
       closing_time: organisation.closingTime,
       work_days: organisation.workDays,
-      currency: organisation.currency.value,
-      hourly_rate: parseInt(organisation.hourlyRate, 10),
+      currency: organisation.currency,
+      hourly_rate: convertToPennies(parseInt(organisation.hourlyRate, 10)),
 
       members: team.map((member) => ({
         email: member.email,
-        role: member.role.value,
+        role: member.role,
       })),
     })
       .unwrap()
       .then((response) => {
-        navigate('/projects', { replace: true, state: { location: '/' } })
+        navigate('/timer', { replace: true, state: { location: '/' } })
         window.location.host = `${organisation.subdomain}.${
           import.meta.env.VITE_ARKORA_STATIC_HOSTNAME
         }`
@@ -90,61 +235,44 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
       })
   }
 
-  const handleFormChange = (data: FormFields) => {
-    if (!isEqual(team, data.team)) {
-      dispatch(setTeam(data.team))
+  const handleFormChange = (data: InviteFormFields) => {
+    if (!isEqual(team, data.members)) {
+      dispatch(setTeam(data.members))
     }
   }
 
   return (
-    <Form<FormFields, typeof TeamFormSchema>
+    <Form<InviteFormFields, typeof inviteMembersSchema>
       className="gap-0"
       onSubmit={handleSubmit}
       onChange={handleFormChange}
-      validationSchema={TeamFormSchema}
+      validationSchema={inviteMembersSchema}
       defaultValues={{
-        email: '',
-        role: {
-          value: UserRole.MEMBER,
-          children: 'Member',
-        },
-        team: team ?? [],
+        email: null,
+        selectedFile: null,
+        selectedHeader: null,
+        containsHeaders: false,
+        members: team,
       }}
     >
       {(methods) => (
         <>
-          <div className="bg-white rounded py-9 px-8 shadow-sm shadow-gray-20 min-h-[600px]">
-            <div className="space-y-2 pb-6">
-              <h1 className="font-semibold text-3xl text-gray-100">Create organisation</h1>
-              <p className="text-base text-gray-80">
-                Almost there! Define your organisation teams and invite your team members
-              </p>
-            </div>
+          <Descriptor>
+            <DescriptorInsights
+              title="Team Members"
+              description="Upload or manually invite team members"
+              className="max-w-md md:max-w-[300px]"
+            />
 
-            <HorizontalDivider />
-
-            <Descriptor>
-              <DescriptorInsights
-                title="Team Members"
-                description="Start inviting the team, or invite them later"
-                className="max-w-md md:max-w-[325px]"
-              />
-
-              {/* Team Members */}
-              <DescriptorContent className="max-w-[405px]">
-                <InviteTeam {...methods} />
-              </DescriptorContent>
-            </Descriptor>
-          </div>
+            <DescriptorContent className="max-w-[420px]">
+              <InviteTeamFormFields {...methods} />
+            </DescriptorContent>
+          </Descriptor>
 
           <div className="flex justify-between mt-12">
-            <button
-              type="button"
-              className="outline-none text-purple-90 font-semibold text-base hover:text-purple-70"
-              onClick={() => onBack('organisation')}
-            >
+            <Button variant="blank" onClick={() => dispatch(setStep({ step: 'organisation' }))}>
               Previous Step
-            </button>
+            </Button>
             <Button
               size="sm"
               className="max-w-[220px] w-full"
@@ -154,6 +282,12 @@ export const TeamView = ({ onBack }: TeamViewProps): JSX.Element => {
               Finish
             </Button>
           </div>
+
+          <ImportMemberModal
+            isOpen={!!methods.watch('selectedFile')}
+            onClose={() => !methods.watch('selectedFile')}
+            {...methods}
+          />
         </>
       )}
     </Form>

@@ -33,14 +33,6 @@ export default class CreateProjectValidator {
     ]),
     private: schema.boolean(),
     show_cost: schema.boolean(),
-    team: schema.array.optional([rules.requiredWhen('private', '=', true)]).members(
-      schema.number([
-        rules.exists({
-          table: 'users',
-          column: 'id',
-        }),
-      ])
-    ),
   })
 
   /**

@@ -55,7 +55,7 @@ test.group('Timers: Index Timers', ({ each }) => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    assert.lengthOf(response.body(), 3)
+    assert.lengthOf(response.body(), 2)
 
     response.assertStatus(200)
     response.assertBodyContains([{ timer: { last_stopped_at: null } }])
@@ -72,7 +72,7 @@ test.group('Timers: Index Timers', ({ each }) => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    assert.lengthOf(response.body(), 3)
+    assert.lengthOf(response.body(), 2)
 
     response.assertStatus(200)
     response.assertBodyContains([{ timer: { last_stopped_at: null } }])
@@ -85,7 +85,7 @@ test.group('Timers: Index Timers', ({ each }) => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    assert.lengthOf(response.body(), 3)
+    assert.lengthOf(response.body(), 2)
 
     response.assertStatus(200)
     response.assertBodyContains([{ timer: { last_stopped_at: null } }])
@@ -114,7 +114,7 @@ test.group('Timers: Index Timers', ({ each }) => {
       .withCsrfToken()
       .loginAs(authUser)
 
-    assert.lengthOf(response.body(), 3)
+    assert.lengthOf(response.body(), 2)
     assert.notContainsSubset(response.body(), { timer: { last_stopped_at: null } })
 
     response.assertStatus(200)

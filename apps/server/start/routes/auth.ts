@@ -9,9 +9,7 @@ Route.group(() => {
       Route.post('/details', 'AuthController.verifyDetails')
       Route.post('/organisation', 'AuthController.verifyOrganisation')
     }).prefix('/register')
-  })
-    .prefix('/auth')
-    .middleware('blockAuth')
+  }).middleware('blockAuth')
 
-  Route.get('/session', 'AuthController.session').prefix('/auth').middleware('auth')
-})
+  Route.get('/session', 'AuthController.session').middleware('auth')
+}).prefix('/auth')

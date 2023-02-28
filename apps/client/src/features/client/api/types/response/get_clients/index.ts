@@ -1,7 +1,5 @@
 import Client from '@/types/Client'
 
-type GetClientsResponse = {
-  clients: Client[]
-}
+type GetClientsResponse = Client[]
 
 export default GetClientsResponse

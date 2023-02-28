@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import {
@@ -12,8 +12,8 @@ import {
   LockIcon,
   OpenLockIcon,
   Spinner,
+  FormErrorMessage,
 } from '@/components'
-import FormErrorMessage from '@/components/Forms/ErrorMessage'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import { ModalFooter } from '@/components/Modal'
 import { ConfirmationModal } from '@/components/Modals'
@@ -29,7 +29,6 @@ import { NonBillableSection } from '../BudgetForm/Sections/NonBillable'
 import { VariableBudgetSection } from '../BudgetForm/Sections/VariableBudget'
 import { convertToPennies, convertToPounds } from '@/helpers/currency'
 import { useQueryError } from '@/hooks/useQueryError'
-import { formatToHours } from '@/helpers/date'
 
 type UpdateBudgetFormProps = {
   onClose: () => void
@@ -69,7 +68,7 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
     formState: { errors },
   } = methods
 
-  useQueryError<BudgetFormFields>(methods.setError, error)
+  useQueryError<BudgetFormFields>({ setError: methods.setError, error })
 
   const onSubmit = async (data: BudgetFormFields) => {
     let actualBudget = data.budget ?? 0
@@ -128,6 +127,7 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
       .then(() => successToast('Budget has been deleted'))
       .catch(() => errorToast('Unable to delete budget, please try again later.'))
 
+    setOpenConfirmationModal(false)
     onClose()
   }
 
@@ -164,7 +164,7 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
   }
 
   return (
-    <Fragment>
+    <>
       <FormProvider {...methods}>
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex gap-6">
@@ -264,8 +264,8 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
         loading={deletingBudget}
         title="You're about to delete a budget"
         btnText="Delete Budget"
-        description="Performing this action will permenently delete all related tasks, members and tracked time associated with this budget. It cannot be recovered."
+        description="Performing this action will permanently delete all related tasks, members and tracked time associated with this budget. It cannot be recovered."
       />
-    </Fragment>
+    </>
   )
 }

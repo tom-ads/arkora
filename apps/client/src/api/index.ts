@@ -49,7 +49,17 @@ const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) =
 
 const appApi = createApi({
   reducerPath: 'arkoraApi',
-  tagTypes: ['Project', 'Projects', 'TimeEntries', 'Budgets', 'Budget'],
+  tagTypes: [
+    'Project',
+    'Projects',
+    'TimeEntries',
+    'Budgets',
+    'Budget',
+    'Members',
+    'Member',
+    'Clients',
+    'Client',
+  ],
   baseQuery: baseQueryInterceptor,
   endpoints: () => ({}),
 })

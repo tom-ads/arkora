@@ -21,11 +21,10 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
   const onSubmit = async (data: ProjectFormFields) => {
     if (data?.client) {
       await createProject({
-        name: data.name,
+        name: data.name!,
         show_cost: data.hideCost,
         private: data.private,
         client_id: data.client,
-        team: data?.team?.map((member) => member.id),
       })
         .unwrap()
         .then(() => {
@@ -45,14 +44,14 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
   return (
     <Modal
       title="Create Project"
-      description="Add a new client project and invite the team"
+      description="Setup a new project for a client"
       icon={<HouseIcon />}
       isOpen={props.isOpen}
       onClose={props.onClose}
     >
       <ProjectForm {...props} onSubmit={onSubmit} error={error}>
-        <ModalFooter className="!mt-36">
-          <Button variant="blank" onClick={props.onClose}>
+        <ModalFooter className="!mt-20">
+          <Button variant="blank" onClick={props.onClose} disabled={creatingProject}>
             Cancel
           </Button>
           <Button

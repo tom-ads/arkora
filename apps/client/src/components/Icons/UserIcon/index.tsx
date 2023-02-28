@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-export const UsersIcon = ({ className }: { className?: string }): JSX.Element => {
+export const UserIcon = ({ className }: { className?: string }): JSX.Element => {
   return (
     <svg
       className={className}

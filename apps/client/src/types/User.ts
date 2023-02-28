@@ -5,10 +5,12 @@ type User = {
   firstname: string
   lastname: string
   email: string
+  verifiedAt: string | null
   initials: string
   role: {
     name: UserRole
   }
+  lastActiveAt: string
 }
 
 export type { User }

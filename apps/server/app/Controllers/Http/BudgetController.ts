@@ -81,7 +81,10 @@ export default class BudgetController {
       return ctx.response.ok([])
     }
 
-    budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
+    budgets = await Budget.getBudgetsMetrics(
+      budgets.map((budget) => budget.id),
+      { page: payload.page }
+    )
 
     return budgets
   }
@@ -120,6 +123,7 @@ export default class BudgetController {
     }
 
     if (payload.private !== budget.private) {
+      // TODO: remove members who aren't assigned?
       budget.private = payload.private
     }
 

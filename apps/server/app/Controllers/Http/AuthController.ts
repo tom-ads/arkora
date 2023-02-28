@@ -75,10 +75,12 @@ export default class AuthController {
       await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
       await owner.related('organisation').associate(createdOrganisation)
 
-      ctx.logger.info(`Created tenant Owner with id: ${owner.id}`)
+      // TODO: send owner a verification link
+
+      ctx.logger.info(`Created owner(${owner.id}) for tenant(${createdOrganisation.subdomain})`)
     } catch (err) {
       ctx.logger.error(
-        `Registering tenant (${createdOrganisation.subdomain}) Owner account failed due to: ${err.message}`
+        `Registering tenant(${createdOrganisation.subdomain}) Owner account failed due to: ${err.message}`
       )
       return ctx.response.internalServerError()
     }
@@ -86,29 +88,18 @@ export default class AuthController {
     // Prevent member list from trying to create owner again
     const filteredMembers = team.members?.filter((member) => member.email !== details.email)
 
-    // Create & Invite Team members
+    // Invite team members to organisation
     if (filteredMembers?.length) {
-      const invitedMembers = await User.createMany(
-        filteredMembers.map((member) => ({
-          email: member.email,
-        }))
-      )
-
-      await Promise.all(
-        invitedMembers.map(async (member) => {
-          const role = userRoles.find(
-            (role) => role.name === filteredMembers?.find((m) => m.email === member.email)?.role
-          )
-
-          await member.related('role').associate(role!)
-          await member.related('organisation').associate(createdOrganisation)
-
-          // TODO: Invite notification
-        })
-      )
+      try {
+        await createdOrganisation.inviteMembers(filteredMembers)
+      } catch (error) {
+        ctx.logger.error(
+          `Error occured while inviting members to tenant(${createdOrganisation.subdomain}) due to: ${error.message}`
+        )
+      }
     }
 
-    ctx.logger.info(`Tenant (${createdOrganisation.subdomain}) has been onboarded`)
+    ctx.logger.info(`Tenant(${createdOrganisation.subdomain}) has been onboarded`)
 
     await ctx.auth.login(owner)
 
