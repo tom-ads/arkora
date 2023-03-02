@@ -41,7 +41,7 @@ export function getDatesBetweenPeriod(startDate: DateTime, endDate: DateTime) {
 }
 
 export function formatToHours(minutes: number) {
-  const totalHours = minutes / 60
+  const totalHours = Math.round(minutes / 60)
   const totalMinutes = minutes % 60
 
   const formattedHours = totalHours < 10 ? `0${totalHours}` : totalHours
