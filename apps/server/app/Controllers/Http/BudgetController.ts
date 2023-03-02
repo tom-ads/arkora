@@ -81,10 +81,7 @@ export default class BudgetController {
       return ctx.response.ok([])
     }
 
-    budgets = await Budget.getBudgetsMetrics(
-      budgets.map((budget) => budget.id),
-      { page: payload.page }
-    )
+    budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
 
     return budgets
   }
@@ -98,9 +95,9 @@ export default class BudgetController {
 
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-    const budgetWithMetrics = (await Budget.getBudgetMetrics(budget.id)) as Budget
+    const budgetWithMetrics = await Budget.getBudgetMetrics(budget.id)
 
-    return budgetWithMetrics.serialize()
+    return budgetWithMetrics?.serialize()
   }
 
   @bind()
@@ -157,7 +154,7 @@ export default class BudgetController {
 
     const updatedBudget = await Budget.getBudgetMetrics(budget.id)
 
-    return updatedBudget!.serialize()
+    return updatedBudget?.serialize()
   }
 
   @bind()

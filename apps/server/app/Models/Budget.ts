@@ -73,8 +73,8 @@ export default class Budget extends BaseModel {
 
   // Computed
 
-  @computed({ serializeAs: 'total_cost' })
-  public get totalCost() {
+  @computed({ serializeAs: 'allocated_budget' })
+  public get allocatedBudget() {
     // Non-billable budgets, do not have cost involved.
     if (this.budgetType.name === BudgetKind.NON_BILLABLE) {
       return
@@ -98,8 +98,8 @@ export default class Budget extends BaseModel {
     return this.budget
   }
 
-  @computed({ serializeAs: 'total_minutes' })
-  public get totalMinutes() {
+  @computed({ serializeAs: 'allocated_duration' })
+  public get allocatedDuration() {
     if (this.hourlyRate) {
       if (
         this.budgetType.name === BudgetKind.FIXED &&
@@ -119,17 +119,17 @@ export default class Budget extends BaseModel {
     return this.budget
   }
 
-  @computed({ serializeAs: 'total_spent' })
-  public get totalSpent() {
+  @computed({ serializeAs: 'spent_cost' })
+  public get spentCost() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
     }
 
-    return parseInt(this.$extras.total_spent ?? 0, 10)
+    return (this.billableCost ?? 0) + (this.unbillableCost ?? 0)
   }
 
-  @computed({ serializeAs: 'total_remaining' })
-  public get totalRemaining() {
+  @computed({ serializeAs: 'remaining_cost' })
+  public get remainingCost() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
     }
@@ -138,45 +138,45 @@ export default class Budget extends BaseModel {
       this.budgetType?.name === BudgetKind.VARIABLE &&
       this.billableType?.name === BillableKind.TOTAL_HOURS
     ) {
-      return this.totalCost! - this.totalSpent!
+      return this.allocatedBudget! - this.spentCost!
     }
 
-    return (this.fixedPrice ? this.fixedPrice : this.budget) - this.totalSpent!
+    return (this.fixedPrice ? this.fixedPrice : this.budget) - this.spentCost!
   }
 
-  @computed({ serializeAs: 'total_billable' })
-  public get totalBillable() {
+  @computed({ serializeAs: 'billable_cost' })
+  public get billableCost() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
     }
 
-    return parseInt(this.$extras.total_billable ?? 0, 10)
+    return parseInt(this.$extras.billable_cost ?? 0, 10)
   }
 
-  @computed({ serializeAs: 'total_billable_minutes' })
-  public get totalBillableMinutes() {
+  @computed({ serializeAs: 'billable_duration' })
+  public get billableDuration() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
     }
 
-    return parseInt(this.$extras.total_billable_minutes ?? 0, 10)
+    return parseInt(this.$extras.billable_duration ?? 0, 10)
   }
 
-  @computed({ serializeAs: 'total_non_billable' })
-  public get totalNonBillable() {
+  @computed({ serializeAs: 'unbillable_cost' })
+  public get unbillableCost() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
     }
 
-    return parseInt(this.$extras.total_non_billable ?? 0, 10)
+    return parseInt(this.$extras.unbillable_cost ?? 0, 10)
   }
 
-  @computed({ serializeAs: 'total_non_billable_minutes' })
-  public get totalNonBillableMinutes() {
+  @computed({ serializeAs: 'unbillable_duration' })
+  public get unbillableDuration() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
     }
-    return parseInt(this.$extras.total_non_billable_minutes ?? 0, 10)
+    return parseInt(this.$extras.unbillable_duration ?? 0, 10)
   }
 
   // Relations - belongsTo
@@ -254,30 +254,32 @@ export default class Budget extends BaseModel {
     return query
       .select(
         'budgets.*',
+        'entries.billable_duration',
+        'entries.unbillable_duration',
         Database.raw(
-          'IFNULL(ROUND(SUM(time_entries.duration_minutes) / 60, 2), 0) * budgets.hourly_rate AS total_spent'
+          'ROUND(ROUND(IFNULL(entries.billable_duration / 60, 0), 2) * budgets.hourly_rate) AS billable_cost'
         ),
         Database.raw(
-          'SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(ROUND(time_entries.duration_minutes / 60, 2), 0) * budgets.hourly_rate ELSE 0 END) AS total_billable'
-        ),
-        Database.raw(
-          'SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS total_billable_minutes'
-        ),
-        Database.raw(
-          'SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(ROUND(time_entries.duration_minutes / 60, 2), 0) * budgets.hourly_rate ELSE 0 END) AS total_non_billable'
-        ),
-        Database.raw(
-          'SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS total_non_billable_minutes'
+          'ROUND(ROUND(IFNULL(entries.unbillable_duration / 60, 0), 2) * budgets.hourly_rate) AS unbillable_cost'
         )
       )
+      .joinRaw(
+        `
+          LEFT JOIN (
+            SELECT
+              budget_tasks.budget_id,
+              SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS billable_duration,
+              SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS unbillable_duration
+            FROM budget_tasks
+            LEFT JOIN time_entries
+            ON budget_tasks.budget_id = time_entries.budget_id
+            AND budget_tasks.task_id = time_entries.task_id
+            GROUP BY budget_tasks.budget_id
+          ) AS entries
+          ON budgets.id = entries.budget_id
+        `
+      )
       .whereIn('budgets.id', budgetIds)
-      .leftJoin('time_entries', 'budgets.id', '=', 'time_entries.budget_id')
-      .leftJoin('budget_tasks', (subQuery) => {
-        subQuery
-          .on('time_entries.task_id', '=', 'budget_tasks.task_id')
-          .andOn('time_entries.budget_id', '=', 'budget_tasks.budget_id')
-      })
-      .groupBy('budgets.id')
       .orderBy('budgets.name')
   })
 

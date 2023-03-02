@@ -9,7 +9,6 @@ import {
   TableRow,
   ToolTip,
 } from '@/components'
-import { ToolTipContainer } from '@/components/ToolTip/container'
 import BudgetType from '@/enums/BudgetType'
 import { calculatePercentage, convertToPounds } from '@/helpers/currency'
 import { formatToHours } from '@/helpers/date'
@@ -31,11 +30,11 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
   const formattedBudget = useMemo(() => {
     const formattedBudget = { ...budget }
     if (budget) {
-      formattedBudget.totalCost = convertToPounds(budget.totalCost)
-      formattedBudget.totalBillable = convertToPounds(budget.totalBillable)
-      formattedBudget.totalNonBillable = convertToPounds(budget.totalNonBillable)
-      formattedBudget.totalSpent = convertToPounds(budget.totalSpent)
-      formattedBudget.totalRemaining = convertToPounds(budget.totalRemaining)
+      formattedBudget.allocatedBudget = convertToPounds(budget.allocatedBudget)
+      formattedBudget.billableCost = convertToPounds(budget.billableCost)
+      formattedBudget.unbillableCost = convertToPounds(budget.unbillableCost)
+      formattedBudget.spentCost = convertToPounds(budget.spentCost)
+      formattedBudget.remainingCost = convertToPounds(budget.remainingCost)
       formattedBudget.hourlyRate = convertToPounds(budget.hourlyRate)
     }
 
@@ -71,7 +70,7 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
 
       <TableData>
         {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <FormatCurrency value={formattedBudget.totalCost} currency={currency?.code} />
+          <FormatCurrency value={formattedBudget.allocatedBudget} currency={currency?.code} />
         ) : (
           <p>- - -</p>
         )}
@@ -79,62 +78,69 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
 
       <TableData>
         {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <ToolTipContainer>
-            <ProgressLineIndicator
-              id={`spent-tooltip-${budget.id}`}
-              percent={calculatePercentage(formattedBudget.totalSpent, formattedBudget.totalCost)}
-            />
-            <ToolTip id={`spent-tooltip-${budget.id}`} className="!p-3">
-              <div className="divide-y divide-gray-40 divide-dashed">
-                <div className="flex flex-col items-start pb-[6px]">
-                  <p className="font-medium text-xs text-gray-50">Total</p>
-                  <div className="flex justify-between w-full">
-                    <p className="font-semibold text-xs text-gray-80">
-                      <FormatCurrency value={formattedBudget.totalCost} currency={currency?.code} />
-                    </p>
-                    <p className="font-semibold text-xs text-gray-80">
-                      {formatToHours(budget.totalMinutes)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-start py-[6px]">
-                  <p className="font-medium text-xs text-gray-50">Spent</p>
-                  <div className="flex justify-between w-full">
-                    <p className="font-semibold text-xs text-gray-80 flex gap-1">
-                      <FormatCurrency
-                        value={formattedBudget.totalSpent}
-                        currency={currency?.code}
-                      />
-                      ({calculatePercentage(formattedBudget.totalSpent, formattedBudget.totalCost)}
-                      %)
-                    </p>
-                    <p className="font-semibold text-xs text-gray-80">
-                      {formatToHours(budget.totalBillableMinutes + budget.totalNonBillableMinutes)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-start pt-[6px]">
-                  <p className="font-medium text-xs text-gray-50">Remaining</p>
-                  <div className="flex justify-between w-full">
-                    <p className="font-semibold text-xs text-gray-80 flex gap-1">
-                      <FormatCurrency
-                        value={formattedBudget.totalRemaining}
-                        currency={currency?.code}
-                      />
-                      (
-                      {calculatePercentage(
-                        formattedBudget.totalRemaining,
-                        formattedBudget.totalCost,
-                      )}
-                      %)
-                    </p>
-                  </div>
+          <ToolTip
+            width={198}
+            trigger={
+              <ProgressLineIndicator
+                percent={calculatePercentage(
+                  formattedBudget.spentCost,
+                  formattedBudget.allocatedBudget,
+                )}
+              />
+            }
+          >
+            <div className="divide-y divide-gray-40 divide-dashed">
+              <div className="flex flex-col items-start pb-[6px]">
+                <p className="font-medium text-xs text-gray-50">Total</p>
+                <div className="flex justify-between w-full">
+                  <p className="font-semibold text-xs text-gray-80">
+                    <FormatCurrency
+                      value={formattedBudget.allocatedBudget}
+                      currency={currency?.code}
+                    />
+                  </p>
+                  <p className="font-semibold text-xs text-gray-80">
+                    {formatToHours(budget.allocatedDuration)}
+                  </p>
                 </div>
               </div>
-            </ToolTip>
-          </ToolTipContainer>
+
+              <div className="flex flex-col items-start py-[6px]">
+                <p className="font-medium text-xs text-gray-50">Spent</p>
+                <div className="flex justify-between w-full">
+                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
+                    <FormatCurrency value={formattedBudget.spentCost} currency={currency?.code} />(
+                    {calculatePercentage(
+                      formattedBudget.spentCost,
+                      formattedBudget.allocatedBudget,
+                    )}
+                    %)
+                  </p>
+                  <p className="font-semibold text-xs text-gray-80">
+                    {formatToHours(budget.billableDuration + budget.unbillableDuration)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-start pt-[6px]">
+                <p className="font-medium text-xs text-gray-50">Remaining</p>
+                <div className="flex justify-between w-full">
+                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
+                    <FormatCurrency
+                      value={formattedBudget.remainingCost}
+                      currency={currency?.code}
+                    />
+                    (
+                    {calculatePercentage(
+                      formattedBudget.remainingCost,
+                      formattedBudget.allocatedBudget,
+                    )}
+                    %)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ToolTip>
         ) : (
           <p>- - -</p>
         )}
@@ -142,41 +148,39 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
 
       <TableData>
         {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <ToolTipContainer>
-            <DoubleProgressLineIndicator
-              id={`billable-tooltip-${budget.id}`}
-              leftPercent={calculatePercentage(
-                formattedBudget?.totalBillable,
-                formattedBudget?.totalSpent,
-              )}
-              rightPercent={calculatePercentage(
-                formattedBudget?.totalNonBillable,
-                formattedBudget?.totalSpent,
-              )}
-            />
-            <ToolTip id={`billable-tooltip-${budget.id}`}>
-              <div className="divide-y divide-gray-40 divide-dashed">
-                <div className="flex justify-between items-center py-1">
-                  <p className="font-medium text-xs text-green-90">Billable</p>
-                  <p className="font-semibold text-xs text-gray-80">
-                    <FormatCurrency
-                      value={formattedBudget?.totalBillable}
-                      currency={currency?.code}
-                    />
-                  </p>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <p className="font-medium text-xs text-red-90">Non-Billable</p>
-                  <p className="font-semibold text-xs text-gray-80">
-                    <FormatCurrency
-                      value={formattedBudget?.totalNonBillable}
-                      currency={currency?.code}
-                    />
-                  </p>
-                </div>
+          <ToolTip
+            width={198}
+            trigger={
+              <DoubleProgressLineIndicator
+                leftPercent={calculatePercentage(
+                  formattedBudget?.billableCost,
+                  formattedBudget?.spentCost,
+                )}
+                rightPercent={calculatePercentage(
+                  formattedBudget?.unbillableCost,
+                  formattedBudget?.spentCost,
+                )}
+              />
+            }
+          >
+            <div className="divide-y divide-gray-40 divide-dashed">
+              <div className="flex justify-between items-center py-1">
+                <p className="font-medium text-xs text-green-90">Billable</p>
+                <p className="font-semibold text-xs text-gray-80">
+                  <FormatCurrency value={formattedBudget?.billableCost} currency={currency?.code} />
+                </p>
               </div>
-            </ToolTip>
-          </ToolTipContainer>
+              <div className="flex justify-between items-center py-1">
+                <p className="font-medium text-xs text-red-90">Non-Billable</p>
+                <p className="font-semibold text-xs text-gray-80">
+                  <FormatCurrency
+                    value={formattedBudget?.unbillableCost}
+                    currency={currency?.code}
+                  />
+                </p>
+              </div>
+            </div>
+          </ToolTip>
         ) : (
           <p>- - -</p>
         )}
