@@ -6,7 +6,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../Button'
 import { HorizontalDivider } from '../Divider'
 import { ArkoraLogo } from '../Icons'
-import { TabGroup, TabItem } from '../Navigation'
+import { TabGroup, TabNavItem } from '../Navigation'
 
 const NavItem = ({ to, children }: { to: string; children: ReactNode }) => {
   return (
@@ -16,7 +16,7 @@ const NavItem = ({ to, children }: { to: string; children: ReactNode }) => {
         classNames(
           'font-medium text-sm px-3 py-1 rounded h-min min-w-[79px] grid place-content-center transition-colors outline-none',
           {
-            'bg-white text-gray-100 hover:bg-gray-10 focus-visible:bg-gray-10': !isActive,
+            'bg-white text-gray-80 hover:bg-gray-10 focus-visible:bg-gray-10': !isActive,
             'bg-purple-10 text-purple-90 hover': isActive,
           },
         )
@@ -61,9 +61,9 @@ export const Header = (): JSX.Element => {
           {/* Sub Navi */}
           <div className="h-[51px] flex gap-x-6 max-w-[1440px] mx-auto px-7 lg:px-[46px]">
             {location.pathname.includes('team') && (
-              <TabGroup>
-                <TabItem to="/team/members">Members</TabItem>
-                <TabItem to="/team/timers">Timers</TabItem>
+              <TabGroup className="gap-x-9">
+                <TabNavItem to="/team/members">Members</TabNavItem>
+                <TabNavItem to="/team/timers">Timers</TabNavItem>
               </TabGroup>
             )}
           </div>

@@ -1,5 +1,4 @@
 import { cva } from 'class-variance-authority'
-import classNames from 'classnames'
 
 const outerRingStyling = cva('relative rounded-full grid place-items-center', {
   variants: {

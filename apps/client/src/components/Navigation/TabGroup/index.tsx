@@ -7,5 +7,5 @@ export type TabGroupProps = {
 }
 
 export const TabGroup = ({ className, children }: TabGroupProps): JSX.Element => {
-  return <div className={classNames('flex gap-x-9', className)}>{children}</div>
+  return <div className={classNames('flex', className)}>{children}</div>
 }

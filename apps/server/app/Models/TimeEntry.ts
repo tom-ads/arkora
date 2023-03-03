@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
 import {
   BaseModel,
+  beforeFetch,
+  beforeFind,
   BelongsTo,
   belongsTo,
   column,
@@ -13,6 +15,15 @@ import Task from './Task'
 import { timerDifference } from 'Helpers/timer'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 
+type EntriesFilters = Partial<{
+  startDate: DateTime
+  endDate: DateTime
+  budgetId: number
+  projectId: number
+  userId: number
+  taskId: number
+}>
+
 type TimeEntryBuilder = ModelQueryBuilderContract<typeof TimeEntry>
 
 export default class TimeEntry extends BaseModel {
@@ -21,13 +32,13 @@ export default class TimeEntry extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column({ serializeAs: null })
+  @column()
   public userId: number
 
-  @column({ serializeAs: null })
+  @column()
   public budgetId: number
 
-  @column({ serializeAs: null })
+  @column()
   public taskId: number
 
   @column.date()
@@ -60,7 +71,7 @@ export default class TimeEntry extends BaseModel {
 
   // Relations
 
-  @belongsTo(() => User, { serializeAs: null })
+  @belongsTo(() => User)
   public user: BelongsTo<typeof User>
 
   @belongsTo(() => Budget)
@@ -86,7 +97,7 @@ export default class TimeEntry extends BaseModel {
     }
   )
 
-  // Methods
+  // Instance Methods
 
   public async stopTimer() {
     const diffMinutes = timerDifference(this.lastStartedAt)
@@ -99,6 +110,38 @@ export default class TimeEntry extends BaseModel {
     this.lastStartedAt = DateTime.now()
     this.lastStoppedAt = null
     this.save()
+  }
+
+  // Static Methods
+
+  public static async getTimeEntries(organisationId: number, filters: EntriesFilters) {
+    const result = await TimeEntry.query()
+      .whereHas('user', (query) => {
+        query.where('organisation_id', organisationId)
+      })
+      .if(filters?.budgetId, (query) => {
+        query.where('time_entries.budget_id', filters.budgetId!)
+      })
+      .if(filters?.userId, (query) => {
+        query.where('time_entries.user_id', filters.userId!)
+      })
+      .if(filters?.projectId, (query) => {
+        query.whereHas('budget', (budgetQuery) => {
+          budgetQuery.where('project_id', filters.projectId!)
+        })
+      })
+      .if(filters?.taskId, (query) => {
+        query.where('time_entries.task_id', filters.taskId!)
+      })
+      .if(filters.startDate || filters?.endDate, (query) => {
+        query.withScopes((scopes) => scopes.filterDate(filters?.startDate, filters?.endDate))
+      })
+      .orderBy('time_entries.date', 'asc')
+      .preload('user')
+      .preload('budget')
+      .preload('task')
+
+    return result
   }
 
   public static async getUserTimesheet(user: User, startDate: string, endDate: string) {

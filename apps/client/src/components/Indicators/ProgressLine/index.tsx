@@ -1,11 +1,10 @@
-type ProgressLineIndicator = {
-  id?: string
-  percent: number
+type ProgressLineIndicatorProps = {
+  percent: string | number
 }
 
-export const ProgressLineIndicator = ({ id, percent }: ProgressLineIndicator): JSX.Element => {
+export const ProgressLineIndicator = ({ percent }: ProgressLineIndicatorProps): JSX.Element => {
   return (
-    <svg id={id} width="100%" height="10" className="outline-none relative">
+    <svg width="100%" height="10" className="outline-none relative">
       <rect width="100%" height="10" rx="2" className="fill-purple-20" strokeLinecap="round" />
       <rect
         width={`${percent}%`}

@@ -7,8 +7,6 @@ import AppRouter from './routes'
 import { store } from './stores/store'
 import { NotifierContextProvider } from 'react-headless-notifier'
 
-import 'react-tooltip/dist/react-tooltip.css'
-
 import './styling/index.css'
 
 const notifierConfig = {
