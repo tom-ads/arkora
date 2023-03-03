@@ -1,69 +1,49 @@
-import {
-  Button,
-  Card,
-  Page,
-  PageContent,
-  PageDescription,
-  PageHeader,
-  PageTitle,
-} from '@/components'
-import {
-  BudgetsTable,
-  CreateBudgetModal,
-  ManageBudgetModal,
-  useGetBudgetsQuery,
-} from '@/features/budget'
-import { BudgetRow } from '@/features/budget'
-import { useState } from 'react'
+import { Page, PageContent, PageDescription, PageHeader, PageTitle } from '@/components'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { RootState } from '@/stores/store'
+import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
+import { useGetProjectQuery } from '../../api'
+import { ProjectBudgetView, ProjectWidget } from '../../components'
+import { ProjectTab } from '@/stores/slices/filters/project'
+import { ProjectTimeView } from '../../components/Views/Time'
+
+const views = {
+  budgets: <ProjectBudgetView />,
+  entries: <ProjectTimeView />,
+  team: <></>,
+}
+
+const ProjectView = () => {
+  const { selectedTab } = useSelector((state: RootState) => ({
+    selectedTab: state.projectFilters.tab,
+  }))
+
+  return views[selectedTab as ProjectTab]
+}
 
 export const ProjectPage = (): JSX.Element => {
-  const [budgetId, setBudgetId] = useState<number | null>(null)
-  const [openCreateBudgetModal, setOpenCreateBudgetModal] = useState(false)
+  useDocumentTitle('Projects')
 
   const { projectId } = useParams()
 
-  const { data: projectBudgets } = useGetBudgetsQuery(
-    { project_id: parseInt(projectId!, 10) },
-    { skip: !projectId },
-  )
+  const { data: project } = useGetProjectQuery(projectId!, {
+    skip: !projectId,
+  })
 
   return (
     <Page>
       <PageHeader>
         <div>
-          <PageTitle>Projects</PageTitle>
+          <PageTitle>{project?.name}</PageTitle>
           <PageDescription>Manage your organisations projects and view insights</PageDescription>
         </div>
       </PageHeader>
       <PageContent className="space-y-5">
-        <Card>
-          <Button size="xs" onClick={() => setOpenCreateBudgetModal(true)}>
-            Create Budget
-          </Button>
-        </Card>
+        <ProjectWidget />
 
-        <BudgetsTable>
-          {projectBudgets?.map((budget) => (
-            <BudgetRow
-              key={budget.id}
-              budget={budget}
-              onManage={(budgetId) => setBudgetId(budgetId)}
-            />
-          ))}
-        </BudgetsTable>
+        <ProjectView />
       </PageContent>
-
-      <CreateBudgetModal
-        isOpen={openCreateBudgetModal}
-        onClose={() => setOpenCreateBudgetModal(false)}
-      />
-      <ManageBudgetModal
-        projectId={projectId ? parseInt(projectId, 10) : null}
-        budgetId={budgetId}
-        isOpen={!!budgetId}
-        onClose={() => setBudgetId(null)}
-      />
     </Page>
   )
 }

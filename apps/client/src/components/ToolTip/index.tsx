@@ -1,24 +1,32 @@
-import classNames from 'classnames'
 import { ReactNode } from 'react'
-import { Tooltip } from 'react-tooltip'
+import * as Tooltip from '@radix-ui/react-tooltip'
 
 type ToolTipProps = {
-  id: string
-  className?: string
+  width: number
+  trigger: JSX.Element
   children: ReactNode
 }
 
-export const ToolTip = ({ id, className, children }: ToolTipProps): JSX.Element => {
+export const ToolTip = ({ width, trigger, children }: ToolTipProps): JSX.Element => {
   return (
-    <Tooltip
-      anchorId={id}
-      offset={10}
-      className={classNames(
-        '!bg-white shadow-md shadow-gray-50 py-2 px-3 !opacity-100 !inset-x-0 w-full z-10',
-        className,
-      )}
-    >
-      {children}
-    </Tooltip>
+    <Tooltip.Provider delayDuration={300} skipDelayDuration={500}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button type="button" className="outline-none w-full">
+            {trigger}
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            sideOffset={5}
+            style={{ width }}
+            className="bg-white shadow-md shadow-gray-50 py-2 px-3 rounded-sm select-none"
+          >
+            {children}
+            <Tooltip.Arrow className="fill-white" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
   )
 }

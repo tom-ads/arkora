@@ -13,12 +13,12 @@ export type Budget = {
   billableType: {
     name: BillableType
   }
-  totalCost: number
-  totalMinutes: number
-  totalSpent: number
-  totalRemaining: number
-  totalBillable: number
-  totalBillableMinutes: number
-  totalNonBillable: number
-  totalNonBillableMinutes: number
+  allocatedBudget: number
+  allocatedDuration: number
+  spentCost: number
+  remainingCost: number
+  billableCost: number
+  billableDuration: number
+  unbillableCost: number
+  unbillableDuration: number
 }

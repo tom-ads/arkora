@@ -37,7 +37,7 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
   return (
     <>
       {data && data?.length > 0 ? (
-        <TableContainer className="min-h-[800px]">
+        <TableContainer className="min-h-[400px]">
           <Table>
             <TableHead>
               <TableRow>

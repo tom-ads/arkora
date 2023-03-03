@@ -13,7 +13,7 @@ export function calculatePercentage(cost: number, total: number) {
     return 0
   }
 
-  return Math.round(Math.abs((cost / total) * 100))
+  return ((cost / total) * 100).toFixed(2)
 }
 
 export function isValidNumber(number: number) {

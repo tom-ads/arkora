@@ -1,18 +1,16 @@
 import classNames from 'classnames'
 
-type DoubleProgressLineIndicator = {
-  id?: string
-  leftPercent: number
-  rightPercent: number
+type DoubleProgressLineIndicatorProps = {
+  leftPercent: number | string
+  rightPercent: number | string
 }
 
 export const DoubleProgressLineIndicator = ({
-  id,
   leftPercent,
   rightPercent,
-}: DoubleProgressLineIndicator): JSX.Element => {
+}: DoubleProgressLineIndicatorProps): JSX.Element => {
   return (
-    <div id={id} className="flex justify-between h-[10px] w-full bg-gray-20">
+    <div className="flex justify-between h-[10px] w-full bg-gray-20">
       <div
         style={{
           height: 10,

@@ -1,6 +1,7 @@
 import { Budget } from './Budget'
 import Project from './Project'
 import Task from './Task'
+import { User } from './User'
 
 type TimeEntry = {
   id: number
@@ -12,6 +13,7 @@ type TimeEntry = {
   lastStoppedAt: string
   budget: Budget & { project: Project }
   task: Task
+  user: User
 }
 
 export default TimeEntry

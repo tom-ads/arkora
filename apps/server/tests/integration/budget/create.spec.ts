@@ -66,14 +66,14 @@ test.group('Budgets : Create Budget', (group) => {
       billable_type: {
         name: billableTypes[0].name,
       },
-      total_billable: 0,
-      total_billable_minutes: 0,
-      total_cost: 10000000,
-      total_minutes: 60000,
-      total_non_billable: 0,
-      total_non_billable_minutes: 0,
-      total_remaining: 10000000,
-      total_spent: 0,
+      spent_cost: 0,
+      remaining_cost: 10000000,
+      allocated_budget: 10000000,
+      allocated_duration: 60000,
+      billable_cost: 0,
+      billable_duration: 0,
+      unbillable_cost: 0,
+      unbillable_duration: 0,
     })
   })
 
@@ -105,14 +105,14 @@ test.group('Budgets : Create Budget', (group) => {
       hourly_rate: payload.hourly_rate,
       budget_type: { name: BudgetKind.FIXED },
       billable_type: { name: billableTypes[0].name },
-      total_billable: 0,
-      total_billable_minutes: 0,
-      total_cost: 10000000,
-      total_minutes: 60000,
-      total_non_billable: 0,
-      total_non_billable_minutes: 0,
-      total_remaining: 10000000,
-      total_spent: 0,
+      spent_cost: 0,
+      remaining_cost: 10000000,
+      allocated_budget: 10000000,
+      allocated_duration: 60000,
+      billable_cost: 0,
+      billable_duration: 0,
+      unbillable_cost: 0,
+      unbillable_duration: 0,
     })
   })
 
@@ -141,7 +141,7 @@ test.group('Budgets : Create Budget', (group) => {
       colour: payload.colour,
       budget_type: { name: BudgetKind.NON_BILLABLE },
       billable_type: { name: billableTypes[1].name },
-      total_minutes: 30000,
+      allocated_duration: 30000,
     })
   })
 
@@ -194,14 +194,14 @@ test.group('Budgets : Create Budget', (group) => {
       billable_type: {
         name: billableTypes[0].name,
       },
-      total_billable: 0,
-      total_billable_minutes: 0,
-      total_cost: 10000000,
-      total_minutes: 60000,
-      total_non_billable: 0,
-      total_non_billable_minutes: 0,
-      total_remaining: 10000000,
-      total_spent: 0,
+      spent_cost: 0,
+      remaining_cost: 10000000,
+      allocated_budget: 10000000,
+      allocated_duration: 60000,
+      billable_cost: 0,
+      billable_duration: 0,
+      unbillable_cost: 0,
+      unbillable_duration: 0,
     })
 
     // Load budget members
