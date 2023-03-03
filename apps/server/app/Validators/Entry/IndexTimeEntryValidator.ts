@@ -30,6 +30,7 @@ export default class IndexTimeEntryValidator {
     budget_id: schema.number.optional(),
     task_id: schema.number.optional(),
     user_id: schema.number.optional(),
+    billable: schema.enum.optional(['billable', 'unbillable']),
   })
 
   /**

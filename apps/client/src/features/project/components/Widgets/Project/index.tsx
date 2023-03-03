@@ -4,6 +4,7 @@ import { ProjectTab, setFilters } from '@/stores/slices/filters/project'
 import { RootState } from '@/stores/store'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { ProjectTimeEntryFilters } from '../../Filters'
 
 export const ProjectWidget = (): JSX.Element => {
   const dispatch = useDispatch()
@@ -52,7 +53,7 @@ export const ProjectWidget = (): JSX.Element => {
 
       <HorizontalDivider />
 
-      <div className="px-5"></div>
+      <div className="px-5 pt-4">{selectedTab === 'entries' && <ProjectTimeEntryFilters />}</div>
 
       <CreateBudgetModal
         isOpen={openActionModal && selectedTab === 'budgets'}

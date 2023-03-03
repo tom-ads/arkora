@@ -16,6 +16,7 @@ const timeEntryEndpoints = appApi.injectEndpoints({
           ...(params?.user_id && { task_id: params.user_id }),
           ...(params?.start_date && { task_id: params.start_date }),
           ...(params?.end_date && { task_id: params.end_date }),
+          ...(params?.billable && { billable: params.billable }),
         },
       }),
     }),

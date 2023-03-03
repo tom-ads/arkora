@@ -42,7 +42,7 @@ export default class Task extends BaseModel {
   })
   public budgets: ManyToMany<typeof Budget>
 
-  // Methods
+  // Static Methods
 
   public static async getCommonTasks() {
     return await Task.query().whereIn('name', Object.values(CommonTask))

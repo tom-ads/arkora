@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import UserRole from 'App/Enum/UserRole'
-import TimeEntry from 'App/Models/TimeEntry'
+import TimeEntry, { BillableOptions } from 'App/Models/TimeEntry'
 import IndexTimeEntryValidator from 'App/Validators/Entry/IndexTimeEntryValidator'
 
 export default class TimeEntriesController {
@@ -19,8 +19,12 @@ export default class TimeEntriesController {
       userId: payload.user_id,
       startDate: payload.start_date,
       endDate: payload.end_date,
+      billable: payload.billable as BillableOptions,
     })
 
-    return entries.map((entry) => entry.serialize())
+    return entries.map((entry) => ({
+      ...entry.serialize(),
+      is_billable: Boolean(entry.$extras.is_billable),
+    }))
   }
 }

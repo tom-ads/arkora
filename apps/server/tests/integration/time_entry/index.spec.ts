@@ -152,6 +152,38 @@ test.group('Time Entries : Index', ({ each }) => {
     response.assertBodyContains([{ budget_id: budget.id }])
   })
 
+  test('organisation member can filter entries by billable', async ({ client, route, assert }) => {
+    const response = await client
+      .get(route('TimeEntryController.index'))
+      .qs({ billable: 'billable' })
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(200)
+
+    assert.lengthOf(response.body(), 10)
+
+    response.assertBodyContains([{ is_billable: true }])
+  })
+
+  test('organisation member can filter entries by unbillable', async ({
+    client,
+    route,
+    assert,
+  }) => {
+    const response = await client
+      .get(route('TimeEntryController.index'))
+      .qs({ billable: 'unbillable' })
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(200)
+
+    assert.lengthOf(response.body(), 0)
+  })
+
   test('organisation member can only filter entries by their user_id', async ({
     client,
     route,

@@ -98,7 +98,7 @@ export const TimeEntryRow = ({ value }: TimeEntryRowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        {value.task.isBillable ? (
+        {value.isBillable ? (
           <div className="w-7 h-7 grid place-content-center bg-green-10 rounded-full shrink-0 mx-auto">
             <TickIcon className="text-green-90 w-4" />
           </div>
