@@ -262,10 +262,10 @@ test.group('Budgets: All Budgets', ({ each }) => {
     response.assertBodyContains(
       budgets.map((budget) => ({
         ...budget.serialize(),
-        total_spent: 20000,
-        total_billable: 20000,
-        total_billable_minutes: 120,
-        total_remaining: 9980000,
+        spent_cost: 20000,
+        billable_cost: 20000,
+        billable_duration: 120,
+        remaining_cost: 9980000,
       }))
     )
   })
