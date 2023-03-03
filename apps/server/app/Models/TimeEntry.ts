@@ -1,8 +1,6 @@
 import { DateTime } from 'luxon'
 import {
   BaseModel,
-  beforeFetch,
-  beforeFind,
   BelongsTo,
   belongsTo,
   column,
@@ -15,6 +13,8 @@ import Task from './Task'
 import { timerDifference } from 'Helpers/timer'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 
+export type BillableOptions = 'billable' | 'unbillable'
+
 type EntriesFilters = Partial<{
   startDate: DateTime
   endDate: DateTime
@@ -22,6 +22,7 @@ type EntriesFilters = Partial<{
   projectId: number
   userId: number
   taskId: number
+  billable: BillableOptions
 }>
 
 type TimeEntryBuilder = ModelQueryBuilderContract<typeof TimeEntry>
@@ -116,8 +117,14 @@ export default class TimeEntry extends BaseModel {
 
   public static async getTimeEntries(organisationId: number, filters: EntriesFilters) {
     const result = await TimeEntry.query()
+      .select('time_entries.*', 'budget_tasks.is_billable')
       .whereHas('user', (query) => {
         query.where('organisation_id', organisationId)
+      })
+      .leftJoin('budget_tasks', (subQuery) => {
+        subQuery
+          .on('time_entries.budget_id', '=', 'budget_tasks.budget_id')
+          .andOn('time_entries.task_id', '=', 'budget_tasks.task_id')
       })
       .if(filters?.budgetId, (query) => {
         query.where('time_entries.budget_id', filters.budgetId!)
@@ -135,6 +142,9 @@ export default class TimeEntry extends BaseModel {
       })
       .if(filters.startDate || filters?.endDate, (query) => {
         query.withScopes((scopes) => scopes.filterDate(filters?.startDate, filters?.endDate))
+      })
+      .if(filters.billable, (query) => {
+        query.where('budget_tasks.is_billable', filters?.billable === 'billable')
       })
       .orderBy('time_entries.date', 'asc')
       .preload('user')

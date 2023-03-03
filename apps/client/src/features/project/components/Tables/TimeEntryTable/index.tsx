@@ -1,16 +1,25 @@
 import { Table, TableBody, TableContainer, TableHead, TableHeading, TableRow } from '@/components'
 import { useGetTimeEntriesQuery } from '@/features/time_entry'
+import { RootState } from '@/stores/store'
+import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { TimeEntryRow, TimeEntrySkeletonRow } from '../Rows/TimeEntryRow'
 
 export const TimeEntryTable = (): JSX.Element => {
   const { projectId } = useParams()
 
+  const { billableFilter } = useSelector((state: RootState) => ({
+    billableFilter: state.projectFilters.timeEntry.billable,
+  }))
+
   const { data: projectEntries, isFetching } = useGetTimeEntriesQuery(
-    { project_id: parseInt(projectId!, 10) },
+    {
+      project_id: parseInt(projectId!, 10),
+      billable: billableFilter,
+    },
     { skip: !projectId },
   )
-  console.log(isFetching)
+
   return (
     <TableContainer className="min-h-[768px]">
       <Table>

@@ -14,6 +14,7 @@ type TimeEntry = {
   budget: Budget & { project: Project }
   task: Task
   user: User
+  isBillable: boolean
 }
 
 export default TimeEntry
