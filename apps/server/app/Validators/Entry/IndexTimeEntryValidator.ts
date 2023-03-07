@@ -29,7 +29,7 @@ export default class IndexTimeEntryValidator {
     project_id: schema.number.optional(),
     budget_id: schema.number.optional(),
     task_id: schema.number.optional(),
-    user_id: schema.number.optional(),
+    members: schema.array.optional().members(schema.number()),
     billable: schema.enum.optional(['billable', 'unbillable']),
   })
 

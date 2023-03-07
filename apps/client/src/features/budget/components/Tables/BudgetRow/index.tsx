@@ -9,9 +9,10 @@ import {
   TableRow,
   ToolTip,
 } from '@/components'
+import BillableType from '@/enums/BillableType'
 import BudgetType from '@/enums/BudgetType'
 import { calculatePercentage, convertToPounds } from '@/helpers/currency'
-import { formatToHours } from '@/helpers/date'
+import { convertMinutesToHours, formatToHours } from '@/helpers/date'
 import { RootState } from '@/stores/store'
 import { Budget } from '@/types'
 import { useMemo } from 'react'

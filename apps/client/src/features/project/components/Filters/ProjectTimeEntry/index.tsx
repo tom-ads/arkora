@@ -1,19 +1,22 @@
-import { FormControl, FormSelect, Form, Button } from '@/components'
+import { FormControl, FormSelect, Form, Button, FormMultiSelect } from '@/components'
 import { SelectOption } from '@/components/Forms/Select/option'
+import { useGetAccountsQuery } from '@/features/account'
 import { setFilters } from '@/stores/slices/filters/project'
 import { RootState } from '@/stores/store'
 import { useEffect, useMemo } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-import { URLSearchParamsInit, useSearchParams } from 'react-router-dom'
+import { URLSearchParamsInit, useParams, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
 type FormFields = {
   billable: 'billable' | 'unbillable' | null
+  users: number[]
 }
 
 const formSchema = z.object({
   billable: z.boolean().nullable(),
+  users: z.array(z.number()),
 })
 
 type FormWrapperProps = UseFormReturn<FormFields> & {
@@ -25,7 +28,8 @@ const FormWrapper = ({ getValues, watch, children }: FormWrapperProps): JSX.Elem
 
   const [params, setParams] = useSearchParams()
 
-  const { billableFilter } = useSelector((state: RootState) => ({
+  const { membersFilter, billableFilter } = useSelector((state: RootState) => ({
+    membersFilter: state.projectFilters.timeEntry.members,
     billableFilter: state.projectFilters.timeEntry.billable,
   }))
 
@@ -49,16 +53,33 @@ const FormWrapper = ({ getValues, watch, children }: FormWrapperProps): JSX.Elem
     dispatch(
       setFilters({
         timeEntry: {
+          members: getValues('users'),
           billable: getValues('billable'),
         },
       }),
     )
-  }, [watch('billable')])
+  }, [watch('users'), watch('billable')])
 
   return children
 }
 
 export const ProjectTimeEntryFilters = (): JSX.Element => {
+  const { projectId } = useParams()
+
+  const { data: projectMembers } = useGetAccountsQuery(
+    { projectId: projectId!, status: 'INVITE_ACCEPTED' },
+    { skip: !projectId },
+  )
+
+  const memberOptions = useMemo(() => {
+    return (
+      projectMembers?.map((member) => ({
+        id: member.id,
+        display: `${member.firstname} ${member.lastname}`,
+      })) ?? []
+    )
+  }, [projectMembers])
+
   const billableOptions = useMemo(() => {
     return [
       { id: 'billable', display: 'Billable' },
@@ -72,13 +93,37 @@ export const ProjectTimeEntryFilters = (): JSX.Element => {
       validationSchema={formSchema}
       defaultValues={{
         billable: null,
+        users: [],
       }}
     >
       {(methods) => (
         <FormWrapper {...methods}>
-          <span></span>
+          <FormControl className="w-[100p] md:w-[200px]">
+            <FormSelect name="billable" placeHolder="Filter billable" control={methods.control}>
+              {billableOptions?.map((option) => (
+                <SelectOption key={option.id} id={option.id}>
+                  {option.display}
+                </SelectOption>
+              ))}
+            </FormSelect>
+          </FormControl>
 
           <div className="flex items-center gap-4">
+            <FormControl className="w-[100p] md:w-[250px]">
+              <FormMultiSelect
+                name="users"
+                placeHolder="Filter team"
+                holderTxt="Members"
+                control={methods.control}
+              >
+                {memberOptions?.map((option) => (
+                  <SelectOption key={option.id} id={option.id}>
+                    {option.display}
+                  </SelectOption>
+                ))}
+              </FormMultiSelect>
+            </FormControl>
+
             <FormControl className="w-[100p] md:w-[200px]">
               <FormSelect name="billable" placeHolder="Filter billable" control={methods.control}>
                 {billableOptions?.map((option) => (

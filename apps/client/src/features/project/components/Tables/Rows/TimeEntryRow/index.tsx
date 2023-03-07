@@ -2,6 +2,7 @@ import {
   Avatar,
   ColourRing,
   CrossIcon,
+  FormatDateTime,
   SkeletonBox,
   TableData,
   TableRow,
@@ -11,6 +12,7 @@ import {
 import { SkeletonCircle } from '@/components/Skeletons/Circle'
 import { formatToHours } from '@/helpers/date'
 import TimeEntry from '@/types/TimeEntry'
+import { DateTime } from 'luxon'
 
 type TimeEntryRowProps = {
   value: TimeEntry
@@ -87,6 +89,10 @@ export const TimeEntryRow = ({ value }: TimeEntryRowProps): JSX.Element => {
 
       <TableData>
         <span className="whitespace-pre-wrap">{value.description || '- - -'}</span>
+      </TableData>
+
+      <TableData>
+        <FormatDateTime value={value.date} format={DateTime.DATE_MED} />
       </TableData>
 
       <TableData>

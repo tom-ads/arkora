@@ -20,7 +20,7 @@ type EntriesFilters = Partial<{
   endDate: DateTime
   budgetId: number
   projectId: number
-  userId: number
+  members: number[]
   taskId: number
   billable: BillableOptions
 }>
@@ -129,8 +129,8 @@ export default class TimeEntry extends BaseModel {
       .if(filters?.budgetId, (query) => {
         query.where('time_entries.budget_id', filters.budgetId!)
       })
-      .if(filters?.userId, (query) => {
-        query.where('time_entries.user_id', filters.userId!)
+      .if(filters?.members, (query) => {
+        query.whereIn('time_entries.user_id', filters.members!)
       })
       .if(filters?.projectId, (query) => {
         query.whereHas('budget', (budgetQuery) => {

@@ -8,8 +8,10 @@ Route.group(() => {
     Route.get('/', 'ProjectController.view')
     Route.put('/', 'ProjectController.update')
     Route.delete('/', 'ProjectController.delete')
+
+    Route.get('/insights', 'ProjectController.insights')
   })
-    .prefix(':project')
+    .prefix(':projectId')
     .where('project', Route.matchers.number())
 })
   .prefix('/projects')

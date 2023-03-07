@@ -5,6 +5,7 @@ type GetAccountsRequest = Partial<{
   search: string | null
   role: UserRole | null
   status: TeamMemberStatus | null
+  projectId: number | string | null
   page: number | null
 }>
 

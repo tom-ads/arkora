@@ -174,4 +174,14 @@ export default class ProjectController {
 
     return ctx.response.noContent()
   }
+
+  @bind()
+  public async insights(ctx: HttpContextContract, project: Project) {
+    const insights = await project.getProjectInsights()
+
+    return {
+      ...insights,
+      ...project.serialize(),
+    }
+  }
 }

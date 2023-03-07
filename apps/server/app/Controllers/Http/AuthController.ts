@@ -35,7 +35,7 @@ export default class AuthController {
     const [currency, weekDays, commonTasks] = await Promise.all([
       Currency.findByOrFail('code', organisation.currency),
       WorkDay.query().withScopes((scopes) => scopes.workDayNames(organisation.work_days)),
-      Task.getCommonTasks(),
+      Task.getDefaultTasks(),
     ])
 
     // Create organisation and relations
@@ -119,7 +119,7 @@ export default class AuthController {
     const payload = await ctx.request.validate(LoginValidator)
 
     const user = await User.query()
-      .withScopes((scopes) => scopes.organisationUser(payload.email, originSubdomain))
+      .withScopes((scopes) => scopes.organisationUser(payload.email.toLowerCase(), originSubdomain))
       .preload('role')
       .first()
 

@@ -29,6 +29,7 @@ import { NonBillableSection } from '../BudgetForm/Sections/NonBillable'
 import { VariableBudgetSection } from '../BudgetForm/Sections/VariableBudget'
 import { convertToPennies, convertToPounds } from '@/helpers/currency'
 import { useQueryError } from '@/hooks/useQueryError'
+import { convertMinutesToHours } from '@/helpers/date'
 
 type UpdateBudgetFormProps = {
   onClose: () => void
@@ -133,17 +134,20 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
 
   useEffect(() => {
     if (budget) {
+      let actualBudget = convertToPounds(budget.allocatedBudget)
+      if (
+        budget.budgetType?.name === BudgetType.NON_BILLABLE ||
+        budget.billableType.name === BillableType.TOTAL_HOURS
+      ) {
+        actualBudget = convertMinutesToHours(budget.allocatedDuration)
+      }
+
       setValue('name', budget.name)
       setValue('budgetType', budget.budgetType.name)
       setValue('billableType', budget.billableType.name)
       setValue('colour', budget.colour)
       setValue('private', budget.private)
-      setValue(
-        'budget',
-        budget.budgetType?.name === BudgetType.NON_BILLABLE
-          ? budget.totalMinutes / 60
-          : convertToPounds(budget.totalCost),
-      )
+      setValue('budget', actualBudget)
       setValue('hourlyRate', budget.hourlyRate ? convertToPounds(budget.hourlyRate) : undefined)
       setValue('fixedPrice', budget.fixedPrice ? convertToPounds(budget.fixedPrice) : undefined)
     }

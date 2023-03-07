@@ -23,6 +23,7 @@ import { isFetchBaseQueryError } from '@/hooks/useQueryError'
 import { useToast } from '@/hooks/useToast'
 import { RootState } from '@/stores/store'
 import { ModalBaseProps } from '@/types'
+import { camelCase, startCase } from 'lodash'
 import { DateTime } from 'luxon'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -55,8 +56,8 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
 
   const [deleteMember, { isLoading: deletingMember }] = useDeleteAccountMutation()
 
-  const { authUserRole } = useSelector((state: RootState) => ({
-    authUserRole: state.auth.user?.role?.name,
+  const { authUser } = useSelector((state: RootState) => ({
+    authUser: state.auth.user,
   }))
 
   const {
@@ -190,7 +191,9 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
 
             <FormControl>
               <FormLabel htmlFor="surname">Role</FormLabel>
-              {authUserRole === UserRole.ORG_ADMIN || authUserRole === UserRole.OWNER ? (
+              {(authUser?.role?.name === UserRole.ORG_ADMIN ||
+                authUser?.role?.name === UserRole.OWNER) &&
+              member?.role?.name !== UserRole.OWNER ? (
                 <FormSelect name="role" control={control} placeHolder="Select role" fullWidth>
                   {roleOptions?.map((option) => (
                     <SelectOption key={option.id} id={option.id}>
@@ -199,19 +202,24 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
                   ))}
                 </FormSelect>
               ) : (
-                <ReadOnly value={watch('role')} />
+                <ReadOnly value={camelCase(startCase(watch('role') ?? ''))} />
               )}
             </FormControl>
 
             <ModalFooter className="!mt-24">
-              <Button
-                variant="blank"
-                onClick={() => setOpenConfirmationModal(true)}
-                disabled={updatingMember || deletingMember}
-                danger
-              >
-                Remove
-              </Button>
+              {authUser?.id !== member?.id || member?.role?.name !== UserRole.OWNER ? (
+                <Button
+                  variant="blank"
+                  onClick={() => setOpenConfirmationModal(true)}
+                  disabled={updatingMember || deletingMember}
+                  danger
+                >
+                  Remove
+                </Button>
+              ) : (
+                <span></span>
+              )}
+
               <Button
                 size="xs"
                 className="max-w-[160px]"

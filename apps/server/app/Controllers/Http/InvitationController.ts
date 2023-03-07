@@ -20,9 +20,9 @@ export default class InvitationController {
     const existingUsers = await ctx.organisation?.related('users').query()
 
     // Prevent invitee emails to already exist as organisation members
-    const filteredInvites = uniqBy(payload.members, 'email').filter(
-      (invitee) => !existingUsers?.some((user) => user.email === invitee.email)
-    )
+    const filteredInvites = uniqBy(payload.members, 'email').filter((invitee) => {
+      !existingUsers?.some((user) => user.email.toLowerCase() === invitee.email.toLowerCase())
+    })
 
     if (filteredInvites?.length) {
       try {

@@ -6,18 +6,20 @@ import classNames from 'classnames'
 import { Fragment, useMemo, useState } from 'react'
 import { useController } from 'react-hook-form'
 
-type FormSelectProps = {
+export interface FormSelectBaseProps {
   name: string
   control: any
   size?: 'xs' | 'sm' | 'md' | 'lg'
-  placeHolder?: string
   error?: boolean
   disabled?: boolean
   fullWidth?: boolean
   children: JSX.Element[]
+  placeHolder: string
 }
 
-const listBoxButton = cva(
+type FormSelectProps = FormSelectBaseProps
+
+export const selectBtnStyling = cva(
   'relative border w-full rounded placeholder:text-gray-60 font-normal text-gray-80 transition-all outline-none flex items-center justify-between z-0 disabled:bg-gray-20',
   {
     variants: {
@@ -53,7 +55,7 @@ const listBoxButton = cva(
   },
 )
 
-const listBoxOptions = cva(
+export const selectOptionStyling = cva(
   'absolute bg-white w-full shadow-sm gap-y-1 rounded shadow-gray-40 overflow-y-auto flex flex-col outline-none scrollbar-hide z-50 p-3 min-h-[150px] max-h-[200px]',
   {
     variants: {
@@ -69,7 +71,7 @@ export const FormSelect = ({
   name,
   control,
   disabled,
-  size = 'sm',
+  size,
   placeHolder = 'Select option',
   error,
   fullWidth = false,
@@ -99,7 +101,7 @@ export const FormSelect = ({
       <Listbox value={value} onChange={onChange} disabled={disabled}>
         {({ open }) => (
           <>
-            <Listbox.Button className={listBoxButton({ size, error, focused })}>
+            <Listbox.Button className={selectBtnStyling({ size, error, focused })}>
               <span
                 className={classNames('text-gray-60 text-start truncate capitalize', {
                   'text-gray-90': selectedItem?.children,
@@ -137,7 +139,7 @@ export const FormSelect = ({
               <Listbox.Options
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                className={listBoxOptions({ fullWidth })}
+                className={selectOptionStyling({ fullWidth })}
                 static
               >
                 {validChildren.map((child) => (

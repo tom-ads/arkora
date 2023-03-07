@@ -6,6 +6,7 @@ export type ProjectTab = 'budgets' | 'entries' | 'team'
 export type BillableTimeEntry = 'billable' | 'unbillable'
 
 export type ProjectTimeEntryFilters = {
+  members: number[]
   billable: BillableTimeEntry | null
 }
 
@@ -17,6 +18,7 @@ interface ProjectFilterState {
 const initialState: ProjectFilterState = {
   tab: 'budgets',
   timeEntry: {
+    members: [],
     billable: null,
   },
 }

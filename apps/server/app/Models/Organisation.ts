@@ -40,6 +40,7 @@ type TeamFilters = Partial<{
   search: string
   role: UserRole
   status: Verify
+  projectId: number
   page: number
 }>
 
@@ -168,37 +169,42 @@ export default class Organisation extends BaseModel {
     return !!result
   }
 
-  public async getTeamMembers(this: Organisation, userId: number, filters?: TeamFilters) {
+  public async getTeamMembers(this: Organisation, filters?: TeamFilters) {
     const result = await this.related('users')
       .query()
       .select('users.*')
-      .where((builder) => {
+      .if(filters?.search, (builder) => {
         builder
-          .whereNot('users.id', userId)
-          .if(filters?.search, (builder) => {
-            builder
-              .whereILike('users.firstname', `%${filters!.search!}%`)
-              .orWhereILike('users.lastname', `%${filters!.search!}%`)
-          })
-          .match(
-            [
-              filters?.status === Verify.INVITE_ACCEPTED,
-              (userBuilder) => userBuilder.whereNotNull('verified_at'),
-            ],
-            [
-              filters?.status === Verify.INVITE_PENDING,
-              (userBuilder) => userBuilder.whereNull('verified_at'),
-            ]
-          )
+          .whereILike('users.firstname', `%${filters!.search!}%`)
+          .orWhereILike('users.lastname', `%${filters!.search!}%`)
       })
+
+      .if(filters?.projectId, (builder) => {
+        builder.whereHas('projects', (projectBuilder) => {
+          projectBuilder.where('id', filters?.projectId!)
+        })
+      })
+
       .if(filters?.role, (userBuilder) =>
-        userBuilder.join('roles', (builder) => {
-          builder.on('users.role_id', '=', 'roles.id').andOnVal('roles.name', filters!.role!)
+        userBuilder.whereHas('role', (roleBuilder) => {
+          roleBuilder.where('name', filters?.role!)
         })
       )
+
       .if(filters?.page, (userBuilder) => {
         userBuilder.forPage(filters!.page!, 10)
       })
+
+      .match(
+        [
+          filters?.status === Verify.INVITE_ACCEPTED,
+          (userBuilder) => userBuilder.whereNotNull('verified_at'),
+        ],
+        [
+          filters?.status === Verify.INVITE_PENDING,
+          (userBuilder) => userBuilder.whereNull('verified_at'),
+        ]
+      )
       .orderBy('users.lastname')
 
     return result

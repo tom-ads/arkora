@@ -13,6 +13,7 @@ import {
 import { useGetAccountsQuery } from '@/features/account'
 import { useResendInvitationMutation } from '@/features/auth'
 import { RootState } from '@/stores/store'
+import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 import { TeamMembersTableRow } from './row'
@@ -30,10 +31,11 @@ type TeamMembersTableProps = {
 }
 
 export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Element => {
-  const { searchFilter, roleFilter, statusFilter } = useSelector((state: RootState) => ({
+  const { searchFilter, roleFilter, statusFilter, authId } = useSelector((state: RootState) => ({
     searchFilter: state.teamMemberFilters.search,
     roleFilter: state.teamMemberFilters.role,
     statusFilter: state.teamMemberFilters.status,
+    authId: state.auth.user?.id,
   }))
 
   const [triggerResend] = useResendInvitationMutation()
@@ -49,9 +51,13 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
     await triggerResend({ userId })
   }
 
+  const filteredMembers = useMemo(() => {
+    return members?.filter((member) => member?.id !== authId)
+  }, [members])
+
   return (
     <>
-      {members && members?.length > 0 ? (
+      {filteredMembers && filteredMembers?.length > 0 ? (
         <TableContainer>
           <Form<FormFields, typeof membersTableSchema>>
             {() => (
@@ -70,7 +76,7 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {members?.map((member) => (
+                  {filteredMembers?.map((member) => (
                     <TeamMembersTableRow
                       key={member.id}
                       value={member}
@@ -85,7 +91,7 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
       ) : (
         <TableEmpty
           icon={<UserIcon />}
-          title="Team"
+          title="No Team Members"
           btnText="Invite Members"
           btnOnClick={onCreate}
           description="Invite team members to assign them to client projects and monitor their time and cost"

@@ -27,6 +27,7 @@ import BudgetKind from 'App/Enum/BudgetKind'
 import BillableKind from 'App/Enum/BillableKind'
 
 type BudgetFilters = Partial<{
+  projectId: number
   page: number
 }>
 
@@ -85,14 +86,12 @@ export default class Budget extends BaseModel {
       return this.fixedPrice
     }
 
-    if (this.billableType?.name) {
-      // Hour based budgets need to calc total cost using: total_hours * rate
-      if (
-        this.budgetType.name === BudgetKind.VARIABLE &&
-        this.billableType.name === BillableKind.TOTAL_HOURS
-      ) {
-        return (this.budget / 60) * ((this.hourlyRate ?? 0) / 100)
-      }
+    // Hour based budgets need to calc total cost using: total_hours * rate
+    if (
+      this?.budgetType?.name === BudgetKind.VARIABLE &&
+      this?.billableType?.name === BillableKind.TOTAL_HOURS
+    ) {
+      return (this.budget / 60) * ((this.hourlyRate ?? 0) / 100)
     }
 
     return this.budget
@@ -150,6 +149,15 @@ export default class Budget extends BaseModel {
       return
     }
 
+    if (
+      this.budgetType?.name === BudgetKind.FIXED &&
+      this.billableType?.name === BillableKind.TOTAL_HOURS
+    ) {
+      const approxRate = this.fixedPrice! / Math.round(this.budget / 60)
+      const durationHrs = Math.round((this.billableDuration ?? 0) / 60)
+      return durationHrs * approxRate
+    }
+
     return parseInt(this.$extras.billable_cost ?? 0, 10)
   }
 
@@ -166,6 +174,19 @@ export default class Budget extends BaseModel {
   public get unbillableCost() {
     if (this.budgetType?.name === BudgetKind.NON_BILLABLE) {
       return
+    }
+
+    if (
+      this.budgetType?.name === BudgetKind.FIXED &&
+      this.billableType?.name === BillableKind.TOTAL_HOURS
+    ) {
+      /* 
+        Improv: Use a more rigorous rounding method instead of math.round,
+        10.08333333 -> 10 ...
+      */
+      const approxRate = this.fixedPrice! / Math.round(this.budget / 60)
+      const durationHrs = Math.round((this.unbillableDuration ?? 0) / 60)
+      return durationHrs * approxRate
     }
 
     return parseInt(this.$extras.unbillable_cost ?? 0, 10)
@@ -250,7 +271,7 @@ export default class Budget extends BaseModel {
     return query.where('private', false)
   })
 
-  public static budgetMetrics = scope((query: BudgetBuilder, budgetIds: number[]) => {
+  public static budgetMetrics = scope((query: BudgetBuilder) => {
     return query
       .select(
         'budgets.*',
@@ -279,7 +300,6 @@ export default class Budget extends BaseModel {
           ON budgets.id = entries.budget_id
         `
       )
-      .whereIn('budgets.id', budgetIds)
       .orderBy('budgets.name')
   })
 
@@ -302,8 +322,13 @@ export default class Budget extends BaseModel {
   */
   public static async getBudgetsMetrics(budgetIds: number[], filters?: BudgetFilters) {
     const result = await Budget.query()
-      .withScopes((scopes) => scopes.budgetMetrics(budgetIds))
+      .withScopes((scopes) => scopes.budgetMetrics())
+      .whereIn('budgets.id', budgetIds)
       .preload('project')
+
+      .if(filters?.projectId, (builder) => {
+        builder.where('budgets.project_id', filters!.projectId!)
+      })
 
       .if(filters?.page, (builder) => {
         builder.forPage(filters!.page!, 10)
@@ -314,7 +339,8 @@ export default class Budget extends BaseModel {
 
   public static async getBudgetMetrics(budgetId: number) {
     const result = await Budget.query()
-      .withScopes((scopes) => scopes.budgetMetrics([budgetId]))
+      .withScopes((scopes) => scopes.budgetMetrics())
+      .where('budgets.id', budgetId)
       .first()
 
     return result

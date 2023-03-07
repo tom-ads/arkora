@@ -8,14 +8,16 @@ import { TimeEntryRow, TimeEntrySkeletonRow } from '../Rows/TimeEntryRow'
 export const TimeEntryTable = (): JSX.Element => {
   const { projectId } = useParams()
 
-  const { billableFilter } = useSelector((state: RootState) => ({
+  const { membersFilter, billableFilter } = useSelector((state: RootState) => ({
+    membersFilter: state.projectFilters.timeEntry.members,
     billableFilter: state.projectFilters.timeEntry.billable,
   }))
 
-  const { data: projectEntries, isFetching } = useGetTimeEntriesQuery(
+  const { data: projectEntries, isLoading } = useGetTimeEntriesQuery(
     {
       project_id: parseInt(projectId!, 10),
       billable: billableFilter,
+      members: membersFilter,
     },
     { skip: !projectId },
   )
@@ -29,6 +31,7 @@ export const TimeEntryTable = (): JSX.Element => {
             <TableHeading className="w-[160px]">NAME</TableHeading>
             <TableHeading className="w-[160px]">BUDGET</TableHeading>
             <TableHeading className="w-[300px]">DESCRIPTION</TableHeading>
+            <TableHeading className="w-[100px]">Date</TableHeading>
             <TableHeading className="w-[100px]">ESTIMATE</TableHeading>
             <TableHeading className="w-[100px]">TIME</TableHeading>
             <TableHeading className="w-[65px]">BILLABLE</TableHeading>
@@ -36,7 +39,7 @@ export const TimeEntryTable = (): JSX.Element => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {isFetching ? (
+          {isLoading ? (
             <>
               {Array.from({ length: 10 }).map((_, idx) => (
                 <TimeEntrySkeletonRow key={idx} />

@@ -1,10 +1,10 @@
-import { Page, PageContent, PageDescription, PageHeader, PageTitle } from '@/components'
+import { Page, PageContent, PageHeader, PageTitle } from '@/components'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useGetProjectQuery } from '../../api'
-import { ProjectBudgetView, ProjectWidget } from '../../components'
+import { ProjectBudgetView, ProjectInsights, ProjectWidget } from '../../components'
 import { ProjectTab } from '@/stores/slices/filters/project'
 import { ProjectTimeView } from '../../components/Views/Time'
 
@@ -36,10 +36,12 @@ export const ProjectPage = (): JSX.Element => {
       <PageHeader>
         <div>
           <PageTitle>{project?.name}</PageTitle>
-          <PageDescription>Manage your organisations projects and view insights</PageDescription>
+          <span className="text-xl text-gray-40 font-medium">{project?.client?.name}</span>
         </div>
       </PageHeader>
       <PageContent className="space-y-5">
+        <ProjectInsights />
+
         <ProjectWidget />
 
         <ProjectView />
