@@ -1,4 +1,5 @@
 import { DateTime, Interval } from 'luxon'
+import { minutesToTime } from './tracking'
 
 /* credit to thread for solution: https://github.com/moment/luxon/issues/118 */
 function getOrdinalSuffix(n: number) {
@@ -22,15 +23,13 @@ export function addOrdinalSuffix(date: DateTime, format: string) {
   return formattedDate.replace(/(?<=\d)\s/, getOrdinalSuffix(monthDay))
 }
 
-export function durationToFormattedTime(duration: number) {
-  const hours = Math.floor(Math.abs(duration / 60))
-  const minutes = duration % 60
+export function durationToFormattedTime(durationMinutes: number) {
+  const hours = Math.floor(Math.abs(durationMinutes / 60))
+  const minutes = durationMinutes % 60
 
   return {
     displayFormat: `${hours}h ${minutes}m`,
-    consumableFormat: `${hours < 10 ? `0${hours}` : hours}:${
-      minutes < 10 ? `0${minutes}` : minutes
-    }`,
+    consumableFormat: minutesToTime(durationMinutes),
   }
 }
 
@@ -44,12 +43,16 @@ export function formatToHours(minutes: number) {
   const totalHours = parseInt(minutes / 60, 10)
   const totalMinutes = minutes % 60
 
-  const formattedHours = totalHours < 10 ? `0${totalHours}` : totalHours
-  const formattedMinutes = totalMinutes < 10 ? `0${totalMinutes}` : totalMinutes
+  const formattedHours = padTimeUnit(totalHours)
+  const formattedMinutes = padTimeUnit(totalMinutes)
 
   return `${formattedHours}h ${formattedMinutes}m`
 }
 
 export function convertMinutesToHours(minutes: number) {
   return minutes / 60
+}
+
+export function padTimeUnit(value: number) {
+  return value < 10 ? `0${value}` : value
 }

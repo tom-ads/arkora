@@ -1,3 +1,3 @@
-type GetBudgetRequest = number
+type GetBudgetRequest = number | string
 
 export default GetBudgetRequest

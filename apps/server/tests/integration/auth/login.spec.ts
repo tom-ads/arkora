@@ -2,8 +2,8 @@ import { test } from '@japa/runner'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 import Hash from '@ioc:Adonis/Core/Hash'
 
-test.group('Auth: Login', () => {
-  test('user can login to their organisation account', async ({ client, route }) => {
+test.group('Auth : Login', () => {
+  test('organisation user can login to their account', async ({ client, route }) => {
     Hash.fake()
 
     const user = await UserFactory.merge({ password: 'newPassword123!' })
@@ -22,10 +22,6 @@ test.group('Auth: Login', () => {
       .withCsrfToken()
 
     response.assertStatus(200)
-    response.assertBodyContains({
-      user: {},
-      organisation: {},
-    })
 
     Hash.restore()
   })

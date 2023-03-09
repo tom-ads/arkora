@@ -5,13 +5,12 @@ Route.group(() => {
   Route.post('/', 'TimerController.create')
 
   Route.put('/stop', 'TimerController.stopTimer')
-  Route.put('/start', 'TimerController.startTimer')
 
   Route.group(() => {
-    Route.delete('/', 'TimerController.delete')
+    Route.put('/start', 'TimerController.startTimer')
   })
-    .prefix(':timeEntryId')
-    .where('timeEntry', Route.matchers.number())
+    .prefix(':timerId')
+    .where('time_entries', Route.matchers.number())
 })
   .prefix('/timers')
   .middleware(['auth', 'subdomain'])

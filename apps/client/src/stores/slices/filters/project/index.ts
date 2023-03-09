@@ -7,6 +7,8 @@ export type BillableTimeEntry = 'billable' | 'unbillable'
 
 export type ProjectTimeEntryFilters = {
   members: number[]
+  budgets: number[]
+  tasks: number[]
   billable: BillableTimeEntry | null
 }
 
@@ -19,6 +21,8 @@ const initialState: ProjectFilterState = {
   tab: 'budgets',
   timeEntry: {
     members: [],
+    budgets: [],
+    tasks: [],
     billable: null,
   },
 }

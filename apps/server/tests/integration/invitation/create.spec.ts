@@ -21,10 +21,7 @@ test.group('Invitation : Create', (group) => {
     authUser = await UserFactory.merge({ organisationId: organisation.id }).with('role').create()
   })
 
-  test('organisation admin can invite a list of members to the organisation', async ({
-    client,
-    route,
-  }) => {
+  test('organisation admin can invite members to the organisation', async ({ client, route }) => {
     const payload = {
       members: [
         {
@@ -71,18 +68,18 @@ test.group('Invitation : Create', (group) => {
       .withCsrfToken()
       .loginAs(authUser)
 
+    response.assertStatus(204)
+
     assert.isTrue(
       mailer.exists((mail) => {
         return mail.subject === 'Join Organisation'
       })
     )
 
-    response.assertStatus(204)
-
     Mail.restore()
   })
 
-  test('organisation member cannot invite a list of members to the organisation', async ({
+  test('organisation member cannot invite members to the organisation', async ({
     client,
     route,
   }) => {
@@ -99,7 +96,7 @@ test.group('Invitation : Create', (group) => {
     response.assertStatus(403)
   })
 
-  test('unauthenticated user cannot invite a list of invitees to the organisation', async ({
+  test('unauthenticated user cannot invite members to the organisation', async ({
     client,
     route,
   }) => {

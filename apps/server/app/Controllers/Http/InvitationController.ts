@@ -19,15 +19,21 @@ export default class InvitationController {
 
     const existingUsers = await ctx.organisation?.related('users').query()
 
-    // Prevent invitee emails to already exist as organisation members
-    const filteredInvites = uniqBy(payload.members, 'email').filter((invitee) => {
-      !existingUsers?.some((user) => user.email.toLowerCase() === invitee.email.toLowerCase())
-    })
+    // Emails should be case insensitive
+    const transformedInvitees = payload.members.map((invitee) => ({
+      ...invitee,
+      email: invitee.email.toLowerCase(),
+    }))
+
+    // Prevent duplicate members
+    const filteredInvites = uniqBy(transformedInvitees, 'email').filter(
+      (invitee) => !existingUsers?.some((user) => user.email.toLowerCase() === invitee.email)
+    )
 
     if (filteredInvites?.length) {
       try {
         // Create and send organisation invitation notification
-        const invitedMembers = await ctx.organisation!.inviteMembers(payload.members)
+        const invitedMembers = await ctx.organisation!.inviteMembers(filteredInvites)
 
         // Link invited members to all associated entities, ie. public projects and budgets
         await ctx.organisation!.associateMembers(invitedMembers)

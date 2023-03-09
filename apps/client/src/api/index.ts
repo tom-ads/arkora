@@ -53,6 +53,7 @@ const appApi = createApi({
     'Project',
     'Projects',
     'TimeEntries',
+    'TimeEntry',
     'Budgets',
     'Budget',
     'Members',

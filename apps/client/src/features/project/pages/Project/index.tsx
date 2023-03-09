@@ -23,7 +23,7 @@ const ProjectView = () => {
 }
 
 export const ProjectPage = (): JSX.Element => {
-  useDocumentTitle('Projects')
+  useDocumentTitle('Project')
 
   const { projectId } = useParams()
 

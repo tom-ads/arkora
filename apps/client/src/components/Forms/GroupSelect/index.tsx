@@ -66,20 +66,25 @@ const listBoxOptions = cva(
         false: 'max-w-[350px] lg:max-w-[450px]',
       },
     },
+    defaultVariants: {
+      fullWidth: false,
+    },
   },
 )
 
 export const FormGroupSelect = ({
   name,
   control,
-  size = 'sm',
+  size,
   placeHolder = 'Select option',
   error,
   disabled,
-  fullWidth = false,
+  fullWidth,
   children,
 }: FormSelectProps): JSX.Element => {
-  const { field } = useController({ name, control })
+  const {
+    field: { value, onChange },
+  } = useController({ name, control })
 
   const [focused, setFocused] = useState(false)
 
@@ -89,29 +94,26 @@ export const FormGroupSelect = ({
       .flat()
       .map((child) => ({
         id: child.id,
-        value: child.value,
         display: child.display,
       }))
   }, [children])
 
-  const handleChange = (selectedItem: number) => {
-    field.onChange(validChildren?.find((child) => child.id === selectedItem))
-  }
+  const selectedItem = validChildren?.find((child) => child?.id === value)
 
   return (
     <div className="relative w-full">
       {/* Listbox will not change last selected if passed undefined, so we need to pass null instead */}
-      <Listbox value={field.value?.id ?? null} onChange={handleChange} disabled={disabled}>
+      <Listbox value={value ?? null} onChange={(id) => onChange(id)} disabled={disabled}>
         {({ open }) => (
           <>
             <Listbox.Button className={listBoxButton({ size, error, focused, disabled })}>
               <span
                 className={classNames('text-gray-60 text-start truncate capitalize', {
-                  'text-gray-90': field.value?.display,
+                  'text-gray-90': selectedItem?.display,
                 })}
               >
                 {/* Child of SelectOption, a.k.a the display prop */}
-                {field.value?.display ?? placeHolder}
+                {selectedItem?.display ?? placeHolder}
               </span>
               <span
                 aria-hidden
@@ -121,7 +123,7 @@ export const FormGroupSelect = ({
                 })}
               >
                 <ChevronIcon
-                  className={classNames('transform transition-transform', {
+                  className={classNames('transform transition-transform w-5', {
                     '-rotate-180': focused,
                     'text-gray-60': disabled,
                   })}

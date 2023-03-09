@@ -1,7 +1,7 @@
 import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class StartTimerValidator {
+export default class UpdateEntryValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -24,12 +24,22 @@ export default class StartTimerValidator {
    *    ```
    */
   public schema = schema.create({
-    timer_id: schema.number([
+    budget_id: schema.number.optional([
       rules.exists({
-        table: 'time_entries',
+        table: 'budgets',
         column: 'id',
       }),
     ]),
+    task_id: schema.number.optional([
+      rules.exists({
+        table: 'tasks',
+        column: 'id',
+      }),
+    ]),
+    date: schema.date({ format: 'iso' }),
+    description: schema.string.optional(),
+    duration_minutes: schema.number(),
+    estimated_minutes: schema.number.optional(),
   })
 
   /**

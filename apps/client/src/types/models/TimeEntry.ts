@@ -5,6 +5,8 @@ import { User } from './User'
 
 type TimeEntry = {
   id: number
+  taskId: number
+  budgetId: number
   date: string
   durationMinutes: number
   estimatedMinutes: number

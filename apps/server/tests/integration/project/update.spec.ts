@@ -22,7 +22,7 @@ test.group('Project: Update Project', () => {
       .create()
 
     const response = await client
-      .put(route('ProjectController.update', { project: 1 }))
+      .put(route('ProjectController.update', { projectId: 1 }))
       .form({
         name: 'updated-name',
         show_cost: false,
@@ -61,7 +61,7 @@ test.group('Project: Update Project', () => {
       .create()
 
     const response = await client
-      .put(route('ProjectController.update', { project: 1 }))
+      .put(route('ProjectController.update', { projectId: 1 }))
       .form({
         name: 'updated-name',
         show_cost: false,
@@ -100,7 +100,7 @@ test.group('Project: Update Project', () => {
       .create()
 
     const response = await client
-      .put(route('ProjectController.update', { project: 1 }))
+      .put(route('ProjectController.update', { projectId: 1 }))
       .form({
         name: 'updated-name',
         show_cost: false,
@@ -139,7 +139,7 @@ test.group('Project: Update Project', () => {
       .create()
 
     const response = await client
-      .put(route('ProjectController.update', { project: 1 }))
+      .put(route('ProjectController.update', { projectId: 1 }))
       .form({
         name: 'updated-name',
         show_cost: false,
@@ -178,7 +178,7 @@ test.group('Project: Update Project', () => {
       .create()
 
     const response = await client
-      .put(route('ProjectController.update', { project: 1 }))
+      .put(route('ProjectController.update', { projectId: 1 }))
       .form({
         name: 'updated-name',
         show_cost: false,
@@ -226,7 +226,7 @@ test.group('Project: Update Project', () => {
       .create()
 
     const response = await client
-      .put(route('ProjectController.update', { project: 2 }))
+      .put(route('ProjectController.update', { projectId: 2 }))
       .form({
         name: 'updated-name',
         show_cost: false,

@@ -27,8 +27,8 @@ export default class IndexTimeEntryValidator {
     start_date: schema.date.optional({ format: 'iso' }),
     end_date: schema.date.optional({ format: 'iso' }),
     project_id: schema.number.optional(),
-    budget_id: schema.number.optional(),
-    task_id: schema.number.optional(),
+    tasks: schema.array.optional().members(schema.number()),
+    budgets: schema.array.optional().members(schema.number()),
     members: schema.array.optional().members(schema.number()),
     billable: schema.enum.optional(['billable', 'unbillable']),
   })

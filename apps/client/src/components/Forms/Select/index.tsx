@@ -142,7 +142,7 @@ export const FormSelect = ({
                 className={selectOptionStyling({ fullWidth })}
                 static
               >
-                {validChildren.map((child) => (
+                {validChildren?.map((child) => (
                   <Listbox.Option
                     key={child.id}
                     value={child?.id}

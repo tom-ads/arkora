@@ -45,7 +45,7 @@ export function useTimeTracker(delay?: number): UseTimeTrackerReturn {
 
   const restartTracking = useCallback(
     async (timerId: number) => {
-      await startTimerMutation({ timer_id: timerId })
+      await startTimerMutation(timerId)
         .unwrap()
         .then((res) => {
           setIsPlaying(true)
@@ -59,7 +59,7 @@ export function useTimeTracker(delay?: number): UseTimeTrackerReturn {
 
   const stopTracking = useCallback(
     async (timerId?: number): Promise<void> => {
-      await stopTimerMutation({ timer_id: timerId })
+      await stopTimerMutation(timerId)
         .unwrap()
         .then(() => {
           dispatch(endTimer())

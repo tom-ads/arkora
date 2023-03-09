@@ -88,11 +88,9 @@ export default class BudgetController {
       { includeProject: payload?.include_project }
     )
 
-    if (!budgets?.length) {
-      return ctx.response.ok([])
-    }
+    ctx.response.abortIf(!budgets?.length, [], 200)
 
-    budgets = await Budget.getBudgetsMetrics(budgets.map((budget) => budget.id))
+    budgets = await Budget.getBudgetsMetrics(budgets!.map((budget) => budget.id))
 
     return budgets
   }

@@ -1,2 +1,2 @@
 export * from './CreateProject'
-export * from './UpdateProject'
+export * from './ManageProject'

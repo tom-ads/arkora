@@ -43,8 +43,6 @@ export const ProjectInsights = (): JSX.Element => {
             })}
           >
             <span>{formattedInsights.status?.toLowerCase()} Project</span>
-            <div className="rounded-full w-1 h-1 flex-shrink-0 bg-gray-80"></div>
-            <span className="text-gray-90">{formattedInsights.private ? 'Private' : 'Public'}</span>
           </p>
         </div>
       </div>

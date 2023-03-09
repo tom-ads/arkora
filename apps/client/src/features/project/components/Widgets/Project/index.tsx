@@ -41,14 +41,17 @@ export const ProjectWidget = (): JSX.Element => {
             Team
           </TabItem>
         </TabGroup>
-        <Button
-          size="xs"
-          onClick={() => setOpenActionModal(true)}
-          className="min-h-[36px] py-0 mb-2 text-[14px] -translate-y-1 max-w-[180px]"
-          block
-        >
-          Create Budget
-        </Button>
+        {selectedTab !== 'entries' && (
+          <Button
+            size="xs"
+            onClick={() => setOpenActionModal(true)}
+            className="min-h-[36px] py-0 mb-2 text-[14px] -translate-y-1 max-w-[180px]"
+            block
+          >
+            {selectedTab === 'budgets' && <span>Create Budget</span>}
+            {selectedTab === 'team' && <span>Assign Members</span>}
+          </Button>
+        )}
       </div>
 
       <HorizontalDivider />

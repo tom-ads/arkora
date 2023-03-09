@@ -1,6 +1,6 @@
 import { Badge, PauseIcon, PlayIcon } from '@/components'
 import { durationToFormattedTime } from '@/helpers/date'
-import TimeEntry from '@/types/TimeEntry'
+import TimeEntry from '@/types/models/TimeEntry'
 import { Button } from '@/components'
 import classNames from 'classnames'
 import { useMemo } from 'react'

@@ -1,5 +1,5 @@
 import { Budget } from '@/types'
-import Project from '@/types/Project'
+import Project from '@/types/models/Project'
 
 type BudgetProject = Budget & { project?: Project }
 

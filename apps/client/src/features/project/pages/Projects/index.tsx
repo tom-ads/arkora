@@ -1,9 +1,12 @@
 import { Button, Page, PageContent, PageDescription, PageHeader, PageTitle } from '@/components'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useState } from 'react'
-import { CreateProjectModal, UpdateProjectModal } from '../../components'
+import { CreateProjectModal, ManageProjectModal } from '../../components'
 import { ProjectsTable } from '../../components/Tables/ProjectsTable'
 
 export const ProjectsPage = (): JSX.Element => {
+  useDocumentTitle('Projects')
+
   const [openCreateProjectModal, setOpenCreateProjectModal] = useState(false)
 
   const [projectId, setProjectId] = useState<number | null>(null)
@@ -32,7 +35,7 @@ export const ProjectsPage = (): JSX.Element => {
         isOpen={openCreateProjectModal}
         onClose={() => setOpenCreateProjectModal(false)}
       />
-      <UpdateProjectModal
+      <ManageProjectModal
         projectId={projectId}
         isOpen={!!projectId}
         onClose={() => setProjectId(null)}

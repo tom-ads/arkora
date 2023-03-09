@@ -1,12 +1,11 @@
-import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 import Budget from 'App/Models/Budget'
 import Task from 'App/Models/Task'
 import TimeEntry from 'App/Models/TimeEntry'
-import CreateTimeEntryValidator from 'App/Validators/Timer/CreateTimeEntryValidator'
-import StartTimerValidator from 'App/Validators/Timer/StartTimerValidator'
+import CreateTimerValidator from 'App/Validators/Timer/CreateTimerValidator'
 import StopTimerValidator from 'App/Validators/Timer/StopTimerValidator'
+import { bind } from '@adonisjs/route-model-binding'
 import { DateTime } from 'luxon'
 
 export default class TimerController {
@@ -29,7 +28,7 @@ export default class TimerController {
    * @errorResponse (422)  UnprocessableEntity   Only valid payloads can be used to create a timer
    */
   public async create(ctx: HttpContextContract) {
-    const payload = await ctx.request.validate(CreateTimeEntryValidator)
+    const payload = await ctx.request.validate(CreateTimerValidator)
 
     const [budget, task] = await Promise.all([
       Budget.findOrFail(payload.budget_id),
@@ -117,15 +116,12 @@ export default class TimerController {
    * @errorResponse (404)  Not Found             Only existing time entries can be started
    * @errorResponse (422)  UnprocessableEntity   Only valid timers can be started
    */
-  public async startTimer(ctx: HttpContextContract) {
-    const payload = await ctx.request.validate(StartTimerValidator)
-
-    const timeEntry = await TimeEntry.findOrFail(payload.timer_id)
-
-    await ctx.bouncer.with('TimeEntryPolicy').authorize('update', timeEntry)
+  @bind()
+  public async startTimer(ctx: HttpContextContract, entry: TimeEntry) {
+    await ctx.bouncer.with('TimeEntryPolicy').authorize('update', entry)
 
     // Deactivate any related timer to timeEntry user
-    const activeTimer = await timeEntry.user.getActiveTimer()
+    const activeTimer = await entry.user.getActiveTimer()
     if (activeTimer) {
       try {
         await activeTimer.stopTimer()
@@ -138,32 +134,14 @@ export default class TimerController {
     }
 
     // Restart timer
-    await timeEntry.restartTimer()
-    await timeEntry.refresh()
+    await entry.restartTimer()
+    await entry.refresh()
 
     return {
-      ...timeEntry?.serialize(),
+      ...entry?.serialize(),
       last_stopped_at: null,
-      description: timeEntry.description ?? null,
+      description: entry.description ?? null,
     }
-  }
-
-  /**
-   * @route DELETE api/v1/timers/:timeEntryId
-   * @description Delete a specific time entry
-   *
-   * @successStatus 204 - No Content
-   *
-   * @errorResponse (401)  Unauthorized  Only authenticated users can delete an entry
-   * @errorResponse (403)  Forbidden     Only admins can delete other team members entries
-   */
-  @bind()
-  public async delete(ctx: HttpContextContract, entry: TimeEntry) {
-    await ctx.bouncer.with('TimeEntryPolicy').authorize('delete', entry)
-
-    await entry.delete()
-
-    return ctx.response.noContent()
   }
 
   /**

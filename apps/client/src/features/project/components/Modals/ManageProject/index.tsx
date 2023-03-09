@@ -11,15 +11,15 @@ import { ProjectForm, ProjectFormFields } from '../../Forms/ProjectForm'
 import { useState } from 'react'
 import { useToast } from '@/hooks/useToast'
 
-type UpdateProjectModalProps = ModalBaseProps & {
+type ManageProjectModalProps = ModalBaseProps & {
   projectId: number | null
 }
 
-export const UpdateProjectModal = ({
+export const ManageProjectModal = ({
   projectId,
   onClose,
   isOpen,
-}: UpdateProjectModalProps): JSX.Element => {
+}: ManageProjectModalProps): JSX.Element => {
   const { successToast, errorToast } = useToast()
 
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false)

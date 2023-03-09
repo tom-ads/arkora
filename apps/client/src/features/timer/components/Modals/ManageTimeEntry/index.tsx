@@ -1,13 +1,35 @@
 import { Button, ClockIcon } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
-import { useDeleteTimerMutation } from '../../../api'
 import { ModalBaseProps } from '@/types'
-import { TimeEntryForm } from '../../Forms'
+import { TimeEntryFields, TimeEntryForm } from '../../Forms'
 import { useToast } from '@/hooks/useToast'
 import { ConfirmationModal } from '@/components/Modals'
 import { useState } from 'react'
+import {
+  useDeleteTimeEntryMutation,
+  useGetTimeEntryQuery,
+  useUpdateTimeEntryMutation,
+} from '@/features/entry'
+import { minutesToTime, timeToMinutes } from '@/helpers/tracking'
+import { z } from 'zod'
 
-type ManageTimeEntryModal = ModalBaseProps & {
+export const manageEntrySchema = z.object({
+  budget: z.number({ required_error: 'Budget is required' }),
+  task: z.number({ required_error: 'Task is required' }),
+  estimatedTime: z.string().nullable(),
+  trackedTime: z.string().superRefine((val, ctx) => {
+    const durationMinutes = timeToMinutes(val)
+    if (!durationMinutes || durationMinutes <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Tracked time required',
+      })
+    }
+  }),
+  description: z.string().nullable(),
+})
+
+type ManageTimeEntryModalProps = ModalBaseProps & {
   entryId: number | null
 }
 
@@ -15,12 +37,41 @@ export const ManageTimeEntryModal = ({
   entryId,
   isOpen,
   onClose,
-}: ManageTimeEntryModal): JSX.Element => {
+}: ManageTimeEntryModalProps): JSX.Element => {
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false)
 
   const { successToast, errorToast } = useToast()
 
-  const [triggerDelete, { isLoading: deletingEntry }] = useDeleteTimerMutation()
+  const { data: entry } = useGetTimeEntryQuery(entryId!, { skip: !entryId })
+
+  const [triggerUpdate, { isLoading: updatingEntry }] = useUpdateTimeEntryMutation()
+
+  const [triggerDelete, { isLoading: deletingEntry }] = useDeleteTimeEntryMutation()
+
+  const onSubmit = async (data: TimeEntryFields) => {
+    if (data.budget && data.task) {
+      await triggerUpdate({
+        timer_id: entry!.id,
+        date: entry!.date,
+        budget_id: data.budget,
+        task_id: data!.task,
+        description: data.description ?? '',
+        duration_minutes: timeToMinutes(data.trackedTime),
+        estimated_minutes: timeToMinutes(data.estimatedTime),
+      })
+        .unwrap()
+        .then(() => successToast('Entry has been updated'))
+        .catch((error) => {
+          if (error.status === 422) {
+            return
+          }
+
+          errorToast('Unable to update entry, please try again later.')
+        })
+
+      onClose()
+    }
+  }
 
   const onConfirm = async () => {
     setOpenConfirmationModal(false)
@@ -37,17 +88,34 @@ export const ManageTimeEntryModal = ({
     <>
       <Modal
         title="Manage Entry"
-        description="Manage your time entry"
+        description="Update time entry information"
         icon={<ClockIcon />}
         isOpen={isOpen}
         onClose={onClose}
       >
-        <TimeEntryForm isOpen={isOpen} onClose={onClose}>
+        <TimeEntryForm
+          isOpen={isOpen}
+          onClose={onClose}
+          onSubmit={onSubmit}
+          validationSchema={manageEntrySchema}
+          defaultValues={{
+            budget: entry?.budgetId ?? undefined,
+            task: entry?.taskId ?? undefined,
+            description: entry?.description ?? '',
+            estimatedTime: entry?.estimatedMinutes ? minutesToTime(entry?.estimatedMinutes) : '',
+            trackedTime: entry?.durationMinutes ? minutesToTime(entry?.durationMinutes) : '',
+          }}
+        >
           <ModalFooter className="!mt-11">
-            <Button variant="blank" onClick={() => setOpenConfirmationModal(true)} danger>
+            <Button
+              variant="blank"
+              onClick={() => setOpenConfirmationModal(true)}
+              disabled={updatingEntry}
+              danger
+            >
               Delete
             </Button>
-            <Button size="xs" type="submit" className="max-w-[161px]">
+            <Button size="xs" type="submit" className="max-w-[161px]" loading={updatingEntry}>
               <span>Update Entry</span>
             </Button>
           </ModalFooter>

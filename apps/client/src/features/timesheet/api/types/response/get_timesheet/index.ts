@@ -1,4 +1,4 @@
-import TimeEntry from '@/types/TimeEntry'
+import TimeEntry from '@/types/models/TimeEntry'
 
 type TimesheetDay = {
   day: string

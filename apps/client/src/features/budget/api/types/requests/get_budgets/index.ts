@@ -1,7 +1,7 @@
 type GetBudgetsRequest = Partial<{
-  project_id: number
-  user_id: number
-  include_project: boolean
+  projectId: number | string
+  userId: number | string
+  includeProject: boolean
 }>
 
 export default GetBudgetsRequest

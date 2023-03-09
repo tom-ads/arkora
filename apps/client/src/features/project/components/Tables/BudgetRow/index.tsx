@@ -5,64 +5,68 @@ import {
   FormatCurrency,
   InlineLink,
   ProgressLineIndicator,
+  SkeletonBox,
   TableData,
   TableRow,
   ToolTip,
 } from '@/components'
-import BillableType from '@/enums/BillableType'
 import BudgetType from '@/enums/BudgetType'
 import { calculatePercentage, convertToPounds } from '@/helpers/currency'
-import { convertMinutesToHours, formatToHours } from '@/helpers/date'
+import { formatToHours } from '@/helpers/date'
 import { RootState } from '@/stores/store'
 import { Budget } from '@/types'
+import { TableRowBaseProps } from '@/types/TableRow'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
-type BudgetRowProps = {
-  onManage: (id: number) => void
-  budget: Budget
-}
+type RowProps = TableRowBaseProps<Budget>
 
-export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => {
+export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
   const { currency } = useSelector((state: RootState) => ({
     currency: state.organisation.currency,
   }))
 
+  const handleManage = () => {
+    if (onManage) {
+      onManage(value.id)
+    }
+  }
+
   const formattedBudget = useMemo(() => {
-    const formattedBudget = { ...budget }
-    if (budget) {
-      formattedBudget.allocatedBudget = convertToPounds(budget.allocatedBudget)
-      formattedBudget.billableCost = convertToPounds(budget.billableCost)
-      formattedBudget.unbillableCost = convertToPounds(budget.unbillableCost)
-      formattedBudget.spentCost = convertToPounds(budget.spentCost)
-      formattedBudget.remainingCost = convertToPounds(budget.remainingCost)
-      formattedBudget.hourlyRate = convertToPounds(budget.hourlyRate)
+    const transformedBudget = { ...value }
+    if (value) {
+      transformedBudget.allocatedBudget = convertToPounds(value.allocatedBudget)
+      transformedBudget.billableCost = convertToPounds(value.billableCost)
+      transformedBudget.unbillableCost = convertToPounds(value.unbillableCost)
+      transformedBudget.spentCost = convertToPounds(value.spentCost)
+      transformedBudget.remainingCost = convertToPounds(value.remainingCost)
+      transformedBudget.hourlyRate = convertToPounds(value.hourlyRate)
     }
 
-    return formattedBudget
-  }, [budget])
+    return transformedBudget
+  }, [value])
 
   return (
     <TableRow>
       <TableData>
         <div
           className="w-2 h-9 flex flex-col grow rounded-lg"
-          style={{ backgroundColor: budget.colour ?? 'black' }}
+          style={{ backgroundColor: value.colour ?? 'black' }}
         ></div>
       </TableData>
 
       <TableData className="truncate">
-        <InlineLink className="font-medium truncate" to={`/budgets/${budget.id}`}>
-          {budget.name}
+        <InlineLink className="font-medium truncate" to={`/budgets/${value.id}`}>
+          {value.name}
         </InlineLink>
       </TableData>
 
       <TableData>
-        <Badge variant="default">{budget?.budgetType?.name}</Badge>
+        <Badge variant="default">{value?.budgetType?.name}</Badge>
       </TableData>
 
       <TableData>
-        {budget.budgetType?.name !== BudgetType.NON_BILLABLE && budget.hourlyRate ? (
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE && value.hourlyRate ? (
           <FormatCurrency value={formattedBudget?.hourlyRate} currency={currency?.code} />
         ) : (
           <p>- - -</p>
@@ -70,7 +74,7 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
       </TableData>
 
       <TableData>
-        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE ? (
           <FormatCurrency value={formattedBudget.allocatedBudget} currency={currency?.code} />
         ) : (
           <p>- - -</p>
@@ -78,7 +82,7 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
       </TableData>
 
       <TableData>
-        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE ? (
           <ToolTip
             width={198}
             trigger={
@@ -101,7 +105,7 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
                     />
                   </p>
                   <p className="font-semibold text-xs text-gray-80">
-                    {formatToHours(budget.allocatedDuration)}
+                    {formatToHours(value.allocatedDuration)}
                   </p>
                 </div>
               </div>
@@ -118,7 +122,7 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
                     %)
                   </p>
                   <p className="font-semibold text-xs text-gray-80">
-                    {formatToHours(budget.billableDuration + budget.unbillableDuration)}
+                    {formatToHours(value.billableDuration + value.unbillableDuration)}
                   </p>
                 </div>
               </div>
@@ -148,7 +152,7 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
       </TableData>
 
       <TableData>
-        {budget.budgetType?.name !== BudgetType.NON_BILLABLE ? (
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE ? (
           <ToolTip
             width={198}
             trigger={
@@ -188,13 +192,55 @@ export const BudgetRow = ({ onManage, budget }: BudgetRowProps): JSX.Element => 
       </TableData>
 
       <TableData>
-        <p>{budget.private ? 'Private' : 'Public'}</p>
+        <p>{value.private ? 'Private' : 'Public'}</p>
       </TableData>
 
       <TableData>
-        <Button variant="blank" onClick={() => onManage(budget.id)}>
+        <Button variant="blank" onClick={handleManage}>
           Manage
         </Button>
+      </TableData>
+    </TableRow>
+  )
+}
+
+export const BudgetSkeletonRow = (): JSX.Element => {
+  return (
+    <TableRow>
+      <TableData>
+        <SkeletonBox height={36} width={14} className="rounded-lg" />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} randomWidth />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={50} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={50} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={100} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={170} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={170} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={60} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={60} />
       </TableData>
     </TableRow>
   )

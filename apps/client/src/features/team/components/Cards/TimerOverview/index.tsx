@@ -1,5 +1,5 @@
 import { Avatar, Card, VerticalDivider } from '@/components'
-import { Timer } from '@/types/Timer'
+import { Timer } from '@/types/models/Timer'
 
 type ReadOnlyProps = {
   label: string

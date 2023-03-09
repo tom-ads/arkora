@@ -1,10 +1,19 @@
-/* 
-    A helper function that receives a time string and returns
-    the duration minutes. ie. 05:50 = 350 minutes
-*/
-export function timeToMinutes(time: string) {
-  const splitTime = time.split(':')
-  const hourToMinutes = parseInt(splitTime[0], 10) * 60
+import { padTimeUnit } from './date'
 
-  return hourToMinutes + parseInt(splitTime[1], 10)
+export function timeToMinutes(time: string) {
+  const splitTime = time.split(':').map(Number)
+  const hours = splitTime[0] * 60
+  const minutes = splitTime[1]
+
+  return hours + minutes
+}
+
+export function minutesToTime(durationMinutes: number) {
+  const minutes = durationMinutes % 60
+  const hours = Math.abs(durationMinutes - minutes) / 60
+
+  const formattedMinutes = padTimeUnit(minutes)
+  const formattedHours = padTimeUnit(hours)
+
+  return `${formattedHours}:${formattedMinutes}`
 }

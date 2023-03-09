@@ -1,12 +1,12 @@
 import { BillableTimeEntry } from '@/stores/slices/filters/project'
 
 type GetTimeEntriesRequest = Partial<{
-  project_id: number
-  budget_id: number
-  task_id: number
+  projectId: number | string
+  budgets: (number | string)[]
+  tasks: (number | string)[]
   members: (number | string)[]
-  start_date: string
-  end_date: string
+  startDate: string
+  endDate: string
   billable: BillableTimeEntry | null
 }>
 

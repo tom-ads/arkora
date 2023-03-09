@@ -1,4 +1,4 @@
-import Client from '@/types/Client'
+import Client from '@/types/models/Client'
 import appApi from 'api'
 import { CreateClientRequest, UpdateClientRequest } from './types/requests'
 import { GetClientsResponse } from './types/response'
