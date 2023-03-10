@@ -17,7 +17,7 @@ const CriteriaSuggestion = ({ criteria }: { criteria: CriteriaFields }) => {
     <div className="flex items-center gap-x-2 transition-all duration-1000">
       <div
         className={classNames(
-          ' h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200',
+          'h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200',
           {
             'bg-red-10': !criteria.achieved,
             'bg-green-10': criteria.achieved,
@@ -31,8 +31,9 @@ const CriteriaSuggestion = ({ criteria }: { criteria: CriteriaFields }) => {
         )}
       </div>
       <p
-        className={classNames('text-red-90 font-medium text-xs transition-colour duration-200', {
+        className={classNames('font-medium text-xs transition-colour duration-200', {
           'text-green-90': criteria.achieved,
+          'text-red-90': !criteria.achieved,
         })}
       >
         {criteria.suggestion}
@@ -44,10 +45,11 @@ const CriteriaSuggestion = ({ criteria }: { criteria: CriteriaFields }) => {
 const IndicatorBar = ({ threshold, scoreFactor }: { threshold: number; scoreFactor: number }) => {
   return (
     <div
-      className={classNames('rounded w-full h-[3px] bg-red-90 transition-colors', {
+      className={classNames('rounded w-full h-[3px] transition-colors', {
         'ease-linear duration-300 bg-gradient-to-r from-green-90 to bg-green-90':
           scoreFactor === threshold,
         'bg-green-90': scoreFactor > threshold,
+        'bg-red-90': scoreFactor < threshold,
       })}
     ></div>
   )
