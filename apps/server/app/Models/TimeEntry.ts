@@ -18,10 +18,10 @@ export type BillableOptions = 'billable' | 'unbillable'
 type EntriesFilters = Partial<{
   startDate: DateTime
   endDate: DateTime
-  budgetId: number
+  budgets: number[]
   projectId: number
-  userId: number
-  taskId: number
+  members: number[]
+  tasks: number[]
   billable: BillableOptions
 }>
 
@@ -49,7 +49,7 @@ export default class TimeEntry extends BaseModel {
   public description: string | null
 
   @column()
-  public estimatedMinutes: number
+  public estimatedMinutes: number | null
 
   @column()
   public durationMinutes: number
@@ -126,19 +126,19 @@ export default class TimeEntry extends BaseModel {
           .on('time_entries.budget_id', '=', 'budget_tasks.budget_id')
           .andOn('time_entries.task_id', '=', 'budget_tasks.task_id')
       })
-      .if(filters?.budgetId, (query) => {
-        query.where('time_entries.budget_id', filters.budgetId!)
+      .if(filters?.budgets, (query) => {
+        query.whereIn('time_entries.budget_id', filters.budgets!)
       })
-      .if(filters?.userId, (query) => {
-        query.where('time_entries.user_id', filters.userId!)
+      .if(filters?.members, (query) => {
+        query.whereIn('time_entries.user_id', filters.members!)
       })
       .if(filters?.projectId, (query) => {
         query.whereHas('budget', (budgetQuery) => {
           budgetQuery.where('project_id', filters.projectId!)
         })
       })
-      .if(filters?.taskId, (query) => {
-        query.where('time_entries.task_id', filters.taskId!)
+      .if(filters?.tasks, (query) => {
+        query.whereIn('time_entries.task_id', filters.tasks!)
       })
       .if(filters.startDate || filters?.endDate, (query) => {
         query.withScopes((scopes) => scopes.filterDate(filters?.startDate, filters?.endDate))

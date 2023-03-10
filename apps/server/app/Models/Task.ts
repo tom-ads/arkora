@@ -44,7 +44,17 @@ export default class Task extends BaseModel {
 
   // Static Methods
 
-  public static async getCommonTasks() {
+  public static async getDefaultTasks() {
     return await Task.query().whereIn('name', Object.values(CommonTask))
+  }
+
+  public static async getOrganisationTasks(organisationId: number) {
+    const result = await Task.query()
+      .whereHas('organisations', (query) => {
+        query.where('id', organisationId)
+      })
+      .exec()
+
+    return result
   }
 }

@@ -14,6 +14,7 @@ import BillableTypeFactory from 'Database/factories/BillableTypeFactory'
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 import { union } from 'lodash'
+import { stringify } from 'qs'
 
 test.group('Time Entries : Index', ({ each }) => {
   let organisation: Organisation
@@ -108,7 +109,7 @@ test.group('Time Entries : Index', ({ each }) => {
 
     const response = await client
       .get(route('TimeEntryController.index'))
-      .qs({ task_id: task.id })
+      .qs(stringify({ tasks: [task.id] }, { arrayFormat: 'brackets', encode: false }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -123,7 +124,7 @@ test.group('Time Entries : Index', ({ each }) => {
   test('organisation user can filter entries by userId', async ({ client, route, assert }) => {
     const response = await client
       .get(route('TimeEntryController.index'))
-      .qs({ user_id: authUser.id })
+      .qs(stringify({ members: [authUser.id] }, { arrayFormat: 'brackets', encode: false }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -140,7 +141,7 @@ test.group('Time Entries : Index', ({ each }) => {
 
     const response = await client
       .get(route('TimeEntryController.index'))
-      .qs({ budget_id: budget.id })
+      .qs(stringify({ budgets: [budget.id] }, { arrayFormat: 'brackets', encode: false }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)

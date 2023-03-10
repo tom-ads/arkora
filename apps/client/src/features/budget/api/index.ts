@@ -29,7 +29,11 @@ const budgetEndpoints = appApi.injectEndpoints({
     getBudgets: build.query<GetBudgetsResponse, GetBudgetsRequest>({
       query: (params) => ({
         url: budgetBasePath,
-        params,
+        params: {
+          ...(params.projectId && { project_id: params.projectId }),
+          ...(params.userId && { user_id: params.userId }),
+          ...(params.includeProject && { include_project: params.includeProject }),
+        },
       }),
       providesTags: ['Budgets'],
     }),

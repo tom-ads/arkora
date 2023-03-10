@@ -25,7 +25,7 @@ export default class InvitationsValidator {
    *    ```
    */
   public schema = schema.create({
-    members: schema.array([rules.distinct('email')]).members(
+    members: schema.array().members(
       schema.object().members({
         email: schema.string([rules.trim(), rules.email()]),
         role: schema.enum(Object.values(UserRole).filter((v) => v !== UserRole.OWNER)),

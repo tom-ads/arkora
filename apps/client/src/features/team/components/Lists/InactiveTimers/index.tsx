@@ -1,5 +1,5 @@
 import { HorizontalDivider } from '@/components'
-import { Timer } from '@/types/Timer'
+import { Timer } from '@/types/models/Timer'
 import { TimerOverviewCard } from '../../Cards'
 
 type InactiveTimersListProps = {

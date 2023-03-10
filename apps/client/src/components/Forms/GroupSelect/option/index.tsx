@@ -5,7 +5,6 @@ import classNames from 'classnames'
 
 export type GroupOption = {
   id: string | number
-  value: string
   display: string
 }
 

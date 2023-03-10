@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { DateTime } from 'luxon'
-import TimeEntry from '@/types/TimeEntry'
+import TimeEntry from '@/types/models/TimeEntry'
 
 interface TimesheetState {
   selectedDay: string

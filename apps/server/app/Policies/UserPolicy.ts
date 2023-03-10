@@ -26,20 +26,21 @@ export default class UserPolicy extends BasePolicy {
       return false
     }
 
-    /*
-      Members cannot update other tenant users and admins can
-      only update tenant users of their own role or below.
-    */
-    const authUserRole = authUser.role?.name
+    const authRole = authUser.role?.name
     const userRole = user.role?.name
-    if (authUserRole === UserRole.MEMBER) {
+
+    if (authRole === userRole) {
+      return false
+    }
+
+    if (authRole === UserRole.MEMBER) {
       return false
     } else if (
-      authUserRole === UserRole.MANAGER &&
+      authRole === UserRole.MANAGER &&
       (userRole === UserRole.ORG_ADMIN || userRole === UserRole.OWNER)
     ) {
       return false
-    } else if (authUserRole === UserRole.ORG_ADMIN && userRole === UserRole.OWNER) {
+    } else if (authRole === UserRole.ORG_ADMIN && userRole === UserRole.OWNER) {
       return false
     }
 

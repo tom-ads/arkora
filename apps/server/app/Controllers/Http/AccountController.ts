@@ -13,7 +13,7 @@ export default class AccountController {
     const payload = await ctx.request.validate(GetAccountsValidator)
 
     try {
-      const team = await ctx.organisation!.getTeamMembers(ctx.auth.user!.id, payload)
+      const team = await ctx.organisation!.getTeamMembers(payload)
       return team.map((member) => member.serialize())
     } catch (error) {
       ctx.logger.error(
@@ -46,7 +46,10 @@ export default class AccountController {
 
     const authRole = ctx.auth.user?.role?.name
 
-    if (authRole === UserRole.ORG_ADMIN || authRole === UserRole.OWNER) {
+    if (
+      (authRole === UserRole.ORG_ADMIN || authRole === UserRole.OWNER) &&
+      user.role?.name !== UserRole.OWNER
+    ) {
       if (payload.role && payload.role !== user.role?.name) {
         const newRole = await Role.findBy('name', payload.role)
         await user.related('role').associate(newRole!)

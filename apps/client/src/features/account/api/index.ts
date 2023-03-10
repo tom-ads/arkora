@@ -14,6 +14,7 @@ const accountEndpoints = appApi.injectEndpoints({
           ...(params?.role && { role: params.role }),
           ...(params?.status && { status: params.status }),
           ...(params?.search && { search: params.search }),
+          ...(params?.projectId && { projectId: params.projectId }),
         },
       }),
       providesTags: ['Members'],

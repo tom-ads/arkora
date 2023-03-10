@@ -35,7 +35,7 @@ export default class AuthController {
     const [currency, weekDays, commonTasks] = await Promise.all([
       Currency.findByOrFail('code', organisation.currency),
       WorkDay.query().withScopes((scopes) => scopes.workDayNames(organisation.work_days)),
-      Task.getCommonTasks(),
+      Task.getDefaultTasks(),
     ])
 
     // Create organisation and relations

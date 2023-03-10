@@ -1,6 +1,8 @@
 import {
   Button,
   Card,
+  FormatDateTime,
+  HorizontalDivider,
   Page,
   PageContent,
   PageDescription,
@@ -104,11 +106,9 @@ export const TimerPage = (): JSX.Element => {
             className="w-[174px]"
             block
           >
-            {timer.isTracking ? (
-              <PauseIcon className="w-4 h-4 shrink-0" />
-            ) : (
-              <PlayIcon className="w-4 h-4 shrink-0" />
-            )}
+            {timer.isTracking && <PauseIcon className="w-4 h-4 shrink-0" />}
+            {!timer.isTracking && <PlayIcon className="w-4 h-4 shrink-0" />}
+
             <span>{`${timer.isTracking ? 'Stop' : 'Start'} Timer`}</span>
           </Button>
         </div>
@@ -118,11 +118,13 @@ export const TimerPage = (): JSX.Element => {
         <TimesheetPeriod />
 
         <Card className="p-0">
-          <WeekDaySelect />
+          <div className="max-w-[1115px]">
+            <WeekDaySelect />
+          </div>
 
           {/* Times */}
           <div className="bg-gray-20 py-[6px] lg:py-2">
-            <div className="max-w-[1100px] px-6 flex justify-between items-center">
+            <div className="max-w-[1115px] px-6 flex justify-between items-center">
               {week?.map((currentDate) => (
                 <div
                   key={`time-period-${currentDate.day}`}
@@ -134,6 +136,24 @@ export const TimerPage = (): JSX.Element => {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="px-6 pt-6">
+            <HorizontalDivider
+              contentLeft={
+                <span className="whitespace-nowrap font-semibold text-gray-100 text-lg">
+                  Time Entries
+                </span>
+              }
+              contentRight={
+                <div className="whitespace-nowrap font-semibold text-gray-100 text-lg">
+                  <FormatDateTime
+                    value={DateTime.fromISO(selectedDay?.day ?? '')}
+                    format="LLLL dd, yyyy"
+                  />
+                </div>
+              }
+            />
           </div>
 
           <div className="p-6 space-y-2 md:max-w-[800px]">

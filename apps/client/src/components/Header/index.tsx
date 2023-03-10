@@ -3,6 +3,7 @@ import classNames from 'classnames'
 import { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { Avatar } from '../Avatar'
 import { Button } from '../Button'
 import { HorizontalDivider } from '../Divider'
 import { ArkoraLogo } from '../Icons'
@@ -31,26 +32,36 @@ export const Header = (): JSX.Element => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
+  const { authInitials, isAuthenticated } = useSelector((state: RootState) => ({
+    authInitials: state.auth.user?.initials,
+    isAuthenticated: state.auth.isAuthenticated,
+  }))
 
   return (
     <header className="w-full bg-white">
       {/* Main Navi */}
-      <div className="flex gap-x-6 max-w-[1440px] mx-auto py-4 px-7 lg:px-[46px]">
-        <div className="flex items-center gap-2 pr-3">
-          <Button onClick={() => navigate(isAuthenticated ? '/timer' : '/')} variant="blank">
-            <ArkoraLogo className="w-[38px] h-[39px]" />
-            <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
-          </Button>
+      <div className="flex items-center justify-between max-w-[1440px] mx-auto py-4 px-7 lg:px-[46px]">
+        <div className="flex items-center gap-x-6">
+          <div className="flex items-center gap-2 pr-3">
+            <Button onClick={() => navigate(isAuthenticated ? '/timer' : '/')} variant="blank">
+              <ArkoraLogo className="w-[38px] h-[39px]" />
+              <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>
+            </Button>
+          </div>
+          {isAuthenticated && (
+            <nav className="sm:flex gap-2 px-3 items-center hidden">
+              <NavItem to="timer">Timer</NavItem>
+              <NavItem to="projects">Projects</NavItem>
+              <NavItem to="clients">Clients</NavItem>
+              <NavItem to="team">Team</NavItem>
+            </nav>
+          )}
         </div>
 
         {isAuthenticated && (
-          <nav className="sm:flex gap-2 px-3 items-center hidden">
-            <NavItem to="timer">Timer</NavItem>
-            <NavItem to="projects">Projects</NavItem>
-            <NavItem to="clients">Clients</NavItem>
-            <NavItem to="team">Team</NavItem>
-          </nav>
+          <Avatar className="w-10 h-10">
+            <span className="text-sm font-semibold">{authInitials}</span>
+          </Avatar>
         )}
       </div>
 

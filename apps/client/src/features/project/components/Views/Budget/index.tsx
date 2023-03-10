@@ -1,20 +1,16 @@
-import { BudgetsTable, ManageBudgetModal, useGetBudgetsQuery } from '@/features/budget'
+import { ManageBudgetModal } from '@/features/budget'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { BudgetsTable } from '../../Tables'
 
 export const ProjectBudgetView = (): JSX.Element => {
   const [budgetId, setBudgetId] = useState<number | null>(null)
 
   const { projectId } = useParams()
 
-  const { data: projectBudgets } = useGetBudgetsQuery(
-    { project_id: parseInt(projectId!, 10) },
-    { skip: !projectId },
-  )
-
   return (
     <>
-      <BudgetsTable onManageRow={(id) => setBudgetId(id)} value={projectBudgets ?? null} />
+      <BudgetsTable onManage={(id) => setBudgetId(id)} />
 
       <ManageBudgetModal
         projectId={projectId ? parseInt(projectId, 10) : null}

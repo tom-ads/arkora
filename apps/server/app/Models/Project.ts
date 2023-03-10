@@ -17,6 +17,7 @@ import Status from 'App/Enum/Status'
 import Budget from './Budget'
 import User from './User'
 import Organisation from './Organisation'
+import { sumBy } from 'lodash'
 
 type ProjectBuilder = ModelQueryBuilderContract<typeof Project>
 
@@ -84,13 +85,9 @@ export default class Project extends BaseModel {
     return query.where('private', false)
   })
 
-  // Methods
+  // Instance Methods
 
-  public async assignProjectMembers(
-    organisation: Organisation,
-    project: Project,
-    members: number[]
-  ) {
+  public async assignProjectMembers(organisation: Organisation, project: Project) {
     await project.related('members').detach()
 
     const projectMembers: User[] = await organisation
@@ -102,5 +99,38 @@ export default class Project extends BaseModel {
       .exec()
 
     await project.related('members').attach(projectMembers.map((member) => member.id))
+  }
+
+  public async getProjectInsights(this: Project) {
+    const result = await this.related('budgets')
+      .query()
+      .withScopes((scopes) => scopes.budgetMetrics())
+      .exec()
+
+    const totalBillableDuration = sumBy(result, (b) => b.billableDuration ?? 0)
+    const totalBillableCost = sumBy(result, (b) => b.billableCost ?? 0)
+    const totalUnbillableDuration = sumBy(result, (b) => b.unbillableDuration ?? 0)
+    const totalUnbillableCost = sumBy(result, (b) => b.unbillableCost ?? 0)
+    const totalAllocatedBudget = sumBy(result, (b) => b.allocatedBudget ?? 0)
+    const totalAllocatedDuration = sumBy(result, (b) => b.allocatedDuration ?? 0)
+
+    return {
+      allocatedCost: totalAllocatedBudget,
+      allocatedDuration: totalAllocatedDuration,
+      usedCost: totalBillableCost + totalUnbillableCost,
+      usedDuration: totalBillableDuration + totalUnbillableDuration,
+
+      billableDuration: totalBillableDuration,
+      billableCost: totalBillableCost,
+      unbillableDuration: totalUnbillableDuration,
+      unbillableCost: totalUnbillableCost,
+
+      revenue: totalBillableCost + totalUnbillableCost,
+      expenses: totalUnbillableCost,
+      profit: totalBillableCost - totalUnbillableCost,
+
+      remainingCost: totalAllocatedBudget - (totalBillableCost + totalUnbillableCost),
+      remainingDuration: totalAllocatedDuration - (totalUnbillableDuration + totalBillableDuration),
+    }
   }
 }

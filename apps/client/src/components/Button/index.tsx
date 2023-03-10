@@ -60,7 +60,9 @@ const button = cva(
     defaultVariants: {
       size: 'md',
       variant: 'primary',
+      danger: false,
       disabled: false,
+      block: false,
     },
   },
 )

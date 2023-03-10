@@ -8,7 +8,7 @@ import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 import { DateTime } from 'luxon'
 
-test.group('Timers : Start Timer', ({ each }) => {
+test.group('Timer : Start', ({ each }) => {
   let authUser: User
   let timeEntry: TimeEntry
   let organisation: Organisation
@@ -51,11 +51,8 @@ test.group('Timers : Start Timer', ({ each }) => {
     await authUser.related('role').associate(memberRole)
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: timeEntry.id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
@@ -66,7 +63,7 @@ test.group('Timers : Start Timer', ({ each }) => {
     })
   })
 
-  test('organisation member cannot restart an existing time entry of another organisation team member', async ({
+  test('organisation member cannot restart another team members timer', async ({
     client,
     route,
   }) => {
@@ -78,21 +75,15 @@ test.group('Timers : Start Timer', ({ each }) => {
     const diffTimeEntry = await TimeEntryFactory.with('user', 1).apply('lastStoppedAt').create()
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: diffTimeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: diffTimeEntry.id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
     response.assertStatus(403)
   })
 
-  test('organisation admin can restart an existing time entry of another organisation team member', async ({
-    client,
-    route,
-  }) => {
+  test('organisation admin can restart a team members timer', async ({ client, route }) => {
     // Associate org_admin role to auth user
     const orgAdminRole = await RoleFactory.apply('orgAdmin').create()
     await authUser.related('role').associate(orgAdminRole)
@@ -105,11 +96,8 @@ test.group('Timers : Start Timer', ({ each }) => {
       .create()
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: diffUserTimeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: diffUserTimeEntry.id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
@@ -142,11 +130,8 @@ test.group('Timers : Start Timer', ({ each }) => {
     ]).createMany(2)
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: diffUserTimeEntries[1].id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: diffUserTimeEntries[1].id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
@@ -166,7 +151,7 @@ test.group('Timers : Start Timer', ({ each }) => {
     })
   })
 
-  test('diff organisation auth user, cannot start timer from another organisation', async ({
+  test('organisation admin cannot start a timer of another organisations member', async ({
     client,
     route,
   }) => {
@@ -179,21 +164,18 @@ test.group('Timers : Start Timer', ({ each }) => {
     ).create()
 
     const response = await client
-      .put(route('TimerController.startTimer'))
-      .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: timeEntry.id,
-      })
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
+      .headers({ origin: `http://diff-org.arkora.co.uk` })
       .loginAs(diffUser)
       .withCsrfToken()
 
-    response.assertStatus(404)
-    response.assertBody({ message: 'Organisation account does not exist' })
+    response.assertStatus(403)
+    response.assertBody({ message: [{ message: 'Not authorized to perform this action' }] })
   })
 
-  test('unauthenticated user cannot start a timer', async ({ client, route }) => {
+  test('unauthenticated user cannot restart a timer', async ({ client, route }) => {
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 

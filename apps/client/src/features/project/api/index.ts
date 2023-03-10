@@ -2,6 +2,7 @@ import appApi from 'api'
 import { CreateProjectRequest, UpdateProjectRequest } from './types/requests'
 import {
   CreateProjectResponse,
+  GetProjectInsightsResponse,
   GetProjectResponse,
   GetProjectsResponse,
   UpdateProjectResponse,
@@ -46,6 +47,11 @@ const projectEndpoints = appApi.injectEndpoints({
       }),
       invalidatesTags: ['Projects', 'Project'],
     }),
+
+    getProjectInsights: build.query<GetProjectInsightsResponse, number | string>({
+      query: (id) => `${projectsBasePath}/${id}/insights`,
+      providesTags: ['Projects'],
+    }),
   }),
   overrideExisting: false,
 })
@@ -57,4 +63,5 @@ export const {
   useUpdateProjectMutation,
   useLazyGetProjectQuery,
   useDeleteProjectMutation,
+  useGetProjectInsightsQuery,
 } = projectEndpoints

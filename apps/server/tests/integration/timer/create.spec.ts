@@ -9,7 +9,7 @@ import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 import { DateTime } from 'luxon'
 
-test.group('Timer: Start Time Entry', ({ each }) => {
+test.group('Timer : Create', ({ each }) => {
   let organisation: Organisation
   let commonTasks: Task[]
   let budgets: Budget[]

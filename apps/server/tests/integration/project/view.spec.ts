@@ -18,7 +18,7 @@ test.group('Project: View Project', () => {
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 1 }))
+      .get(route('ProjectController.view', { projectId: 1 }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -45,7 +45,7 @@ test.group('Project: View Project', () => {
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 1 }))
+      .get(route('ProjectController.view', { projectId: 1 }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -72,7 +72,7 @@ test.group('Project: View Project', () => {
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 1 }))
+      .get(route('ProjectController.view', { projectId: 1 }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -99,7 +99,7 @@ test.group('Project: View Project', () => {
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 1 }))
+      .get(route('ProjectController.view', { projectId: 1 }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -115,7 +115,7 @@ test.group('Project: View Project', () => {
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 1 }))
+      .get(route('ProjectController.view', { projectId: 1 }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 
@@ -149,7 +149,7 @@ test.group('Project: View Project', () => {
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 1 }))
+      .get(route('ProjectController.view', { projectId: 1 }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(diffUser)
@@ -181,7 +181,7 @@ test.group('Project: View Project', () => {
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 2 }))
+      .get(route('ProjectController.view', { projectId: 2 }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
