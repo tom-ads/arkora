@@ -6,7 +6,7 @@ import { BudgetFactory, OrganisationFactory, RoleFactory, UserFactory } from 'Da
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 
-test.group('Timers : Stop Timer', ({ each }) => {
+test.group('Timer : Stop', ({ each }) => {
   let authUser: User
   let timeEntry: TimeEntry
   let organisation: Organisation

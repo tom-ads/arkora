@@ -9,7 +9,7 @@ import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factorie
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 
-test.group('Timer: Start Time Entry', ({ each }) => {
+test.group('Time Entry : Delete', ({ each }) => {
   let organisation: Organisation
   let commonTasks: Task[]
   let budgets: Budget[]
@@ -74,7 +74,7 @@ test.group('Timer: Start Time Entry', ({ each }) => {
       .create()
 
     const response = await client
-      .delete(route('TimerController.delete', { timeEntryId: entry.id }))
+      .delete(route('TimeEntryController.delete', { entryId: entry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -107,7 +107,7 @@ test.group('Timer: Start Time Entry', ({ each }) => {
     await authUser.related('role').associate(memberRole)
 
     const response = await client
-      .delete(route('TimerController.delete', { timeEntryId: entry.id }))
+      .delete(route('TimeEntryController.delete', { entryId: entry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -135,7 +135,7 @@ test.group('Timer: Start Time Entry', ({ each }) => {
       .create()
 
     const response = await client
-      .delete(route('TimerController.delete', { timeEntryId: entry.id }))
+      .delete(route('TimeEntryController.delete', { entryId: entry.id }))
       .headers({ origin: `http://diff-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(diffOrgUser)
@@ -153,7 +153,7 @@ test.group('Timer: Start Time Entry', ({ each }) => {
       .create()
 
     const response = await client
-      .delete(route('TimerController.delete', { timeEntryId: entry.id }))
+      .delete(route('TimeEntryController.delete', { entryId: entry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 

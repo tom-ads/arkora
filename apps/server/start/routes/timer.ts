@@ -9,7 +9,7 @@ Route.group(() => {
   Route.group(() => {
     Route.put('/start', 'TimerController.startTimer')
   })
-    .prefix(':timerId')
+    .prefix(':entryId')
     .where('time_entries', Route.matchers.number())
 })
   .prefix('/timers')
