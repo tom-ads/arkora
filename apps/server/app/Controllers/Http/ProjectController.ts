@@ -126,7 +126,7 @@ export default class ProjectController {
     }
 
     if (payload?.team?.length) {
-      await project.assignProjectMembers(ctx.organisation!, project, payload.team ?? [])
+      // await project.assignProjectMembers(ctx.organisation!, project, payload.team ?? [])
     }
 
     await project.save()
@@ -176,7 +176,7 @@ export default class ProjectController {
   }
 
   @bind()
-  public async insights(ctx: HttpContextContract, project: Project) {
+  public async insights(_: HttpContextContract, project: Project) {
     const insights = await project.getProjectInsights()
 
     return {

@@ -4,7 +4,6 @@ import {
   Table,
   TableBody,
   TableContainer,
-  TableEmpty,
   TableHead,
   TableHeading,
   TableRow,
@@ -40,7 +39,7 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
 
   const [triggerResend] = useResendInvitationMutation()
 
-  const { data: members } = useGetAccountsQuery({
+  const { data: members, isLoading } = useGetAccountsQuery({
     page: 1,
     role: roleFilter,
     search: searchFilter,
@@ -56,47 +55,45 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
   }, [members])
 
   return (
-    <>
-      {filteredMembers && filteredMembers?.length > 0 ? (
-        <TableContainer>
-          <Form<FormFields, typeof membersTableSchema>>
-            {() => (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableHeading className="w-[32px]" first>
-                      <FormCheckbox name="select-all" />
-                    </TableHeading>
-                    <TableHeading className="w-[30px]"></TableHeading>
-                    <TableHeading className="w-[150px]">NAME</TableHeading>
-                    <TableHeading className="w-[200px]">EMAIL</TableHeading>
-                    <TableHeading className="w-[100px]">ROLE</TableHeading>
-                    <TableHeading className="w-[100px]">JOINED</TableHeading>
-                    <TableHeading className="w-[60px]" last></TableHeading>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredMembers?.map((member) => (
-                    <TeamMembersTableRow
-                      key={member.id}
-                      value={member}
-                      onResend={() => handleAction(member.id)}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </Form>
-        </TableContainer>
-      ) : (
-        <TableEmpty
-          icon={<UserIcon />}
-          title="No Team Members"
-          btnText="Invite Members"
-          btnOnClick={onCreate}
-          description="Invite team members to assign them to client projects and monitor their time and cost"
-        />
-      )}
-    </>
+    <TableContainer
+      emptyState={{
+        isEmpty: !filteredMembers?.length && isLoading,
+        icon: <UserIcon />,
+        title: 'No Team Members',
+        btnText: 'Invite Members',
+        onClick: onCreate,
+        description:
+          'Invite team members to assign them to client projects and monitor their time and cost',
+      }}
+    >
+      <Form<FormFields, typeof membersTableSchema>>
+        {() => (
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeading className="w-[32px]" first>
+                  <FormCheckbox name="select-all" />
+                </TableHeading>
+                <TableHeading className="w-[30px]"></TableHeading>
+                <TableHeading className="w-[150px]">NAME</TableHeading>
+                <TableHeading className="w-[200px]">EMAIL</TableHeading>
+                <TableHeading className="w-[100px]">ROLE</TableHeading>
+                <TableHeading className="w-[100px]">JOINED</TableHeading>
+                <TableHeading className="w-[60px]" last></TableHeading>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredMembers?.map((member) => (
+                <TeamMembersTableRow
+                  key={member.id}
+                  value={member}
+                  onResend={() => handleAction(member.id)}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Form>
+    </TableContainer>
   )
 }
