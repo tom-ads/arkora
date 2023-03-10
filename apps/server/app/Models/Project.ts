@@ -87,11 +87,7 @@ export default class Project extends BaseModel {
 
   // Instance Methods
 
-  public async assignProjectMembers(
-    organisation: Organisation,
-    project: Project,
-    members: number[]
-  ) {
+  public async assignProjectMembers(organisation: Organisation, project: Project) {
     await project.related('members').detach()
 
     const projectMembers: User[] = await organisation
