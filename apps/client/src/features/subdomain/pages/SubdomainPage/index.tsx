@@ -1,7 +1,10 @@
 import { ArkoraLogo, InlineLink } from '@/components'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { SubdomainForm } from '../../components/SubdomainForm'
 
 export const SubdomainPage = (): JSX.Element => {
+  useDocumentTitle()
+
   return (
     <div className="pb-4 flex flex-col justify-center w-full">
       <div className="pb-10">

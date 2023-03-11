@@ -6,10 +6,10 @@ import { useIsInitialRender } from './useIsInitialRender'
   On initial render it sets the document title to the passed
   in title.
 */
-export const useDocumentTitle = (title: string, isBlocked?: boolean) => {
+export const useDocumentTitle = (title?: string) => {
   const isInitialRender = useIsInitialRender()
 
-  if (isInitialRender && !isBlocked) {
-    window.document.title = `Arkora • ${title}`
+  if (isInitialRender) {
+    window.document.title = `Arkora${title ? ` • ${title}` : ''}`
   }
 }
