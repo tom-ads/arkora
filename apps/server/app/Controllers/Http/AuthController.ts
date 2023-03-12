@@ -167,15 +167,14 @@ export default class AuthController {
 
     const user = ctx.auth.user!
 
-    if (!user || !(await Hash.verify(user?.password, payload.old_password))) {
-      ctx.response.unprocessableEntity({ message: 'Old password does not match' })
-      return
+    if (!user || !(await Hash.verify(user?.password, payload.current_password))) {
+      return ctx.response.unprocessableEntity({
+        errors: [{ field: 'currentPassword', message: 'Old password does not match' }],
+      })
     }
 
     // Model hook with automatically hash the password for us
     user.password = payload.new_password
-
-    // TODO: send password confirmation
 
     await user.save()
 

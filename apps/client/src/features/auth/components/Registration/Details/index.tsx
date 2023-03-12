@@ -27,7 +27,7 @@ const DetailsFormSchema = z
     lastname: z
       .string()
       .min(1, { message: 'Lastname is required' })
-      .regex(/^([^0-9]+)$/, { message: ' Lastname cannot contain numbers' }),
+      .regex(/^([^0-9]+)$/, { message: 'Lastname cannot contain numbers' }),
     email: z
       .string()
       .min(1, { message: 'Email is required' })

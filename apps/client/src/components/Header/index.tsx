@@ -1,7 +1,7 @@
 import { useLogoutMutation } from '@/features/auth'
 import { RootState } from '@/stores/store'
 import classNames from 'classnames'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Avatar } from '../Avatar'
@@ -11,8 +11,11 @@ import { Dropdown, DropdownItem } from '../Dropdown'
 import { ArkoraLogo, ArrowThin } from '../Icons'
 import { TabGroup, TabNavItem } from '../Navigation'
 import { clearAuth } from '@/stores/slices/auth'
+import { ProfileModal } from '@/features/account'
 
 const AvatarDropdown = () => {
+  const [openAccountModal, setOpenAccountModal] = useState<boolean>(false)
+
   const dispatch = useDispatch()
 
   const { authInitials } = useSelector((state: RootState) => ({
@@ -32,11 +35,13 @@ const AvatarDropdown = () => {
       <Dropdown
         trigger={
           <Avatar className="w-10 h-10">
-            <span className="text-sm font-semibold">{authInitials}</span>
+            <span className="text-sm font-semibold uppercase">{authInitials}</span>
           </Avatar>
         }
       >
-        <DropdownItem className="h-8">Account</DropdownItem>
+        <DropdownItem className="h-8" onClick={() => setOpenAccountModal(true)}>
+          Account
+        </DropdownItem>
         <DropdownItem className="h-8">Organisation</DropdownItem>
 
         <HorizontalDivider className="mt-3 mb-[2px]" />
@@ -49,6 +54,8 @@ const AvatarDropdown = () => {
           <ArrowThin className="transform rotate-180 w-6 h-6 text-purple-90" />
         </DropdownItem>
       </Dropdown>
+
+      <ProfileModal isOpen={openAccountModal} onClose={() => setOpenAccountModal(false)} />
     </div>
   )
 }

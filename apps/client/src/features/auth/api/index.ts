@@ -1,3 +1,4 @@
+import { User } from '@/types'
 import appApi from 'api'
 import {
   VerifyDetailsRequest,
@@ -7,6 +8,7 @@ import {
   LoginRequest,
   ResendInvitationRequest,
   InviteMembersRequest,
+  ChangePasswordRequest,
 } from './types/requests'
 import {
   RegisterResponse,
@@ -83,6 +85,14 @@ const authEndpoints = appApi.injectEndpoints({
       }),
     }),
 
+    changePassword: build.mutation<User, ChangePasswordRequest>({
+      query: (body) => ({
+        url: `${authBasePath}/change-password`,
+        method: 'POST',
+        body,
+      }),
+    }),
+
     getSession: build.query<SessionResponse, void>({
       query: () => `${authBasePath}/session `,
     }),
@@ -99,5 +109,6 @@ export const {
   useRegisterMutation,
   useLoginMutation,
   useLogoutMutation,
+  useChangePasswordMutation,
   useGetSessionQuery,
 } = authEndpoints

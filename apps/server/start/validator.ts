@@ -114,6 +114,35 @@ validator.rule(
 )
 
 validator.rule(
+  'organisationEmail',
+  async (email, [organisationId, authEmail], options) => {
+    if (typeof organisationId !== 'number' || typeof authEmail !== 'string') {
+      throw new Error('"organisationEmail" rule can only be used with a number schema type')
+    }
+
+    const exists = await Organisation.query()
+      .where('id', organisationId)
+      .whereHas('users', (projectQuery) => {
+        projectQuery.where((query) => {
+          query.where('email', email).andWhereNot('email', authEmail)
+        })
+      })
+      .first()
+
+    if (exists) {
+      options.errorReporter.report(
+        options.pointer,
+        'organisationEmail',
+        'organisationEmail validation failed',
+        options.arrayExpressionPointer,
+        { organisationId }
+      )
+    }
+  },
+  () => ({ async: true })
+)
+
+validator.rule(
   'budgetName',
   async (name, [projectId, exceptCurrentName], options) => {
     if (typeof projectId !== 'number') {

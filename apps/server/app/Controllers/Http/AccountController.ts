@@ -44,6 +44,10 @@ export default class AccountController {
       user.lastname = payload.lastname
     }
 
+    if (payload.email && payload?.email !== user?.email) {
+      user.email = payload.email
+    }
+
     const authRole = ctx.auth.user?.role?.name
 
     if (

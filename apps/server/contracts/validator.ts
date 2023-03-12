@@ -5,5 +5,6 @@ declare module '@ioc:Adonis/Core/Validator' {
     workDays(): Rule
     budgetName(projectId: number, exceptCurrentName?: boolean): Rule
     organisationProject(organisationId: number): Rule
+    organisationEmail(organisationId: number, authEmail: string): Rule
   }
 }

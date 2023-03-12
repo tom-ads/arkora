@@ -14,5 +14,6 @@ Route.group(() => {
   Route.group(() => {
     Route.get('/session', 'AuthController.session')
     Route.post('/logout', 'AuthController.logout')
+    Route.post('/change-password', 'AuthController.changePassword')
   }).middleware('auth')
 }).prefix('/auth')

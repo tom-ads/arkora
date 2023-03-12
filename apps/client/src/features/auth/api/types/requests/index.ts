@@ -5,6 +5,7 @@ import LoginRequest from './login'
 import VerifyInvitationRequest from './verify_invitation'
 import ResendInvitationRequest from './resend_invitation'
 import InviteMembersRequest from './invite_members'
+import ChangePasswordRequest from './change_password'
 
 export type {
   LoginRequest,
@@ -13,5 +14,6 @@ export type {
   VerifyInvitationRequest,
   RegisterRequest,
   ResendInvitationRequest,
+  ChangePasswordRequest,
   InviteMembersRequest,
 }
