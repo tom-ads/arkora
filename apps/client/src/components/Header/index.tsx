@@ -1,13 +1,57 @@
+import { useLogoutMutation } from '@/features/auth'
 import { RootState } from '@/stores/store'
 import classNames from 'classnames'
-import { ReactNode } from 'react'
-import { useSelector } from 'react-redux'
+import { ReactNode, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Avatar } from '../Avatar'
 import { Button } from '../Button'
 import { HorizontalDivider } from '../Divider'
-import { ArkoraLogo } from '../Icons'
+import { Dropdown, DropdownItem } from '../Dropdown'
+import { ArkoraLogo, ArrowThin } from '../Icons'
 import { TabGroup, TabNavItem } from '../Navigation'
+import { clearAuth } from '@/stores/slices/auth'
+
+const AvatarDropdown = () => {
+  const dispatch = useDispatch()
+
+  const { authInitials } = useSelector((state: RootState) => ({
+    authInitials: state.auth.user?.initials,
+  }))
+
+  const [triggerLogout, { isSuccess }] = useLogoutMutation()
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(clearAuth())
+    }
+  }, [isSuccess])
+
+  return (
+    <div className="relative">
+      <Dropdown
+        trigger={
+          <Avatar className="w-10 h-10">
+            <span className="text-sm font-semibold">{authInitials}</span>
+          </Avatar>
+        }
+      >
+        <DropdownItem className="h-8">Account</DropdownItem>
+        <DropdownItem className="h-8">Organisation</DropdownItem>
+
+        <HorizontalDivider className="mt-3 mb-[2px]" />
+
+        <DropdownItem
+          onClick={triggerLogout}
+          className="rounded-none flex items-center justify-between"
+        >
+          <span>Logout</span>
+          <ArrowThin className="transform rotate-180 w-6 h-6 text-purple-90" />
+        </DropdownItem>
+      </Dropdown>
+    </div>
+  )
+}
 
 const NavItem = ({ to, children }: { to: string; children: ReactNode }) => {
   return (
@@ -32,8 +76,7 @@ export const Header = (): JSX.Element => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const { authInitials, isAuthenticated } = useSelector((state: RootState) => ({
-    authInitials: state.auth.user?.initials,
+  const { isAuthenticated } = useSelector((state: RootState) => ({
     isAuthenticated: state.auth.isAuthenticated,
   }))
 
@@ -58,11 +101,7 @@ export const Header = (): JSX.Element => {
           )}
         </div>
 
-        {isAuthenticated && (
-          <Avatar className="w-10 h-10">
-            <span className="text-sm font-semibold">{authInitials}</span>
-          </Avatar>
-        )}
+        {isAuthenticated && <AvatarDropdown />}
       </div>
 
       {isAuthenticated && (

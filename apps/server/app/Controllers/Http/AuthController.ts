@@ -12,6 +12,7 @@ import TeamValidator from 'App/Validators/Auth/Register/TeamValidator'
 import { getOriginSubdomain } from 'Helpers/subdomain'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Task from 'App/Models/Task'
+import ChangePasswordValidator from 'App/Validators/Auth/ChangePassword'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -139,6 +140,18 @@ export default class AuthController {
     }
   }
 
+  public async logout(ctx: HttpContextContract) {
+    // Prevent active timer from carrying on after logging out
+    const timer = await ctx.auth.user!.getActiveTimer()
+    if (timer) {
+      await timer.stopTimer()
+    }
+
+    await ctx.auth.logout()
+
+    return ctx.response.noContent()
+  }
+
   public async session(ctx: HttpContextContract) {
     await ctx.auth.user?.load('organisation')
 
@@ -147,5 +160,25 @@ export default class AuthController {
       organisation: ctx.auth.user?.organisation,
       timer: await ctx.auth.user!.getActiveTimer(),
     }
+  }
+
+  public async changePassword(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(ChangePasswordValidator)
+
+    const user = ctx.auth.user!
+
+    if (!user || !(await Hash.verify(user?.password, payload.old_password))) {
+      ctx.response.unprocessableEntity({ message: 'Old password does not match' })
+      return
+    }
+
+    // Model hook with automatically hash the password for us
+    user.password = payload.new_password
+
+    // TODO: send password confirmation
+
+    await user.save()
+
+    return user.serialize()
   }
 }

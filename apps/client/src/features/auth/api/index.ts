@@ -76,6 +76,13 @@ const authEndpoints = appApi.injectEndpoints({
       }),
     }),
 
+    logout: build.mutation<void, void>({
+      query: () => ({
+        url: `${authBasePath}/logout`,
+        method: 'POST',
+      }),
+    }),
+
     getSession: build.query<SessionResponse, void>({
       query: () => `${authBasePath}/session `,
     }),
@@ -91,5 +98,6 @@ export const {
   useInviteMembersMutation,
   useRegisterMutation,
   useLoginMutation,
+  useLogoutMutation,
   useGetSessionQuery,
 } = authEndpoints

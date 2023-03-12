@@ -11,5 +11,8 @@ Route.group(() => {
     }).prefix('/register')
   }).middleware('blockAuth')
 
-  Route.get('/session', 'AuthController.session').middleware('auth')
+  Route.group(() => {
+    Route.get('/session', 'AuthController.session')
+    Route.post('/logout', 'AuthController.logout')
+  }).middleware('auth')
 }).prefix('/auth')
