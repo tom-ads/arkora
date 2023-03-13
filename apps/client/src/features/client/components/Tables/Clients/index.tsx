@@ -25,6 +25,7 @@ export const ClientsTable = ({ onCreate }: ClientsTableProps): JSX.Element => {
 
   return (
     <TableContainer
+      className="min-h-[738px]"
       emptyState={{
         isEmpty: !clients?.length && !isLoading,
         icon: <UserIcon />,

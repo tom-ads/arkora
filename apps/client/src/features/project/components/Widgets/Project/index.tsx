@@ -56,7 +56,9 @@ export const ProjectWidget = (): JSX.Element => {
 
       <HorizontalDivider />
 
-      <div className="px-5 pt-4">{selectedTab === 'entries' && <ProjectTimeEntryFilters />}</div>
+      <div className="px-5 pt-4 h-[58px]">
+        {selectedTab === 'entries' && <ProjectTimeEntryFilters />}
+      </div>
 
       <CreateBudgetModal
         isOpen={openActionModal && selectedTab === 'budgets'}

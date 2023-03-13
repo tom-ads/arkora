@@ -30,7 +30,7 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
     <TableContainer
       className="min-h-[738px]"
       emptyState={{
-        isEmpty: !project?.length && !isLoading,
+        isEmpty: !projects?.length && !isLoading,
         title: 'Projects',
         btnText: 'Create Project',
         onClick: onCreate,

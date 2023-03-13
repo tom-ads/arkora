@@ -56,6 +56,7 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
 
   return (
     <TableContainer
+      className="min-h-[738px]"
       emptyState={{
         isEmpty: !filteredMembers?.length && isLoading,
         icon: <UserIcon />,
