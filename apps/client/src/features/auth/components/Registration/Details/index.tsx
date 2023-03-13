@@ -17,6 +17,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import * as z from 'zod'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
+import { validatePassword } from '@/helpers/validation/fields'
+import validationIssuer from '@/helpers/validation/issuer'
 
 const DetailsFormSchema = z
   .object({
@@ -38,6 +40,10 @@ const DetailsFormSchema = z
   .refine((data) => data.password === data.passwordConfirmation, {
     message: 'Passwords do not match',
     path: ['passwordConfirmation'],
+  })
+  .superRefine((fields, ctx) => {
+    const passwordValidation = validatePassword(fields.password)
+    validationIssuer('password', passwordValidation, ctx)
   })
 
 type FormFields = {
