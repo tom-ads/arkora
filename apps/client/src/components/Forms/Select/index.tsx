@@ -111,18 +111,17 @@ export const FormSelect = ({
                 {selectedItem?.children ?? placeHolder}
               </span>
               <span
-                aria-hidden
+                aria-hidden="true"
                 className={classNames('text-gray-100 ml-2 flex flex-shrink-0 pointer-events-none', {
                   'w-5 h-5': size === 'xs' || size === 'sm' || size === 'md',
                   'w-6 h-6': size === 'lg',
                 })}
               >
                 <ChevronIcon
-                  className={classNames('transform transition-transform', {
+                  className={classNames('transform transition-transform w-5', {
                     '-rotate-180': focused,
                     'text-gray-60': disabled,
                   })}
-                  aria-hidden="true"
                 />
               </span>
             </Listbox.Button>

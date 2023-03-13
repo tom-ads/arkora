@@ -109,7 +109,7 @@ export const FormMultiSelect = ({
                 })}
               >
                 <ChevronIcon
-                  className={classNames('transform transition-transform', {
+                  className={classNames('transform transition-transform w-5', {
                     '-rotate-180': focused,
                     'text-gray-60': disabled,
                   })}
