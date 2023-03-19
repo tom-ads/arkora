@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
   Route.get('/', 'AccountController.index')
+  Route.get('/insights', 'AccountController.insights')
 
   Route.group(() => {
     Route.get('/', 'AccountController.view')

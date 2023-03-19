@@ -55,6 +55,7 @@ const InviteMemberList = ({ watch, control }: { watch: any; control: any }): JSX
       </div>
     )
   }
+
   return (
     <List<InviteFormFields, 'members'>
       name="members"

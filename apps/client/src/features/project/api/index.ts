@@ -1,5 +1,11 @@
+import { User } from '@/types'
 import appApi from 'api'
-import { CreateProjectRequest, UpdateProjectRequest } from './types/requests'
+import {
+  CreateProjectMembersRequest,
+  CreateProjectRequest,
+  DeleteProjectMemberRequest,
+  UpdateProjectRequest,
+} from './types/requests'
 import {
   CreateProjectResponse,
   GetProjectInsightsResponse,
@@ -52,6 +58,23 @@ const projectEndpoints = appApi.injectEndpoints({
       query: (id) => `${projectsBasePath}/${id}/insights`,
       providesTags: ['Projects'],
     }),
+
+    createProjectMember: build.mutation<User[], CreateProjectMembersRequest>({
+      query: ({ projectId, ...body }) => ({
+        url: `${projectsBasePath}/${projectId}/members`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['ProjectMembers'],
+    }),
+
+    deleteProjectMember: build.mutation<void, DeleteProjectMemberRequest>({
+      query: ({ projectId, memberId }) => ({
+        url: `${projectsBasePath}/${projectId}/members/${memberId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ProjectMembers'],
+    }),
   }),
   overrideExisting: false,
 })
@@ -64,4 +87,6 @@ export const {
   useLazyGetProjectQuery,
   useDeleteProjectMutation,
   useGetProjectInsightsQuery,
+  useCreateProjectMemberMutation,
+  useDeleteProjectMemberMutation,
 } = projectEndpoints

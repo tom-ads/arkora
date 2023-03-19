@@ -79,14 +79,7 @@ export const ConfirmationModal = ({
                     >
                       Cancel
                     </Button>
-                    <Button
-                      size="xs"
-                      type="submit"
-                      className="max-w-[161px] w-full"
-                      onClick={onConfirm}
-                      loading={loading}
-                      danger
-                    >
+                    <Button size="xs" type="submit" onClick={onConfirm} loading={loading} danger>
                       {btnText}
                     </Button>
                   </ModalFooter>

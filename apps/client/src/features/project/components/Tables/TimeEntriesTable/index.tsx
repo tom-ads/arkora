@@ -54,9 +54,7 @@ export const TimeEntriesTable = ({ onManage }: TableProps): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[160px]" first>
-              NAME
-            </TableHeading>
+            <TableHeading className="w-[160px]" first></TableHeading>
             <TableHeading className="w-[190px]">BUDGET</TableHeading>
             <TableHeading className="w-[270px]">DESCRIPTION</TableHeading>
             <TableHeading className="w-[90px]">Date</TableHeading>

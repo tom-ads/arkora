@@ -1,6 +1,11 @@
 import { User } from '@/types'
 import appApi from 'api'
-import { GetAccountsRequest, GetAccountRequest, UpdateAccountRequest } from './types/requests'
+import {
+  GetAccountsRequest,
+  GetAccountRequest,
+  UpdateAccountRequest,
+  GetInsightsRequest,
+} from './types/requests'
 import { GetAccountResponse, GetAccountsResponse } from './types/response'
 
 const accountBasePath = '/accounts'
@@ -41,6 +46,16 @@ const accountEndpoints = appApi.injectEndpoints({
       }),
       invalidatesTags: ['Members', 'Member'],
     }),
+
+    getAccountsInsights: build.query<User[], GetInsightsRequest>({
+      query: (params) => ({
+        url: `${accountBasePath}/insights`,
+        params: {
+          ...(params.projectId && { project_id: params.projectId }),
+        },
+      }),
+      providesTags: ['ProjectMembers'],
+    }),
   }),
   overrideExisting: false,
 })
@@ -50,4 +65,5 @@ export const {
   useGetAccountQuery,
   useUpdateAccountMutation,
   useDeleteAccountMutation,
+  useGetAccountsInsightsQuery,
 } = accountEndpoints

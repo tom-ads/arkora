@@ -11,6 +11,10 @@ type User = {
     name: UserRole
   }
   lastActiveAt: string
+
+  spentDuration: number
+  billableDuration: number
+  unbillableDuration: number
 }
 
 export type { User }

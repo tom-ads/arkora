@@ -32,8 +32,17 @@ export const TimeEntriesRow = ({ value, onManage }: RowProps): JSX.Element => {
     <TableRow>
       <TableData>
         <div className="flex items-center gap-3">
-          <Avatar>{value.user.initials || <UserIcon />}</Avatar>
-          <span className="font-medium">{`${value.user?.firstname ?? ''}${lastName}`}</span>
+          <Avatar className="w-9 h-9 uppercase">
+            {value.user.initials || <UserIcon className="w-5 h-5" />}
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm text-gray-80">
+              {value.user.firstname} {value.user.lastname}
+            </span>
+            {value.user?.role?.name && (
+              <span className="text-xs text-gray-50 font-medium">{value.user.role.name}</span>
+            )}
+          </div>
         </div>
       </TableData>
 

@@ -4,14 +4,19 @@ import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useGetProjectQuery } from '../../api'
-import { ProjectBudgetView, ProjectInsights, ProjectWidget } from '../../components'
+import {
+  ProjectBudgetView,
+  ProjectInsights,
+  ProjectTeamView,
+  ProjectWidget,
+} from '../../components'
 import { ProjectTab } from '@/stores/slices/filters/project'
 import { ProjectTimeView } from '../../components/Views/Time'
 
 const views = {
   budgets: <ProjectBudgetView />,
   entries: <ProjectTimeView />,
-  team: <></>,
+  team: <ProjectTeamView />,
 }
 
 const ProjectView = () => {

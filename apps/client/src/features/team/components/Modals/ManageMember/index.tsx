@@ -220,14 +220,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
                 <span></span>
               )}
 
-              <Button
-                size="xs"
-                className="max-w-[160px]"
-                type="submit"
-                loading={updatingMember}
-                disabled={deletingMember}
-                block
-              >
+              <Button size="xs" type="submit" loading={updatingMember} disabled={deletingMember}>
                 Update {member?.firstname ?? 'Member'}
               </Button>
             </ModalFooter>

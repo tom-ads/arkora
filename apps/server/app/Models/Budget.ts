@@ -91,7 +91,7 @@ export default class Budget extends BaseModel {
       this?.budgetType?.name === BudgetKind.VARIABLE &&
       this?.billableType?.name === BillableKind.TOTAL_HOURS
     ) {
-      return (this.budget / 60) * ((this.hourlyRate ?? 0) / 100)
+      return (this.budget / 60) * ((this.hourlyRate ?? 0) / 100) * 100
     }
 
     return this.budget
@@ -293,8 +293,8 @@ export default class Budget extends BaseModel {
               SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS unbillable_duration
             FROM budget_tasks
             LEFT JOIN time_entries
-            ON budget_tasks.budget_id = time_entries.budget_id
-            AND budget_tasks.task_id = time_entries.task_id
+              ON budget_tasks.budget_id = time_entries.budget_id
+              AND budget_tasks.task_id = time_entries.task_id
             GROUP BY budget_tasks.budget_id
           ) AS entries
           ON budgets.id = entries.budget_id

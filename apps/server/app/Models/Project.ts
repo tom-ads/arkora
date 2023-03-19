@@ -7,6 +7,8 @@ import {
   column,
   HasMany,
   hasMany,
+  HasManyThrough,
+  hasManyThrough,
   ManyToMany,
   manyToMany,
   ModelQueryBuilderContract,
@@ -18,6 +20,11 @@ import Budget from './Budget'
 import User from './User'
 import Organisation from './Organisation'
 import { sumBy } from 'lodash'
+import TimeEntry from './TimeEntry'
+
+type ProjectInsightsFilter = {
+  users: number[]
+}
 
 type ProjectBuilder = ModelQueryBuilderContract<typeof Project>
 
@@ -61,6 +68,9 @@ export default class Project extends BaseModel {
   })
   public members: ManyToMany<typeof User>
 
+  @hasManyThrough([() => Budget, () => TimeEntry])
+  public timeEntries: HasManyThrough<typeof Budget>
+
   // Hooks
 
   @beforeDelete()
@@ -101,10 +111,16 @@ export default class Project extends BaseModel {
     await project.related('members').attach(projectMembers.map((member) => member.id))
   }
 
-  public async getProjectInsights(this: Project) {
+  public async getProjectInsights(this: Project, filters?: ProjectInsightsFilter) {
     const result = await this.related('budgets')
       .query()
       .withScopes((scopes) => scopes.budgetMetrics())
+      .if(filters?.users, (builder) => {
+        builder.whereHas('members', (memberBuilder) => {
+          memberBuilder.whereIn('time_entries.user_id', filters!.users)
+        })
+      })
+
       .exec()
 
     const totalBillableDuration = sumBy(result, (b) => b.billableDuration ?? 0)

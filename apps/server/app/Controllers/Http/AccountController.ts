@@ -5,6 +5,7 @@ import GetAccountsValidator from 'App/Validators/Accounts/GetAccountsValidator'
 import UpdateAccountValidator from 'App/Validators/Accounts/UpdateAccountValidator'
 import Role from 'App/Models/Role'
 import UserRole from 'App/Enum/UserRole'
+import InsightsValidator from 'App/Validators/Project/InsightsValidator'
 
 export default class AccountController {
   public async index(ctx: HttpContextContract) {
@@ -73,5 +74,16 @@ export default class AccountController {
     await user.delete()
 
     return ctx.response.noContent()
+  }
+
+  public async insights(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(InsightsValidator)
+
+    let users: User[] = []
+    if (payload.project_id) {
+      users = await User.getProjectInsights(ctx.auth.user!.organisationId, payload.project_id)
+    }
+
+    return users.map((user) => user.serialize())
   }
 }

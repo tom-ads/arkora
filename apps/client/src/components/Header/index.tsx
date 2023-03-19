@@ -92,7 +92,7 @@ export const Header = (): JSX.Element => {
       {/* Main Navi */}
       <div className="flex items-center justify-between max-w-[1440px] mx-auto py-4 px-7 lg:px-[46px]">
         <div className="flex items-center gap-x-6">
-          <div className="flex items-center gap-2 pr-3">
+          <div className="pr-3">
             <Button onClick={() => navigate(isAuthenticated ? '/timer' : '/')} variant="blank">
               <ArkoraLogo className="w-[38px] h-[39px]" />
               <p className="text-2xl text-gray-100 font-istokWeb font-normal">Arkora</p>

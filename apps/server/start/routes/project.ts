@@ -10,6 +10,17 @@ Route.group(() => {
     Route.delete('/', 'ProjectController.delete')
 
     Route.get('/insights', 'ProjectController.insights')
+
+    // Project Members
+    Route.group(() => {
+      Route.post('/', 'ProjectMemberController.create')
+
+      Route.group(() => {
+        Route.delete('/', 'ProjectMemberController.delete')
+      })
+        .prefix(':memberId')
+        .where('user', Route.matchers.number())
+    }).prefix('/members')
   })
     .prefix(':projectId')
     .where('project', Route.matchers.number())

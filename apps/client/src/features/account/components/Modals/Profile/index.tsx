@@ -14,19 +14,13 @@ export const ProfileModal = (props: ModalBaseProps): JSX.Element => {
   }))
 
   return (
-    <Modal
-      title="Account"
-      description="Manage account information"
-      isOpen={props.isOpen}
-      onClose={props.onClose}
-      className="max-w-[500px]"
-    >
+    <Modal title="Account" isOpen={props.isOpen} onClose={props.onClose} className="max-w-[500px]">
       <>
         <div className="flex items-center gap-5 mb-2">
           <Avatar className="w-[52px] h-[52px]">
             <UserIcon className="w-6 h-6 text-purple-90" />
           </Avatar>
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start">
             <p className="font-semibold text-gray-100">
               {authUser?.firstname} {authUser?.lastname ?? ''}
             </p>
