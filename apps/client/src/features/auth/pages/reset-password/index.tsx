@@ -44,10 +44,7 @@ export const ResetPasswordPage = (): JSX.Element => {
 
   const [searchParams] = useSearchParams()
 
-  const handleSubmit = async (
-    data: ResetPasswordFormFields,
-    methods: UseFormReturn<ResetPasswordFormFields>,
-  ) => {
+  const handleSubmit = async (data: ResetPasswordFormFields) => {
     const userId = searchParams.get('user_id')
     const token = searchParams.get('token')
 
@@ -58,9 +55,8 @@ export const ResetPasswordPage = (): JSX.Element => {
           navigate('/login')
           successToast('Your password has been reset')
         })
-        .catch((error) => {
-          // methods.resetField('passwordConfirmation')
-          if (error.status === 422) return
+        .catch(() => {
+          /* */
         })
     }
   }

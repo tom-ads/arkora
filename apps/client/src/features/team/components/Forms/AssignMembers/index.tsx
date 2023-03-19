@@ -1,7 +1,6 @@
-import { Form, FormControl, FormDebouncedInput, HorizontalDivider, MouseIcon } from '@/components'
-import { useGetAccountsQuery } from '@/features/account'
-import { ReactNode, useMemo, useState } from 'react'
-import { UseFormReturn } from 'react-hook-form'
+import { Form, FormControl, FormDebouncedInput, HorizontalDivider } from '@/components'
+import { User } from '@/types'
+import { ReactNode } from 'react'
 import { z } from 'zod'
 import { AssignMembersList } from '../../Lists/AssignMembers'
 import { SelectedAsignee } from './../../../types'
@@ -16,76 +15,57 @@ const formSchema = z.object({
   members: z.array(z.number()),
 })
 
-const FormWrapper = ({ getValues, setValue }: UseFormReturn<AssignMembersFields>) => {
-  const [debouncedSearch, setDebouncedSearch] = useState<string | null>(null)
-
-  const { data: members } = useGetAccountsQuery({
-    search: debouncedSearch,
-    status: 'INVITE_ACCEPTED',
-  })
-
-  const formattedMembers: SelectedAsignee[] = useMemo(() => {
-    const selectedItems = getValues('members')
-    return (
-      members?.map((member) => {
-        const isSelected = selectedItems?.find((item) => item.id === member.id)?.isSelected
-        return { ...member, isSelected: !!isSelected }
-      }) ?? []
-    )
-  }, [members])
-
-  return (
-    <>
-      <div className="flex items-center gap-4 mb-5">
-        <FormControl>
-          <FormDebouncedInput
-            name="search"
-            placeHolder="Search members"
-            size="sm"
-            className="!h-[39px]"
-            value={debouncedSearch ?? ''}
-            onChange={(search) => {
-              setValue('search', search)
-              setDebouncedSearch(search)
-            }}
-          />
-        </FormControl>
-      </div>
-
-      <HorizontalDivider
-        contentLeft={
-          <p className="whitespace-nowrap font-medium text-base text-gray-100">Members</p>
-        }
-        contentRight={
-          <div className="flex items-center gap-1 text-gray-80">
-            <MouseIcon className="w-5 h-5 shrink-0" />
-            <p className="whitespace-nowrap text-sm font-medium">Scroll to view list</p>
-          </div>
-        }
-      />
-
-      <AssignMembersList
-        value={formattedMembers}
-        onChange={(items) => setValue('members', items)}
-      />
-    </>
-  )
-}
-
 type AssignMembersFormProps = {
   onSubmit: (data: AssignMembersFields) => void
+  onSearch: (search: string) => void
+  value: User[]
   children: ReactNode
 }
 
-export const AssignMembersForm = ({ onSubmit, children }: AssignMembersFormProps): JSX.Element => {
+export const AssignMembersForm = ({
+  value,
+  onSearch,
+  onSubmit,
+  children,
+}: AssignMembersFormProps): JSX.Element => {
   return (
     <Form<AssignMembersFields, typeof formSchema>
       onSubmit={onSubmit}
       defaultValues={{ members: [], search: '' }}
     >
-      {(methods) => (
+      {({ setValue, watch }) => (
         <>
-          <FormWrapper {...methods} />
+          <FormControl className="mb-5">
+            <FormDebouncedInput
+              name="search"
+              placeHolder="Search members"
+              size="sm"
+              className="!h-[39px]"
+              value={watch('search')}
+              onChange={(search) => {
+                setValue('search', search)
+                onSearch(search)
+              }}
+            />
+          </FormControl>
+
+          <HorizontalDivider
+            contentLeft={
+              <p className="whitespace-nowrap font-medium text-base text-gray-100">Members</p>
+            }
+            contentRight={
+              <p className="whitespace-nowrap font-medium text-base text-gray-100">
+                {watch('members')?.length ?? 0} Selected
+              </p>
+            }
+          />
+
+          <AssignMembersList
+            items={value}
+            selected={watch('members')}
+            onChange={(items) => setValue('members', items)}
+          />
+
           {children}
         </>
       )}

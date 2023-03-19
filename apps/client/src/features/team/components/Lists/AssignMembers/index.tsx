@@ -1,25 +1,35 @@
 import { Avatar, CircleTick, UserIcon } from '@/components'
 import { SelectedAsignee } from './../../../types'
 import classNames from 'classnames'
+import { User } from '@/types'
 
 type AssignMembersListProps = {
-  value: SelectedAsignee[]
+  items: User[]
+  selected: SelectedAsignee[]
   onChange: (items: SelectedAsignee[]) => void
 }
 
-export const AssignMembersList = ({ value, onChange }: AssignMembersListProps): JSX.Element => {
+export const AssignMembersList = ({
+  items,
+  selected,
+  onChange,
+}: AssignMembersListProps): JSX.Element => {
   const handleOnClick = (selectedAssignee: SelectedAsignee) => {
-    onChange(
-      value.map((member) => {
-        if (member.id === selectedAssignee.id) {
-          member.isSelected = !selectedAssignee.isSelected
-        }
-        return member
-      }),
-    )
+    const isSelected = selected?.find((item) => item.id === selectedAssignee.id)?.isSelected
+    if (isSelected) {
+      onChange(selected.filter((member) => member.id !== selectedAssignee.id))
+      return
+    }
+
+    onChange([...selected, { ...selectedAssignee, isSelected: true }])
   }
 
-  if (!value?.length) {
+  const formattedMembers: SelectedAsignee[] = items?.map((member) => {
+    const isSelected = selected?.find((item) => item.id === member.id)?.isSelected
+    return { ...member, isSelected: !!isSelected }
+  })
+
+  if (!formattedMembers?.length) {
     return (
       <div className="py-5 w-full text-center h-[400px]">
         <p className="font-medium text-md text-gray-50 whitespace-nowrap">All Members Assigned</p>
@@ -29,7 +39,7 @@ export const AssignMembersList = ({ value, onChange }: AssignMembersListProps): 
 
   return (
     <ul className="w-full py-4 h-[400px] overflow-y-auto scrollbar-hide divide-y divide-dashed divide-gray-30 scroll-smooth">
-      {value?.map((member) => (
+      {formattedMembers?.map((member) => (
         <li key={member.id} className="w-full">
           <div className="my-1">
             <button

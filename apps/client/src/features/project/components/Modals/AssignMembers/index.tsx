@@ -1,19 +1,40 @@
 import { Button } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
+import { useGetAccountsQuery } from '@/features/account'
 import { useCreateProjectMemberMutation } from '@/features/project'
 import { AssignMembersFields, AssignMembersForm } from '@/features/team'
 import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
+import { differenceBy, union, unionBy, uniq, uniqBy } from 'lodash'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 type Props = ModalBaseProps
 
 export const AssignProjectMemberModal = ({ isOpen, onClose }: Props): JSX.Element => {
+  const [debouncedSearch, setDebouncedSearch] = useState<string | null>(null)
+
   const { projectId } = useParams()
 
   const { successToast, errorToast } = useToast()
 
   const [assignProjectMembers] = useCreateProjectMemberMutation()
+
+  const { data: members } = useGetAccountsQuery(
+    {
+      search: debouncedSearch,
+      status: 'INVITE_ACCEPTED',
+    },
+    { skip: !projectId },
+  )
+
+  const { data: projectMembers } = useGetAccountsQuery(
+    {
+      projectId,
+      status: 'INVITE_ACCEPTED',
+    },
+    { skip: !projectId },
+  )
 
   const onSubmit = async (data: AssignMembersFields) => {
     if (projectId) {
@@ -29,9 +50,17 @@ export const AssignProjectMemberModal = ({ isOpen, onClose }: Props): JSX.Elemen
     }
   }
 
+  const unassignedMembers = useMemo(() => {
+    return differenceBy(members ?? [], projectMembers ?? [], 'id')
+  }, [members, projectMembers])
+
   return (
     <Modal title="Assign Members" isOpen={isOpen} onClose={onClose} className="max-w-[600px]">
-      <AssignMembersForm onSubmit={onSubmit}>
+      <AssignMembersForm
+        onSubmit={onSubmit}
+        onSearch={(search) => setDebouncedSearch(search)}
+        value={unassignedMembers ?? []}
+      >
         <ModalFooter>
           <Button variant="blank" onClick={onClose}>
             Cancel
