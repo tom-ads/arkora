@@ -1,5 +1,11 @@
 import { AuthLayout, MainLayout, Spinner } from '@/components'
-import { InvitationPage, LoginPage, RegistrationPage } from '@/features/auth'
+import {
+  ForgotPasswordPage,
+  InvitationPage,
+  LoginPage,
+  RegistrationPage,
+  ResetPasswordPage,
+} from '@/features/auth'
 import { SubdomainPage, SubdomainNotFoundPage, useCheckSubdomainQuery } from '@/features/subdomain'
 import { setOrganisation } from '@/stores/slices/organisation'
 import { RootState } from '@/stores/store'
@@ -31,7 +37,11 @@ export const PublicRoutes = (): JSX.Element => {
       if (data?.exists) {
         disptach(setOrganisation({ ...data.organisation }))
 
-        if (location.pathname !== '/invitation') {
+        if (
+          location.pathname !== '/invitation' &&
+          location.pathname !== '/forgot-password' &&
+          location.pathname !== '/reset-password'
+        ) {
           navigate(data?.exists ? '/login' : '/', { replace: true })
         }
       }
@@ -55,7 +65,12 @@ export const PublicRoutes = (): JSX.Element => {
     return <Navigate to={to} replace />
   }
 
-  if (location.pathname === '/register' || location.pathname === '/invitation') {
+  if (
+    location.pathname === '/register' ||
+    location.pathname === '/invitation' ||
+    location.pathname === '/forgot-password' ||
+    location.pathname === '/reset-password'
+  ) {
     return <MainLayout />
   }
 
@@ -77,6 +92,14 @@ export const publicRoutes = [
       {
         path: '/login',
         element: <LoginPage />,
+      },
+      {
+        path: '/forgot-password',
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPasswordPage />,
       },
       {
         path: '/invitation',

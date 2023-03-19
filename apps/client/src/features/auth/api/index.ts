@@ -9,6 +9,7 @@ import {
   ResendInvitationRequest,
   InviteMembersRequest,
   ChangePasswordRequest,
+  ResetPasswordRequest,
 } from './types/requests'
 import {
   RegisterResponse,
@@ -93,6 +94,27 @@ const authEndpoints = appApi.injectEndpoints({
       }),
     }),
 
+    forgotPassword: build.mutation<void, string>({
+      query: (email) => ({
+        url: `${authBasePath}/forgot-password`,
+        method: 'POST',
+        body: { email },
+      }),
+    }),
+
+    resetPassword: build.mutation<void, ResetPasswordRequest>({
+      query: (body) => ({
+        url: `${authBasePath}/reset-password`,
+        method: 'POST',
+        body: {
+          user_id: body.userId,
+          token: body.token,
+          password: body.password,
+          password_confirmation: body.passwordConfirmation,
+        },
+      }),
+    }),
+
     getSession: build.query<SessionResponse, void>({
       query: () => `${authBasePath}/session `,
     }),
@@ -110,5 +132,7 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useChangePasswordMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useGetSessionQuery,
 } = authEndpoints

@@ -22,7 +22,7 @@ const registrationViews = {
   team: {
     id: 2,
     title: 'Invite the team',
-    description: 'Almost there! Define your organisation teams and invite your team members',
+    description: 'Almost there! Start early and invite the team, or do it later!',
     view: <TeamView />,
   },
 }

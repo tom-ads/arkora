@@ -66,15 +66,11 @@ export const LoginPage = (): JSX.Element => {
   return (
     <div className="flex flex-col justify-center self-center">
       <div className="flex items-center flex-wrap gap-4 pb-6">
-        <ArkoraLogo className="w-24 h-24 flex-shrink-0" />
+        <ArkoraLogo className="w-24 h-2- flex-shrink-0" />
         <div className="flex flex-col justify-start">
           <h2 className="text-gray-100 text-xl">Welcome to</h2>
           <h1 className="font-medium text-3xl text-purple-90">{organisation.name ?? 'Arkora'}</h1>
         </div>
-      </div>
-
-      <div className="w-full mb-9">
-        <p className="text-gray-60 align-baseline">Please enter your credentials</p>
       </div>
 
       <Form<FormFields, typeof LoginFormSchema>
@@ -120,7 +116,7 @@ export const LoginPage = (): JSX.Element => {
               )}
             </FormControl>
 
-            <div>
+            <div className="flex justify-end">
               <InlineLink className="font-semibold text-sm" to="/forgot-password">
                 Forgot Password?
               </InlineLink>

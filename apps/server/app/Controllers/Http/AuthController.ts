@@ -13,6 +13,13 @@ import { getOriginSubdomain } from 'Helpers/subdomain'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Task from 'App/Models/Task'
 import ChangePasswordValidator from 'App/Validators/Auth/ChangePassword'
+import { DateTime } from 'luxon'
+import ForgotPasswordValidator from 'App/Validators/Auth/ForgotPassword'
+import { string } from '@ioc:Adonis/Core/Helpers'
+import { generatePasswordResetLink } from 'Helpers/links'
+import PasswordReset from 'App/Models/PasswordReset'
+import ResetPassword from 'App/Mailers/ResetPassword'
+import ResetPasswordValidator from 'App/Validators/Auth/ResetPassword'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -72,6 +79,7 @@ export default class AuthController {
         lastname: details.lastname,
         email: details.email,
         password: details.password,
+        verifiedAt: DateTime.now(),
       })
       await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
       await owner.related('organisation').associate(createdOrganisation)
@@ -160,6 +168,68 @@ export default class AuthController {
       organisation: ctx.auth.user?.organisation,
       timer: await ctx.auth.user!.getActiveTimer(),
     }
+  }
+
+  public async forgotPassword(ctx: HttpContextContract) {
+    const originSubdomain = getOriginSubdomain(ctx.request.header('origin')!)
+    if (!originSubdomain) {
+      ctx.response.notFound({ message: 'Origin header not present' })
+      return
+    }
+
+    const payload = await ctx.request.validate(ForgotPasswordValidator)
+
+    const user = await User.query()
+      .withScopes((scopes) => scopes.organisationUser(payload.email, originSubdomain))
+      .first()
+
+    if (user) {
+      const organisation = await Organisation.findByOrFail('subdomain', originSubdomain)
+
+      const token = string.generateRandom(32)
+      const resetLink = generatePasswordResetLink(originSubdomain, user.id, token)
+
+      try {
+        // Create and send password reset notification
+        await PasswordReset.create({ userId: user.id, token })
+        await new ResetPassword(organisation, user, resetLink).send()
+
+        ctx.logger.info(`Reset password link has been generated and sent to user(${user.id})`)
+      } catch (error) {
+        ctx.logger.error(
+          `Failed to generate and send password reset link for user(${user.id}) due to: ${error.message}`
+        )
+      }
+    }
+
+    return ctx.response.ok({ message: 'Reset link was sent to this email address' })
+  }
+
+  public async resetPassword(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(ResetPasswordValidator)
+
+    const user = await User.findOrFail(payload.user_id)
+
+    const validToken = await PasswordReset.getUserToken(payload.user_id)
+
+    if (!validToken) {
+      return ctx.response.badRequest({ message: 'Password reset link has expired' })
+    }
+
+    if (!(await Hash.verify(validToken.token, payload.token))) {
+      return ctx.response.unprocessableEntity({
+        errors: [
+          {
+            field: 'passwordConfirmation',
+            message: 'We cannot verify this reset link.',
+          },
+        ],
+      })
+    }
+
+    await PasswordReset.invalidateUserTokens(user.id)
+
+    return ctx.response.noContent()
   }
 
   public async changePassword(ctx: HttpContextContract) {
