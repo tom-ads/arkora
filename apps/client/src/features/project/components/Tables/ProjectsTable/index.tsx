@@ -7,7 +7,6 @@ import {
   TableRow,
   HouseIcon,
 } from '@/components'
-import project from '@/stores/slices/filters/project'
 import { useState } from 'react'
 import { useGetProjectsQuery } from '../../../api'
 import { ProjectsRow, ProjectsRowSkeleton } from '../ProjectsRow'
@@ -42,8 +41,9 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[32px]" first></TableHeading>
-            <TableHeading className="w-[270px]">NAME</TableHeading>
+            <TableHeading className="w-[270px]" first>
+              NAME
+            </TableHeading>
             <TableHeading className="w-[270px]">CLIENT</TableHeading>
             <TableHeading className="w-[200px]">TEAM</TableHeading>
             <TableHeading className="w-[120px]">STATUS</TableHeading>
