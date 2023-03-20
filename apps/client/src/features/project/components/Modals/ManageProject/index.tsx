@@ -28,7 +28,8 @@ export const ManageProjectModal = ({
     skip: !projectId,
   })
 
-  const [updateProject, { isLoading: updatingProject }] = useUpdateProjectMutation()
+  const [updateProject, { isLoading: updatingProject, error: updateError }] =
+    useUpdateProjectMutation()
 
   const [deleteProject, { isLoading: deletingProject }] = useDeleteProjectMutation()
 
@@ -41,10 +42,15 @@ export const ManageProjectModal = ({
       client_id: data.client!,
     })
       .unwrap()
-      .then(() => successToast('Project has been updated'))
-      .catch(() => errorToast('Unable to update project, please try again later.'))
-
-    onClose()
+      .then(() => {
+        onClose()
+        successToast('Project has been updated')
+      })
+      .catch((error) => {
+        if (error.status === 422) return
+        onClose()
+        errorToast('Unable to update project, please try again later.')
+      })
   }
 
   const onConfirm = async () => {
@@ -69,6 +75,7 @@ export const ManageProjectModal = ({
         <ProjectForm
           isOpen={isOpen}
           onSubmit={onSubmit}
+          error={updateError}
           defaultValues={{
             name: project?.name,
             client: project?.client?.id,

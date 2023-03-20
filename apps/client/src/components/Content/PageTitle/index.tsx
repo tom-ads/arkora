@@ -5,5 +5,5 @@ type PageTitleProps = {
 }
 
 export const PageTitle = ({ children }: PageTitleProps): JSX.Element => {
-  return <h1 className="text-white font-semibold text-4xl mb-2">{children}</h1>
+  return <h1 className="text-white font-semibold text-4xl mb-1">{children}</h1>
 }

@@ -43,7 +43,19 @@ const projectEndpoints = appApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['Projects', 'Project'],
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedProject } = await queryFulfilled
+          dispatch(
+            projectEndpoints.util.updateQueryData('getProject', id, (draft) => {
+              Object.assign(draft, updatedProject)
+            }),
+          )
+        } catch {
+          /* */
+        }
+      },
+      invalidatesTags: ['Projects'],
     }),
 
     deleteProject: build.mutation<void, number>({

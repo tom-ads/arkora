@@ -1,9 +1,9 @@
 import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Status from 'App/Enum/Status'
+import UserRole from 'App/Enum/UserRole'
 import Client from 'App/Models/Client'
 import Project from 'App/Models/Project'
-import User from 'App/Models/User'
 import CreateProjectValidator from 'App/Validators/Project/CreateProjectValidator'
 import UpdateProjectValidator from 'App/Validators/Project/UpdateProjectValidator'
 
@@ -30,36 +30,32 @@ export default class ProjectController {
 
     const payload = await ctx.request.validate(CreateProjectValidator)
 
-    const nameExists = await ctx.organisation
-      ?.related('projects')
-      .query()
-      .where('projects.name', payload.name)
-
-    if (nameExists?.length) {
-      ctx.response.unprocessableEntity({
-        errors: [{ field: 'name', message: 'Name already exists' }],
+    const nameTaken = await Project.isNameTaken(ctx.organisation!, payload.name)
+    if (nameTaken) {
+      return ctx.response.unprocessableEntity({
+        errors: [{ field: 'name', message: 'Name already taken' }],
       })
-      return
     }
 
-    const projectClient = await Client.findOrFail(payload.client_id)
+    let createdProject: Project
+    try {
+      createdProject = await Project.create({
+        name: payload.name,
+        clientId: payload.client_id,
+        showCost: payload.show_cost,
+        private: payload.private,
+        status: Status.ACTIVE,
+      })
 
-    const createdProject = await Project.create({
-      name: payload.name,
-      showCost: payload.show_cost,
-      private: payload.private,
-      status: Status.ACTIVE,
-    })
-    await createdProject.related('client').associate(projectClient)
+      ctx.logger.info(`Created project for tenant(${ctx.organisation!.id})`)
+    } catch (error) {
+      ctx.logger.error(
+        `Failed to create project for tenant(${ctx.organisation!.id}), due to ${error.message}`
+      )
+      return ctx.response.internalServerError()
+    }
 
-    const projectMembers: User[] = await ctx
-      .organisation!.related('users')
-      .query()
-      .if(payload.private, (query) => query.withScopes((scope) => scope.organisationAdmins()))
-      .exec()
-
-    // Link project members to the new project
-    await createdProject.related('members').attach(projectMembers.map((member) => member.id))
+    await createdProject.assignProjectMembers(ctx.organisation!)
 
     return createdProject.serialize()
   }
@@ -76,7 +72,7 @@ export default class ProjectController {
    * @errorResponse (404) Not Found      Only organisation accounts can get a list of projects
    */
   public async index(ctx: HttpContextContract) {
-    const projects = await ctx.organisation
+    const projects = await ctx.auth.user
       ?.related('projects')
       .query()
       .preload('budgets')
@@ -114,19 +110,33 @@ export default class ProjectController {
     const payload = await ctx.request.validate(UpdateProjectValidator)
 
     if (payload.name !== project.name) {
+      const nameTaken = await Project.isNameTaken(ctx.organisation!, payload.name, project.id)
+      if (nameTaken) {
+        return ctx.response.unprocessableEntity({
+          errors: [{ field: 'name', message: 'Name already taken' }],
+        })
+      }
+
       project.name = payload.name
+    }
+
+    if (payload.client_id !== project.clientId) {
+      const client = await Client.find(payload.client_id)
+      await project.related('client').associate(client!)
     }
 
     if (payload.private !== project.private) {
       project.private = payload.private
+
+      // Ensure all members are added to project if made public
+      if (!project.private) {
+        const members = await ctx.organisation?.related('users').query()
+        await project.related('members').sync(members?.map((member) => member.id) ?? [])
+      }
     }
 
     if (payload.show_cost !== project.showCost) {
       project.showCost = payload.show_cost
-    }
-
-    if (payload?.team?.length) {
-      // await project.assignProjectMembers(ctx.organisation!, project, payload.team ?? [])
     }
 
     await project.save()
@@ -150,7 +160,10 @@ export default class ProjectController {
   public async view(ctx: HttpContextContract, project: Project) {
     await ctx.bouncer.with('ProjectPolicy').authorize('view', project)
 
-    await project.load('members')
+    // Only non-members can view all project members
+    if (ctx.auth.user!.role?.name !== UserRole.MEMBER) {
+      await project.load('members')
+    }
 
     return project.serialize()
   }

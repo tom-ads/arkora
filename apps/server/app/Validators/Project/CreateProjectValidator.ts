@@ -25,14 +25,15 @@ export default class CreateProjectValidator {
    */
   public schema = schema.create({
     name: schema.string([rules.trim()]),
+    private: schema.boolean(),
+    show_cost: schema.boolean(),
     client_id: schema.number([
       rules.exists({
         table: 'clients',
         column: 'id',
       }),
+      rules.organisationClient(this.ctx.organisation!.id),
     ]),
-    private: schema.boolean(),
-    show_cost: schema.boolean(),
   })
 
   /**

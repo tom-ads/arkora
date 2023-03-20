@@ -8,6 +8,7 @@ import {
   UserIcon,
 } from '@/components'
 import { useGetAccountsInsightsQuery } from '@/features/account'
+import { useGetProjectQuery } from './../../../api'
 import { useParams } from 'react-router-dom'
 import { MemberRow } from '../MemberRow'
 
@@ -17,6 +18,8 @@ type TableProps = {
 
 export const MembersTable = ({ onDelete }: TableProps): JSX.Element => {
   const { projectId } = useParams()
+
+  const { data: project } = useGetProjectQuery(projectId!, { skip: !projectId })
 
   const { data: accounts, isLoading } = useGetAccountsInsightsQuery(
     { projectId },
@@ -46,7 +49,12 @@ export const MembersTable = ({ onDelete }: TableProps): JSX.Element => {
         </TableHead>
         <TableBody>
           {accounts?.map((value) => (
-            <MemberRow onDelete={onDelete} key={value.id} value={value} />
+            <MemberRow
+              onDelete={onDelete}
+              key={value.id}
+              value={value}
+              isPrivate={project?.private ?? true}
+            />
           ))}
           {/* {isLoading ? (
         <>

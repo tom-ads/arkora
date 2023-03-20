@@ -1,6 +1,7 @@
 import { validator } from '@ioc:Adonis/Core/Validator'
 import { CurrencyCode } from 'App/Enum/CurrencyCode'
 import WeekDay from 'App/Enum/WeekDay'
+import Client from 'App/Models/Client'
 import Organisation from 'App/Models/Organisation'
 import Project from 'App/Models/Project'
 
@@ -134,6 +135,33 @@ validator.rule(
         options.pointer,
         'organisationEmail',
         'organisationEmail validation failed',
+        options.arrayExpressionPointer,
+        { organisationId }
+      )
+    }
+  },
+  () => ({ async: true })
+)
+
+validator.rule(
+  'organisationClient',
+  async (clientId, [organisationId], options) => {
+    if (typeof organisationId !== 'number') {
+      throw new Error('"organisationClient" rule can only be used with a number schema type')
+    }
+
+    const exists = await Client.query()
+      .where('id', clientId)
+      .whereHas('organisation', (query) => {
+        query.where('id', organisationId)
+      })
+      .first()
+
+    if (!exists) {
+      options.errorReporter.report(
+        options.pointer,
+        'organisationClient',
+        'organisationClient validation failed',
         options.arrayExpressionPointer,
         { organisationId }
       )

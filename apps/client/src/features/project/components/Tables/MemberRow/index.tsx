@@ -17,9 +17,10 @@ import { useSelector } from 'react-redux'
 type MemberRowProps = {
   onDelete: (id: number) => void
   value: User
+  isPrivate: boolean
 }
 
-export const MemberRow = ({ onDelete, value }: MemberRowProps): JSX.Element => {
+export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.Element => {
   const authId = useSelector((state: RootState) => state.auth.user?.id)
 
   const formattedMember = useMemo(() => {
@@ -86,7 +87,12 @@ export const MemberRow = ({ onDelete, value }: MemberRowProps): JSX.Element => {
       <TableData>
         <div className="w-full flex items-center justify-end">
           {value.id !== authId && (
-            <Button variant="blank" onClick={() => onDelete(formattedMember.id)} danger>
+            <Button
+              variant="blank"
+              onClick={() => onDelete(formattedMember.id)}
+              disabled={!isPrivate}
+              danger
+            >
               Remove
             </Button>
           )}

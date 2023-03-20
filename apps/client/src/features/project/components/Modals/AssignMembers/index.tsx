@@ -5,13 +5,11 @@ import { useCreateProjectMemberMutation } from '@/features/project'
 import { AssignMembersFields, AssignMembersForm } from '@/features/team'
 import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
-import { differenceBy, union, unionBy, uniq, uniqBy } from 'lodash'
+import { differenceBy } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-type Props = ModalBaseProps
-
-export const AssignProjectMemberModal = ({ isOpen, onClose }: Props): JSX.Element => {
+export const AssignProjectMemberModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Element => {
   const [debouncedSearch, setDebouncedSearch] = useState<string | null>(null)
 
   const { projectId } = useParams()

@@ -95,20 +95,30 @@ export default class Project extends BaseModel {
     return query.where('private', false)
   })
 
+  // Static methods
+
+  public static async isNameTaken(organisation: Organisation, name: string, projectId?: number) {
+    const result = await organisation
+      .related('projects')
+      .query()
+      .if(projectId, (query) => query.whereNot('projects.id', projectId!))
+      .where('projects.name', name)
+      .first()
+
+    return !!result
+  }
+
   // Instance Methods
 
-  public async assignProjectMembers(organisation: Organisation, project: Project) {
-    await project.related('members').detach()
-
-    const projectMembers: User[] = await organisation
+  public async assignProjectMembers(this: Project, organisation: Organisation) {
+    const members: User[] = await organisation
       .related('users')
       .query()
-      .if(project.private, (query) => {
+      .if(this.private, (query) => {
         query.withScopes((scopes) => scopes.organisationAdmins())
       })
-      .exec()
 
-    await project.related('members').attach(projectMembers.map((member) => member.id))
+    await this.related('members').sync(members.map((member) => member.id))
   }
 
   public async getProjectInsights(this: Project, filters?: ProjectInsightsFilter) {
