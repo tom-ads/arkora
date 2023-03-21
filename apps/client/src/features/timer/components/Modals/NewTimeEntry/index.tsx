@@ -4,11 +4,11 @@ import { useCreateTimerMutation } from '../../../api'
 import { ModalBaseProps } from '@/types'
 import { TimeEntryFields, TimeEntryForm } from '../../Forms/TimeEntryForm'
 import { DateTime } from 'luxon'
-import { timeToMinutes } from '@/helpers/tracking'
 import { useDispatch } from 'react-redux'
 import { useToast } from '@/hooks/useToast'
-import { startTimer } from '@/stores/slices/timer'
+import { startTracking } from '@/stores/slices/timer'
 import { z } from 'zod'
+import { convertTimeToMinutes } from '@/helpers/date'
 
 export const newEntrySchema = z.object({
   budget: z.number({ required_error: 'Budget is required' }),
@@ -32,11 +32,11 @@ export const NewTimeEntryModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Elem
         budget_id: data.budget,
         task_id: data.task,
         description: data.description,
-        duration_minutes: timeToMinutes(data.trackedTime),
-        estimated_minutes: timeToMinutes(data.estimatedTime),
+        duration_minutes: convertTimeToMinutes(data.trackedTime),
+        estimated_minutes: convertTimeToMinutes(data.estimatedTime),
       })
         .unwrap()
-        .then((data) => dispatch(startTimer(data)))
+        .then((data) => dispatch(startTracking(data)))
         .catch(() => errorToast('Unable to start timer, please contact your administrator'))
 
       onClose()
@@ -45,8 +45,8 @@ export const NewTimeEntryModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Elem
 
   return (
     <Modal
-      title="New Time Entry"
-      description="Start tracking your time"
+      title="Start Timer"
+      description="Setup your timer against a budget"
       icon={<ClockIcon />}
       isOpen={isOpen}
       onClose={onClose}
@@ -68,8 +68,7 @@ export const NewTimeEntryModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Elem
           <Button variant="blank" onClick={onClose} disabled={creatingTimer}>
             Cancel
           </Button>
-          <Button size="xs" type="submit" className="max-w-[161px] w-full" loading={creatingTimer}>
-            <PlayIcon className="w-4 h-4 shrink-0" />
+          <Button size="xs" type="submit" loading={creatingTimer}>
             <span>Start Timer</span>
           </Button>
         </ModalFooter>

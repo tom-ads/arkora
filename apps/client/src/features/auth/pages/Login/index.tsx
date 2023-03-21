@@ -12,7 +12,7 @@ import {
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { setAuth } from '@/stores/slices/auth'
 import { setOrganisation } from '@/stores/slices/organisation'
-import { startTimer } from '@/stores/slices/timer'
+import { startTracking } from '@/stores/slices/timer'
 import { RootState } from '@/stores/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -49,7 +49,7 @@ export const LoginPage = (): JSX.Element => {
         dispatch(setAuth(response.user))
         dispatch(setOrganisation(response.organisation))
         if (response.timer) {
-          dispatch(startTimer(response.timer))
+          dispatch(startTracking(response.timer))
         }
 
         navigate('/timer', { replace: true })

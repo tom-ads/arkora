@@ -11,7 +11,7 @@ import {
   UserIcon,
 } from '@/components'
 import { SkeletonCircle } from '@/components/Skeletons/Circle'
-import { formatToHours } from '@/helpers/date'
+import { formatMinutesToHourMinutes } from '@/helpers/date'
 import TimeEntry from '@/types/models/TimeEntry'
 import { TableRowBaseProps } from '@/types/TableRow'
 import classNames from 'classnames'
@@ -65,11 +65,11 @@ export const TimeEntriesRow = ({ value, onManage }: RowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        <span>{formatToHours(value?.estimatedMinutes)}</span>
+        <span>{formatMinutesToHourMinutes(value?.estimatedMinutes)}</span>
       </TableData>
 
       <TableData>
-        <span>{formatToHours(value?.durationMinutes)}</span>
+        <span>{formatMinutesToHourMinutes(value?.durationMinutes)}</span>
       </TableData>
 
       <TableData>

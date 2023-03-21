@@ -1,5 +1,4 @@
 import { DateTime, Interval } from 'luxon'
-import { minutesToTime } from './tracking'
 
 /* credit to thread for solution: https://github.com/moment/luxon/issues/118 */
 function getOrdinalSuffix(n: number) {
@@ -23,30 +22,38 @@ export function addOrdinalSuffix(date: DateTime, format: string) {
   return formattedDate.replace(/(?<=\d)\s/, getOrdinalSuffix(monthDay))
 }
 
-export function durationToFormattedTime(durationMinutes: number) {
-  const hours = Math.floor(Math.abs(durationMinutes / 60))
-  const minutes = durationMinutes % 60
-
-  return {
-    displayFormat: `${hours}h ${minutes}m`,
-    consumableFormat: minutesToTime(durationMinutes),
-  }
-}
-
 export function getDatesBetweenPeriod(startDate: DateTime, endDate: DateTime) {
   return Interval.fromDateTimes(startDate, endDate.plus(1))
     .splitBy({ day: 1 })
     .map((d) => d.start)
 }
 
-export function formatToHours(minutes: number) {
-  const totalHours = parseInt(`${minutes / 60}`, 10)
-  const totalMinutes = minutes % 60
+export function formatMinutesToTime(durationMinutes: number) {
+  const minutes = durationMinutes % 60
+  const hours = Math.abs(durationMinutes - minutes) / 60
 
-  const formattedHours = padTimeUnit(totalHours)
-  const formattedMinutes = padTimeUnit(totalMinutes)
+  const formattedMinutes = padTimeUnit(minutes)
+  const formattedHours = padTimeUnit(hours)
+
+  return `${formattedHours}:${formattedMinutes}`
+}
+
+export function formatMinutesToHourMinutes(durationMinutes: number) {
+  const minutes = durationMinutes % 60
+  const hours = Math.abs(durationMinutes - minutes) / 60
+
+  const formattedHours = padTimeUnit(hours)
+  const formattedMinutes = padTimeUnit(minutes)
 
   return `${formattedHours}h ${formattedMinutes}m`
+}
+
+export function convertTimeToMinutes(time: string) {
+  const splitTime = time.split(':').map(Number)
+  const hours = splitTime[0] * 60
+  const minutes = splitTime[1]
+
+  return hours + minutes
 }
 
 export function convertMinutesToHours(minutes: number) {

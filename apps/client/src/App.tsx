@@ -4,7 +4,7 @@ import { Spinner } from './components'
 import { useGetSessionQuery } from './features/auth'
 import { setAuth } from './stores/slices/auth'
 import { setOrganisation } from './stores/slices/organisation'
-import { startTimer } from './stores/slices/timer'
+import { startTracking } from './stores/slices/timer'
 
 const Loader = () => {
   return (
@@ -28,7 +28,7 @@ const App = ({ children }: AppProps): JSX.Element => {
       dispatch(setAuth(authResponse.user))
       dispatch(setOrganisation(authResponse.organisation))
       if (authResponse.timer) {
-        dispatch(startTimer(authResponse.timer))
+        dispatch(startTracking(authResponse.timer))
       }
     }
   }, [authResponse])

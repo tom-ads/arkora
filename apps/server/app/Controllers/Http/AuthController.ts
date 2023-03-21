@@ -20,6 +20,7 @@ import { generatePasswordResetLink } from 'Helpers/links'
 import PasswordReset from 'App/Models/PasswordReset'
 import ResetPassword from 'App/Mailers/ResetPassword'
 import ResetPasswordValidator from 'App/Validators/Auth/ResetPassword'
+import { timerDifference } from 'Helpers/timer'
 
 export default class AuthController {
   public async verifyDetails({ request, response }: HttpContextContract) {
@@ -163,10 +164,22 @@ export default class AuthController {
   public async session(ctx: HttpContextContract) {
     await ctx.auth.user?.load('organisation')
 
+    /* 
+      Active timer could've been running while the user left their
+      browser etc. We need to ensure the additional time has been
+      set onto the durationMinutes for the client. This does not
+      persist to the db until the user forces the timer to stop.
+    */
+    const activeTimer = await ctx.auth.user!.getActiveTimer()
+    if (activeTimer) {
+      const diffMinutes = timerDifference(activeTimer.lastStartedAt)
+      activeTimer.durationMinutes += diffMinutes
+    }
+
     return {
       user: ctx.auth.user,
       organisation: ctx.auth.user?.organisation,
-      timer: await ctx.auth.user!.getActiveTimer(),
+      timer: activeTimer,
     }
   }
 
