@@ -12,7 +12,7 @@ import {
 } from '@/components'
 import BudgetType from '@/enums/BudgetType'
 import { calculatePercentage, convertToPounds } from '@/helpers/currency'
-import { formatToHours } from '@/helpers/date'
+import { formatMinutesToHourMinutes } from '@/helpers/date'
 import { RootState } from '@/stores/store'
 import { Budget } from '@/types'
 import { TableRowBaseProps } from '@/types/TableRow'
@@ -105,7 +105,7 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
                     />
                   </p>
                   <p className="font-semibold text-xs text-gray-80">
-                    {formatToHours(value.allocatedDuration)}
+                    {formatMinutesToHourMinutes(value.allocatedDuration)}
                   </p>
                 </div>
               </div>
@@ -122,7 +122,7 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
                     %)
                   </p>
                   <p className="font-semibold text-xs text-gray-80">
-                    {formatToHours(value.billableDuration + value.unbillableDuration)}
+                    {formatMinutesToHourMinutes(value.billableDuration + value.unbillableDuration)}
                   </p>
                 </div>
               </div>

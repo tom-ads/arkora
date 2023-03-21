@@ -5,6 +5,7 @@ import { RootState } from '@/stores/store'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ProjectTimeEntryFilters } from '../../Filters'
+import { AssignProjectMemberModal } from '../../Modals/AssignMembers'
 
 export const ProjectWidget = (): JSX.Element => {
   const dispatch = useDispatch()
@@ -15,7 +16,7 @@ export const ProjectWidget = (): JSX.Element => {
     selectedTab: state.projectFilters.tab,
   }))
 
-  const handleTab = (tab: ProjectTab) => {
+  const handleSelectedTab = (tab: ProjectTab) => {
     dispatch(setFilters({ tab }))
   }
 
@@ -26,18 +27,22 @@ export const ProjectWidget = (): JSX.Element => {
           <TabItem
             size="md"
             isActive={selectedTab === 'budgets'}
-            onClick={() => handleTab('budgets')}
+            onClick={() => handleSelectedTab('budgets')}
           >
             Budgets
           </TabItem>
           <TabItem
             size="md"
             isActive={selectedTab === 'entries'}
-            onClick={() => handleTab('entries')}
+            onClick={() => handleSelectedTab('entries')}
           >
             Time
           </TabItem>
-          <TabItem size="md" isActive={selectedTab === 'team'} onClick={() => handleTab('team')}>
+          <TabItem
+            size="md"
+            isActive={selectedTab === 'team'}
+            onClick={() => handleSelectedTab('team')}
+          >
             Team
           </TabItem>
         </TabGroup>
@@ -56,10 +61,17 @@ export const ProjectWidget = (): JSX.Element => {
 
       <HorizontalDivider />
 
-      <div className="px-5 pt-4">{selectedTab === 'entries' && <ProjectTimeEntryFilters />}</div>
+      <div className="px-5 pt-4 h-[58px]">
+        {selectedTab === 'entries' && <ProjectTimeEntryFilters />}
+      </div>
 
       <CreateBudgetModal
         isOpen={openActionModal && selectedTab === 'budgets'}
+        onClose={() => setOpenActionModal(false)}
+      />
+
+      <AssignProjectMemberModal
+        isOpen={openActionModal && selectedTab === 'team'}
         onClose={() => setOpenActionModal(false)}
       />
     </div>

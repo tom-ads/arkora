@@ -1,29 +1,18 @@
 import {
-  Table,
-  TableHead,
-  TableHeading,
   TableRow,
   TableData,
   InlineLink,
-  ChevronIcon,
   Badge,
   AvatarLimit,
   Button,
   SkeletonBox,
 } from '@/components'
 import { SkeletonCircle } from '@/components/Skeletons/Circle'
-import { ExpandableRow } from '@/components/Table/ExpandableRow'
 import Status from '@/enums/Status'
 import ProjectBudget from '@/types/models/ProjectBudget'
 import { TableRowBaseProps } from '@/types/TableRow'
-import classNames from 'classnames'
 
-type RowProps = TableRowBaseProps<ProjectBudget> & {
-  isExpanded: boolean
-  onExpand: (id: number) => void
-}
-
-export const ProjectsRow = ({ value, isExpanded, onExpand, onManage }: RowProps): JSX.Element => {
+export const ProjectsRow = ({ value, onManage }: TableRowBaseProps<ProjectBudget>): JSX.Element => {
   const handleManage = () => {
     if (onManage) {
       onManage(value.id)
@@ -33,17 +22,6 @@ export const ProjectsRow = ({ value, isExpanded, onExpand, onManage }: RowProps)
   return (
     <>
       <TableRow>
-        <TableData>
-          <Button variant="blank" onClick={() => onExpand(value.id)}>
-            <ChevronIcon
-              className={classNames(
-                'w-5 h-5 transition-transform duration-150 transform text-gray-90',
-                { '-rotate-90': !isExpanded },
-              )}
-            />
-          </Button>
-        </TableData>
-
         <TableData className="truncate">
           <InlineLink className="font-medium" to={`/projects/${value.id}`}>
             {value.name}
@@ -74,26 +52,6 @@ export const ProjectsRow = ({ value, isExpanded, onExpand, onManage }: RowProps)
           </Button>
         </TableData>
       </TableRow>
-
-      {/* Project Budgets Expandable */}
-      <ExpandableRow show={isExpanded}>
-        <TableData colSpan={6}>
-          <Table>
-            <TableHead>
-              <TableHeading className="w-[255px]" first>
-                Budget
-              </TableHeading>
-              <TableHeading className="w-[255px]">Type</TableHeading>
-              <TableHeading className="w-[255px]">Rate</TableHeading>
-              <TableHeading className="w-[255px]">Alloc. Hours</TableHeading>
-              <TableHeading className="w-[255px]">Spent / Remaining</TableHeading>
-              <TableHeading className="w-[255px]" last>
-                Billable / Non-Billable
-              </TableHeading>
-            </TableHead>
-          </Table>
-        </TableData>
-      </ExpandableRow>
     </>
   )
 }

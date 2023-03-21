@@ -14,10 +14,6 @@ export default class ProjectPolicy extends BasePolicy {
       return false
     }
 
-    if (user.role?.name === UserRole.MEMBER) {
-      return false
-    }
-
     return true
   }
 

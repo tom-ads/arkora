@@ -1,6 +1,7 @@
 import { validator } from '@ioc:Adonis/Core/Validator'
 import { CurrencyCode } from 'App/Enum/CurrencyCode'
 import WeekDay from 'App/Enum/WeekDay'
+import Client from 'App/Models/Client'
 import Organisation from 'App/Models/Organisation'
 import Project from 'App/Models/Project'
 
@@ -105,6 +106,62 @@ validator.rule(
         options.pointer,
         'organisationProject',
         'organisationProject validation failed',
+        options.arrayExpressionPointer,
+        { organisationId }
+      )
+    }
+  },
+  () => ({ async: true })
+)
+
+validator.rule(
+  'organisationEmail',
+  async (email, [organisationId, authEmail], options) => {
+    if (typeof organisationId !== 'number' || typeof authEmail !== 'string') {
+      throw new Error('"organisationEmail" rule can only be used with a number schema type')
+    }
+
+    const exists = await Organisation.query()
+      .where('id', organisationId)
+      .whereHas('users', (projectQuery) => {
+        projectQuery.where((query) => {
+          query.where('email', email).andWhereNot('email', authEmail)
+        })
+      })
+      .first()
+
+    if (exists) {
+      options.errorReporter.report(
+        options.pointer,
+        'organisationEmail',
+        'organisationEmail validation failed',
+        options.arrayExpressionPointer,
+        { organisationId }
+      )
+    }
+  },
+  () => ({ async: true })
+)
+
+validator.rule(
+  'organisationClient',
+  async (clientId, [organisationId], options) => {
+    if (typeof organisationId !== 'number') {
+      throw new Error('"organisationClient" rule can only be used with a number schema type')
+    }
+
+    const exists = await Client.query()
+      .where('id', clientId)
+      .whereHas('organisation', (query) => {
+        query.where('id', organisationId)
+      })
+      .first()
+
+    if (!exists) {
+      options.errorReporter.report(
+        options.pointer,
+        'organisationClient',
+        'organisationClient validation failed',
         options.arrayExpressionPointer,
         { organisationId }
       )

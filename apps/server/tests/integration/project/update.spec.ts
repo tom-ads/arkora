@@ -1,34 +1,51 @@
 import { test } from '@japa/runner'
-import Status from 'App/Enum/Status'
-import UserRole from 'App/Enum/UserRole'
-import { OrganisationFactory, UserFactory } from 'Database/factories'
+import Organisation from 'App/Models/Organisation'
+import Project from 'App/Models/Project'
+import User from 'App/Models/User'
+import { OrganisationFactory, ProjectFactory, RoleFactory, UserFactory } from 'Database/factories'
 
-test.group('Project: Update Project', () => {
-  test('organisation manager can update a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({
-              name: 'new-project',
-              showCost: true,
-              private: true,
-            })
-          })
+test.group('Projects : Update', (group) => {
+  let authUser: User
+  let project: Project
+  let organisation: Organisation
+
+  group.each.setup(async () => {
+    // Setup organisation
+    organisation = await OrganisationFactory.with('users', 5, (userBuilder) => {
+      userBuilder.with('role', 1, (roleBuilder) => {
+        roleBuilder.apply('member')
       })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.MANAGER }))
-      .create()
+    }).create()
+
+    // Setup organisation projects
+    project = await ProjectFactory.with('client', 1, (clientBuilder) =>
+      clientBuilder.merge({ organisationId: organisation.id })
+    ).create()
+
+    await organisation.load('clients')
+
+    // Setup authUser
+    authUser = await UserFactory.merge({ organisationId: organisation.id }).with('role').create()
+
+    // Link authUser to all organisation projects
+    await project.related('members').attach([authUser.id])
+  })
+
+  test('organisation manager can update a project', async ({ client, route }) => {
+    // Set authUser role to MANAGER
+    const managerRole = await RoleFactory.apply('manager').create()
+    await authUser.related('role').associate(managerRole)
+
+    const payload = {
+      name: 'updated-name',
+      show_cost: false,
+      private: false,
+      client_id: organisation.clients[0].id,
+    }
 
     const response = await client
-      .put(route('ProjectController.update', { projectId: 1 }))
-      .form({
-        name: 'updated-name',
-        show_cost: false,
-        private: false,
-        team: [],
-      })
+      .put(route('ProjectController.update', { projectId: project.id }))
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -36,38 +53,29 @@ test.group('Project: Update Project', () => {
     response.assertStatus(200)
     response.assertBodyContains({
       id: 1,
+      client: organisation.clients[0].serialize(),
       name: 'updated-name',
       private: false,
       show_cost: false,
-      status: Status.ACTIVE,
+      status: 'ACTIVE',
     })
   })
 
   test('organisation org_admin can update a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({
-              name: 'new-project',
-              showCost: true,
-              private: true,
-            })
-          })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.ORG_ADMIN }))
-      .create()
+    // Set authUser role to ORG_ADMIN
+    const orgRole = await RoleFactory.apply('orgAdmin').create()
+    await authUser.related('role').associate(orgRole)
+
+    const payload = {
+      name: 'updated-name',
+      show_cost: false,
+      private: false,
+      client_id: organisation.clients[0].id,
+    }
 
     const response = await client
-      .put(route('ProjectController.update', { projectId: 1 }))
-      .form({
-        name: 'updated-name',
-        show_cost: false,
-        private: false,
-        team: [],
-      })
+      .put(route('ProjectController.update', { projectId: project.id }))
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -75,38 +83,25 @@ test.group('Project: Update Project', () => {
     response.assertStatus(200)
     response.assertBodyContains({
       id: 1,
+      client: organisation.clients[0].serialize(),
       name: 'updated-name',
       private: false,
       show_cost: false,
-      status: Status.ACTIVE,
+      status: 'ACTIVE',
     })
   })
 
   test('organisation owner can update a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({
-              name: 'new-project',
-              showCost: true,
-              private: true,
-            })
-          })
-      })
-    })
-      .with('role')
-      .create()
+    const payload = {
+      name: 'updated-name',
+      show_cost: false,
+      private: false,
+      client_id: organisation.clients[0].id,
+    }
 
     const response = await client
       .put(route('ProjectController.update', { projectId: 1 }))
-      .form({
-        name: 'updated-name',
-        show_cost: false,
-        private: false,
-        team: [],
-      })
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -114,125 +109,70 @@ test.group('Project: Update Project', () => {
     response.assertStatus(200)
     response.assertBodyContains({
       id: 1,
+      client: organisation.clients[0].serialize(),
       name: 'updated-name',
       private: false,
       show_cost: false,
-      status: Status.ACTIVE,
+      status: 'ACTIVE',
     })
   })
 
   test('organisation member cannot update a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({
-              name: 'new-project',
-              showCost: true,
-              private: true,
-            })
-          })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.ORG_ADMIN }))
-      .create()
+    // Set authUser role to MEMBER
+    const memberRole = await RoleFactory.apply('member').create()
+    await authUser.related('role').associate(memberRole)
+
+    const payload = {
+      name: 'updated-name',
+      show_cost: false,
+      private: false,
+      client_id: organisation.clients[0].id,
+    }
 
     const response = await client
-      .put(route('ProjectController.update', { projectId: 1 }))
-      .form({
-        name: 'updated-name',
-        show_cost: false,
-        private: false,
-        team: [],
-      })
+      .put(route('ProjectController.update', { projectId: project.id }))
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
 
-    response.assertStatus(200)
-    response.assertBodyContains({
-      id: 1,
-      name: 'updated-name',
-      private: false,
-      show_cost: false,
-      status: Status.ACTIVE,
-    })
+    response.assertStatus(403)
   })
 
-  test('unauthenticated organiation user cannot update a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({
-              name: 'new-project',
-              showCost: true,
-              private: true,
-            })
-          })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.ORG_ADMIN }))
-      .create()
+  test('unauthenticated user cannot update a project', async ({ client, route }) => {
+    const payload = {
+      name: 'updated-name',
+      show_cost: false,
+      private: false,
+      client_id: organisation.clients[0].id,
+    }
 
     const response = await client
-      .put(route('ProjectController.update', { projectId: 1 }))
-      .form({
-        name: 'updated-name',
-        show_cost: false,
-        private: false,
-        team: [],
-      })
+      .put(route('ProjectController.update', { projectId: project.id }))
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
-      .loginAs(authUser)
 
-    response.assertStatus(200)
-    response.assertBodyContains({
-      id: 1,
-      name: 'updated-name',
-      private: false,
-      show_cost: false,
-      status: Status.ACTIVE,
-    })
+    response.assertStatus(401)
   })
 
-  test('test organisation user cannot update diff organisations project', async ({
-    client,
-    route,
-  }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({
-              name: 'new-project',
-              showCost: true,
-              private: true,
-            })
-          })
-      })
-    })
-      .with('role')
-      .create()
-
-    await OrganisationFactory.merge({ subdomain: 'diff-org' })
+  test('organisation user cannot update diff organisations project', async ({ client, route }) => {
+    const diffOrg = await OrganisationFactory.merge({ subdomain: 'diff-org' })
       .with('clients', 1, (clientBuilder) => {
         return clientBuilder.merge({ organisationId: clientBuilder.parent.id }).with('projects', 1)
       })
       .create()
 
+    const payload = {
+      name: 'updated-name',
+      show_cost: false,
+      private: false,
+      client_id: diffOrg.clients[0].id,
+    }
+
     const response = await client
       .put(route('ProjectController.update', { projectId: 2 }))
-      .form({
-        name: 'updated-name',
-        show_cost: false,
-        private: false,
-        team: [],
-      })
+      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)

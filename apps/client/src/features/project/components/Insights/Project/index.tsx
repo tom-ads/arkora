@@ -1,12 +1,12 @@
-import { FormatCurrency } from '@/components'
+import { FormatCurrency, LockIcon, OpenLockIcon } from '@/components'
 import { useGetProjectInsightsQuery } from '../../../api'
-import { formatToHours } from '@/helpers/date'
 import classNames from 'classnames'
 import { useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { GetProjectInsightsResponse } from '../../../api/types/response'
 import { convertToPounds } from '@/helpers/currency'
 import Status from '@/enums/Status'
+import { formatMinutesToHourMinutes } from '@/helpers/date'
 
 export const ProjectInsights = (): JSX.Element => {
   const { projectId } = useParams()
@@ -35,15 +35,26 @@ export const ProjectInsights = (): JSX.Element => {
       <div className="border-b border-dashed border-gray-30 px-[21px] py-4">
         <div className="flex items-center justify-between">
           <p>01st Jan - 24th June </p>
-          <p
-            className={classNames('text-sm font-medium capitalize flex items-center gap-3', {
-              'text-green-90': formattedInsights?.status === Status.ACTIVE,
-              'text-yellow-90': formattedInsights?.status === Status.PENDING,
-              'text-gray-70': formattedInsights?.status === Status.INACTIVE,
-            })}
-          >
-            <span>{formattedInsights.status?.toLowerCase()} Project</span>
-          </p>
+          <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 text-gray-80">
+                {formattedInsights.private ? <LockIcon /> : <OpenLockIcon />}
+              </div>
+              <span className="text-sm font-medium text-gray-80">
+                {formattedInsights.private ? 'Private' : 'Public'}
+              </span>
+            </div>
+            <span>-</span>
+            <p
+              className={classNames('text-sm font-medium capitalize flex items-center gap-3', {
+                'text-green-90': formattedInsights?.status === Status.ACTIVE,
+                'text-yellow-90': formattedInsights?.status === Status.PENDING,
+                'text-gray-70': formattedInsights?.status === Status.INACTIVE,
+              })}
+            >
+              <span>{formattedInsights.status?.toLowerCase()} Project</span>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -59,7 +70,7 @@ export const ProjectInsights = (): JSX.Element => {
                   <FormatCurrency value={formattedInsights.allocatedCost} />
                 </p>
                 <p className="text-sm font-medium text-gray-100">
-                  {formatToHours(formattedInsights.allocatedDuration)}
+                  {formatMinutesToHourMinutes(formattedInsights.allocatedDuration)}
                 </p>
               </div>
             </div>
@@ -71,7 +82,7 @@ export const ProjectInsights = (): JSX.Element => {
                   <FormatCurrency value={formattedInsights.usedCost} />
                 </p>
                 <p className="text-sm font-medium text-gray-100">
-                  {formatToHours(formattedInsights.usedDuration)}
+                  {formatMinutesToHourMinutes(formattedInsights.usedDuration)}
                 </p>
               </div>
             </div>
@@ -88,7 +99,7 @@ export const ProjectInsights = (): JSX.Element => {
                   <FormatCurrency value={formattedInsights.billableCost} />
                 </p>
                 <p className="text-sm font-medium text-gray-100">
-                  {formatToHours(formattedInsights.billableDuration)}
+                  {formatMinutesToHourMinutes(formattedInsights.billableDuration)}
                 </p>
               </div>
             </div>
@@ -100,7 +111,7 @@ export const ProjectInsights = (): JSX.Element => {
                   <FormatCurrency value={formattedInsights.unbillableCost} />
                 </p>
                 <p className="text-sm font-medium text-gray-100">
-                  {formatToHours(formattedInsights.unbillableDuration)}
+                  {formatMinutesToHourMinutes(formattedInsights.unbillableDuration)}
                 </p>
               </div>
             </div>
@@ -152,7 +163,7 @@ export const ProjectInsights = (): JSX.Element => {
                   <FormatCurrency value={formattedInsights.remainingCost} />
                 </p>
                 <p className="text-sm font-medium text-gray-100">
-                  {formatToHours(formattedInsights.remainingDuration)}
+                  {formatMinutesToHourMinutes(formattedInsights.remainingDuration)}
                 </p>
               </div>
             </div>

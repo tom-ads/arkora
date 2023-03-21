@@ -10,15 +10,15 @@ import {
   useGetTimeEntryQuery,
   useUpdateTimeEntryMutation,
 } from '@/features/entry'
-import { minutesToTime, timeToMinutes } from '@/helpers/tracking'
 import { z } from 'zod'
+import { convertTimeToMinutes, formatMinutesToTime } from '@/helpers/date'
 
 export const manageEntrySchema = z.object({
   budget: z.number({ required_error: 'Budget is required' }),
   task: z.number({ required_error: 'Task is required' }),
   estimatedTime: z.string().nullable(),
   trackedTime: z.string().superRefine((val, ctx) => {
-    const durationMinutes = timeToMinutes(val)
+    const durationMinutes = convertTimeToMinutes(val)
     if (!durationMinutes || durationMinutes <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -56,8 +56,8 @@ export const ManageTimeEntryModal = ({
         budget_id: data.budget,
         task_id: data!.task,
         description: data.description ?? '',
-        duration_minutes: timeToMinutes(data.trackedTime),
-        estimated_minutes: timeToMinutes(data.estimatedTime),
+        duration_minutes: convertTimeToMinutes(data.trackedTime),
+        estimated_minutes: convertTimeToMinutes(data.estimatedTime),
       })
         .unwrap()
         .then(() => successToast('Entry has been updated'))
@@ -102,8 +102,10 @@ export const ManageTimeEntryModal = ({
             budget: entry?.budgetId ?? undefined,
             task: entry?.taskId ?? undefined,
             description: entry?.description ?? '',
-            estimatedTime: entry?.estimatedMinutes ? minutesToTime(entry?.estimatedMinutes) : '',
-            trackedTime: entry?.durationMinutes ? minutesToTime(entry?.durationMinutes) : '',
+            estimatedTime: entry?.estimatedMinutes
+              ? formatMinutesToTime(entry?.estimatedMinutes)
+              : '',
+            trackedTime: entry?.durationMinutes ? formatMinutesToTime(entry?.durationMinutes) : '',
           }}
         >
           <ModalFooter className="!mt-11">

@@ -57,10 +57,15 @@ const IndicatorBar = ({ threshold, scoreFactor }: { threshold: number; scoreFact
 
 type PasswordStrengthProps = {
   password: string
+  hideSuggestions?: boolean
   isError: boolean
 }
 
-export const PasswordStrength = ({ password, isError }: PasswordStrengthProps): JSX.Element => {
+export const PasswordStrength = ({
+  password,
+  hideSuggestions,
+  isError,
+}: PasswordStrengthProps): JSX.Element => {
   const [isDirty, { reset }] = useIsDirty(password)
 
   const { scoreFactor, criterias } = useMemo(() => {
@@ -113,21 +118,23 @@ export const PasswordStrength = ({ password, isError }: PasswordStrengthProps): 
         ))}
       </div>
 
-      <Transition
-        show={(isDirty && scoreFactor !== 5) || isError}
-        enter="transition-opacity duration-75"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="transition-opacity duration-150"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-      >
-        <div className="flex flex-col gap-y-2">
-          {Object.keys(criterias).map((criterion) => (
-            <CriteriaSuggestion key={criterion} criteria={criterias[criterion]} />
-          ))}
-        </div>
-      </Transition>
+      {!hideSuggestions && (
+        <Transition
+          show={(isDirty && scoreFactor !== 5) || isError}
+          enter="transition-opacity duration-75"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="transition-opacity duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="flex flex-col gap-y-2">
+            {Object.keys(criterias).map((criterion) => (
+              <CriteriaSuggestion key={criterion} criteria={criterias[criterion]} />
+            ))}
+          </div>
+        </Transition>
+      )}
     </div>
   )
 }

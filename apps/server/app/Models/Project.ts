@@ -7,6 +7,8 @@ import {
   column,
   HasMany,
   hasMany,
+  HasManyThrough,
+  hasManyThrough,
   ManyToMany,
   manyToMany,
   ModelQueryBuilderContract,
@@ -18,6 +20,11 @@ import Budget from './Budget'
 import User from './User'
 import Organisation from './Organisation'
 import { sumBy } from 'lodash'
+import TimeEntry from './TimeEntry'
+
+type ProjectInsightsFilter = {
+  users: number[]
+}
 
 type ProjectBuilder = ModelQueryBuilderContract<typeof Project>
 
@@ -61,6 +68,9 @@ export default class Project extends BaseModel {
   })
   public members: ManyToMany<typeof User>
 
+  @hasManyThrough([() => Budget, () => TimeEntry])
+  public timeEntries: HasManyThrough<typeof Budget>
+
   // Hooks
 
   @beforeDelete()
@@ -85,26 +95,42 @@ export default class Project extends BaseModel {
     return query.where('private', false)
   })
 
-  // Instance Methods
+  // Static methods
 
-  public async assignProjectMembers(organisation: Organisation, project: Project) {
-    await project.related('members').detach()
-
-    const projectMembers: User[] = await organisation
-      .related('users')
+  public static async isNameTaken(organisation: Organisation, name: string, projectId?: number) {
+    const result = await organisation
+      .related('projects')
       .query()
-      .if(project.private, (query) => {
-        query.withScopes((scopes) => scopes.organisationAdmins())
-      })
-      .exec()
+      .if(projectId, (query) => query.whereNot('projects.id', projectId!))
+      .where('projects.name', name)
+      .first()
 
-    await project.related('members').attach(projectMembers.map((member) => member.id))
+    return !!result
   }
 
-  public async getProjectInsights(this: Project) {
+  // Instance Methods
+
+  public async assignProjectMembers(this: Project, organisation: Organisation) {
+    const members: User[] = await organisation
+      .related('users')
+      .query()
+      .if(this.private, (query) => {
+        query.withScopes((scopes) => scopes.organisationAdmins())
+      })
+
+    await this.related('members').sync(members.map((member) => member.id))
+  }
+
+  public async getProjectInsights(this: Project, filters?: ProjectInsightsFilter) {
     const result = await this.related('budgets')
       .query()
       .withScopes((scopes) => scopes.budgetMetrics())
+      .if(filters?.users, (builder) => {
+        builder.whereHas('members', (memberBuilder) => {
+          memberBuilder.whereIn('time_entries.user_id', filters!.users)
+        })
+      })
+
       .exec()
 
     const totalBillableDuration = sumBy(result, (b) => b.billableDuration ?? 0)

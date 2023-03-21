@@ -7,8 +7,6 @@ import {
   TableRow,
   HouseIcon,
 } from '@/components'
-import project from '@/stores/slices/filters/project'
-import { useState } from 'react'
 import { useGetProjectsQuery } from '../../../api'
 import { ProjectsRow, ProjectsRowSkeleton } from '../ProjectsRow'
 
@@ -18,19 +16,13 @@ type ProjectTableProps = {
 }
 
 export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.Element => {
-  const [expandedRow, setExpandedRow] = useState<number | null>(null)
-
   const { data: projects, isLoading } = useGetProjectsQuery()
-
-  const handleExpandedRow = (projectId: number) => {
-    setExpandedRow(expandedRow !== projectId ? projectId : null)
-  }
 
   return (
     <TableContainer
       className="min-h-[738px]"
       emptyState={{
-        isEmpty: !project?.length && !isLoading,
+        isEmpty: !projects?.length && !isLoading,
         title: 'Projects',
         btnText: 'Create Project',
         onClick: onCreate,
@@ -42,8 +34,9 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[32px]" first></TableHeading>
-            <TableHeading className="w-[270px]">NAME</TableHeading>
+            <TableHeading className="w-[270px]" first>
+              NAME
+            </TableHeading>
             <TableHeading className="w-[270px]">CLIENT</TableHeading>
             <TableHeading className="w-[200px]">TEAM</TableHeading>
             <TableHeading className="w-[120px]">STATUS</TableHeading>
@@ -61,13 +54,7 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
           ) : (
             <>
               {projects?.map((project) => (
-                <ProjectsRow
-                  key={project.id}
-                  value={project}
-                  isExpanded={project.id === expandedRow}
-                  onExpand={handleExpandedRow}
-                  onManage={onManage}
-                />
+                <ProjectsRow key={project.id} value={project} onManage={onManage} />
               ))}
             </>
           )}

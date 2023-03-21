@@ -29,7 +29,7 @@ export default class extends BaseSeeder {
       clientBuilder.with('projects', 5, (projectBuilder) => {
         projectBuilder
           .with('members', 5, (memberBuilder) => {
-            memberBuilder.merge({ organisationId: 1, roleId: 4 })
+            memberBuilder.merge({ organisationId: 1, roleId: 4, password: 'newPassword123!' })
           })
           .with('budgets', 5, (budgetBuilder) => {
             return budgetBuilder.merge({

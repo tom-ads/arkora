@@ -58,6 +58,8 @@ const appApi = createApi({
     'Budget',
     'Members',
     'Member',
+    'ProjectMembers',
+    'ProjectMember',
     'Clients',
     'Client',
   ],

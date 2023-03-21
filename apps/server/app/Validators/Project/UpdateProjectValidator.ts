@@ -27,14 +27,13 @@ export default class UpdateProjectValidator {
     name: schema.string([rules.trim()]),
     private: schema.boolean(),
     show_cost: schema.boolean(),
-    team: schema.array.optional([rules.requiredWhen('private', '=', true)]).members(
-      schema.number([
-        rules.exists({
-          table: 'users',
-          column: 'id',
-        }),
-      ])
-    ),
+    client_id: schema.number([
+      rules.exists({
+        table: 'clients',
+        column: 'id',
+      }),
+      rules.organisationClient(this.ctx.organisation!.id),
+    ]),
   })
 
   /**

@@ -5,6 +5,10 @@ import UserRole from 'App/Enum/UserRole'
 export default class UpdateAccountValidator {
   constructor(protected ctx: HttpContextContract) {}
 
+  public refs = schema.refs({
+    authEmail: this.ctx.auth?.user?.email as string,
+  })
+
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
@@ -27,6 +31,11 @@ export default class UpdateAccountValidator {
   public schema = schema.create({
     firstname: schema.string.optional([rules.trim()]),
     lastname: schema.string.optional([rules.trim()]),
+    email: schema.string.optional([
+      rules.trim(),
+      rules.email(),
+      rules.organisationEmail(this.ctx.organisation!.id, this.refs.authEmail.value),
+    ]),
     role: schema.enum.optional(Object.values(UserRole).filter((v) => v !== UserRole.OWNER)),
   })
 
@@ -41,5 +50,7 @@ export default class UpdateAccountValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'email.organisationEmail': 'Email already taken',
+  }
 }
