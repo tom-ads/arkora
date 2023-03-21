@@ -21,7 +21,7 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
   const isActive = !entry.lastStoppedAt
 
   useEffect(() => {
-    if (isActive && entryDuration && entryDuration < duration) {
+    if (isActive && entryDuration < duration) {
       setEntryDuration(duration)
     } else if (!isActive && entryDuration !== entry.durationMinutes) {
       setEntryDuration(entry.durationMinutes)
