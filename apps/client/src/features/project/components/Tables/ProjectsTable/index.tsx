@@ -7,7 +7,6 @@ import {
   TableRow,
   HouseIcon,
 } from '@/components'
-import { useState } from 'react'
 import { useGetProjectsQuery } from '../../../api'
 import { ProjectsRow, ProjectsRowSkeleton } from '../ProjectsRow'
 
@@ -17,13 +16,7 @@ type ProjectTableProps = {
 }
 
 export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.Element => {
-  const [expandedRow, setExpandedRow] = useState<number | null>(null)
-
   const { data: projects, isLoading } = useGetProjectsQuery()
-
-  const handleExpandedRow = (projectId: number) => {
-    setExpandedRow(expandedRow !== projectId ? projectId : null)
-  }
 
   return (
     <TableContainer
@@ -61,13 +54,7 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
           ) : (
             <>
               {projects?.map((project) => (
-                <ProjectsRow
-                  key={project.id}
-                  value={project}
-                  isExpanded={project.id === expandedRow}
-                  onExpand={handleExpandedRow}
-                  onManage={onManage}
-                />
+                <ProjectsRow key={project.id} value={project} onManage={onManage} />
               ))}
             </>
           )}

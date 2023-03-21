@@ -8,7 +8,7 @@ import {
   UserIcon,
 } from '@/components'
 import { calculatePercentage } from '@/helpers/currency'
-import { formatToHours } from '@/helpers/date'
+import { formatMinutesToHourMinutes } from '@/helpers/date'
 import { RootState } from '@/stores/store'
 import { User } from '@/types'
 import { useMemo } from 'react'
@@ -49,7 +49,7 @@ export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.E
 
       <TableData>{value.email?.toLowerCase()}</TableData>
 
-      <TableData>{formatToHours(formattedMember.spentDuration ?? 0)}</TableData>
+      <TableData>{formatMinutesToHourMinutes(formattedMember.spentDuration ?? 0)}</TableData>
 
       <TableData>
         <ToolTip
@@ -71,13 +71,13 @@ export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.E
             <div className="flex justify-between items-center py-1">
               <p className="font-medium text-xs text-green-90">Billable</p>
               <p className="font-semibold text-xs text-gray-80">
-                {formatToHours(formattedMember.billableDuration)}
+                {formatMinutesToHourMinutes(formattedMember.billableDuration)}
               </p>
             </div>
             <div className="flex justify-between items-center py-1">
               <p className="font-medium text-xs text-red-90">Non-Billable</p>
               <p className="font-semibold text-xs text-gray-80">
-                {formatToHours(formattedMember.unbillableDuration)}
+                {formatMinutesToHourMinutes(formattedMember.unbillableDuration)}
               </p>
             </div>
           </div>

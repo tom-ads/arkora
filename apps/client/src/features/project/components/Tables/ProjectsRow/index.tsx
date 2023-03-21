@@ -1,11 +1,7 @@
 import {
-  Table,
-  TableHead,
-  TableHeading,
   TableRow,
   TableData,
   InlineLink,
-  ChevronIcon,
   Badge,
   AvatarLimit,
   Button,
@@ -15,7 +11,6 @@ import { SkeletonCircle } from '@/components/Skeletons/Circle'
 import Status from '@/enums/Status'
 import ProjectBudget from '@/types/models/ProjectBudget'
 import { TableRowBaseProps } from '@/types/TableRow'
-import classNames from 'classnames'
 
 export const ProjectsRow = ({ value, onManage }: TableRowBaseProps<ProjectBudget>): JSX.Element => {
   const handleManage = () => {
