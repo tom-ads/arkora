@@ -29,6 +29,8 @@ import {
   WeekDaySelect,
 } from '../../components'
 import { NewTimeEntryModal } from '../../components/Modals/NewTimeEntry'
+import { BillablePieChart } from '../../components/Metrics/BillablePieChart'
+import { cloneDeep, groupBy, sumBy } from 'lodash'
 
 export const TimerPage = (): JSX.Element => {
   const [openNewTimeEntryModal, setOpenNewTimeEntryModal] = useState(false)
@@ -80,6 +82,28 @@ export const TimerPage = (): JSX.Element => {
   }, [weekDays, timesheet])
 
   const selectedDay = week?.find((weekDay) => weekDay.day === timesheet.selectedDay)
+
+  const billableSeries = useMemo(() => {
+    const dayEntries = cloneDeep(selectedDay?.entries ?? [])
+    if (timer) {
+      dayEntries?.map((entry) => {
+        if (entry.id === timer.id) {
+          entry.durationMinutes = timer.durationMinutes ?? 0
+        }
+
+        return entry
+      }) ?? []
+    }
+
+    const groupedEntries = groupBy(dayEntries, (e) =>
+      e.task.isBillable ? 'billable' : 'nonBillable',
+    )
+
+    return {
+      billableDuration: sumBy(groupedEntries['billable'], (e) => e.durationMinutes) ?? 0,
+      unbillableDuration: sumBy(groupedEntries['nonBillable'], (e) => e.durationMinutes) ?? 0,
+    }
+  }, [selectedDay, timer])
 
   return (
     <Page>
@@ -168,6 +192,12 @@ export const TimerPage = (): JSX.Element => {
                 onManage={(id) => setTimeEntryId(id)}
               />
             ))}
+          </div>
+
+          <div>
+            <BillablePieChart
+              data={[billableSeries['billableDuration'], billableSeries['unbillableDuration']]}
+            />
           </div>
         </Card>
       </PageContent>

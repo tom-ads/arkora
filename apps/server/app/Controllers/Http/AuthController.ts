@@ -142,10 +142,16 @@ export default class AuthController {
 
     await ctx.auth.login(user)
 
+    const activeTimer = await ctx.auth.user!.getActiveTimer()
+    if (activeTimer) {
+      const diffMinutes = timerDifference(activeTimer.lastStartedAt)
+      activeTimer.durationMinutes += diffMinutes
+    }
+
     return {
       user: user.serialize(),
       organisation: organisation?.serialize(),
-      timer: await ctx.auth.user!.getActiveTimer(),
+      timer: activeTimer,
     }
   }
 
