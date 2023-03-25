@@ -58,7 +58,7 @@ export const TimeEntryForm = ({
 
   useEffect(() => {
     if (budgetId) {
-      triggerTasks({ budget_id: budgetId })
+      triggerTasks({ budgetId })
     }
   }, [budgetId])
 

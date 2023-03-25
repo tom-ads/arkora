@@ -12,11 +12,9 @@ export default class TaskController {
     // Optionally filter tasks by budget
     if (payload.budget_id) {
       const budget = await Budget.findOrFail(payload.budget_id)
-
       await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-      await budget.load('tasks')
-      tasks = budget.tasks
+      tasks = await Task.getBudgetTasks(budget.id)
     } else {
       await ctx.organisation!.load('tasks')
       tasks = ctx.organisation!.tasks ?? []
