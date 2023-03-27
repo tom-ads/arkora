@@ -7,19 +7,17 @@ export default class TaskController {
   public async index(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(GetTasksValidator)
 
-    let tasks: Task[] = []
-
-    // Optionally filter tasks by budget
     if (payload.budget_id) {
       const budget = await Budget.findOrFail(payload.budget_id)
       await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-      tasks = await Task.getBudgetTasks(budget.id)
-    } else {
-      await ctx.organisation!.load('tasks')
-      tasks = ctx.organisation!.tasks ?? []
+      const budgetTasks = await Task.getBudgetTasks(budget.id)
+      return budgetTasks.map((budgetTask) => budgetTask.serialize())
     }
 
-    return tasks.map((task) => task.serialize())
+    await ctx.organisation!.load('commonTasks')
+    const organisationTasks = ctx.organisation?.commonTasks ?? []
+
+    return organisationTasks.map((task) => task.serialize())
   }
 }

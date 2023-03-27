@@ -165,10 +165,10 @@ export default class User extends BaseModel {
       .select(
         'users.*',
         Database.raw(
-          'SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS billable_duration'
+          'SUM(CASE WHEN tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS billable_duration'
         ),
         Database.raw(
-          'SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS unbillable_duration'
+          'SUM(CASE WHEN tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS unbillable_duration'
         )
       )
       .leftJoin('time_entries', (query) => {
@@ -177,10 +177,10 @@ export default class User extends BaseModel {
           query.andOnIn('time_entries.budget_id', filters?.budgets)
         }
       })
-      .leftJoin('budget_tasks', (query) => {
+      .leftJoin('tasks', (query) => {
         query
-          .on('time_entries.budget_id', '=', 'budget_tasks.budget_id')
-          .andOn('time_entries.task_id', '=', 'budget_tasks.task_id')
+          .on('time_entries.budget_id', '=', 'tasks.budget_id')
+          .andOn('time_entries.task_id', '=', 'tasks.id')
       })
       .groupBy('users.id')
   })

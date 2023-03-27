@@ -12,7 +12,7 @@ export default class BudgetTaskController {
 
     await TimeEntry.query().where('budget_id', budget.id).where('task_id', task.id).delete()
 
-    await budget.related('tasks').detach([task.id])
+    await budget.related('tasks').query().where('id', task.id).delete()
 
     return ctx.response.noContent()
   }
@@ -29,14 +29,15 @@ export default class BudgetTaskController {
     }
 
     if (payload.name !== budgetTask.name) {
-      // TODO: prevent common tasks from being overridden
-
-      // check not comon task
       budgetTask.name = payload.name
     }
 
-    if (payload.is_billable !== budgetTask.$extras.is_billable) {
-      await budget.related('tasks').attach({ [task.id]: { is_billable: payload.is_billable } })
+    if (payload.is_billable !== budgetTask.isBillable) {
+      await budget
+        .related('tasks')
+        .query()
+        .where('tasks.id', task.id)
+        .update({ is_billable: payload.is_billable })
     }
 
     await budgetTask.save()

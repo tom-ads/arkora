@@ -1,5 +1,5 @@
 import { test } from '@japa/runner'
-import { CommonTask } from 'App/Enum/CommonTask'
+import { CommonTask } from 'App/Enum/DefaultTask'
 import Organisation from 'App/Models/Organisation'
 import TimeEntry from 'App/Models/TimeEntry'
 import { OrganisationFactory, UserFactory } from 'Database/factories'

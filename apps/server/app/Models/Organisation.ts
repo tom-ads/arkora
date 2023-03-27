@@ -19,12 +19,12 @@ import Currency from './Currency'
 import WorkDay from './WorkDay'
 import Client from './Client'
 import Project from './Project'
-import Task from './Task'
 import UserRole from 'App/Enum/UserRole'
 import Verify from 'App/Enum/Verify'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Role from './Role'
 import OrganisationInvitation from 'App/Mailers/OrganisationInvitation'
+import CommonTask from './CommonTask'
 
 type Invitee = {
   email: string
@@ -91,6 +91,12 @@ export default class Organisation extends BaseModel {
   @hasMany(() => User, { serializeAs: null })
   public users: HasMany<typeof User>
 
+  @hasMany(() => CommonTask)
+  public commonTasks: HasMany<typeof CommonTask>
+
+  @hasMany(() => Client)
+  public clients: HasMany<typeof Client>
+
   @belongsTo(() => Currency)
   public currency: BelongsTo<typeof Currency>
 
@@ -99,15 +105,6 @@ export default class Organisation extends BaseModel {
     pivotRelatedForeignKey: 'workday_id',
   })
   public workDays: ManyToMany<typeof WorkDay>
-
-  @manyToMany(() => Task, {
-    pivotTable: 'common_tasks',
-    pivotColumns: ['is_billable'],
-  })
-  public tasks: ManyToMany<typeof Task>
-
-  @hasMany(() => Client)
-  public clients: HasMany<typeof Client>
 
   @hasManyThrough([() => Project, () => Client])
   public projects: HasManyThrough<typeof Project>
