@@ -21,5 +21,5 @@ export default Factory.define(Organisation, ({ faker }) => {
   .relation('currency', () => CurrencyFactory)
   .relation('workDays', () => WorkDayFactory)
   .relation('clients', () => ClientFactory)
-  .relation('tasks', () => TaskFactory)
+  .relation('commonTasks', () => TaskFactory)
   .build()

@@ -22,7 +22,9 @@ test.group('Timer : Stop', ({ each }) => {
 
     // Setup organisation budget and attach common tasks
     const budget = await BudgetFactory.with('budgetType').create()
-    await budget.related('tasks').attach([commonTask.id])
+    await budget
+      .related('tasks')
+      .create({ name: commonTask.name, isBillable: commonTask.isBillable })
 
     // Setup organisation owner
     authUser = await UserFactory.merge({ organisationId: organisation.id }).with('role').create()

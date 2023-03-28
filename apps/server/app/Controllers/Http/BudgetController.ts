@@ -7,7 +7,7 @@ import GetBudgetsValidator from 'App/Validators/Budget/GetBudgetsValidator'
 import { bind } from '@adonisjs/route-model-binding'
 import UpdateBudgetValidator from 'App/Validators/Budget/UpdateBudgetValidator'
 import BudgetKind from 'App/Enum/BudgetKind'
-import Task from 'App/Models/Task'
+import CommonTask from 'App/Models/CommonTask'
 
 export default class BudgetController {
   public async create(ctx: HttpContextContract) {
@@ -36,8 +36,6 @@ export default class BudgetController {
         fixedPrice: payload.fixed_price,
       })
 
-      // TODO: use associate for project, budget, and billable relations...
-
       ctx.logger.info(`Created budget ${createdBudget.id} for tenant ${ctx.organisation!.id}`)
     } catch (err) {
       ctx.logger.error(
@@ -55,23 +53,13 @@ export default class BudgetController {
     }
 
     // Assign organisation default tasks to budget
-    const organisationTasks = await Task.getOrganisationTasks(ctx.organisation!.id)
+    const organisationTasks = await CommonTask.getOrganisationTasks(ctx.organisation!.id)
     if (organisationTasks?.length) {
-      await createdBudget.related('tasks').attach(
-        organisationTasks.reduce((prev, curr) => {
-          prev[curr.id] = {
-            /* 
-              All tasks are marked as false for non-billable budget type,
-              otherwise use the organisations default common task setup
-            */
-            is_billable:
-              budgetType?.name === BudgetKind.NON_BILLABLE
-                ? false
-                : Boolean(curr.$extras.pivot_is_billable),
-          }
-          return prev
-        }, {})
-      )
+      await createdBudget
+        .related('tasks')
+        .createMany(
+          organisationTasks.map((task) => ({ name: task.name, isBillable: task.isBillable }))
+        )
     }
 
     return createdBudget.serialize()
@@ -92,7 +80,7 @@ export default class BudgetController {
 
     budgets = await Budget.getBudgetsMetrics(budgets!.map((budget) => budget.id))
 
-    return budgets
+    return budgets.map((budget) => budget.serialize())
   }
 
   @bind()
@@ -150,15 +138,9 @@ export default class BudgetController {
       if (newBudgetType) {
         await budget.related('budgetType').associate(newBudgetType)
 
+        // All non-billable tasks related to budget need to be non-billable tasks
         if (payload.budget_type === BudgetKind.NON_BILLABLE) {
-          // All non-billable tasks related to budget need to be non-billable tasks
-          const budgetTasks = await budget.related('tasks').query()
-          await budget.related('tasks').sync(
-            budgetTasks.reduce((prev, curr) => {
-              prev[curr.id] = { is_billable: false }
-              return prev
-            }, {})
-          )
+          await budget.related('tasks').query().update({ is_billable: false })
         }
       }
     }

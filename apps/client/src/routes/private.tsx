@@ -1,4 +1,5 @@
 import { MainLayout } from '@/components'
+import { BudgetRoutes } from '@/features/budget'
 import { ClientRoutes } from '@/features/client'
 import { ProjectRoutes } from '@/features/project'
 import { TeamRoutes } from '@/features/team'
@@ -38,6 +39,10 @@ export const privateRoutes = [
       {
         path: '/team/*',
         element: <TeamRoutes />,
+      },
+      {
+        path: '/budgets/*',
+        element: <BudgetRoutes />,
       },
     ],
   },
