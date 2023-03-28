@@ -218,13 +218,10 @@ export default class Budget extends BaseModel {
   })
   public members: ManyToMany<typeof User>
 
-  @manyToMany(() => Task, {
-    pivotTable: 'budget_tasks',
-    pivotColumns: ['is_billable'],
-  })
-  public tasks: ManyToMany<typeof Task>
-
   // Relations - hasMany
+
+  @hasMany(() => Task)
+  public tasks: HasMany<typeof Task>
 
   @hasMany(() => TimeEntry)
   public timeEntries: HasMany<typeof TimeEntry>
@@ -251,7 +248,6 @@ export default class Budget extends BaseModel {
     await Promise.all([
       budget.related('members').detach(),
       budget.related('timeEntries').query().delete(),
-      budget.related('tasks').detach(),
     ])
   }
 
@@ -288,14 +284,14 @@ export default class Budget extends BaseModel {
         `
           LEFT JOIN (
             SELECT
-              budget_tasks.budget_id,
-              SUM(CASE WHEN budget_tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS billable_duration,
-              SUM(CASE WHEN budget_tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS unbillable_duration
-            FROM budget_tasks
+              tasks.budget_id,
+              SUM(CASE WHEN tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS billable_duration,
+              SUM(CASE WHEN tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS unbillable_duration
+            FROM tasks
             LEFT JOIN time_entries
-              ON budget_tasks.budget_id = time_entries.budget_id
-              AND budget_tasks.task_id = time_entries.task_id
-            GROUP BY budget_tasks.budget_id
+              ON tasks.budget_id = time_entries.budget_id
+              AND tasks.id = time_entries.task_id
+            GROUP BY tasks.budget_id
           ) AS entries
           ON budgets.id = entries.budget_id
         `
@@ -325,11 +321,9 @@ export default class Budget extends BaseModel {
       .withScopes((scopes) => scopes.budgetMetrics())
       .whereIn('budgets.id', budgetIds)
       .preload('project')
-
       .if(filters?.projectId, (builder) => {
         builder.where('budgets.project_id', filters!.projectId!)
       })
-
       .if(filters?.page, (builder) => {
         builder.forPage(filters!.page!, 10)
       })

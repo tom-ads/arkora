@@ -117,14 +117,14 @@ export default class TimeEntry extends BaseModel {
 
   public static async getTimeEntries(organisationId: number, filters: EntriesFilters) {
     const result = await TimeEntry.query()
-      .select('time_entries.*', 'budget_tasks.is_billable')
+      .select('time_entries.*', 'tasks.is_billable')
       .whereHas('user', (query) => {
         query.where('organisation_id', organisationId)
       })
-      .leftJoin('budget_tasks', (subQuery) => {
+      .leftJoin('tasks', (subQuery) => {
         subQuery
-          .on('time_entries.budget_id', '=', 'budget_tasks.budget_id')
-          .andOn('time_entries.task_id', '=', 'budget_tasks.task_id')
+          .on('time_entries.budget_id', '=', 'tasks.budget_id')
+          .andOn('time_entries.task_id', '=', 'tasks.id')
       })
       .if(filters?.budgets, (query) => {
         query.whereIn('time_entries.budget_id', filters.budgets!)
@@ -144,7 +144,7 @@ export default class TimeEntry extends BaseModel {
         query.withScopes((scopes) => scopes.filterDate(filters?.startDate, filters?.endDate))
       })
       .if(filters.billable, (query) => {
-        query.where('budget_tasks.is_billable', filters?.billable === 'billable')
+        query.where('tasks.is_billable', filters?.billable === 'billable')
       })
       .orderBy('time_entries.date', 'asc')
       .preload('user')

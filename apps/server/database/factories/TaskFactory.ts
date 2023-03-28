@@ -7,5 +7,5 @@ export default Factory.define(Task, () => {
     name: 'Development',
   }
 })
-  .relation('budgets', () => BudgetFactory)
+  .relation('budget', () => BudgetFactory)
   .build()

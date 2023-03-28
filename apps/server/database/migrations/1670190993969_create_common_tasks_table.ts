@@ -5,11 +5,12 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
       table.integer('organisation_id').unsigned().references('organisations.id').onDelete('CASCADE')
-      table.integer('task_id').unsigned().references('tasks.id').onDelete('CASCADE')
+      table.string('name')
       table.boolean('is_billable').defaultTo(false)
-
-      table.unique(['organisation_id', 'task_id'])
+      table.timestamp('created_at')
+      table.timestamp('updated_at')
     })
   }
 

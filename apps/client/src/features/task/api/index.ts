@@ -9,7 +9,9 @@ const taskEndpoints = appApi.injectEndpoints({
     getTasks: build.query<GetTasksResponse, GetTasksRequest>({
       query: (params) => ({
         url: tasksBasePath,
-        params,
+        params: {
+          ...(params.budgetId && { budget_id: params.budgetId }),
+        },
       }),
     }),
   }),

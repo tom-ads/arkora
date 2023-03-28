@@ -22,8 +22,10 @@ test.group('Timer : Index', ({ each }) => {
     const commonTask = await TaskFactory.create()
 
     // Setup organisation budget and attach common tasks
-    const budget = await BudgetFactory.with('budgetType').create()
-    await budget.related('tasks').attach([commonTask.id])
+    const budget = await BudgetFactory.with('budgetType').with('tasks').create()
+    await budget
+      .related('tasks')
+      .create({ name: commonTask.name, isBillable: commonTask.isBillable })
 
     // Create organisation members with active timers
     await UserFactory.merge({ organisationId: organisation.id })

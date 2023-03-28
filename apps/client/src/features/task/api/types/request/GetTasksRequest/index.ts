@@ -1,5 +1,5 @@
 type GetTasksRequest = {
-  budget_id?: number
+  budgetId?: number | string
 }
 
 export default GetTasksRequest

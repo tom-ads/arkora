@@ -1,4 +1,4 @@
-export enum CommonTask {
+export enum DefaultTask {
   DEVELOPMENT = 'DEVELOPMENT',
   DISCOVERY = 'DISCOVERY',
   DESIGN = 'DESIGN',
