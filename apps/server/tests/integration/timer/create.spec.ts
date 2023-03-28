@@ -1,5 +1,5 @@
 import { test } from '@japa/runner'
-import { CommonTask } from 'App/Enum/DefaultTask'
+import { DefaultTask } from 'App/Enum/DefaultTask'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 import Budget from 'App/Models/Budget'
 import Organisation from 'App/Models/Organisation'
@@ -29,11 +29,16 @@ test.group('Timer : Create', ({ each }) => {
 
     // Setup common organisation tasks
     commonTasks = await TaskFactory.merge([
-      { name: CommonTask.DESIGN },
-      { name: CommonTask.DEVELOPMENT },
-      { name: CommonTask.DISCOVERY },
+      { name: DefaultTask.DESIGN },
+      { name: DefaultTask.DEVELOPMENT },
+      { name: DefaultTask.DISCOVERY },
     ]).createMany(3)
-    await organisation.related('tasks').attach(commonTasks.map((task) => task.id))
+    await organisation.related('commonTasks').createMany(
+      commonTasks.map((task) => ({
+        name: task.name,
+        isBillable: task.isBillable,
+      }))
+    )
 
     // Preload projects and budgets
     await organisation.load('projects')
@@ -44,7 +49,13 @@ test.group('Timer : Create', ({ each }) => {
     // Link tasks to budgets
     await Promise.all(
       budgets.map(
-        async (budget) => await budget.related('tasks').attach(commonTasks.map((task) => task.id))
+        async (budget) =>
+          await budget.related('tasks').createMany(
+            commonTasks.map((task) => ({
+              name: task.name,
+              isBillable: task.isBillable,
+            }))
+          )
       )
     )
   })
@@ -77,7 +88,7 @@ test.group('Timer : Create', ({ each }) => {
         ...payload,
         date: DateTime.now().toISO(),
         budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === CommonTask.DEVELOPMENT)?.id,
+        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
       })
       .withCsrfToken()
       .loginAs(authUser)
@@ -113,7 +124,7 @@ test.group('Timer : Create', ({ each }) => {
         ...payload,
         date: DateTime.now().toISO(),
         budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === CommonTask.DEVELOPMENT)?.id,
+        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
       })
       .withCsrfToken()
       .loginAs(authUser)
@@ -149,7 +160,7 @@ test.group('Timer : Create', ({ each }) => {
         ...payload,
         date: DateTime.now().toISO(),
         budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === CommonTask.DEVELOPMENT)?.id,
+        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
       })
       .withCsrfToken()
       .loginAs(authUser)
@@ -183,7 +194,7 @@ test.group('Timer : Create', ({ each }) => {
         ...payload,
         date: DateTime.now().toISO(),
         budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === CommonTask.DEVELOPMENT)?.id,
+        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
       })
       .withCsrfToken()
       .loginAs(authUser)
@@ -215,7 +226,7 @@ test.group('Timer : Create', ({ each }) => {
         ...payload,
         date: DateTime.now().toISO(),
         budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === CommonTask.DEVELOPMENT)?.id,
+        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
       })
       .withCsrfToken()
       .loginAs(authUser)
@@ -255,7 +266,7 @@ test.group('Timer : Create', ({ each }) => {
         ...payload,
         date: DateTime.now().toISO(),
         budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === CommonTask.DEVELOPMENT)?.id,
+        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
       })
       .withCsrfToken()
       .loginAs(authUser)

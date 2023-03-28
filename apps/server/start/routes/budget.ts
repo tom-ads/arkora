@@ -10,7 +10,12 @@ Route.group(() => {
     Route.put('/', 'BudgetController.update')
 
     Route.group(() => {
+      Route.get('/', 'BudgetTaskController.index')
+      Route.post('/', 'BudgetTaskController.create')
+
       Route.group(() => {
+        Route.get('/', 'BudgetTaskController.view')
+        Route.put('/', 'BudgetTaskController.update')
         Route.delete('/', 'BudgetTaskController.delete')
       })
         .prefix(':taskId')

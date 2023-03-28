@@ -1,4 +1,5 @@
 import {
+  ClipboardIcon,
   Form,
   Table,
   TableBody,
@@ -7,11 +8,11 @@ import {
   TableHeading,
   TableRow,
 } from '@/components'
-import { useGetTasksQuery } from '@/features/task'
+import { useGetBudgetTasksQuery } from '@/features/budget_tasks'
 import Task from '@/types/models/Task'
 import { useParams } from 'react-router-dom'
 import { z } from 'zod'
-import { TasksRow } from '../TasksRow'
+import { BudgetTaskRow, BudgetTaskSkeletonRow } from '../TasksRow'
 
 type FormFields = {
   tasks: Task[]
@@ -19,21 +20,24 @@ type FormFields = {
 
 const validationSchema = z.object({})
 
-export const BudgetTasksTable = (): JSX.Element => {
+type BudgetTasksTableProps = {
+  onManage: (taskId: number) => void
+}
+
+export const BudgetTasksTable = ({ onManage }: BudgetTasksTableProps): JSX.Element => {
   const { budgetId } = useParams()
 
-  const { data: tasks, isLoading } = useGetTasksQuery({ budgetId }, { skip: !budgetId })
+  const { data: tasks, isLoading } = useGetBudgetTasksQuery(budgetId!, { skip: !budgetId })
 
   return (
     <TableContainer
       emptyState={{
-        isEmpty: !tasks?.length && isLoading,
-        // icon: <UserIcon />,
+        isEmpty: !tasks?.length && !isLoading,
+        icon: <ClipboardIcon />,
         title: 'No Tasks',
         btnText: 'Create Task',
-        // onClick: onCreate,
         description:
-          'Tasks determine the billable / non-billable of each time entry they create for a budget',
+          'Budget tasks define what is considered billable and non-billable for each time entry created against this budget',
       }}
     >
       <Form<FormFields, typeof validationSchema> defaultValues={{ tasks: tasks ?? [] }}>
@@ -47,13 +51,23 @@ export const BudgetTasksTable = (): JSX.Element => {
                 <TableHeading className="w-[200px]">SPENT</TableHeading>
                 <TableHeading className="w-[150px]">BILLABLE / NON-BILLABLE</TableHeading>
                 <TableHeading className="w-[100px]">BILLABLE</TableHeading>
-                <TableHeading className="w-[40px]" last></TableHeading>
+                <TableHeading className="w-[50px]" last></TableHeading>
               </TableRow>
             </TableHead>
             <TableBody>
-              {tasks?.map((task) => (
-                <TasksRow key={task.id} value={task} itemIdx={task.id} />
-              ))}
+              {isLoading ? (
+                <>
+                  {Array.from({ length: 10 }).map((_, idx) => (
+                    <BudgetTaskSkeletonRow key={idx} />
+                  ))}
+                </>
+              ) : (
+                <>
+                  {tasks?.map((task) => (
+                    <BudgetTaskRow key={task.id} value={task} onManage={onManage} />
+                  ))}
+                </>
+              )}
             </TableBody>
           </Table>
         )}

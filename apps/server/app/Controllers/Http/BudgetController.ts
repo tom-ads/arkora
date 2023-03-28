@@ -80,7 +80,7 @@ export default class BudgetController {
 
     budgets = await Budget.getBudgetsMetrics(budgets!.map((budget) => budget.id))
 
-    return budgets
+    return budgets.map((budget) => budget.serialize())
   }
 
   @bind()

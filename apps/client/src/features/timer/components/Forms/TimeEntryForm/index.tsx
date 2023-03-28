@@ -14,9 +14,9 @@ import { Budget, ModalBaseProps } from '@/types'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { ZodType } from 'zod'
 import { groupBy, startCase } from 'lodash'
-import { useLazyGetTasksQuery } from '@/features/task'
 import Task from '@/types/models/Task'
 import { UseFormReturn } from 'react-hook-form'
+import { useLazyGetBudgetTasksQuery } from '@/features/budget_tasks'
 
 export type TimeEntryFields = {
   budget: number | undefined
@@ -44,7 +44,7 @@ export const TimeEntryForm = ({
 
   const { data: budgets } = useGetBudgetsQuery({ includeProject: true }, { skip: !isOpen })
 
-  const [triggerTasks, { data: tasks }] = useLazyGetTasksQuery()
+  const [triggerTasks, { data: tasks }] = useLazyGetBudgetTasksQuery()
 
   const handleFormChange = useCallback<FormChangeCallback<TimeEntryFields>>(
     (fields: TimeEntryFields, methods: UseFormReturn<TimeEntryFields>) => {
@@ -58,7 +58,7 @@ export const TimeEntryForm = ({
 
   useEffect(() => {
     if (budgetId) {
-      triggerTasks({ budgetId })
+      triggerTasks(budgetId)
     }
   }, [budgetId])
 
@@ -80,7 +80,7 @@ export const TimeEntryForm = ({
     return Object.fromEntries(
       Object.entries(groupedTasks ?? {}).map(([key, value]) => {
         return [
-          key === 'billable' ? 'Billable' : 'Non-Billable',
+          key === 'true' ? 'Billable' : 'Non-Billable',
           value.map((task: Task) => ({
             id: task.id,
             display: task.name,

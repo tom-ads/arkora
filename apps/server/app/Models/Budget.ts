@@ -321,11 +321,9 @@ export default class Budget extends BaseModel {
       .withScopes((scopes) => scopes.budgetMetrics())
       .whereIn('budgets.id', budgetIds)
       .preload('project')
-
       .if(filters?.projectId, (builder) => {
         builder.where('budgets.project_id', filters!.projectId!)
       })
-
       .if(filters?.page, (builder) => {
         builder.forPage(filters!.page!, 10)
       })

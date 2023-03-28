@@ -1,5 +1,5 @@
 import { test } from '@japa/runner'
-import { CommonTask } from 'App/Enum/DefaultTask'
+import { DefaultTask } from 'App/Enum/DefaultTask'
 import Organisation from 'App/Models/Organisation'
 import TimeEntry from 'App/Models/TimeEntry'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
@@ -29,11 +29,16 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
 
     // Setup common organisation tasks
     const commonTasks = await TaskFactory.merge([
-      { name: CommonTask.DESIGN },
-      { name: CommonTask.DEVELOPMENT },
-      { name: CommonTask.DISCOVERY },
+      { name: DefaultTask.DESIGN },
+      { name: DefaultTask.DEVELOPMENT },
+      { name: DefaultTask.DISCOVERY },
     ]).createMany(3)
-    await organisation.related('tasks').attach(commonTasks.map((task) => task.id))
+    await organisation.related('commonTasks').createMany(
+      commonTasks.map((task) => ({
+        name: task.name,
+        isBillable: task.isBillable,
+      }))
+    )
 
     // Preload projects and budgets
     await organisation.load('projects')
@@ -42,7 +47,15 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     // Link tasks to budgets
     const budgets = organisation.projects.map((project) => project.budgets).flat()
     await Promise.all(
-      budgets.map((budget) => budget.related('tasks').attach(commonTasks.map((task) => task.id)))
+      budgets.map(
+        async (budget) =>
+          await budget.related('tasks').createMany(
+            commonTasks.map((task) => ({
+              name: task.name,
+              isBillable: task.isBillable,
+            }))
+          )
+      )
     )
 
     // Generate timesheet across previous week

@@ -1,7 +1,23 @@
 import { Page, PageBackBtn, PageContent, PageHeader, PageTitle } from '@/components'
+import { BudgetTab } from '@/stores/slices/filters/budgets'
+import { RootState } from '@/stores/store'
+import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useGetBudgetQuery } from '../../api'
-import { BudgetTasksTable } from '../../components/Tables'
+import { BudgetTaskView } from '../../components/Views'
+import { BudgetControlsWidget } from '../../components/Widgets/BudgetControls'
+
+const views = {
+  tasks: <BudgetTaskView />,
+}
+
+const BudgetView = () => {
+  const { selectedTab } = useSelector((state: RootState) => ({
+    selectedTab: state.budgetFilters.tab,
+  }))
+
+  return views[selectedTab as BudgetTab]
+}
 
 export const BudgetPage = (): JSX.Element => {
   const { budgetId } = useParams()
@@ -17,7 +33,9 @@ export const BudgetPage = (): JSX.Element => {
         </div>
       </PageHeader>
       <PageContent className="space-y-5">
-        <BudgetTasksTable />
+        <BudgetControlsWidget />
+
+        <BudgetView />
       </PageContent>
     </Page>
   )

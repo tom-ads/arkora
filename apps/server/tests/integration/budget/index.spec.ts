@@ -1,9 +1,9 @@
 import { test } from '@japa/runner'
-import { CommonTask } from 'App/Enum/DefaultTask'
+import { DefaultTask } from 'App/Enum/DefaultTask'
 import Budget from 'App/Models/Budget'
+import CommonTask from 'App/Models/CommonTask'
 import Organisation from 'App/Models/Organisation'
 import Project from 'App/Models/Project'
-import Task from 'App/Models/Task'
 import User from 'App/Models/User'
 import {
   BudgetTypeFactory,
@@ -12,13 +12,13 @@ import {
   UserFactory,
 } from 'Database/factories'
 import BillableTypeFactory from 'Database/factories/BillableTypeFactory'
-import TaskFactory from 'Database/factories/TaskFactory'
+import CommonTaskFactory from 'Database/factories/CommonTaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 
-test.group('Budgets: All Budgets', ({ each }) => {
+test.group('Budgets : Index', ({ each }) => {
   let organisation: Organisation
   let projects: Project[]
-  let commonTasks: Task[]
+  let commonTasks: CommonTask[]
   let budgets: Budget[]
   let authUser: User
 
@@ -28,10 +28,10 @@ test.group('Budgets: All Budgets', ({ each }) => {
 
   each.setup(async () => {
     // Setup common tasks
-    commonTasks = await TaskFactory.merge([
-      { name: CommonTask.DESIGN },
-      { name: CommonTask.DEVELOPMENT },
-      { name: CommonTask.DISCOVERY },
+    commonTasks = await CommonTaskFactory.merge([
+      { name: DefaultTask.DESIGN },
+      { name: DefaultTask.DEVELOPMENT },
+      { name: DefaultTask.DISCOVERY },
     ]).createMany(3)
 
     const budgetType = await BudgetTypeFactory.apply('variable').create()
@@ -68,11 +68,11 @@ test.group('Budgets: All Budgets', ({ each }) => {
       ...budgets.map(async (budget) => await budget.related('members').attach([authUser.id])),
       ...budgets.map(
         async (budget) =>
-          await budget.related('tasks').attach(
-            commonTasks.reduce((prev, curr) => {
-              prev[curr.id] = { is_billable: true }
-              return prev
-            }, {})
+          await budget.related('tasks').createMany(
+            commonTasks.map((task) => ({
+              name: task.name,
+              isBillable: task.isBillable,
+            }))
           )
       ),
     ])
@@ -232,23 +232,19 @@ test.group('Budgets: All Budgets', ({ each }) => {
   })
 
   test('organisation user can retrieve budgets with metrics', async ({ client, route }) => {
+    await budgets[0].load('tasks')
+    await budgets[1].load('tasks')
+
     await TimeEntryFactory.mergeRecursive({
       userId: authUser.id,
-      taskId: commonTasks[0].id,
       durationMinutes: 60,
     })
       .merge([
-        { budgetId: budgets[0].id },
-        { budgetId: budgets[1].id },
-        { budgetId: budgets[2].id },
-        { budgetId: budgets[3].id },
-        { budgetId: budgets[0].id },
-        { budgetId: budgets[1].id },
-        { budgetId: budgets[2].id },
-        { budgetId: budgets[3].id },
+        { budgetId: budgets[0].id, taskId: budgets[0].tasks[0].id },
+        { budgetId: budgets[1].id, taskId: budgets[1].tasks[0].id },
       ])
       .apply('lastStoppedAt')
-      .createMany(8)
+      .createMany(2)
 
     const response = await client
       .get(route('BudgetController.index'))
@@ -259,15 +255,15 @@ test.group('Budgets: All Budgets', ({ each }) => {
     response.assertStatus(200)
 
     await Promise.all(budgets.map(async (budget) => await budget.load('project')))
-    response.assertBodyContains(
-      budgets.map((budget) => ({
-        ...budget.serialize(),
-        spent_cost: 20000,
-        billable_cost: 20000,
-        billable_duration: 120,
-        remaining_cost: 9980000,
-      }))
-    )
+
+    response.assertBodyContains([
+      {
+        spent_cost: 10000,
+        unbillable_cost: 10000,
+        unbillable_duration: 60,
+        remaining_cost: 9990000,
+      },
+    ])
   })
 
   test('organisation user cannot index budgets for a different organisation', async ({

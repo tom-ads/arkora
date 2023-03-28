@@ -1,21 +1,29 @@
 import {
   Button,
+  CrossIcon,
   DoubleProgressLineIndicator,
-  FormCheckbox,
+  SkeletonBox,
   TableData,
   TableRow,
+  TickIcon,
   ToolTip,
 } from '@/components'
+import { SkeletonCircle } from '@/components/Skeletons/Circle'
 import { calculatePercentage } from '@/helpers/currency'
 import { formatMinutesToHourMinutes } from '@/helpers/date'
 import Task from '@/types/models/Task'
+import { TableRowBaseProps } from '@/types/TableRow'
+import classNames from 'classnames'
 
-type TasksRowProps = {
-  value: Task
-  itemIdx: number
-}
+type TasksRowProps = TableRowBaseProps<Task>
 
-export const TasksRow = ({ value, itemIdx }: TasksRowProps): JSX.Element => {
+export const BudgetTaskRow = ({ value, onManage }: TasksRowProps): JSX.Element => {
+  const handleManage = () => {
+    if (onManage) {
+      onManage(value.id)
+    }
+  }
+
   return (
     <TableRow>
       <TableData>
@@ -60,18 +68,47 @@ export const TasksRow = ({ value, itemIdx }: TasksRowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        <FormCheckbox name={`tasks.${itemIdx}.isBillable`} />
+        <div
+          className={classNames('rounded-full w-8  h-8 grid place-content-center', {
+            'bg-green-10 text-green-90': value.isBillable,
+            'bg-red-10 text-red-90': !value.isBillable,
+          })}
+        >
+          {value.isBillable && <TickIcon className="text-green-90 w-4 h-4" />}
+          {!value.isBillable && <CrossIcon className="text-red-90 w-4 h-4" />}
+        </div>
       </TableData>
 
       <TableData>
-        <Button
-          variant="blank"
-          // onClick={() => onDelete(formattedMember.id)}
-          // disabled={!isPrivate}
-          danger
-        >
-          Remove
+        <Button variant="blank" onClick={handleManage}>
+          Manage
         </Button>
+      </TableData>
+    </TableRow>
+  )
+}
+
+export const BudgetTaskSkeletonRow = (): JSX.Element => {
+  return (
+    <TableRow>
+      <TableData>
+        <SkeletonBox height={20} randomWidth />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={100} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={170} />
+      </TableData>
+
+      <TableData>
+        <SkeletonCircle height={30} width={30} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={20} width={70} />
       </TableData>
     </TableRow>
   )

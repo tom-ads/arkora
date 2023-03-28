@@ -4,6 +4,7 @@ import WeekDay from 'App/Enum/WeekDay'
 import Client from 'App/Models/Client'
 import Organisation from 'App/Models/Organisation'
 import Project from 'App/Models/Project'
+import Task from 'App/Models/Task'
 
 /*
 |--------------------------------------------------------------------------
@@ -195,6 +196,28 @@ validator.rule(
         'budgetName validation failed',
         options.arrayExpressionPointer,
         { projectId, exceptCurrentName }
+      )
+    }
+  },
+  () => ({ async: true })
+)
+
+validator.rule(
+  'budgetTaskName',
+  async (name, [budgetId, exceptCurrentName], options) => {
+    const exists = await Task.query().where('budget_id', budgetId).where('name', name).first()
+
+    /* 
+      Validator can optionally handle the case of needing to not include 
+      the current name from the check
+    */
+    if (exists && !exceptCurrentName) {
+      options.errorReporter.report(
+        options.pointer,
+        'budgetTaskName',
+        'budgetTaskName validation failed',
+        options.arrayExpressionPointer,
+        { budgetId, exceptCurrentName }
       )
     }
   },

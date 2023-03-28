@@ -3,9 +3,44 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Budget from 'App/Models/Budget'
 import Task from 'App/Models/Task'
 import TimeEntry from 'App/Models/TimeEntry'
+import CreateBudgetTaskValidator from 'App/Validators/BudgetTask/CreateBudgetTaskValidator'
 import UpdateBudgetTaskValidator from 'App/Validators/BudgetTask/UpdateBudgetTaskValidator'
 
 export default class BudgetTaskController {
+  @bind()
+  public async create(ctx: HttpContextContract, budget: Budget) {
+    await ctx.bouncer.with('BudgetPolicy').authorize('create')
+
+    const payload = await ctx.request.validate(CreateBudgetTaskValidator)
+
+    const budgetTask = await budget
+      .related('tasks')
+      .create({ name: payload.name, isBillable: payload.is_billable })
+
+    return budgetTask.serialize()
+  }
+
+  @bind()
+  public async index(ctx: HttpContextContract, budget: Budget) {
+    await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
+
+    const budgetTasks = await Task.getBudgetTasks(budget.id)
+
+    return budgetTasks?.map((task) => task.serialize())
+  }
+
+  @bind()
+  public async view(ctx: HttpContextContract, budget: Budget, task: Task) {
+    await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
+
+    const budgetTask = await budget.related('tasks').query().where('tasks.id', task.id).first()
+    if (!budgetTask) {
+      return ctx.response.notFound()
+    }
+
+    return budgetTask.serialize()
+  }
+
   @bind()
   public async delete(ctx: HttpContextContract, budget: Budget, task: Task) {
     await ctx.bouncer.with('BudgetPolicy').authorize('delete', budget)
