@@ -39,8 +39,13 @@ export function formatMinutesToTime(durationMinutes: number) {
 }
 
 export function formatMinutesToHourMinutes(durationMinutes: number) {
-  const minutes = durationMinutes % 60
-  const hours = Math.abs(durationMinutes - minutes) / 60
+  let minutes = 0
+  let hours = 0
+
+  if (durationMinutes > 0) {
+    minutes = durationMinutes % 60
+    hours = (durationMinutes - minutes) / 60
+  }
 
   const formattedHours = padTimeUnit(hours)
   const formattedMinutes = padTimeUnit(minutes)

@@ -6,6 +6,7 @@ import Role from 'App/Models/Role'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 import { getBillableTypes } from './BillableType'
 import { getBudgetTypes } from './BudgetType'
+import { getWorkDays } from './WorkDay'
 
 export default class extends BaseSeeder {
   public static environment = ['development']
@@ -53,6 +54,9 @@ export default class extends BaseSeeder {
         password: 'newPassword123!',
       }),
     ])
+
+    const workDays = await getWorkDays()
+    await organisation.related('workDays').attach(workDays.map((day) => day.id))
 
     const organisationTasks = await this.createCommonTasks(organisation.id)
 

@@ -79,6 +79,7 @@ export const TimesheetPeriod = (): JSX.Element => {
           </div>
         )}
 
+        {/* Timesheet Controls */}
         <div className="flex gap-x-4 mb-auto">
           <Button
             size="xs"

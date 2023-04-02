@@ -98,6 +98,14 @@ export default class TimeEntry extends BaseModel {
     }
   )
 
+  public static forOrganisation = scope((query: TimeEntryBuilder, organisationId: number) => {
+    query.join('users', (query) => {
+      query
+        .on('time_entries.user_id', '=', 'users.id')
+        .andOnVal('users.organisation_id', organisationId)
+    })
+  })
+
   // Instance Methods
 
   public async stopTimer() {
@@ -154,13 +162,32 @@ export default class TimeEntry extends BaseModel {
     return result
   }
 
-  public static async getUserTimesheet(user: User, startDate: string, endDate: string) {
+  public static async getTimesheets(
+    organisationId: number,
+    startDate: DateTime,
+    endDate: DateTime,
+    userId?: number
+  ) {
     return await TimeEntry.query()
-      .where('user_id', user.id)
+      .if(
+        userId,
+        (query) => query.where('user_id', userId!),
+        (query) => query.withScopes((scopes) => scopes.forOrganisation(organisationId))
+      )
+      .withScopes((scopes) => scopes.filterDate(startDate, endDate))
+      .orderBy('time_entries.date', 'asc')
+      .preload('budget', (query) => query.preload('project'))
+      .preload('task')
+  }
+
+  public static async getUserTimesheet(userId: number, startDate: string, endDate: string) {
+    return await TimeEntry.query()
+      .where('user_id', userId)
       .where('date', '>=', startDate)
       .where('date', '<=', endDate)
       .orderBy('date', 'asc')
-      .exec()
+      .preload('budget', (query) => query.preload('project'))
+      .preload('task')
   }
 
   public static async getLastTimer(userId: number) {
