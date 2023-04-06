@@ -23,8 +23,12 @@ export const TimesheetDayInsights = ({ value }: TimesheetDayInsightsProps): JSX.
   const openingTime = DateTime.fromISO(organisation.openingTime!)
   const closingTime = DateTime.fromISO(organisation.closingTime!)
 
-  const dailyGoalDuration = calcDailyDuration(openingTime, closingTime)
-  const weeklyGoalDuration = dailyGoalDuration * (organisation?.workDays?.length ?? 0)
+  const dailyGoalDuration = calcDailyDuration(
+    openingTime,
+    closingTime,
+    organisation.breakDuration ?? 0,
+  )
+  const weeklyGoalDuration = dailyGoalDuration * (organisation?.businessDays?.length ?? 0)
 
   return (
     <>

@@ -18,11 +18,11 @@ interface RegisterDetails {
 interface RegisterOrganisation {
   name: string
   subdomain: string
-  workDays: WeekDay[]
+  businessDays: WeekDay[]
   openingTime: string
   closingTime: string
   currency: CurrencyCode
-  hourlyRate: string
+  defaultRate: number | null
 }
 
 interface RegisterTeamMember {
@@ -52,11 +52,11 @@ const initialState: RegistrationState = JSON.parse(
   "organisation": {
     "name": "",
     "subdomain": "",
-    "workDays": [],
+    "businessDays": [],
     "openingTime": "",
     "closingTime": "",
     "currency": "GBP",
-    "hourlyRate": ""
+    "defaultRate": null
   },
   "team": []
 }`,
@@ -84,11 +84,11 @@ const registrationSlice = createSlice({
     setOrganisation: (currentState, action: PayloadAction<RegisterOrganisation>) => {
       currentState.organisation.name = action.payload.name
       currentState.organisation.subdomain = action.payload.subdomain
-      currentState.organisation.workDays = action.payload.workDays
+      currentState.organisation.businessDays = action.payload.businessDays
       currentState.organisation.openingTime = action.payload.openingTime
       currentState.organisation.closingTime = action.payload.closingTime
       currentState.organisation.currency = action.payload.currency
-      currentState.organisation.hourlyRate = action.payload.hourlyRate
+      currentState.organisation.defaultRate = action.payload.defaultRate
 
       localStorage.setItem('registration', JSON.stringify(currentState))
     },
@@ -112,11 +112,11 @@ const registrationSlice = createSlice({
       currentState.organisation = {
         name: '',
         subdomain: '',
-        workDays: [],
+        businessDays: [],
         openingTime: '',
         closingTime: '',
         currency: 'GBP',
-        hourlyRate: '',
+        defaultRate: null,
       }
       currentState.team = []
 

@@ -208,15 +208,15 @@ export const TeamView = (): JSX.Element => {
       lastname: details.lastname,
       email: details.email,
       password: details.password,
-      password_confirmation: details.password,
+      passwordConfirmation: details.password,
 
       name: organisation.name,
       subdomain: organisation.subdomain,
-      opening_time: organisation.openingTime,
-      closing_time: organisation.closingTime,
-      work_days: organisation.workDays,
+      openingTime: organisation.openingTime,
+      closingTime: organisation.closingTime,
+      businessDays: organisation.businessDays,
       currency: organisation.currency,
-      hourly_rate: convertToPennies(parseInt(organisation.hourlyRate, 10)),
+      defaultRate: convertToPennies(organisation.defaultRate ?? 0),
 
       members: team.map((member) => ({
         email: member.email,

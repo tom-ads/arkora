@@ -15,20 +15,21 @@ import {
   FormLabel,
 } from '@/components'
 import { WeekDaysSelect } from '@/components/WeekDays'
-import { WeekDay } from '@/enums/WeekDay'
 import { SelectOption } from '@/components/Forms/Select/option'
 import { useMemo } from 'react'
 import currencies from '@/assets/currency/currency.json'
 import { z } from 'zod'
 import { DateTime } from 'luxon'
 import { useVerifyOrganisationMutation } from '../../../api'
-import { CurrencyCode } from '@/types/CurrencyCode'
 import { useDispatch, useSelector } from 'react-redux'
 import { setOrganisation, setStep } from '@/stores/slices/registration'
 import { useLazyCheckSubdomainQuery } from '@/features/subdomain'
 import { RootState } from '@/stores/store'
 import { isEqual } from 'lodash'
 import hourlyRateSchema from '@/helpers/validation/hourly_rate'
+import { OrganisationFormFields } from '@/features/organisation'
+import { convertToPennies } from '@/helpers/currency'
+import { useToast } from '@/hooks/useToast'
 
 const OrganisationSchema = z
   .object({
@@ -38,11 +39,11 @@ const OrganisationSchema = z
       .trim()
       .min(1, { message: 'Subdomain is required' })
       .regex(/^[a-z-]+$/, { message: 'Subdomains can only contain lowercase letters and hyphens' }),
-    workDays: z.array(z.string()).nonempty({ message: 'At least 1 work day required' }),
+    businessDays: z.array(z.string()).nonempty({ message: 'At least 1 work day required' }),
     openingTime: z.string().trim().min(1, { message: 'Opening time is required' }),
     closingTime: z.string().trim().min(1, { message: 'Closing time is required' }),
     currency: z.string(),
-    hourlyRate: hourlyRateSchema,
+    defaultRate: hourlyRateSchema,
   })
   .superRefine((val, ctx) => {
     const openingTime = DateTime.fromFormat(val.openingTime, 'HH:mm')
@@ -65,42 +66,34 @@ const OrganisationSchema = z
     }
   })
 
-type FormFields = {
-  name: string
-  subdomain: string
-  workDays: WeekDay[]
-  openingTime: string
-  closingTime: string
-  currency: CurrencyCode
-  hourlyRate: string
-}
-
 export const OrganisationsView = (): JSX.Element => {
   const dispatch = useDispatch()
 
   const organisation = useSelector((state: RootState) => state.registration.organisation)
 
+  const { errorToast } = useToast()
+
   const [verifyOrganisation, { isLoading: isVerifying }] = useVerifyOrganisationMutation()
 
   const [checkSubdomainTrigger, { data: checkSubdomainResult }] = useLazyCheckSubdomainQuery()
 
-  const handleSubmit = async (data: FormFields) => {
+  const handleSubmit = async (data: OrganisationFormFields) => {
     dispatch(setOrganisation(data))
     await verifyOrganisation({
-      name: data.name,
-      subdomain: data.subdomain,
-      opening_time: data.openingTime,
-      closing_time: data.closingTime,
-      currency: data.currency,
-      work_days: data.workDays,
-      hourly_rate: parseFloat(data.hourlyRate),
+      ...data,
+      defaultRate: convertToPennies(data.defaultRate),
     })
       .unwrap()
       .then(() => dispatch(setStep({ step: 'team' })))
-      .catch()
+      .catch((err) => {
+        if (err.status === 422) return
+        errorToast(
+          'We failed to verify your organisation details. Please try again or contact our support.',
+        )
+      })
   }
 
-  const handleFormChange = (data: FormFields) => {
+  const handleFormChange = (data: OrganisationFormFields) => {
     if (!isEqual(organisation, data)) {
       dispatch(setOrganisation(data))
     }
@@ -114,7 +107,7 @@ export const OrganisationsView = (): JSX.Element => {
   }, [])
 
   return (
-    <Form<FormFields, typeof OrganisationSchema>
+    <Form<OrganisationFormFields, typeof OrganisationSchema>
       className="gap-0"
       onSubmit={handleSubmit}
       onChange={handleFormChange}
@@ -122,11 +115,11 @@ export const OrganisationsView = (): JSX.Element => {
       defaultValues={{
         name: organisation?.name ?? '',
         subdomain: organisation?.subdomain ?? '',
-        workDays: organisation?.workDays ?? [],
+        businessDays: organisation?.businessDays ?? [],
         openingTime: organisation?.openingTime ?? '',
         closingTime: organisation?.closingTime ?? '',
         currency: organisation?.currency ?? 'GBP',
-        hourlyRate: organisation?.hourlyRate ?? '',
+        defaultRate: (organisation?.defaultRate as number) ?? null,
       }}
     >
       {({ control, setValue, watch, trigger, formState: { errors } }) => (
@@ -204,12 +197,12 @@ export const OrganisationsView = (): JSX.Element => {
             />
             <DescriptorContent className="max-w-[405px]">
               <FormControl>
-                <FormLabel htmlFor="workDays" size="sm">
+                <FormLabel htmlFor="businessDays" size="sm">
                   Work Days
                 </FormLabel>
-                <WeekDaysSelect name="workDays" control={control} />
-                {errors.workDays?.message && (
-                  <FormErrorMessage size="sm">{errors.workDays?.message}</FormErrorMessage>
+                <WeekDaysSelect name="businessDays" control={control} />
+                {errors.businessDays?.message && (
+                  <FormErrorMessage size="sm">{errors.businessDays?.message}</FormErrorMessage>
                 )}
               </FormControl>
               <div className="flex justify-between gap-3">
@@ -266,17 +259,17 @@ export const OrganisationsView = (): JSX.Element => {
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel htmlFor="hourlyRate" size="sm">
+                  <FormLabel htmlFor="defaultRate" size="sm">
                     Hourly Rate
                   </FormLabel>
                   <FormCurrencyInput
                     size="sm"
                     currency={watch('currency')}
-                    name="hourlyRate"
-                    error={!!errors?.hourlyRate?.message}
+                    name="defaultRate"
+                    error={!!errors?.defaultRate?.message}
                   />
-                  {errors.hourlyRate?.message && (
-                    <FormErrorMessage size="sm">{errors.hourlyRate?.message}</FormErrorMessage>
+                  {errors.defaultRate?.message && (
+                    <FormErrorMessage size="sm">{errors.defaultRate?.message}</FormErrorMessage>
                   )}
                 </FormControl>
               </div>

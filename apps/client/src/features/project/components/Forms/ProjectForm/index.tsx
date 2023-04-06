@@ -6,10 +6,10 @@ import {
   FormSelect,
   FormStyledRadio,
   HorizontalDivider,
-  InfoCircleIcon,
   LockIcon,
   OpenLockIcon,
   FormErrorMessage,
+  InlineTip,
 } from '@/components'
 import { SelectOption } from '@/components/Forms/Select/option'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
@@ -122,12 +122,7 @@ export const ProjectForm = ({
             </FormControl>
 
             {!!watch('private') && (
-              <div className="flex items-center gap-2">
-                <InfoCircleIcon className="w-5 h-5" />
-                <p className="text-gray-80 text-sm">
-                  Members can be assigned after project has been created
-                </p>
-              </div>
+              <InlineTip value="Members can be assigned after project has been created." />
             )}
           </div>
 

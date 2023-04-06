@@ -12,9 +12,11 @@ import { ArkoraLogo, ArrowThin } from '../Icons'
 import { TabGroup, TabNavItem } from '../Navigation'
 import { clearAuth } from '@/stores/slices/auth'
 import { ProfileModal } from '@/features/account'
+import { ManageOrganisationModal } from '@/features/organisation'
 
 const AvatarDropdown = () => {
-  const [openAccountModal, setOpenAccountModal] = useState<boolean>(false)
+  const [openProfileModal, setOpenProfileModal] = useState<boolean>(false)
+  const [openOrganisationModal, setOpenOrganisationModal] = useState<boolean>(false)
 
   const dispatch = useDispatch()
 
@@ -39,10 +41,12 @@ const AvatarDropdown = () => {
           </Avatar>
         }
       >
-        <DropdownItem className="h-8" onClick={() => setOpenAccountModal(true)}>
+        <DropdownItem className="h-8" onClick={() => setOpenProfileModal(true)}>
           Account
         </DropdownItem>
-        <DropdownItem className="h-8">Organisation</DropdownItem>
+        <DropdownItem className="h-8" onClick={() => setOpenOrganisationModal(true)}>
+          Organisation
+        </DropdownItem>
 
         <HorizontalDivider className="mt-3 mb-[2px]" />
 
@@ -55,7 +59,11 @@ const AvatarDropdown = () => {
         </DropdownItem>
       </Dropdown>
 
-      <ProfileModal isOpen={openAccountModal} onClose={() => setOpenAccountModal(false)} />
+      <ProfileModal isOpen={openProfileModal} onClose={() => setOpenProfileModal(false)} />
+      <ManageOrganisationModal
+        isOpen={openOrganisationModal}
+        onClose={() => setOpenOrganisationModal(false)}
+      />
     </div>
   )
 }
