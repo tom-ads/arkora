@@ -1,10 +1,9 @@
 import classNames from 'classnames'
-import { ReactNode, useEffect } from 'react'
+import { FormEvent, ReactNode, useEffect } from 'react'
 import {
   DeepPartial,
   FieldValues,
   FormProvider,
-  SubmitHandler,
   useForm,
   UseFormReturn,
   ValidationMode,
@@ -79,15 +78,18 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
     }
   }, [defaultValues])
 
-  const handleSubmit: SubmitHandler<TFormValues> = (fields: TFormValues) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+
     if (onSubmit) {
-      onSubmit(fields, methods)
+      methods.handleSubmit((data: TFormValues) => onSubmit(data, methods))(event)
     }
   }
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(handleSubmit)} className="w-full">
+      <form onSubmit={handleSubmit} className="w-full">
         <fieldset className={classNames('flex flex-col w-full', className)}>
           {children(methods)}
         </fieldset>

@@ -1,14 +1,14 @@
-import { Button, ClockIcon, PlayIcon } from '@/components'
+import { Button, ClockIcon } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
 import { useCreateTimerMutation } from '../../../api'
 import { ModalBaseProps } from '@/types'
 import { TimeEntryFields, TimeEntryForm } from '../../Forms/TimeEntryForm'
-import { DateTime } from 'luxon'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useToast } from '@/hooks/useToast'
 import { startTracking } from '@/stores/slices/timer'
 import { z } from 'zod'
 import { convertTimeToMinutes } from '@/helpers/date'
+import { RootState } from '@/stores/store'
 
 export const newEntrySchema = z.object({
   budget: z.number({ required_error: 'Budget is required' }),
@@ -23,12 +23,14 @@ export const NewTimeEntryModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Elem
 
   const { errorToast } = useToast()
 
+  const selectedDay = useSelector((state: RootState) => state.timer.timesheet.selectedDay)
+
   const [createTimer, { isLoading: creatingTimer }] = useCreateTimerMutation()
 
   const onSubmit = async (data: TimeEntryFields) => {
     if (data?.budget && data?.task) {
       await createTimer({
-        date: DateTime.now().toSQLDate(),
+        date: selectedDay,
         budget_id: data.budget,
         task_id: data.task,
         description: data.description,

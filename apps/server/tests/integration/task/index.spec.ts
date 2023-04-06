@@ -5,7 +5,6 @@ import CommonTask from 'App/Models/CommonTask'
 import Organisation from 'App/Models/Organisation'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 import CommonTaskFactory from 'Database/factories/CommonTaskFactory'
-import TaskFactory from 'Database/factories/TaskFactory'
 
 test.group('Tasks : Index', ({ each }) => {
   let organisation: Organisation

@@ -3,7 +3,7 @@ type VerifyDetailsRequest = {
   lastname: string
   email: string
   password: string
-  password_confirmation: string
+  passwordConfirmation: string
 }
 
 export default VerifyDetailsRequest

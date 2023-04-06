@@ -4,11 +4,12 @@ import { CurrencyCode } from '@/types/CurrencyCode'
 type VerifyOrganisationRequest = {
   name: string
   subdomain: string
-  opening_time: string
-  closing_time: string
-  work_days: WeekDay[]
+  openingTime: string
+  closingTime: string
+  businessDays: WeekDay[]
   currency: CurrencyCode
-  hourly_rate: number
+  defaultRate: number
+  breakDuration: number
 }
 
 export default VerifyOrganisationRequest

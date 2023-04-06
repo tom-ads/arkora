@@ -22,29 +22,37 @@ import { Transition } from '@headlessui/react'
 import { DateTime } from 'luxon'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { NewTimeEntryModal } from '../../components/Modals/NewTimeEntry'
 import {
   ManageTimeEntryModal,
   TimeEntryCard,
   TimesheetPeriod,
   WeekDaySelect,
 } from '../../components'
-import { NewTimeEntryModal } from '../../components/Modals/NewTimeEntry'
+import { cloneDeep, groupBy, sumBy } from 'lodash'
+import { TimesheetDayInsights } from '../../components/Insights'
 
 export const TimerPage = (): JSX.Element => {
   const [openNewTimeEntryModal, setOpenNewTimeEntryModal] = useState(false)
   const [timeEntryId, setTimeEntryId] = useState<number | null>(null)
 
-  const { timesheet, timer, isTracking } = useSelector((state: RootState) => ({
-    timesheet: state.timer.timesheet,
-    timer: state.timer.timeEntry,
-    isTracking: state.timer.isTracking,
-  }))
+  const { startDate, endDate, timer, isTracking, selectedDate, authId } = useSelector(
+    (state: RootState) => ({
+      startDate: state.timer.timesheet.startDate,
+      endDate: state.timer.timesheet.endDate,
+      selectedDate: state.timer.timesheet.selectedDay,
+      timer: state.timer.timeEntry,
+      isTracking: state.timer.isTracking,
+      authId: state.auth.user?.id,
+    }),
+  )
 
   const { restartTimer, stopTimer } = useTimeTracker()
 
-  const { data: weekDays } = useGetTimesheetQuery({
-    start_date: timesheet.startDate ?? DateTime.now().startOf('week').toISODate(),
-    end_date: timesheet.endDate ?? DateTime.now().endOf('week').toISODate(),
+  const { data: timesheet } = useGetTimesheetQuery({
+    startDate: startDate ?? DateTime.now().startOf('week').toISODate(),
+    endDate: endDate ?? DateTime.now().endOf('week').toISODate(),
+    userId: authId as number,
   })
 
   const handleTracking = async (timerId?: number) => {
@@ -61,25 +69,44 @@ export const TimerPage = (): JSX.Element => {
     setOpenNewTimeEntryModal(true)
   }
 
-  const week = useMemo(() => {
-    if (timesheet.startDate && timesheet.endDate) {
-      const dates = getDatesBetweenPeriod(
-        DateTime.fromISO(timesheet.startDate),
-        DateTime.fromISO(timesheet.endDate),
-      )
+  const formattedWeek = useMemo(() => {
+    if (startDate && endDate) {
+      const dates = getDatesBetweenPeriod(DateTime.fromISO(startDate), DateTime.fromISO(endDate))
+      const groupedEntries = groupBy(timesheet, (e) => e.date)
 
-      return dates.map((day) => {
-        const payloadDate = weekDays?.days.find((weekDay) => weekDay.day === day.toISODate())
-        return {
-          ...payloadDate,
-          day: payloadDate?.day ?? day.toISODate(),
-          totalMinutes: payloadDate?.totalMinutes ?? 0,
-        }
-      })
+      return dates.map((day) => ({
+        weekDay: day.toISODate(),
+        dailyDuration: sumBy(groupedEntries[day.toISODate()], (e) => e.durationMinutes),
+        timeEntries: groupedEntries[day.toISODate()],
+      }))
     }
-  }, [weekDays, timesheet])
+  }, [timesheet, startDate, endDate])
 
-  const selectedDay = week?.find((weekDay) => weekDay.day === timesheet.selectedDay)
+  const selectedDay = formattedWeek?.find((weekDay) => weekDay.weekDay === selectedDate)
+
+  const insights = useMemo(() => {
+    const dayEntries = cloneDeep(selectedDay?.timeEntries ?? [])
+    if (timer) {
+      dayEntries?.map((entry) => {
+        if (entry.id === timer.id) {
+          entry.durationMinutes = timer.durationMinutes ?? 0
+        }
+
+        return entry
+      }) ?? []
+    }
+
+    const groupedEntries = groupBy(dayEntries, (e) =>
+      e.task.isBillable ? 'billable' : 'nonBillable',
+    )
+
+    return {
+      billableDuration: sumBy(groupedEntries['billable'], (e) => e.durationMinutes) ?? 0,
+      unbillableDuration: sumBy(groupedEntries['nonBillable'], (e) => e.durationMinutes) ?? 0,
+      dailyDuration: sumBy(dayEntries, (e) => e.durationMinutes) ?? 0,
+      weeklyDuration: sumBy(timesheet, (e) => e.durationMinutes) ?? 0,
+    }
+  }, [timesheet, selectedDate, timer])
 
   return (
     <Page>
@@ -121,20 +148,17 @@ export const TimerPage = (): JSX.Element => {
         <TimesheetPeriod />
 
         <Card className="p-0 min-h-[800px]">
-          <div className="max-w-[1115px]">
+          <div className="flex justify-between items-end max-w-[1000px] pt-6 px-6">
             <WeekDaySelect />
           </div>
 
           {/* Times */}
           <div className="bg-gray-20 py-[6px] lg:py-2">
-            <div className="max-w-[1115px] px-6 flex justify-between items-center">
-              {week?.map((weekDay) => (
-                <div
-                  key={`time-period-${weekDay.day}`}
-                  className="w-[56px] sm:w-[64px] md:w-[80px] lg:w-[90px] px-1"
-                >
+            <div className="flex justify-between items-center max-w-[1000px] px-6">
+              {formattedWeek?.map((weekDay) => (
+                <div key={weekDay.weekDay} className="px-1">
                   <span className="font-medium text-xs md:text-sm lg:text-base text-gray-70">
-                    {formatMinutesToHourMinutes(weekDay.totalMinutes ?? 0)}
+                    {formatMinutesToHourMinutes(weekDay.dailyDuration ?? 0)}
                   </span>
                 </div>
               ))}
@@ -151,7 +175,7 @@ export const TimerPage = (): JSX.Element => {
               contentRight={
                 <div className="whitespace-nowrap font-semibold text-gray-100 text-lg">
                   <FormatDateTime
-                    value={DateTime.fromISO(selectedDay?.day ?? '')}
+                    value={DateTime.fromISO(selectedDate ?? '')}
                     format="LLLL dd, yyyy"
                   />
                 </div>
@@ -159,15 +183,21 @@ export const TimerPage = (): JSX.Element => {
             />
           </div>
 
-          <div className="p-6 space-y-2 md:max-w-[800px]">
-            {selectedDay?.entries?.map((entry) => (
-              <TimeEntryCard
-                key={entry.id}
-                entry={entry}
-                onToggle={handleTracking}
-                onManage={(id) => setTimeEntryId(id)}
-              />
-            ))}
+          <div className="grid grid-cols-12 p-6">
+            <div className="space-y-2 col-span-12 lg:col-span-7">
+              {selectedDay?.timeEntries?.map((entry) => (
+                <TimeEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  onToggle={handleTracking}
+                  onManage={(id) => setTimeEntryId(id)}
+                />
+              ))}
+            </div>
+
+            <div className="hidden lg:block lg:col-span-5">
+              <TimesheetDayInsights value={insights} />
+            </div>
           </div>
         </Card>
       </PageContent>

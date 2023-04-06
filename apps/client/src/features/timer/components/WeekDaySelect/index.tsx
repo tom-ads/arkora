@@ -31,7 +31,7 @@ export const WeekDaySelect = (): JSX.Element => {
   }, [timesheet.startDate, timesheet.endDate, timesheet.selectedDay])
 
   return (
-    <div className="flex justify-between px-6 pt-6 max-w-[1100px]]">
+    <>
       {weekDays?.map((weekDay) => (
         <button
           type="button"
@@ -64,6 +64,6 @@ export const WeekDaySelect = (): JSX.Element => {
           </p>
         </button>
       ))}
-    </div>
+    </>
   )
 }

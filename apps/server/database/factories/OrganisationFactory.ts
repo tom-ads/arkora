@@ -14,7 +14,8 @@ export default Factory.define(Organisation, ({ faker }) => {
     subdomain: 'test-org',
     openingTime: DateTime.now().set({ hour: 9, minute: 0, second: 0 }),
     closingTime: DateTime.now().set({ hour: 17, minute: 0, second: 0 }),
-    defaultRate: parseInt(faker.random.numeric(4), 10),
+    defaultRate: 10000,
+    breakDuration: 30,
   }
 })
   .relation('users', () => UserFactory)

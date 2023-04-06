@@ -1,15 +1,31 @@
+import TimeEntry from '@/types/models/TimeEntry'
 import appApi from 'api'
-import { GetTimesheetRequest } from './types/request'
+import { GetTimesheetRequest, GetTimesheetsRequest } from './types/request'
 import { GetTimesheetResponse } from './types/response'
 
 const timesheetBasePath = '/timesheets'
 
 const timesheetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
-    getTimesheet: build.query<GetTimesheetResponse, GetTimesheetRequest>({
+    getTimesheet: build.query<TimeEntry[], GetTimesheetRequest>({
+      query: (params) => ({
+        url: `${timesheetBasePath}/${params.userId}`,
+        params: {
+          start_date: params.startDate,
+          end_date: params.endDate,
+          user: params.userId,
+        },
+      }),
+      providesTags: ['TimeEntries', 'TimeEntry'],
+    }),
+
+    getTimesheets: build.query<GetTimesheetResponse, GetTimesheetsRequest>({
       query: (params) => ({
         url: timesheetBasePath,
-        params,
+        params: {
+          start_date: params.startDate,
+          end_date: params.endDate,
+        },
       }),
       providesTags: ['TimeEntries'],
     }),
@@ -17,4 +33,4 @@ const timesheetEndpoints = appApi.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useGetTimesheetQuery } = timesheetEndpoints
+export const { useGetTimesheetsQuery, useGetTimesheetQuery } = timesheetEndpoints

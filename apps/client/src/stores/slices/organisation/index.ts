@@ -9,27 +9,35 @@ const organisationState = createSlice({
   initialState,
   reducers: {
     setOrganisation: (currentState, action: PayloadAction<Partial<Organisation>>) => {
+      currentState.id = action.payload.id
       currentState.name = action.payload.name
       currentState.subdomain = action.payload.subdomain
       currentState.openingTime = action.payload.openingTime
       currentState.closingTime = action.payload.closingTime
+      currentState.breakDuration = action.payload.breakDuration
       currentState.currency = action.payload.currency
       currentState.defaultRate = action.payload.defaultRate
-      currentState.workDays = action.payload.workDays
+      currentState.businessDays = action.payload.businessDays
+      currentState.commonTasks = action.payload.commonTasks
+      currentState.createdAt = action.payload.createdAt
     },
 
     clearOrganisation: (currentState) => {
+      currentState.id = undefined
       currentState.name = undefined
       currentState.subdomain = undefined
       currentState.openingTime = undefined
       currentState.closingTime = undefined
-      currentState.workDays = []
+      currentState.breakDuration = undefined
+      currentState.businessDays = []
+      currentState.commonTasks = []
       currentState.currency = {
         code: 'GBP',
         name: 'Great Brtish Pounds',
         symbol: '£',
       }
       currentState.defaultRate = undefined
+      currentState.createdAt = undefined
     },
   },
 })

@@ -43,7 +43,7 @@ export default class AuthController {
 
     const [currency, weekDays] = await Promise.all([
       Currency.findByOrFail('code', organisation.currency),
-      WorkDay.query().withScopes((scopes) => scopes.workDayNames(organisation.work_days)),
+      WorkDay.query().withScopes((scopes) => scopes.workDayNames(organisation.business_days)),
     ])
 
     // Create organisation and relations
@@ -54,7 +54,7 @@ export default class AuthController {
         subdomain: organisation.subdomain,
         openingTime: organisation.opening_time,
         closingTime: organisation.closing_time,
-        defaultRate: organisation.hourly_rate,
+        defaultRate: organisation.default_rate,
       })
 
       await Promise.all([
@@ -141,10 +141,16 @@ export default class AuthController {
 
     await ctx.auth.login(user)
 
+    const activeTimer = await ctx.auth.user!.getActiveTimer()
+    if (activeTimer) {
+      const diffMinutes = timerDifference(activeTimer.lastStartedAt)
+      activeTimer.durationMinutes += diffMinutes
+    }
+
     return {
       user: user.serialize(),
       organisation: organisation?.serialize(),
-      timer: await ctx.auth.user!.getActiveTimer(),
+      timer: activeTimer?.serialize(),
     }
   }
 
@@ -161,7 +167,7 @@ export default class AuthController {
   }
 
   public async session(ctx: HttpContextContract) {
-    await ctx.auth.user?.load('organisation')
+    const organisation = await Organisation.findOrFail(ctx.auth.user?.organisationId)
 
     /* 
       Active timer could've been running while the user left their
@@ -176,9 +182,9 @@ export default class AuthController {
     }
 
     return {
-      user: ctx.auth.user,
-      organisation: ctx.auth.user?.organisation,
-      timer: activeTimer,
+      user: ctx.auth.user?.serialize(),
+      organisation: organisation.serialize(),
+      timer: activeTimer?.serialize(),
     }
   }
 

@@ -34,13 +34,14 @@ export default class OrganisationValidator {
       }),
       // TODO: check for reserved words, ie. Arkora/arkora
     ]),
-    work_days: schema
+    business_days: schema
       .array([rules.minLength(1), rules.maxLength(7), rules.workDays()])
       .members(schema.string()),
     opening_time: schema.date({ format: 'iso' }, [rules.beforeField('closing_time')]),
     closing_time: schema.date({ format: 'iso' }, [rules.afterField('opening_time')]),
     currency: schema.string([rules.currencyCode()]),
-    hourly_rate: schema.number([rules.range(0, maxHourlyRate)]),
+    break_duration: schema.number(),
+    default_rate: schema.number([rules.range(0, maxHourlyRate)]),
   })
 
   /**
