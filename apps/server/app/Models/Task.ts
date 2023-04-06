@@ -63,6 +63,7 @@ export default class Task extends BaseModel {
       })
       .where('tasks.budget_id', budgetId)
       .groupBy('tasks.id')
+      .orderBy('tasks.name')
 
     return result
   }
