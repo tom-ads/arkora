@@ -2,7 +2,7 @@ import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { maxHourlyRate } from 'Config/app'
 
-export default class OrganisationValidator {
+export default class UpdateOrganisationValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -25,22 +25,21 @@ export default class OrganisationValidator {
    *    ```
    */
   public schema = schema.create({
-    name: schema.string({ trim: true }),
-    subdomain: schema.string([
-      rules.regex(/^[a-z-]+$/),
-      rules.unique({
-        table: 'organisations',
-        column: 'subdomain',
-      }),
-      // TODO: check for reserved words, ie. Arkora/arkora
-    ]),
-    business_days: schema
-      .array([rules.minLength(1), rules.maxLength(7), rules.workDays()])
-      .members(schema.string()),
+    name: schema.string(),
     opening_time: schema.date({ format: 'iso' }, [rules.beforeField('closing_time')]),
     closing_time: schema.date({ format: 'iso' }, [rules.afterField('opening_time')]),
     currency: schema.string([rules.currencyCode()]),
     default_rate: schema.number([rules.range(0, maxHourlyRate)]),
+    break_duration: schema.number(),
+    business_days: schema
+      .array([rules.minLength(1), rules.maxLength(7), rules.workDays()])
+      .members(schema.string()),
+    default_tasks: schema.array([rules.distinct('name')]).members(
+      schema.object().members({
+        name: schema.string(),
+        is_billable: schema.boolean(),
+      })
+    ),
   })
 
   /**
@@ -55,26 +54,16 @@ export default class OrganisationValidator {
    *
    */
   public messages: CustomMessages = {
-    'name.required': 'Name is required',
+    'firstname.required': 'Firstname is required',
 
-    'subdomain.required': 'Subdomain is required',
-    'subdomain.unique': 'Subdomain already taken',
-    'subdomain.regex': 'Invalid subdomain, can only have letters and hyphens',
+    'lastname.required': 'Lastname is required',
 
-    'work_days.required': 'Work days are required',
-    'work_days.enum': 'Invalid weekday',
-    'work_days.minLength': '1 work day required',
-    'work_days.maxLength': 'Can only have 7 work days per week',
+    'email.required': 'Email is required',
+    'email.email': 'Not a valid email address',
 
-    'opening_time.required': 'Opening time is required',
-    'opening_time.beforeField': 'Opening time must be before the closing time',
+    'password.required': 'Password is required',
+    'password.password': 'Password requirements not met',
 
-    'closing_time.required': 'Closing time is required',
-    'closing_time.afterField': 'Closing time must be after the opening time',
-
-    'currency.required': 'Currency is required',
-
-    'hourly_rate.required': 'Hourly rate is required',
-    'hourly_rate.range': 'Hourly rate must be between 0 and 20000',
+    'password_confirmation.required': 'Confirm password is required',
   }
 }

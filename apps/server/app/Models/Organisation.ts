@@ -7,6 +7,7 @@ import {
   BelongsTo,
   belongsTo,
   column,
+  computed,
   HasMany,
   hasMany,
   HasManyThrough,
@@ -53,7 +54,7 @@ type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 export default class Organisation extends BaseModel {
   // Columns
 
-  @column({ isPrimary: true, serializeAs: null })
+  @column({ isPrimary: true })
   public id: number
 
   @column({ serializeAs: null })
@@ -78,20 +79,30 @@ export default class Organisation extends BaseModel {
   public closingTime: DateTime
 
   @column()
+  public breakDuration: number
+
+  @column()
   public defaultRate: number
 
-  @column.dateTime({ serializeAs: null, autoCreate: true })
+  @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ serializeAs: null, autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  // Computed
+
+  @computed({ serializeAs: 'business_days' })
+  public get businessDays() {
+    return this.workDays?.map((day) => day.name) ?? []
+  }
 
   // Relationships
 
   @hasMany(() => User, { serializeAs: null })
   public users: HasMany<typeof User>
 
-  @hasMany(() => CommonTask)
+  @hasMany(() => CommonTask, { serializeAs: 'common_tasks' })
   public commonTasks: HasMany<typeof CommonTask>
 
   @hasMany(() => Client)
@@ -103,6 +114,7 @@ export default class Organisation extends BaseModel {
   @manyToMany(() => WorkDay, {
     pivotTable: 'organisation_work_days',
     pivotRelatedForeignKey: 'workday_id',
+    serializeAs: null,
   })
   public workDays: ManyToMany<typeof WorkDay>
 
@@ -114,7 +126,7 @@ export default class Organisation extends BaseModel {
   @beforeFind()
   @beforeFetch()
   public static preloadRelations(query: OrganisationBuilder) {
-    query.preload('currency').preload('workDays')
+    query.preload('currency').preload('workDays').preload('commonTasks')
   }
 
   // Instance Methods
