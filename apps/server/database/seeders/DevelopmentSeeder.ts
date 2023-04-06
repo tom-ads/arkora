@@ -2,6 +2,7 @@ import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 import BillableKind from 'App/Enum/BillableKind'
 import UserRole from 'App/Enum/UserRole'
 import CommonTask from 'App/Models/CommonTask'
+import Currency from 'App/Models/Currency'
 import Role from 'App/Models/Role'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 import { getBillableTypes } from './BillableType'
@@ -55,9 +56,17 @@ export default class extends BaseSeeder {
       }),
     ])
 
-    const workDays = await getWorkDays()
-    await organisation.related('workDays').attach(workDays.map((day) => day.id))
+    // Assign default work days
+    const defaultWorkDays = await getWorkDays(true)
+    await organisation.related('workDays').attach(defaultWorkDays.map((day) => day.id))
 
+    // Assign default currency to organisation
+    const gbpCurrency = await Currency.findBy('code', 'GBP')
+    if (gbpCurrency) {
+      await organisation.related('currency').associate(gbpCurrency!)
+    }
+
+    // Assign default tasks to organisation
     const organisationTasks = await this.createCommonTasks(organisation.id)
 
     // Load projects and budgets
