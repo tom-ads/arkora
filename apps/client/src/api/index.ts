@@ -1,4 +1,4 @@
-import { transformResponse } from '@/helpers/transform'
+import { transformRequest, transformResponse } from '@/helpers/transform'
 import { clearAuth } from '@/stores/slices/auth'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
@@ -32,6 +32,16 @@ const rootQuery = fetchBaseQuery({
 })
 
 const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) => {
+  if (typeof args === 'object') {
+    if (args?.params) {
+      args.params = transformRequest(args.params)
+    }
+
+    if (args.body) {
+      args.body = transformRequest(args.body)
+    }
+  }
+
   const result = await rootQuery(args, api, extraOptions)
 
   // Logout if response is 401
