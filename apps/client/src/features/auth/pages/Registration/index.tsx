@@ -1,4 +1,4 @@
-import { DetailsView, OrganisationsView, TeamView } from '../../components/Registration'
+import { DetailsView, OrganisationsView, TeamView } from './../../components'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/stores/store'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -10,20 +10,17 @@ const registrationViews = {
     id: 0,
     title: 'Your details',
     description: 'Let’s get started! We need to collect some details and setup your account',
-    view: <DetailsView />,
   },
   organisation: {
     id: 1,
     title: 'Create organisation',
     description:
       'Let’s setup your organisation. It’ll be home to everything your team does on Arkora',
-    view: <OrganisationsView />,
   },
   team: {
     id: 2,
     title: 'Invite the team',
     description: 'Almost there! Start early and invite the team, or do it later!',
-    view: <TeamView />,
   },
 }
 
@@ -56,7 +53,9 @@ export const RegistrationPage = (): JSX.Element => {
 
           <HorizontalDivider />
 
-          {activeView.view}
+          {step === 'details' && <DetailsView />}
+          {step === 'organisation' && <OrganisationsView />}
+          {step === 'team' && <TeamView />}
         </div>
       </div>
     </div>

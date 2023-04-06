@@ -23,6 +23,7 @@ interface RegisterOrganisation {
   closingTime: string
   currency: CurrencyCode
   defaultRate: number | null
+  breakDuration: string | null
 }
 
 interface RegisterTeamMember {
@@ -56,7 +57,8 @@ const initialState: RegistrationState = JSON.parse(
     "openingTime": "",
     "closingTime": "",
     "currency": "GBP",
-    "defaultRate": null
+    "defaultRate": null,
+    "durationBreak": null
   },
   "team": []
 }`,
@@ -89,6 +91,7 @@ const registrationSlice = createSlice({
       currentState.organisation.closingTime = action.payload.closingTime
       currentState.organisation.currency = action.payload.currency
       currentState.organisation.defaultRate = action.payload.defaultRate
+      currentState.organisation.breakDuration = action.payload.breakDuration
 
       localStorage.setItem('registration', JSON.stringify(currentState))
     },
@@ -117,6 +120,7 @@ const registrationSlice = createSlice({
         closingTime: '',
         currency: 'GBP',
         defaultRate: null,
+        breakDuration: null,
       }
       currentState.team = []
 

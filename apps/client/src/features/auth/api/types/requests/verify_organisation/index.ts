@@ -9,6 +9,7 @@ type VerifyOrganisationRequest = {
   businessDays: WeekDay[]
   currency: CurrencyCode
   defaultRate: number
+  breakDuration: number
 }
 
 export default VerifyOrganisationRequest

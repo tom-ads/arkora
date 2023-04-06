@@ -40,6 +40,7 @@ export default class OrganisationValidator {
     opening_time: schema.date({ format: 'iso' }, [rules.beforeField('closing_time')]),
     closing_time: schema.date({ format: 'iso' }, [rules.afterField('opening_time')]),
     currency: schema.string([rules.currencyCode()]),
+    break_duration: schema.number(),
     default_rate: schema.number([rules.range(0, maxHourlyRate)]),
   })
 
