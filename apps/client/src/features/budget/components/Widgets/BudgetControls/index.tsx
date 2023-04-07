@@ -30,6 +30,13 @@ export const BudgetControlsWidget = (): JSX.Element => {
             >
               Tasks
             </TabItem>
+            <TabItem
+              size="md"
+              isActive={selectedTab === 'members'}
+              onClick={() => handleSelectedTab('members')}
+            >
+              Members
+            </TabItem>
           </TabGroup>
 
           <Button
@@ -39,6 +46,7 @@ export const BudgetControlsWidget = (): JSX.Element => {
             block
           >
             {selectedTab === 'tasks' && <span>Create Task</span>}
+            {selectedTab === 'members' && <span>Assign Members</span>}
           </Button>
         </div>
 

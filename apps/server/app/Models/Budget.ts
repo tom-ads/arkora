@@ -299,7 +299,18 @@ export default class Budget extends BaseModel {
       .orderBy('budgets.name')
   })
 
-  // Methods - Static
+  // Instance Methods
+
+  public async getMetricsForMembers(this: Budget) {
+    const result = await this.related('members')
+      .query()
+      .withScopes((scope) => scope.userInsights({ budgets: [this.id] }))
+      .orderBy('users.lastname')
+
+    return result
+  }
+
+  // Static methods
 
   /*
     This method returns a total_spent field for each specified budget, where each budget can have
