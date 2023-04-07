@@ -1,14 +1,17 @@
 import Route from '@ioc:Adonis/Core/Route'
 
+// Budgets
 Route.group(() => {
   Route.get('/', 'BudgetController.index')
   Route.post('/', 'BudgetController.create')
 
+  // Budget
   Route.group(() => {
     Route.get('/', 'BudgetController.view')
     Route.delete('/', 'BudgetController.delete')
     Route.put('/', 'BudgetController.update')
 
+    // Budget Tasks
     Route.group(() => {
       Route.get('/', 'BudgetTaskController.index')
       Route.post('/', 'BudgetTaskController.create')
@@ -21,6 +24,18 @@ Route.group(() => {
         .prefix(':taskId')
         .where('tasks', Route.matchers.number())
     }).prefix('/tasks')
+
+    // Budget Members
+    Route.group(() => {
+      Route.get('/', 'BudgetMemberController.index')
+      Route.post('/', 'BudgetMemberController.create')
+
+      Route.group(() => {
+        Route.delete('/', 'BudgetMemberController.delete')
+      })
+        .prefix(':userId')
+        .where('users', Route.matchers.number())
+    }).prefix('/members')
   })
     .prefix(':budgetId')
     .where('budget', Route.matchers.number())
