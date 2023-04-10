@@ -62,10 +62,7 @@ export const ManageTimeEntryModal = ({
         .unwrap()
         .then(() => successToast('Entry has been updated'))
         .catch((error) => {
-          if (error.status === 422) {
-            return
-          }
-
+          if (error.status === 422) return
           errorToast('Unable to update entry, please try again later.')
         })
 

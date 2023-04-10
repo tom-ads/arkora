@@ -4,11 +4,12 @@ import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useGetBudgetQuery } from '../../api'
-import { BudgetMemberView, BudgetTaskView } from '../../components/Views'
+import { BudgetMemberView, BudgetTaskView, BudgetTimeView } from '../../components/Views'
 import { BudgetControlsWidget } from '../../components/Widgets/BudgetControls'
 
 const views = {
   tasks: <BudgetTaskView />,
+  time: <BudgetTimeView />,
   members: <BudgetMemberView />,
 }
 
