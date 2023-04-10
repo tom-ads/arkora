@@ -1,13 +1,23 @@
 import { User } from '@/types'
 import appApi from 'api'
-import { CreateBudgetMembersRequest } from './types/requests'
+import {
+  CreateBudgetMembersRequest,
+  DeleteBudgetMemberRequest,
+  GetBudgetMembersRequest,
+} from './types/requests'
 
 const budgetMembersBasePath = '/budgets'
 
 const budgetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
-    getBudgetMembers: build.query<User[], number | string>({
-      query: (budgetId) => `${budgetMembersBasePath}/${budgetId}/members`,
+    getBudgetMembers: build.query<User[], GetBudgetMembersRequest>({
+      query: ({ budgetId, ...params }) => ({
+        url: `${budgetMembersBasePath}/${budgetId}/members`,
+        params: {
+          ...(params.search && { search: params.search }),
+        },
+      }),
+      providesTags: ['BudgetMembers'],
     }),
 
     createBudgetMember: build.mutation<User, CreateBudgetMembersRequest>({
@@ -16,9 +26,22 @@ const budgetEndpoints = appApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['BudgetMembers'],
+    }),
+
+    deleteBudgetMember: build.mutation<void, DeleteBudgetMemberRequest>({
+      query: ({ budgetId, memberId }) => ({
+        url: `${budgetMembersBasePath}/${budgetId}/members/${memberId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['BudgetMembers', 'BudgetMember'],
     }),
   }),
   overrideExisting: false,
 })
 
-export const { useGetBudgetMembersQuery, useCreateBudgetMemberMutation } = budgetEndpoints
+export const {
+  useGetBudgetMembersQuery,
+  useCreateBudgetMemberMutation,
+  useDeleteBudgetMemberMutation,
+} = budgetEndpoints

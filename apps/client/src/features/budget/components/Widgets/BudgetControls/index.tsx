@@ -1,4 +1,5 @@
 import { Button, HorizontalDivider, TabGroup, TabItem } from '@/components'
+import { AssignBudgetMemberModal } from '@/features/budget_members'
 import { BudgetTab, setFilters } from '@/stores/slices/filters/budgets'
 import { RootState } from '@/stores/store'
 import { useState } from 'react'
@@ -52,13 +53,16 @@ export const BudgetControlsWidget = (): JSX.Element => {
 
         <HorizontalDivider />
 
-        <div className="px-5 pt-4 h-[58px]">
-          {/* {selectedTab === 'tasks' && <ProjectTimeEntryFilters />} */}
-        </div>
+        <div className="px-5 pt-4 h-[58px]"></div>
       </div>
 
       <CreateBudgetTaskModal
         isOpen={openActionModal && selectedTab === 'tasks'}
+        onClose={() => setOpenActionModal(false)}
+      />
+
+      <AssignBudgetMemberModal
+        isOpen={openActionModal && selectedTab === 'members'}
         onClose={() => setOpenActionModal(false)}
       />
     </>

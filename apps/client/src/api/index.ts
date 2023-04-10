@@ -68,6 +68,8 @@ const appApi = createApi({
     'Budget',
     'BudgetTasks',
     'BudgetTask',
+    'BudgetMembers',
+    'BudgetMember',
     'Members',
     'Member',
     'ProjectMembers',

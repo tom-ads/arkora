@@ -21,9 +21,10 @@ export const BudgetMembersTable = ({ onDelete }: TableProps): JSX.Element => {
 
   const { data: budget } = useGetBudgetQuery(budgetId!, { skip: !budgetId })
 
-  const { data: members, isLoading: loadingMembers } = useGetBudgetMembersQuery(budgetId!, {
-    skip: !budgetId,
-  })
+  const { data: members, isLoading: loadingMembers } = useGetBudgetMembersQuery(
+    { budgetId: budgetId! },
+    { skip: !budgetId },
+  )
 
   return (
     <TableContainer

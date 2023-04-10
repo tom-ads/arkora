@@ -3,13 +3,16 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Budget from 'App/Models/Budget'
 import User from 'App/Models/User'
 import CreateBudgetMemberValidator from 'App/Validators/BudgetMember/CreateMemberValidator'
+import GetBudgetMembersValidator from 'App/Validators/BudgetMember/GetMembersValidator'
 
 export default class BudgetMemberController {
   @bind()
   public async index(ctx: HttpContextContract, budget: Budget) {
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-    const budgetMembers = await budget.getMetricsForMembers()
+    const payload = await ctx.request.validate(GetBudgetMembersValidator)
+
+    const budgetMembers = await budget.getMetricsForMembers(payload)
 
     return budgetMembers.map((member) => member.serialize())
   }
