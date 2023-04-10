@@ -33,6 +33,13 @@ export const BudgetControlsWidget = (): JSX.Element => {
             </TabItem>
             <TabItem
               size="md"
+              isActive={selectedTab === 'time'}
+              onClick={() => handleSelectedTab('time')}
+            >
+              Time
+            </TabItem>
+            <TabItem
+              size="md"
               isActive={selectedTab === 'members'}
               onClick={() => handleSelectedTab('members')}
             >
@@ -40,15 +47,17 @@ export const BudgetControlsWidget = (): JSX.Element => {
             </TabItem>
           </TabGroup>
 
-          <Button
-            size="xs"
-            onClick={() => setOpenActionModal(true)}
-            className="min-h-[36px] py-0 mb-2 text-[14px] -translate-y-1 max-w-[180px]"
-            block
-          >
-            {selectedTab === 'tasks' && <span>Create Task</span>}
-            {selectedTab === 'members' && <span>Assign Members</span>}
-          </Button>
+          {selectedTab !== 'time' && (
+            <Button
+              size="xs"
+              onClick={() => setOpenActionModal(true)}
+              className="min-h-[36px] py-0 mb-2 text-[14px] -translate-y-1 max-w-[180px]"
+              block
+            >
+              {selectedTab === 'tasks' && <span>Create Task</span>}
+              {selectedTab === 'members' && <span>Assign Members</span>}
+            </Button>
+          )}
         </div>
 
         <HorizontalDivider />

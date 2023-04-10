@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
-export type BudgetTab = 'tasks' | 'members'
+export type BudgetTab = 'tasks' | 'time' | 'members'
 
 interface BudgetFilterState {
   tab: BudgetTab
