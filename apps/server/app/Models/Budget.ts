@@ -31,6 +31,10 @@ type BudgetFilters = Partial<{
   page: number
 }>
 
+type MemberFilters = Partial<{
+  search: string
+}>
+
 type BudgetBuilder = ModelQueryBuilderContract<typeof Budget>
 
 export default class Budget extends BaseModel {
@@ -301,10 +305,15 @@ export default class Budget extends BaseModel {
 
   // Instance Methods
 
-  public async getMetricsForMembers(this: Budget) {
+  public async getMetricsForMembers(this: Budget, filters?: MemberFilters) {
     const result = await this.related('members')
       .query()
       .withScopes((scope) => scope.userInsights({ budgets: [this.id] }))
+      .if(filters?.search, (query) => {
+        query
+          .whereILike('users.firstname', `%${filters!.search!}%`)
+          .orWhereILike('users.lastname', `%${filters!.search!}%`)
+      })
       .orderBy('users.lastname')
 
     return result

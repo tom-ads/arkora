@@ -75,7 +75,7 @@ export const TimeEntriesRow = ({ value, onManage }: RowProps): JSX.Element => {
       <TableData>
         <div
           className={classNames('w-7 h-7 grid place-content-center rounded-full shrink-0 mx-auto', {
-            'bg-green-10': !value?.isBillable,
+            'bg-green-10': value?.isBillable,
             'bg-red-10': !value?.isBillable,
           })}
         >

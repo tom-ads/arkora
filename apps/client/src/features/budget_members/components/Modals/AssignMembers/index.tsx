@@ -1,53 +1,53 @@
 import { Button } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
-import { useGetAccountsQuery } from '@/features/account'
-import {
-  useCreateProjectMembersMutation,
-  useGetProjectMembersQuery,
-} from '@/features/project_members'
+import { useCreateBudgetMemberMutation, useGetBudgetMembersQuery } from './../../../api'
 import { AssignMembersFields, AssignMembersForm } from '@/features/team'
 import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
 import { differenceBy } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useGetBudgetQuery } from '@/features/budget'
+import { useGetProjectMembersQuery } from '@/features/project_members'
 
-export const AssignProjectMemberModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Element => {
+export const AssignBudgetMemberModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Element => {
   const [debouncedSearch, setDebouncedSearch] = useState<string | null>(null)
 
-  const { projectId } = useParams()
+  const { budgetId } = useParams()
 
   const { successToast, errorToast } = useToast()
 
-  const [assignProjectMembers, { isLoading: assigningMembers }] = useCreateProjectMembersMutation()
+  const [assignMembers] = useCreateBudgetMemberMutation()
 
-  const { data: organisationMembers } = useGetAccountsQuery(
-    { search: debouncedSearch, status: 'INVITE_ACCEPTED' },
-    { skip: !projectId },
-  )
+  const { data: budget } = useGetBudgetQuery(budgetId!, { skip: !budgetId })
 
   const { data: projectMembers } = useGetProjectMembersQuery(
-    { projectId: projectId!, search: debouncedSearch },
-    { skip: !projectId },
+    { projectId: budget?.projectId as number, search: debouncedSearch },
+    { skip: !budget?.projectId },
+  )
+
+  const { data: budgetMembers } = useGetBudgetMembersQuery(
+    { budgetId: budgetId! },
+    { skip: !budgetId },
   )
 
   const onSubmit = async (data: AssignMembersFields) => {
-    if (projectId) {
-      await assignProjectMembers({
-        projectId,
+    if (budgetId) {
+      await assignMembers({
+        budgetId,
         members: data.members.map((member) => member.id),
       })
         .unwrap()
-        .then(() => successToast('Project members have been assigned'))
-        .catch(() => errorToast('Unable to assign project members, please try again later'))
+        .then(() => successToast('Budget members have been assigned'))
+        .catch(() => errorToast('Unable to assign budget members, please try again later'))
 
       onClose()
     }
   }
 
   const unassignedMembers = useMemo(() => {
-    return differenceBy(organisationMembers ?? [], projectMembers ?? [], 'id')
-  }, [organisationMembers, projectMembers])
+    return differenceBy(projectMembers ?? [], budgetMembers ?? [], 'id')
+  }, [projectMembers, budgetMembers])
 
   return (
     <Modal title="Assign Members" isOpen={isOpen} onClose={onClose} className="max-w-[600px]">
@@ -57,10 +57,10 @@ export const AssignProjectMemberModal = ({ isOpen, onClose }: ModalBaseProps): J
         value={unassignedMembers ?? []}
       >
         <ModalFooter>
-          <Button variant="blank" onClick={onClose} disabled={assigningMembers}>
+          <Button variant="blank" onClick={onClose}>
             Cancel
           </Button>
-          <Button size="xs" type="submit" loading={assigningMembers}>
+          <Button size="xs" type="submit">
             Assign Members
           </Button>
         </ModalFooter>

@@ -1,15 +1,5 @@
-import {
-  Button,
-  CrossIcon,
-  DoubleProgressLineIndicator,
-  SkeletonBox,
-  TableData,
-  TableRow,
-  TickIcon,
-  ToolTip,
-} from '@/components'
+import { Button, CrossIcon, SkeletonBox, TableData, TableRow, TickIcon } from '@/components'
 import { SkeletonCircle } from '@/components/Skeletons/Circle'
-import { calculatePercentage } from '@/helpers/currency'
 import { formatMinutesToHourMinutes } from '@/helpers/date'
 import Task from '@/types/models/Task'
 import { TableRowBaseProps } from '@/types/TableRow'
@@ -32,39 +22,6 @@ export const BudgetTaskRow = ({ value, onManage }: TasksRowProps): JSX.Element =
 
       <TableData>
         {formatMinutesToHourMinutes(value.billableDuration + value.unbillableDuration)}
-      </TableData>
-
-      <TableData>
-        <ToolTip
-          width={262}
-          trigger={
-            <DoubleProgressLineIndicator
-              leftPercent={calculatePercentage(
-                value.billableDuration,
-                value.billableDuration + value.unbillableDuration,
-              )}
-              rightPercent={calculatePercentage(
-                value.unbillableDuration,
-                value.billableDuration + value.unbillableDuration,
-              )}
-            />
-          }
-        >
-          <div className="divide-y divide-gray-40 divide-dashed">
-            <div className="flex justify-between items-center py-1">
-              <p className="font-medium text-xs text-green-90">Billable</p>
-              <p className="font-semibold text-xs text-gray-80">
-                {formatMinutesToHourMinutes(value.billableDuration)}
-              </p>
-            </div>
-            <div className="flex justify-between items-center py-1">
-              <p className="font-medium text-xs text-red-90">Non-Billable</p>
-              <p className="font-semibold text-xs text-gray-80">
-                {formatMinutesToHourMinutes(value.unbillableDuration)}
-              </p>
-            </div>
-          </div>
-        </ToolTip>
       </TableData>
 
       <TableData>
@@ -97,10 +54,6 @@ export const BudgetTaskSkeletonRow = (): JSX.Element => {
 
       <TableData>
         <SkeletonBox height={20} width={100} />
-      </TableData>
-
-      <TableData>
-        <SkeletonBox height={20} width={170} />
       </TableData>
 
       <TableData>

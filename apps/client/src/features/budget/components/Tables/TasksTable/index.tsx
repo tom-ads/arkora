@@ -45,11 +45,10 @@ export const BudgetTasksTable = ({ onManage }: BudgetTasksTableProps): JSX.Eleme
           <Table>
             <TableHead>
               <TableRow>
-                <TableHeading className="w-[200px]" first>
+                <TableHeading className="w-[400px]" first>
                   NAME
                 </TableHeading>
-                <TableHeading className="w-[200px]">SPENT</TableHeading>
-                <TableHeading className="w-[150px]">BILLABLE / NON-BILLABLE</TableHeading>
+                <TableHeading className="w-[100px]">SPENT</TableHeading>
                 <TableHeading className="w-[100px]">BILLABLE</TableHeading>
                 <TableHeading className="w-[50px]" last></TableHeading>
               </TableRow>

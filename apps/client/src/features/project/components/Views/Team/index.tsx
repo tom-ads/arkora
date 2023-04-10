@@ -1,9 +1,9 @@
 import { MembersTable } from '../../Tables/MembersTable'
 import { ConfirmationModal } from '@/components/Modals'
 import { useState } from 'react'
-import { useDeleteProjectMemberMutation } from './../../../api'
 import { useParams } from 'react-router-dom'
 import { useToast } from '@/hooks/useToast'
+import { useDeleteProjectMemberMutation } from '@/features/project_members'
 
 export const ProjectTeamView = (): JSX.Element => {
   const [deleteId, setDeleteId] = useState<number | null>(null)
@@ -12,7 +12,7 @@ export const ProjectTeamView = (): JSX.Element => {
 
   const { successToast, errorToast } = useToast()
 
-  const [triggerDelete] = useDeleteProjectMemberMutation()
+  const [triggerDelete, { isLoading }] = useDeleteProjectMemberMutation()
 
   const handleDelete = async () => {
     if (projectId && deleteId) {
@@ -35,7 +35,7 @@ export const ProjectTeamView = (): JSX.Element => {
         onConfirm={handleDelete}
         title="You're about to remove a member"
         btnText="Remove Member"
-        loading={false}
+        loading={isLoading}
         description="Performing this action will permanently remove this member from the projects budgets and time entries will be deleted. It cannot be recovered."
       />
     </>

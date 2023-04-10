@@ -108,29 +108,22 @@ export default class BudgetController {
 
     const payload = await ctx.request.validate(UpdateBudgetValidator)
 
-    if (payload.name !== budget.name) {
-      budget.name = payload.name
-    }
-
-    if (payload.colour !== budget.colour) {
-      budget.colour = payload.colour
-    }
+    budget.merge({
+      name: payload.name,
+      colour: payload.colour,
+      fixedPrice: payload.fixed_price ?? null,
+      budget: payload.budget ?? null,
+      hourlyRate: payload.hourly_rate ?? null,
+    })
 
     if (payload.private !== budget.private) {
-      // TODO: remove members who aren't assigned?
+      await budget.load('project')
+      if (!payload.private) {
+        const projectMembers = await budget.project.related('members').query()
+        await budget.related('members').sync(projectMembers.map((member) => member.id))
+      }
+
       budget.private = payload.private
-    }
-
-    if (payload.fixed_price !== budget.fixedPrice) {
-      budget.fixedPrice = payload.fixed_price ?? null
-    }
-
-    if (payload.budget !== budget.budget) {
-      budget.budget = payload.budget
-    }
-
-    if (payload.hourly_rate !== budget.hourlyRate) {
-      budget.hourlyRate = payload.hourly_rate ?? null
     }
 
     if (payload.budget_type !== budget.budgetType?.name) {

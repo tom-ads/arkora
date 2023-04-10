@@ -7,10 +7,10 @@ import {
   TableRow,
   UserIcon,
 } from '@/components'
-import { useGetAccountsInsightsQuery } from '@/features/account'
 import { useGetProjectQuery } from './../../../api'
 import { useParams } from 'react-router-dom'
 import { MemberRow } from '../MemberRow'
+import { useGetProjectMembersQuery } from '@/features/project_members'
 
 type TableProps = {
   onDelete: (id: number) => void
@@ -21,8 +21,8 @@ export const MembersTable = ({ onDelete }: TableProps): JSX.Element => {
 
   const { data: project } = useGetProjectQuery(projectId!, { skip: !projectId })
 
-  const { data: accounts, isLoading } = useGetAccountsInsightsQuery(
-    { projectId },
+  const { data: projectMembers, isLoading: loadingMembers } = useGetProjectMembersQuery(
+    { projectId: projectId! },
     { skip: !projectId },
   )
 
@@ -30,7 +30,7 @@ export const MembersTable = ({ onDelete }: TableProps): JSX.Element => {
     <TableContainer
       className="min-h-[778px]"
       emptyState={{
-        isEmpty: !accounts?.length && !isLoading,
+        isEmpty: !projectMembers?.length && !loadingMembers,
         icon: <UserIcon />,
         title: 'No Members Assigned',
         description:
@@ -48,31 +48,14 @@ export const MembersTable = ({ onDelete }: TableProps): JSX.Element => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {accounts?.map((value) => (
+          {projectMembers?.map((member) => (
             <MemberRow
               onDelete={onDelete}
-              key={value.id}
-              value={value}
+              key={member.id}
+              value={member}
               isPrivate={project?.private ?? true}
             />
           ))}
-          {/* {isLoading ? (
-        <>
-          {Array.from({ length: 10 }).map((_, idx) => (
-            <BudgetSkeletonRow key={idx} />
-          ))}
-        </>
-      ) : (
-        <>
-          {projectBudgets?.map((budget) => (
-            <BudgetRow
-              key={budget.id}
-              value={budget}
-              onManage={(budgetId) => onManage(budgetId)}
-            />
-          ))}
-        </>
-      )} */}
         </TableBody>
       </Table>
     </TableContainer>

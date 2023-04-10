@@ -37,33 +37,36 @@ export default class TimerController {
 
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-    // Todo: prevent timers after a certain point
-
     const currentTimer = await ctx.auth.user!.getActiveTimer()
     if (currentTimer) {
       await currentTimer.stopTimer()
       ctx.logger.info(`Create Timer: stopped active timer for user(${ctx.auth.user!.id})`)
     }
 
-    const timeEntry = await ctx.auth.user!.related('timeEntries').create({
-      date: payload.date,
-      description: payload.description,
-      durationMinutes: payload?.duration_minutes ?? 0,
-      estimatedMinutes: payload?.estimated_minutes ?? 0,
-      lastStartedAt: DateTime.now(),
-      status: TimeSheetStatus.PENDING,
-    })
-    await Promise.all([
-      timeEntry.related('budget').associate(budget),
-      timeEntry.related('task').associate(task),
-    ])
-
-    ctx.logger.info(`Create Timer: created new time entry for user(${ctx.auth.user!.id})`)
+    let createdEntry: TimeEntry
+    try {
+      createdEntry = await ctx.auth.user!.related('timeEntries').create({
+        budgetId: budget.id,
+        taskId: task.id,
+        date: payload.date,
+        description: payload.description,
+        durationMinutes: payload?.duration_minutes ?? 0,
+        estimatedMinutes: payload?.estimated_minutes ?? 0,
+        lastStartedAt: DateTime.now(),
+        status: TimeSheetStatus.PENDING,
+      })
+      ctx.logger.info(`Create Timer: created new time entry for user(${ctx.auth.user!.id})`)
+    } catch (err) {
+      ctx.logger.info(
+        `Failed to create timer for user(${ctx.auth.user!.id}) due to: ${err.message}`
+      )
+      return ctx.response.internalServerError()
+    }
 
     return {
-      ...timeEntry?.serialize(),
+      ...createdEntry?.serialize(),
       last_stopped_at: null,
-      description: timeEntry.description ?? null,
+      description: createdEntry.description ?? null,
     }
   }
 

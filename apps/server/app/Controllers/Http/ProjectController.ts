@@ -55,7 +55,7 @@ export default class ProjectController {
       return ctx.response.internalServerError()
     }
 
-    await createdProject.assignProjectMembers(ctx.organisation!)
+    await createdProject.assignMembers(ctx.organisation!)
 
     return createdProject.serialize()
   }
@@ -190,7 +190,7 @@ export default class ProjectController {
 
   @bind()
   public async insights(_: HttpContextContract, project: Project) {
-    const insights = await project.getProjectInsights()
+    const insights = await project.getInsights()
 
     return {
       ...insights,
