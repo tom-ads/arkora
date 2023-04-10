@@ -1,7 +1,10 @@
 import { Button } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
 import { useGetAccountsQuery } from '@/features/account'
-import { useCreateProjectMemberMutation } from '@/features/project'
+import {
+  useCreateProjectMembersMutation,
+  useGetProjectMembersQuery,
+} from '@/features/project_members'
 import { AssignMembersFields, AssignMembersForm } from '@/features/team'
 import { useToast } from '@/hooks/useToast'
 import { ModalBaseProps } from '@/types'
@@ -16,21 +19,15 @@ export const AssignProjectMemberModal = ({ isOpen, onClose }: ModalBaseProps): J
 
   const { successToast, errorToast } = useToast()
 
-  const [assignProjectMembers] = useCreateProjectMemberMutation()
+  const [assignProjectMembers, { isLoading: assigningMembers }] = useCreateProjectMembersMutation()
 
-  const { data: members } = useGetAccountsQuery(
-    {
-      search: debouncedSearch,
-      status: 'INVITE_ACCEPTED',
-    },
+  const { data: organisationMembers } = useGetAccountsQuery(
+    { search: debouncedSearch, status: 'INVITE_ACCEPTED' },
     { skip: !projectId },
   )
 
-  const { data: projectMembers } = useGetAccountsQuery(
-    {
-      projectId,
-      status: 'INVITE_ACCEPTED',
-    },
+  const { data: projectMembers } = useGetProjectMembersQuery(
+    { projectId: projectId!, search: debouncedSearch },
     { skip: !projectId },
   )
 
@@ -49,8 +46,8 @@ export const AssignProjectMemberModal = ({ isOpen, onClose }: ModalBaseProps): J
   }
 
   const unassignedMembers = useMemo(() => {
-    return differenceBy(members ?? [], projectMembers ?? [], 'id')
-  }, [members, projectMembers])
+    return differenceBy(organisationMembers ?? [], projectMembers ?? [], 'id')
+  }, [organisationMembers, projectMembers])
 
   return (
     <Modal title="Assign Members" isOpen={isOpen} onClose={onClose} className="max-w-[600px]">
@@ -60,10 +57,10 @@ export const AssignProjectMemberModal = ({ isOpen, onClose }: ModalBaseProps): J
         value={unassignedMembers ?? []}
       >
         <ModalFooter>
-          <Button variant="blank" onClick={onClose}>
+          <Button variant="blank" onClick={onClose} disabled={assigningMembers}>
             Cancel
           </Button>
-          <Button size="xs" type="submit">
+          <Button size="xs" type="submit" loading={assigningMembers}>
             Assign Members
           </Button>
         </ModalFooter>

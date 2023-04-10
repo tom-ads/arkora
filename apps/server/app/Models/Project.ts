@@ -26,6 +26,10 @@ type ProjectInsightsFilter = {
   users: number[]
 }
 
+type MemberInsightsFilter = Partial<{
+  search: string
+}>
+
 type ProjectBuilder = ModelQueryBuilderContract<typeof Project>
 
 export default class Project extends BaseModel {
@@ -110,7 +114,21 @@ export default class Project extends BaseModel {
 
   // Instance Methods
 
-  public async assignProjectMembers(this: Project, organisation: Organisation) {
+  public async getMetricsForMembers(this: Project, filters?: MemberInsightsFilter) {
+    const result = await this.related('members')
+      .query()
+      .withScopes((scope) => scope.userInsights({ projects: [this.id] }))
+      .if(filters?.search, (query) => {
+        query
+          .whereILike('users.firstname', `%${filters!.search!}%`)
+          .orWhereILike('users.lastname', `%${filters!.search!}%`)
+      })
+      .orderBy('users.lastname')
+
+    return result
+  }
+
+  public async assignMembers(this: Project, organisation: Organisation) {
     const members: User[] = await organisation
       .related('users')
       .query()
@@ -121,7 +139,18 @@ export default class Project extends BaseModel {
     await this.related('members').sync(members.map((member) => member.id))
   }
 
-  public async getProjectInsights(this: Project, filters?: ProjectInsightsFilter) {
+  public async unassignMember(this: Project, userId: number) {
+    // Detach from project
+    await this.related('members').detach([userId])
+
+    // Detach from each project budget
+    const projectBudgets = await this.related('budgets').query()
+    await Promise.all(
+      projectBudgets.map(async (budget) => await budget.related('members').detach([userId]))
+    )
+  }
+
+  public async getInsights(this: Project, filters?: ProjectInsightsFilter) {
     const result = await this.related('budgets')
       .query()
       .withScopes((scopes) => scopes.budgetMetrics())

@@ -1,9 +1,11 @@
 import Route from '@ioc:Adonis/Core/Route'
 
+// Projects
 Route.group(() => {
   Route.get('/', 'ProjectController.index')
   Route.post('/', 'ProjectController.create')
 
+  // Project
   Route.group(() => {
     Route.get('/', 'ProjectController.view')
     Route.put('/', 'ProjectController.update')
@@ -13,6 +15,7 @@ Route.group(() => {
 
     // Project Members
     Route.group(() => {
+      Route.get('/', 'ProjectMemberController.index')
       Route.post('/', 'ProjectMemberController.create')
 
       Route.group(() => {
