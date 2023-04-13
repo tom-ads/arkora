@@ -2,7 +2,7 @@ import appApi from 'api'
 import { GetTasksRequest } from './types/request'
 import { GetTasksResponse } from './types/response'
 
-const tasksBasePath = '/tasks'
+const tasksBasePath = '/api/v1/tasks'
 
 const taskEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

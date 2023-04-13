@@ -2,7 +2,7 @@ import appApi from 'api'
 import { CheckSubdomainRequest } from './types/requests'
 import { CheckSubdomainResponse } from './types/responses'
 
-const subdomainBasePath = '/subdomain'
+const subdomainBasePath = '/api/v1/subdomain'
 
 const subdomainEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

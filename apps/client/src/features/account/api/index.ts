@@ -8,7 +8,7 @@ import {
 } from './types/requests'
 import { GetAccountResponse, GetAccountsResponse } from './types/response'
 
-const accountBasePath = '/accounts'
+const accountBasePath = '/api/v1/accounts'
 
 const accountEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

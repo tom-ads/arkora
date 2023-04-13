@@ -6,7 +6,7 @@ import {
   GetBudgetMembersRequest,
 } from './types/requests'
 
-const budgetMembersBasePath = '/budgets'
+const budgetMembersBasePath = '/api/v1/budgets'
 
 const budgetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

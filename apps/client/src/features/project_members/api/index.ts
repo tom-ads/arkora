@@ -3,7 +3,7 @@ import appApi from 'api'
 import { CreateProjectMembersRequest, GetProjectMembersRequest } from './types/requests'
 import DeleteProjectMemberRequest from './types/requests/delete_member'
 
-const projectMembersBasePath = '/projects'
+const projectMembersBasePath = '/api/v1/projects'
 
 const budgetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

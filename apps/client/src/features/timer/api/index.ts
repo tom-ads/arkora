@@ -2,7 +2,7 @@ import TimeEntry from '@/types/models/TimeEntry'
 import appApi from 'api'
 import { CreateTimerRequest, GetTimersResponse } from './types'
 
-const timerBasePath = '/timers'
+const timerBasePath = '/api/v1/timers'
 
 const taskEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
