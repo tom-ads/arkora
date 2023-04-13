@@ -47,6 +47,12 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       })
     }
 
+    if (ctx.response.getStatus() >= 500) {
+      return ctx.response.internalServerError({
+        message: [{ message: 'Internal Server Error' }],
+      })
+    }
+
     return super.handle(error, ctx)
   }
 }
