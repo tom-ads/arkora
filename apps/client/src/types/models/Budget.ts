@@ -1,7 +1,16 @@
 import BillableType from '@/enums/BillableType'
 import { BudgetType } from './BudgetType'
 
-export type Budget = {
+export type BudgetBaseMetrics = {
+  allocatedBudget: number
+  allocatedDuration: number
+  billableCost: number
+  billableDuration: number
+  unbillableCost: number
+  unbillableDuration: number
+}
+
+export type Budget = BudgetBaseMetrics & {
   id: number
   projectId: number
   name: string
@@ -13,12 +22,6 @@ export type Budget = {
   billableType: {
     name: BillableType
   }
-  allocatedBudget: number
-  allocatedDuration: number
   spentCost: number
   remainingCost: number
-  billableCost: number
-  billableDuration: number
-  unbillableCost: number
-  unbillableDuration: number
 }
