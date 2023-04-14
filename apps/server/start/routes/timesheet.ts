@@ -9,6 +9,6 @@ Route.group(() => {
         .where('users', Route.matchers.number())
     })
       .prefix('/timesheets')
-      .middleware(['verifyTenant', 'auth'])
+      .middleware(['auth', 'verifyTenant'])
   }).prefix('/v1')
 }).prefix('/api')

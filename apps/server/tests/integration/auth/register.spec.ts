@@ -4,14 +4,16 @@ import WeekDay from 'App/Enum/WeekDay'
 import Organisation from 'App/Models/Organisation'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 
-const registerRoute = '/auth/register'
-
-test.group('Auth: Registration - Register', () => {
+test.group('Auth : Registration - Register', () => {
   test('user can register their organisation and invite team members', async ({
     client,
     assert,
+    route,
   }) => {
-    const response = await client.post(registerRoute).form(payload).withCsrfToken()
+    const response = await client
+      .post(route('AuthController.register'))
+      .form(payload)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -34,17 +36,21 @@ test.group('Auth: Registration - Register', () => {
 
     assert.notStrictEqual(
       createdOrganisation?.workDays.map((day) => day.name),
-      payload.work_days
+      payload.business_days
     )
     assert.equal(createdOrganisation?.currency.code, payload.currency)
   })
 
   test('user cannot register an organisation that already exists with same subdomain', async ({
     client,
+    route,
   }) => {
     await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
 
-    const response = await client.post(registerRoute).form(payload).withCsrfToken()
+    const response = await client
+      .post(route('AuthController.register'))
+      .form(payload)
+      .withCsrfToken()
 
     response.assertStatus(422)
     response.assertBodyContains({
@@ -58,11 +64,11 @@ test.group('Auth: Registration - Register', () => {
     })
   })
 
-  test('auth user is forbidden from registering an organisation', async ({ client }) => {
+  test('auth user is forbidden from registering an organisation', async ({ client, route }) => {
     const authUser = await UserFactory.create()
 
     const response = await client
-      .post(registerRoute)
+      .post(route('AuthController.register'))
       .loginAs(authUser)
       .form(payload)
       .withCsrfToken()
@@ -80,11 +86,12 @@ const payload = {
 
   name: 'test-org',
   subdomain: 'test-org',
-  work_days: [WeekDay.MONDAY, WeekDay.TUESDAY],
+  business_days: [WeekDay.MONDAY, WeekDay.TUESDAY],
   opening_time: '09:00',
   closing_time: '17:00',
+  break_duration: 30,
   currency: 'GBP',
-  hourly_rate: 10000,
+  default_rate: 10000,
 
   team: [
     {

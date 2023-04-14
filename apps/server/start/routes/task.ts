@@ -6,6 +6,6 @@ Route.group(() => {
       Route.get('/', 'TaskController.index')
     })
       .prefix('/tasks')
-      .middleware(['verifyTenant', 'auth'])
+      .middleware(['auth', 'verifyTenant'])
   }).prefix('/v1')
 }).prefix('/api')

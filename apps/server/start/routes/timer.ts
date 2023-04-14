@@ -15,6 +15,6 @@ Route.group(() => {
         .where('time_entries', Route.matchers.number())
     })
       .prefix('/timers')
-      .middleware(['verifyTenant', 'auth'])
+      .middleware(['auth', 'verifyTenant'])
   }).prefix('/v1')
 }).prefix('/api')

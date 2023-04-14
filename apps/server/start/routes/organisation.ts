@@ -11,6 +11,6 @@ Route.group(() => {
         .where('organisations', Route.matchers.number())
     })
       .prefix('/organisations')
-      .middleware(['verifyTenant', 'auth'])
+      .middleware(['auth', 'verifyTenant'])
   }).prefix('/v1')
 }).prefix('/api')

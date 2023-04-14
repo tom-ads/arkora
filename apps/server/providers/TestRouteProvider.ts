@@ -24,6 +24,6 @@ export default class TestRouteProvider {
 
   public async boot() {
     const { default: Route } = await import('@ioc:Adonis/Core/Route')
-    Route.get('/test-subdomain', async () => 'Hello world').middleware('subdomain')
+    Route.get('/test-subdomain', async () => 'Hello world').middleware('verifyTenant')
   }
 }

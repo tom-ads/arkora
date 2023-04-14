@@ -9,7 +9,7 @@ Route.group(() => {
         Route.group(() => {
           Route.post('/', 'InvitationController.create')
           Route.post('/resend', 'InvitationController.resend')
-        }).middleware(['verifyTenant', 'auth'])
+        }).middleware(['auth', 'verifyTenant'])
       }).prefix('/invitations')
     }).prefix('/auth')
   }).prefix('/v1')

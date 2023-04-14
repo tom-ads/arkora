@@ -44,6 +44,7 @@ test.group('Invitation : Verify', (group) => {
       .withCsrfToken()
 
     await invitedUser.refresh()
+    await organisation.refresh()
 
     response.assertStatus(200)
     response.assertBodyContains({
