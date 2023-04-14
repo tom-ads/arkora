@@ -115,9 +115,11 @@ export default class Project extends BaseModel {
   // Instance Methods
 
   public async getMetricsForMembers(this: Project, filters?: MemberInsightsFilter) {
+    const budgetIds = (await this.related('budgets').query()).map((budget) => budget.id)
+
     const result = await this.related('members')
       .query()
-      .withScopes((scope) => scope.userInsights({ projects: [this.id] }))
+      .withScopes((scope) => scope.userInsights({ budgets: budgetIds }))
       .if(filters?.search, (query) => {
         query
           .whereILike('users.firstname', `%${filters!.search!}%`)

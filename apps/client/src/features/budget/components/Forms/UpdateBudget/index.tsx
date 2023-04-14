@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
-
+import { useState } from 'react'
+import { UseFormReturn } from 'react-hook-form'
 import {
   Button,
   ColourPicker,
@@ -13,6 +12,7 @@ import {
   OpenLockIcon,
   Spinner,
   FormErrorMessage,
+  Form,
 } from '@/components'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
 import { ModalFooter } from '@/components/Modal'
@@ -21,15 +21,14 @@ import BillableType from '@/enums/BillableType'
 import BudgetType from '@/enums/BudgetType'
 import { useToast } from '@/hooks/useToast'
 import { skipToken } from '@reduxjs/toolkit/dist/query'
-
 import { useDeleteBudgetMutation, useGetBudgetQuery, useUpdateBudgetMutation } from '../../../api'
-import { BudgetFormFields } from '../BudgetForm'
+import { BudgetFormFields, budgetFormSchema } from '../BudgetForm'
 import { FixedBudgetSection } from '../BudgetForm/Sections/FixedBudget'
 import { NonBillableSection } from '../BudgetForm/Sections/NonBillable'
 import { VariableBudgetSection } from '../BudgetForm/Sections/VariableBudget'
 import { convertToPennies, convertToPounds } from '@/helpers/currency'
-import { useQueryError } from '@/hooks/useQueryError'
 import { convertMinutesToHours } from '@/helpers/date'
+import { match } from 'ts-pattern'
 
 type UpdateBudgetFormProps = {
   onClose: () => void
@@ -45,31 +44,8 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
 
   const [triggerDelete, { isLoading: deletingBudget }] = useDeleteBudgetMutation()
 
-  const [triggerUpdate, { isLoading: updatingBudget, error }] = useUpdateBudgetMutation()
-
-  const methods = useForm<BudgetFormFields>({
-    defaultValues: {
-      name: '',
-      colour: '',
-      private: true,
-      fixedPrice: undefined,
-      budgetType: BudgetType.VARIABLE,
-      billableType: BillableType.TOTAL_COST,
-      budget: undefined,
-      hourlyRate: undefined,
-    },
-  })
-
-  const {
-    control,
-    watch,
-    setValue,
-    getValues,
-    handleSubmit,
-    formState: { errors },
-  } = methods
-
-  useQueryError<BudgetFormFields>({ setError: methods.setError, error })
+  const [triggerUpdate, { isLoading: updatingBudget, error: updateErrors }] =
+    useUpdateBudgetMutation()
 
   const onSubmit = async (data: BudgetFormFields) => {
     let actualBudget = data.budget ?? 0
@@ -132,32 +108,15 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
     onClose()
   }
 
-  useEffect(() => {
-    if (budget) {
-      let actualBudget = convertToPounds(budget.allocatedBudget)
-      if (
-        budget.budgetType?.name === BudgetType.NON_BILLABLE ||
-        budget.billableType.name === BillableType.TOTAL_HOURS
-      ) {
-        actualBudget = convertMinutesToHours(budget.allocatedDuration)
-      }
-
-      setValue('name', budget.name)
-      setValue('budgetType', budget.budgetType.name)
-      setValue('billableType', budget.billableType.name)
-      setValue('colour', budget.colour)
-      setValue('private', budget.private)
-      setValue('budget', actualBudget)
-      setValue('hourlyRate', budget.hourlyRate ? convertToPounds(budget.hourlyRate) : undefined)
-      setValue('fixedPrice', budget.fixedPrice ? convertToPounds(budget.fixedPrice) : undefined)
-    }
-  }, [budget])
-
-  useEffect(() => {
-    if (budget?.billableType?.name !== getValues('billableType')) {
+  const onFormChange = (data: BudgetFormFields, methods: UseFormReturn<BudgetFormFields>) => {
+    const { watch, setValue } = methods
+    if (
+      watch('billableType') !== BillableType.TOTAL_COST &&
+      watch('budgetType') === BudgetType.FIXED
+    ) {
       setValue('hourlyRate', null)
     }
-  }, [watch('billableType'), budget])
+  }
 
   if (fetchingBudget) {
     return (
@@ -169,97 +128,133 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
 
   return (
     <>
-      <FormProvider {...methods}>
-        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex gap-6">
-            <FormControl className="flex-grow">
-              <FormLabel htmlFor="name">Name</FormLabel>
-              <FormInput name="name" placeHolder="Enter name" error={!!errors?.name?.message} />
-              {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
+      <Form<BudgetFormFields, typeof budgetFormSchema>
+        onSubmit={onSubmit}
+        queryError={updateErrors}
+        onChange={onFormChange}
+        defaultValues={{
+          name: budget?.name ?? '',
+          colour: budget?.colour ?? '',
+          private: budget?.private ?? false,
+          fixedPrice: budget?.fixedPrice ? convertToPounds(budget.fixedPrice) : undefined,
+          budgetType: budget?.budgetType?.name ?? BudgetType.VARIABLE,
+          billableType: budget?.billableType?.name ?? BillableType.TOTAL_COST,
+          budget:
+            budget?.budgetType?.name === BudgetType.NON_BILLABLE ||
+            budget?.billableType?.name === BillableType.TOTAL_HOURS
+              ? convertMinutesToHours(budget?.allocatedDuration ?? 0)
+              : convertToPounds(budget?.allocatedBudget ?? 0),
+          hourlyRate: budget?.hourlyRate ? convertToPounds(budget.hourlyRate) : undefined,
+        }}
+        className="space-y-6"
+        validationSchema={budgetFormSchema}
+      >
+        {(methods) => (
+          <>
+            <div className="flex gap-6">
+              <FormControl className="flex-grow">
+                <FormLabel htmlFor="name">Name</FormLabel>
+                <FormInput
+                  name="name"
+                  placeHolder="Enter name"
+                  error={!!methods.formState.errors?.name?.message}
+                />
+                {methods.formState.errors?.name?.message && (
+                  <FormErrorMessage>{methods.formState.errors?.name?.message}</FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl className="w-fit">
+                <FormLabel htmlFor="colour">Colour</FormLabel>
+                <ColourPicker name="colour" control={methods.control} />
+              </FormControl>
+            </div>
+
+            <FormControl>
+              <FormLabel htmlFor="private">Visibility</FormLabel>
+              <FormStyledRadio className="flex-col sm:flex-row" name="private">
+                <FormStyledRadioOption
+                  title="Public"
+                  icon={<OpenLockIcon className="stroke-[2px]" />}
+                  description="All assigned project members will be able to view this budget"
+                  value={false}
+                />
+                <FormStyledRadioOption
+                  title="Private"
+                  icon={<LockIcon className="stroke-[2px]" />}
+                  description="Only assigned project members will be able to view this budget"
+                  value={true}
+                />
+              </FormStyledRadio>
             </FormControl>
 
-            <FormControl className="w-fit">
-              <FormLabel htmlFor="colour">Colour</FormLabel>
-              <ColourPicker name="colour" control={control} />
-            </FormControl>
-          </div>
+            <HorizontalDivider
+              contentLeft={
+                <p className="whitespace-nowrap font-medium text-base text-gray-100">Budget Type</p>
+              }
+            />
 
-          <FormControl>
-            <FormLabel htmlFor="private">Visibility</FormLabel>
-            <FormStyledRadio className="flex-col sm:flex-row" name="private">
+            <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
               <FormStyledRadioOption
-                title="Public"
-                icon={<OpenLockIcon className="stroke-[2px]" />}
-                description="All assigned project members will be able to view this budget"
-                value={false}
+                title="Variable"
+                description="Est. budget. Charge and track by the hour. Can overrun."
+                value={BudgetType.VARIABLE}
               />
               <FormStyledRadioOption
-                title="Private"
-                icon={<LockIcon className="stroke-[2px]" />}
-                description="Only assigned project members will be able to view this budget"
-                value={true}
+                title="Fixed"
+                description="Set budget or cost. Tracked by the hour, cannot overrun"
+                value={BudgetType.FIXED}
+              />
+              <FormStyledRadioOption
+                title="Non-Billable"
+                description="No cost, budget hours only. Track by hour, can overrun."
+                value={BudgetType.NON_BILLABLE}
               />
             </FormStyledRadio>
-          </FormControl>
 
-          <HorizontalDivider
-            contentLeft={
-              <p className="whitespace-nowrap font-medium text-base text-gray-100">Budget Type</p>
-            }
-          />
+            <div className="min-h-[210px]">
+              {match(methods.watch('budgetType'))
+                .with(BudgetType.VARIABLE, () => (
+                  <VariableBudgetSection
+                    control={methods.control}
+                    watch={methods.watch}
+                    errors={methods.formState.errors}
+                  />
+                ))
+                .with(BudgetType.FIXED, () => (
+                  <FixedBudgetSection
+                    control={methods.control}
+                    watch={methods.watch}
+                    errors={methods.formState.errors}
+                  />
+                ))
+                .with(BudgetType.NON_BILLABLE, () => (
+                  <NonBillableSection errors={methods.formState.errors} />
+                ))
+                .exhaustive()}
+            </div>
 
-          <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
-            <FormStyledRadioOption
-              title="Variable"
-              description="Est. budget. Charge and track by the hour. Can overrun."
-              value={BudgetType.VARIABLE}
-            />
-            <FormStyledRadioOption
-              title="Fixed"
-              description="Set budget or cost. Tracked by the hour, cannot overrun"
-              value={BudgetType.FIXED}
-            />
-            <FormStyledRadioOption
-              title="Non-Billable"
-              description="No cost, budget hours only. Track by hour, can overrun."
-              value={BudgetType.NON_BILLABLE}
-            />
-          </FormStyledRadio>
-
-          <div className="min-h-[210px]">
-            {watch('budgetType') === BudgetType.VARIABLE && (
-              <VariableBudgetSection control={control} watch={watch} errors={errors} />
-            )}
-
-            {watch('budgetType') === BudgetType.FIXED && (
-              <FixedBudgetSection control={control} watch={watch} errors={errors} />
-            )}
-
-            {watch('budgetType') === BudgetType.NON_BILLABLE && (
-              <NonBillableSection errors={errors} />
-            )}
-          </div>
-
-          <ModalFooter className="mb-4">
-            <Button
-              variant="blank"
-              onClick={() => setOpenConfirmationModal(true)}
-              disabled={updatingBudget || deletingBudget}
-              danger
-            >
-              Delete
-            </Button>
-            <Button
-              size="xs"
-              type="submit"
-              className="max-w-[161px]"
-              loading={updatingBudget || deletingBudget}
-            >
-              Update Budget
-            </Button>
-          </ModalFooter>
-        </form>
-      </FormProvider>
+            <ModalFooter className="mb-4">
+              <Button
+                variant="blank"
+                onClick={() => setOpenConfirmationModal(true)}
+                disabled={updatingBudget || deletingBudget}
+                danger
+              >
+                Delete
+              </Button>
+              <Button
+                size="xs"
+                type="submit"
+                className="max-w-[161px]"
+                loading={updatingBudget || deletingBudget}
+              >
+                Update Budget
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </Form>
 
       <ConfirmationModal
         isOpen={openConfirmationModal}

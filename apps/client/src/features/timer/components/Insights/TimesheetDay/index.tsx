@@ -33,7 +33,7 @@ export const TimesheetDayInsights = ({ value }: TimesheetDayInsightsProps): JSX.
   return (
     <>
       <div className="grid grid-cols-2">
-        <TotalTimePieChart totalTime={value.dailyDuration ?? 0} threshold={450} />
+        <TotalTimePieChart totalTime={value.dailyDuration ?? 0} threshold={dailyGoalDuration} />
         <BillablePieChart
           billableDuration={value.billableDuration}
           unbillableDuration={value.unbillableDuration}

@@ -140,6 +140,7 @@ export default class ProjectController {
     }
 
     await project.save()
+    await project.load('client')
 
     return project.serialize()
   }

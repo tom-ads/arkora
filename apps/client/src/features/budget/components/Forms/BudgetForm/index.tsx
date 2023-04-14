@@ -22,11 +22,12 @@ import validationIssuer from '@/helpers/validation/issuer'
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
 import { ReactNode, useState } from 'react'
-import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import { FixedBudgetSection } from './Sections/FixedBudget'
 import { NonBillableSection } from './Sections/NonBillable'
 import { VariableBudgetSection } from './Sections/VariableBudget'
+import { match } from 'ts-pattern'
+import { UseFormReturn } from 'react-hook-form'
 
 export const billableTypeOption = [
   {
@@ -83,7 +84,7 @@ export const budgetSchema = z
     }
   })
 
-const budgetFormSchema = z
+export const budgetFormSchema = z
   .object({
     name: z.string().min(1, { message: 'Name is required' }),
     colour: z.string(),
@@ -206,17 +207,15 @@ export const BudgetForm = ({
           </FormStyledRadio>
 
           <div className="min-h-[210px]">
-            {watch('budgetType') === BudgetType.VARIABLE && (
-              <VariableBudgetSection control={control} watch={watch} errors={errors} />
-            )}
-
-            {watch('budgetType') === BudgetType.FIXED && (
-              <FixedBudgetSection control={control} watch={watch} errors={errors} />
-            )}
-
-            {watch('budgetType') === BudgetType.NON_BILLABLE && (
-              <NonBillableSection errors={errors} />
-            )}
+            {match(watch('budgetType'))
+              .with(BudgetType.VARIABLE, () => (
+                <VariableBudgetSection control={control} watch={watch} errors={errors} />
+              ))
+              .with(BudgetType.FIXED, () => (
+                <FixedBudgetSection control={control} watch={watch} errors={errors} />
+              ))
+              .with(BudgetType.NON_BILLABLE, () => <NonBillableSection errors={errors} />)
+              .exhaustive()}
           </div>
 
           {children}

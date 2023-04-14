@@ -15,10 +15,7 @@ const budgetTaskEndpoints = appApi.injectEndpoints({
       query: ({ budgetId, ...body }) => ({
         url: `${budgetTasksBasePath}/${budgetId}/tasks`,
         method: 'POST',
-        body: {
-          name: body.name,
-          is_billable: body.isBillable,
-        },
+        body,
       }),
       invalidatesTags: ['BudgetTasks'],
     }),
@@ -37,12 +34,9 @@ const budgetTaskEndpoints = appApi.injectEndpoints({
       query: ({ budgetId, taskId, ...body }) => ({
         url: `${budgetTasksBasePath}/${budgetId}/tasks/${taskId}`,
         method: 'PUT',
-        body: {
-          name: body.name,
-          is_billable: body.isBillable,
-        },
+        body,
       }),
-      invalidatesTags: ['BudgetTasks', 'BudgetTask'],
+      invalidatesTags: ['BudgetTasks', 'BudgetTask', 'Budgets'],
     }),
 
     deleteBudgetTask: build.mutation<void, DeleteBudgetTaskRequest>({

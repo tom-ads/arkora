@@ -10,6 +10,7 @@ import { ModalBaseProps } from '@/types'
 import { ProjectForm, ProjectFormFields } from '../../Forms/ProjectForm'
 import { useState } from 'react'
 import { useToast } from '@/hooks/useToast'
+import { useNavigate } from 'react-router-dom'
 
 type ManageProjectModalProps = ModalBaseProps & {
   projectId: number | null
@@ -21,6 +22,8 @@ export const ManageProjectModal = ({
   isOpen,
 }: ManageProjectModalProps): JSX.Element => {
   const { successToast, errorToast } = useToast()
+
+  const navigate = useNavigate()
 
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false)
 
@@ -55,7 +58,10 @@ export const ManageProjectModal = ({
 
   const onConfirm = async () => {
     await deleteProject(projectId!)
-      .then(() => successToast('Project has been removed'))
+      .then(() => {
+        navigate('/projects')
+        successToast('Project has been removed')
+      })
       .catch(() => errorToast('Unable to remove project, please try again later.'))
 
     setOpenConfirmationModal(false)
