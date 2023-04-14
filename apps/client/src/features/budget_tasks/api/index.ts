@@ -7,7 +7,7 @@ import {
   UpdateBudgetTaskRequest,
 } from './types/request'
 
-const budgetTasksBasePath = '/budgets'
+const budgetTasksBasePath = '/api/v1/budgets'
 
 const budgetTaskEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

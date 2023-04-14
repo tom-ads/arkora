@@ -159,7 +159,6 @@ export default class Project extends BaseModel {
           memberBuilder.whereIn('time_entries.user_id', filters!.users)
         })
       })
-
       .exec()
 
     const totalBillableDuration = sumBy(result, (b) => b.billableDuration ?? 0)

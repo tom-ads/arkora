@@ -3,7 +3,7 @@ import appApi from 'api'
 import { GetTimeEntriesRequest, UpdateTimeEntryRequest } from './request'
 import { stringify } from 'qs'
 
-const timeEntryBasePath = '/entries'
+const timeEntryBasePath = '/api/v1/entries'
 
 const timeEntryEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

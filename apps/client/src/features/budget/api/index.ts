@@ -8,7 +8,7 @@ import {
 } from './types/requests'
 import { GetBudgetsResponse } from './types/response'
 
-const budgetBasePath = '/budgets'
+const budgetBasePath = '/api/v1/budgets'
 
 const budgetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

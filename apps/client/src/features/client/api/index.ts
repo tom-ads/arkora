@@ -3,7 +3,7 @@ import appApi from 'api'
 import { CreateClientRequest, UpdateClientRequest } from './types/requests'
 import { GetClientsResponse } from './types/response'
 
-const clientBasePath = '/clients'
+const clientBasePath = '/api/v1/clients'
 
 const clientEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

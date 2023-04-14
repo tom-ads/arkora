@@ -1,4 +1,4 @@
-import { Page, PageContent, PageHeader, PageTitle } from '@/components'
+import { Page, PageBackBtn, PageContent, PageHeader, PageTitle } from '@/components'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
@@ -32,16 +32,20 @@ export const ProjectPage = (): JSX.Element => {
 
   const { projectId } = useParams()
 
-  const { data: project } = useGetProjectQuery(projectId!, {
+  const { data: project, isLoading } = useGetProjectQuery(projectId!, {
     skip: !projectId,
   })
 
   return (
     <Page>
+      <PageBackBtn to="/projects">Back to Projects</PageBackBtn>
+
       <PageHeader>
         <div>
-          <PageTitle>{project?.name}</PageTitle>
-          <span className="text-xl text-gray-40 font-medium">{project?.client?.name}</span>
+          <PageTitle loading={isLoading}>{project?.name ?? 'Project'}</PageTitle>
+          <span className="text-xl text-gray-40 font-medium">
+            {project?.client?.name ?? 'Client'}
+          </span>
         </div>
       </PageHeader>
       <PageContent className="space-y-5">

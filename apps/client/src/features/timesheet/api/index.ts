@@ -3,7 +3,7 @@ import appApi from 'api'
 import { GetTimesheetRequest, GetTimesheetsRequest } from './types/request'
 import { GetTimesheetResponse } from './types/response'
 
-const timesheetBasePath = '/timesheets'
+const timesheetBasePath = '/api/v1/timesheets'
 
 const timesheetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

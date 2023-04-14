@@ -8,7 +8,7 @@ import {
   UpdateProjectResponse,
 } from './types/response'
 
-const projectsBasePath = '/projects'
+const projectsBasePath = '/api/v1/projects'
 
 const projectEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({

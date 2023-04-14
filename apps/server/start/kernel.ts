@@ -46,6 +46,6 @@ Server.middleware.register([
 Server.middleware.registerNamed({
   auth: () => import('App/Middleware/Auth'),
   silentAuth: () => import('App/Middleware/Auth'),
-  subdomain: () => import('App/Middleware/ValidateSubdomain'),
+  verifyTenant: () => import('App/Middleware/VerifyTenant'),
   blockAuth: () => import('App/Middleware/BlockAuth'),
 })

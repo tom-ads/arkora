@@ -1,44 +1,48 @@
 import Route from '@ioc:Adonis/Core/Route'
 
-// Budgets
 Route.group(() => {
-  Route.get('/', 'BudgetController.index')
-  Route.post('/', 'BudgetController.create')
-
-  // Budget
   Route.group(() => {
-    Route.get('/', 'BudgetController.view')
-    Route.delete('/', 'BudgetController.delete')
-    Route.put('/', 'BudgetController.update')
-
-    // Budget Tasks
+    // Budgets
     Route.group(() => {
-      Route.get('/', 'BudgetTaskController.index')
-      Route.post('/', 'BudgetTaskController.create')
+      Route.get('/', 'BudgetController.index')
+      Route.post('/', 'BudgetController.create')
 
+      // Budget
       Route.group(() => {
-        Route.get('/', 'BudgetTaskController.view')
-        Route.put('/', 'BudgetTaskController.update')
-        Route.delete('/', 'BudgetTaskController.delete')
-      })
-        .prefix(':taskId')
-        .where('tasks', Route.matchers.number())
-    }).prefix('/tasks')
+        Route.get('/', 'BudgetController.view')
+        Route.delete('/', 'BudgetController.delete')
+        Route.put('/', 'BudgetController.update')
 
-    // Budget Members
-    Route.group(() => {
-      Route.get('/', 'BudgetMemberController.index')
-      Route.post('/', 'BudgetMemberController.create')
+        // Budget Tasks
+        Route.group(() => {
+          Route.get('/', 'BudgetTaskController.index')
+          Route.post('/', 'BudgetTaskController.create')
 
-      Route.group(() => {
-        Route.delete('/', 'BudgetMemberController.delete')
+          Route.group(() => {
+            Route.get('/', 'BudgetTaskController.view')
+            Route.put('/', 'BudgetTaskController.update')
+            Route.delete('/', 'BudgetTaskController.delete')
+          })
+            .prefix(':taskId')
+            .where('tasks', Route.matchers.number())
+        }).prefix('/tasks')
+
+        // Budget Members
+        Route.group(() => {
+          Route.get('/', 'BudgetMemberController.index')
+          Route.post('/', 'BudgetMemberController.create')
+
+          Route.group(() => {
+            Route.delete('/', 'BudgetMemberController.delete')
+          })
+            .prefix(':userId')
+            .where('users', Route.matchers.number())
+        }).prefix('/members')
       })
-        .prefix(':userId')
-        .where('users', Route.matchers.number())
-    }).prefix('/members')
-  })
-    .prefix(':budgetId')
-    .where('budget', Route.matchers.number())
-})
-  .prefix('/budgets')
-  .middleware(['auth', 'subdomain'])
+        .prefix(':budgetId')
+        .where('budget', Route.matchers.number())
+    })
+      .prefix('/budgets')
+      .middleware(['auth', 'verifyTenant'])
+  }).prefix('/v1')
+}).prefix('/api')

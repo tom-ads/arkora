@@ -25,6 +25,7 @@ import BillableType from './BillableType'
 import Database from '@ioc:Adonis/Lucid/Database'
 import BudgetKind from 'App/Enum/BudgetKind'
 import BillableKind from 'App/Enum/BillableKind'
+import BudgetNote from './BudgetNote'
 
 type BudgetFilters = Partial<{
   projectId: number
@@ -229,6 +230,9 @@ export default class Budget extends BaseModel {
 
   @hasMany(() => TimeEntry)
   public timeEntries: HasMany<typeof TimeEntry>
+
+  @hasMany(() => BudgetNote)
+  public notes: HasMany<typeof BudgetNote>
 
   // Hooks
 

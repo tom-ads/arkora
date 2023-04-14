@@ -18,7 +18,7 @@ import {
   VerifyInvitationResponse,
 } from './types/response'
 
-const authBasePath = '/auth'
+const authBasePath = '/api/v1/auth'
 
 const authEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
