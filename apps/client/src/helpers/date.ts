@@ -1,11 +1,11 @@
 import { DateTime, Interval } from 'luxon'
 
 /* credit to thread for solution: https://github.com/moment/luxon/issues/118 */
-function getOrdinalSuffix(n: number) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
+export function getOrdinalSuffix(n: number) {
+  const ordinals = ['th', 'st', 'nd', 'rd']
+  const remainder = n % 100
 
-  return s[(v - 20) % 10] || s[v] || s[0]
+  return ordinals[(remainder - 20) % 10] || ordinals[remainder] || ordinals[0]
 }
 
 /* 
