@@ -8,13 +8,9 @@ const timesheetBasePath = '/api/v1/timesheets'
 const timesheetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
     getTimesheet: build.query<TimeEntry[], GetTimesheetRequest>({
-      query: (params) => ({
-        url: `${timesheetBasePath}/${params.userId}`,
-        params: {
-          start_date: params.startDate,
-          end_date: params.endDate,
-          user: params.userId,
-        },
+      query: ({ userId, ...params }) => ({
+        url: `${timesheetBasePath}/${userId}`,
+        params,
       }),
       providesTags: ['TimeEntries', 'TimeEntry'],
     }),
@@ -22,10 +18,7 @@ const timesheetEndpoints = appApi.injectEndpoints({
     getTimesheets: build.query<GetTimesheetResponse, GetTimesheetsRequest>({
       query: (params) => ({
         url: timesheetBasePath,
-        params: {
-          start_date: params.startDate,
-          end_date: params.endDate,
-        },
+        params,
       }),
       providesTags: ['TimeEntries'],
     }),

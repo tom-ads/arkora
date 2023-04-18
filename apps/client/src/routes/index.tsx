@@ -1,5 +1,5 @@
 import { useRoutes } from 'react-router-dom'
-import { privateRoutes } from './private'
+import { privateRoutes } from './protected'
 import { publicRoutes } from './public'
 
 const AppRouter = () => {

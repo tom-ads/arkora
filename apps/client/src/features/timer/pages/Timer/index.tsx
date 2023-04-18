@@ -49,11 +49,14 @@ export const TimerPage = (): JSX.Element => {
 
   const { restartTimer, stopTimer } = useTimeTracker()
 
-  const { data: timesheet } = useGetTimesheetQuery({
-    startDate: startDate ?? DateTime.now().startOf('week').toISODate(),
-    endDate: endDate ?? DateTime.now().endOf('week').toISODate(),
-    userId: authId as number,
-  })
+  const { data: timesheet } = useGetTimesheetQuery(
+    {
+      startDate: startDate ?? DateTime.now().startOf('week').toISODate(),
+      endDate: endDate ?? DateTime.now().endOf('week').toISODate(),
+      userId: authId as number,
+    },
+    { skip: !authId },
+  )
 
   const handleTracking = async (timerId?: number) => {
     if (isTracking && timer?.id) {

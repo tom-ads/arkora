@@ -9,8 +9,16 @@ export const TotalTimePieChart = ({
   totalTime,
   threshold,
 }: TotalTimePieChartProps): JSX.Element => {
-  const normalisedTotal = ((totalTime - 0) / (threshold - 0)) * 100
-  const normalisedDifference = 100 - normalisedTotal
+  let normalisedTotal = 0
+  let normalisedDifference = 100
+
+  if (threshold && threshold > 0) {
+    normalisedTotal = ((totalTime - 0) / (threshold - 0)) * 100
+  }
+
+  if (normalisedDifference > 0) {
+    normalisedDifference = 100 - normalisedTotal
+  }
 
   return (
     <ReactApexChart
