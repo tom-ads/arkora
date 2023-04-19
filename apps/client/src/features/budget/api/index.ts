@@ -1,4 +1,4 @@
-import { Budget } from '@/types'
+import { Budget, BudgetWithProject } from '@/types'
 import appApi from 'api'
 import {
   CreateBudgetRequest,
@@ -21,7 +21,7 @@ const budgetEndpoints = appApi.injectEndpoints({
       invalidatesTags: ['Budgets', 'Budget'],
     }),
 
-    getBudget: build.query<Budget, GetBudgetRequest>({
+    getBudget: build.query<BudgetWithProject, GetBudgetRequest>({
       query: (id) => `${budgetBasePath}/${id}`,
       providesTags: ['Budget'],
     }),
@@ -29,11 +29,7 @@ const budgetEndpoints = appApi.injectEndpoints({
     getBudgets: build.query<GetBudgetsResponse, GetBudgetsRequest>({
       query: (params) => ({
         url: budgetBasePath,
-        params: {
-          ...(params.projectId && { project_id: params.projectId }),
-          ...(params.userId && { user_id: params.userId }),
-          ...(params.includeProject && { include_project: params.includeProject }),
-        },
+        params,
       }),
       providesTags: ['Budgets'],
     }),

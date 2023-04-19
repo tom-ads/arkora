@@ -26,8 +26,6 @@ export const TimeEntriesRow = ({ value, onManage }: RowProps): JSX.Element => {
     }
   }
 
-  const lastName = value.user?.lastname ? ` ${value.user.lastname}` : ''
-
   return (
     <TableRow>
       <TableData>

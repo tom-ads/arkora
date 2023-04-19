@@ -152,6 +152,7 @@ export default class Organisation extends BaseModel {
       })
       .preload('budgets', (budgetQuery) => {
         budgetQuery
+          .withScopes((scope) => scope.budgetMetrics())
           // Ensure related budgets have a member with specified user_id
           .if(filters?.userId, (budgetBuilder) => {
             budgetBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
@@ -187,23 +188,19 @@ export default class Organisation extends BaseModel {
           .whereILike('users.firstname', `%${filters!.search!}%`)
           .orWhereILike('users.lastname', `%${filters!.search!}%`)
       })
-
       .if(filters?.projectId, (builder) => {
         builder.whereHas('projects', (projectBuilder) => {
           projectBuilder.where('id', filters?.projectId!)
         })
       })
-
       .if(filters?.role, (userBuilder) =>
         userBuilder.whereHas('role', (roleBuilder) => {
           roleBuilder.where('name', filters?.role!)
         })
       )
-
       .if(filters?.page, (userBuilder) => {
         userBuilder.forPage(filters!.page!, 10)
       })
-
       .match(
         [
           filters?.status === Verify.INVITE_ACCEPTED,

@@ -1,8 +1,8 @@
-type ProgressLineIndicatorProps = {
+type SingleProgressBarProps = {
   percent: string | number
 }
 
-export const ProgressLineIndicator = ({ percent }: ProgressLineIndicatorProps): JSX.Element => {
+export const SingleProgressBar = ({ percent }: SingleProgressBarProps): JSX.Element => {
   return (
     <svg width="100%" height="10" className="outline-none relative">
       <rect width="100%" height="10" rx="2" className="fill-purple-20" strokeLinecap="round" />

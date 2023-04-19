@@ -1,13 +1,6 @@
-import {
-  Avatar,
-  Button,
-  DoubleProgressLineIndicator,
-  TableData,
-  TableRow,
-  ToolTip,
-  UserIcon,
-} from '@/components'
-import { calculatePercentage } from '@/helpers/currency'
+import { Avatar, Button, TableData, TableRow, UserIcon } from '@/components'
+import { BillableProgressBar } from '@/components/ProgressBars'
+import UserRole from '@/enums/UserRole'
 import { formatMinutesToHourMinutes } from '@/helpers/date'
 import { RootState } from '@/stores/store'
 import { User } from '@/types'
@@ -15,13 +8,16 @@ import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
 type MemberRowProps = {
-  onDelete: (id: number) => void
   value: User
   isPrivate: boolean
+  onDelete: (id: number) => void
 }
 
 export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.Element => {
-  const authId = useSelector((state: RootState) => state.auth.user?.id)
+  const { authId, authRole } = useSelector((state: RootState) => ({
+    authId: state.auth.user?.id,
+    authRole: state.auth.user?.role?.name,
+  }))
 
   const formattedMember = useMemo(() => {
     const member = { ...value }
@@ -49,44 +45,29 @@ export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.E
 
       <TableData>{value.email?.toLowerCase()}</TableData>
 
-      <TableData>{formatMinutesToHourMinutes(formattedMember.spentDuration ?? 0)}</TableData>
+      <TableData>
+        {authRole !== UserRole.MEMBER ? (
+          formatMinutesToHourMinutes(formattedMember.spentDuration ?? 0)
+        ) : (
+          <p>- - -</p>
+        )}
+      </TableData>
 
       <TableData>
-        <ToolTip
-          width={215}
-          trigger={
-            <DoubleProgressLineIndicator
-              leftPercent={calculatePercentage(
-                formattedMember?.billableDuration,
-                formattedMember?.spentDuration,
-              )}
-              rightPercent={calculatePercentage(
-                formattedMember?.unbillableDuration,
-                formattedMember?.spentDuration,
-              )}
-            />
-          }
-        >
-          <div className="divide-y divide-gray-40 divide-dashed">
-            <div className="flex justify-between items-center py-1">
-              <p className="font-medium text-xs text-green-90">Billable</p>
-              <p className="font-semibold text-xs text-gray-80">
-                {formatMinutesToHourMinutes(formattedMember.billableDuration)}
-              </p>
-            </div>
-            <div className="flex justify-between items-center py-1">
-              <p className="font-medium text-xs text-red-90">Non-Billable</p>
-              <p className="font-semibold text-xs text-gray-80">
-                {formatMinutesToHourMinutes(formattedMember.unbillableDuration)}
-              </p>
-            </div>
-          </div>
-        </ToolTip>
+        {authRole !== UserRole.MEMBER ? (
+          <BillableProgressBar
+            width={215}
+            billableTotal={formattedMember.billableDuration}
+            unbillableTotal={formattedMember.unbillableDuration}
+          />
+        ) : (
+          <p>- - -</p>
+        )}
       </TableData>
 
       <TableData>
         <div className="w-full flex items-center justify-end">
-          {value.id !== authId && (
+          {value.id !== authId && authRole !== UserRole.MEMBER && (
             <Button
               variant="blank"
               onClick={() => onDelete(formattedMember.id)}

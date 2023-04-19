@@ -18,9 +18,11 @@ test.group('Projects : Update', (group) => {
     }).create()
 
     // Setup organisation projects
-    project = await ProjectFactory.with('client', 1, (clientBuilder) =>
-      clientBuilder.merge({ organisationId: organisation.id })
-    ).create()
+    project = await ProjectFactory.merge({ name: 'test-project' })
+      .with('client', 1, (clientBuilder) =>
+        clientBuilder.merge({ organisationId: organisation.id })
+      )
+      .create()
 
     await organisation.load('clients')
 
@@ -137,6 +139,54 @@ test.group('Projects : Update', (group) => {
       .loginAs(authUser)
 
     response.assertStatus(403)
+  })
+
+  test('returns 422, when updating an organisations project with a name that already exists', async ({
+    client,
+    route,
+  }) => {
+    const payload = {
+      name: 'test-project',
+      show_cost: false,
+      private: false,
+      client_id: organisation.clients[0].id,
+    }
+
+    const response = await client
+      .put(route('ProjectController.update', { projectId: project.id }))
+      .form(payload)
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(422)
+    response.assertBody({
+      errors: [{ field: 'name', message: 'Name already taken' }],
+    })
+  })
+
+  test('returns 200, when updating an organisations project with the same name', async ({
+    client,
+    route,
+  }) => {
+    const payload = {
+      name: 'test-project',
+      show_cost: false,
+      private: false,
+      client_id: organisation.clients[0].id,
+    }
+
+    const response = await client
+      .put(route('ProjectController.update', { projectId: project.id }))
+      .form(payload)
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(422)
+    response.assertBody({
+      errors: [{ field: 'name', message: 'Name already taken' }],
+    })
   })
 
   test('unauthenticated user cannot update a project', async ({ client, route }) => {

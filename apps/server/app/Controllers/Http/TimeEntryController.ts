@@ -5,15 +5,16 @@ import { bind } from '@adonisjs/route-model-binding'
 import UpdateEntryValidator from 'App/Validators/Entry/UpdateEntryValidator'
 import Budget from 'App/Models/Budget'
 import Task from 'App/Models/Task'
+import UserRole from 'App/Enum/UserRole'
 
 export default class TimeEntriesController {
   public async index(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(IndexTimeEntryValidator)
 
     // Members can only retrieve their own time entries
-    // if (ctx.auth.user!.role?.name === UserRole.MEMBER) {
-    //   payload.user_id = ctx.auth.user!.id
-    // }
+    if (ctx.auth.user!.role?.name === UserRole.MEMBER) {
+      payload.members = [ctx.auth.user!.id]
+    }
 
     const entries = await TimeEntry.getTimeEntries(ctx.organisation!.id, {
       projectId: payload.project_id,

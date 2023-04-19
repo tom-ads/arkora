@@ -1,13 +1,18 @@
 import { Button, CrossIcon, SkeletonBox, TableData, TableRow, TickIcon } from '@/components'
 import { SkeletonCircle } from '@/components/Skeletons/Circle'
+import UserRole from '@/enums/UserRole'
 import { formatMinutesToHourMinutes } from '@/helpers/date'
+import { RootState } from '@/stores/store'
 import Task from '@/types/models/Task'
 import { TableRowBaseProps } from '@/types/TableRow'
 import classNames from 'classnames'
+import { useSelector } from 'react-redux'
 
 type TasksRowProps = TableRowBaseProps<Task>
 
 export const BudgetTaskRow = ({ value, onManage }: TasksRowProps): JSX.Element => {
+  const authRole = useSelector((state: RootState) => state.auth.user?.role?.name)
+
   const handleManage = () => {
     if (onManage) {
       onManage(value.id)
@@ -37,9 +42,11 @@ export const BudgetTaskRow = ({ value, onManage }: TasksRowProps): JSX.Element =
       </TableData>
 
       <TableData>
-        <Button variant="blank" onClick={handleManage}>
-          Manage
-        </Button>
+        {authRole !== UserRole.MEMBER && (
+          <Button variant="blank" onClick={handleManage}>
+            Manage
+          </Button>
+        )}
       </TableData>
     </TableRow>
   )

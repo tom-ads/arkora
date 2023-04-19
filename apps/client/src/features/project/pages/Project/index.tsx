@@ -1,4 +1,12 @@
-import { Button, Page, PageBackBtn, PageContent, PageHeader, PageTitle } from '@/components'
+import {
+  Button,
+  NoPermissionCard,
+  Page,
+  PageBackBtn,
+  PageContent,
+  PageHeader,
+  PageTitle,
+} from '@/components'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
@@ -14,6 +22,8 @@ import {
 import { ProjectTab } from '@/stores/slices/filters/project'
 import { ProjectTimeView } from '../../components/Views/Time'
 import { useState } from 'react'
+import { isFetchBaseQueryError } from '@/hooks/useQueryError'
+import UserRole from '@/enums/UserRole'
 
 const views = {
   budgets: <ProjectBudgetView />,
@@ -34,11 +44,25 @@ export const ProjectPage = (): JSX.Element => {
 
   const [openManageProjectModal, setOpenManageProjectModal] = useState(false)
 
+  const authRole = useSelector((state: RootState) => state.auth.user?.role?.name)
+
   const { projectId } = useParams()
 
-  const { data: project, isLoading } = useGetProjectQuery(parseInt(projectId!, 10), {
+  const {
+    data: project,
+    isLoading,
+    error,
+  } = useGetProjectQuery(parseInt(projectId!, 10), {
     skip: !projectId,
   })
+
+  if (isFetchBaseQueryError(error) && error?.status === 403) {
+    return (
+      <Page>
+        <NoPermissionCard redirectTo="/projects" redirectTxt="Back to projects" />
+      </Page>
+    )
+  }
 
   return (
     <Page>
@@ -51,9 +75,11 @@ export const ProjectPage = (): JSX.Element => {
             {project?.client?.name ?? 'Client'}
           </span>
         </div>
-        <Button variant="secondary" size="xs" onClick={() => setOpenManageProjectModal(true)}>
-          Manage Project
-        </Button>
+        {authRole !== UserRole.MEMBER && (
+          <Button variant="secondary" size="xs" onClick={() => setOpenManageProjectModal(true)}>
+            Manage Project
+          </Button>
+        )}
       </PageHeader>
       <PageContent className="space-y-5">
         <ProjectInsights />
@@ -64,9 +90,9 @@ export const ProjectPage = (): JSX.Element => {
       </PageContent>
 
       <ManageProjectModal
-        projectId={projectId ? parseInt(projectId, 10) : null}
         isOpen={openManageProjectModal}
         onClose={() => setOpenManageProjectModal(false)}
+        projectId={projectId ? parseInt(projectId, 10) : null}
       />
     </Page>
   )
