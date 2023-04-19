@@ -187,9 +187,6 @@ test.group('Budgets : Index', ({ each }) => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-
-    await Promise.all(testProject.budgets.map(async (budget) => await budget.load('project')))
-
     response.assertBodyContains(testProject.budgets.map((budget) => budget.serialize()))
   })
 
@@ -212,8 +209,6 @@ test.group('Budgets : Index', ({ each }) => {
       .loginAs(authUser)
 
     response.assertStatus(200)
-
-    await testBudget.load('project')
     response.assertBody([testBudget.serialize()])
   })
 
