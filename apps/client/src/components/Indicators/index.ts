@@ -1,4 +1,4 @@
 export * from './Stepper'
 export * from './PasswordStrength'
-export * from './ProgressLine'
-export * from './DoubleProgressLine'
+export * from './SingleProgressBar'
+export * from './DoubleProgressBar'

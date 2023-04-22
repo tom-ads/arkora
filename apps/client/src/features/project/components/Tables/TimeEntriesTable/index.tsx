@@ -12,6 +12,7 @@ import { RootState } from '@/stores/store'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { TimeEntriesRow, TimeEntriesSkeletonRow } from '../TimeEntriesRow'
+import UserRole from '@/enums/UserRole'
 
 type TableProps = {
   onManage: (id: number) => void
@@ -20,12 +21,13 @@ type TableProps = {
 export const TimeEntriesTable = ({ onManage }: TableProps): JSX.Element => {
   const { projectId } = useParams()
 
-  const { tasksFilter, budgetsFilter, membersFilter, billableFilter } = useSelector(
+  const { tasksFilter, budgetsFilter, membersFilter, billableFilter, authRole } = useSelector(
     (state: RootState) => ({
       tasksFilter: state.projectFilters.timeEntry.tasks,
       budgetsFilter: state.projectFilters.timeEntry.budgets,
       membersFilter: state.projectFilters.timeEntry.members,
       billableFilter: state.projectFilters.timeEntry.billable,
+      authRole: state.auth.user?.role?.name,
     }),
   )
 
@@ -47,7 +49,9 @@ export const TimeEntriesTable = ({ onManage }: TableProps): JSX.Element => {
         isEmpty: !projectEntries?.length && !isLoading,
         title: 'No Entries Found',
         description:
-          'When project members track their time against the projects budgets you will see their entries here',
+          authRole === UserRole.MEMBER
+            ? 'Your tracked time for this project will display here once you track some time!'
+            : 'When project members track their time against the projects budgets you will see their entries here',
         icon: <ClockIcon />,
       }}
     >

@@ -3,13 +3,15 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useState } from 'react'
 import { CreateProjectModal, ManageProjectModal } from '../../components'
 import { ProjectsTable } from '../../components/Tables/ProjectsTable'
+import { useAuthorization } from '@/hooks/useAuthorization'
 
 export const ProjectsPage = (): JSX.Element => {
   useDocumentTitle('Projects')
 
+  const [projectId, setProjectId] = useState<number | null>(null)
   const [openCreateProjectModal, setOpenCreateProjectModal] = useState(false)
 
-  const [projectId, setProjectId] = useState<number | null>(null)
+  const { checkPermission } = useAuthorization()
 
   return (
     <Page>
@@ -18,9 +20,11 @@ export const ProjectsPage = (): JSX.Element => {
           <PageTitle>Projects</PageTitle>
           <PageDescription>Manage your organisations projects and view insights</PageDescription>
         </div>
-        <Button variant="secondary" size="xs" onClick={() => setOpenCreateProjectModal(true)}>
-          Create Project
-        </Button>
+        {checkPermission('project:create') && (
+          <Button variant="secondary" size="xs" onClick={() => setOpenCreateProjectModal(true)}>
+            Create Project
+          </Button>
+        )}
       </PageHeader>
 
       <PageContent>

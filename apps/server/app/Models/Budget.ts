@@ -325,22 +325,7 @@ export default class Budget extends BaseModel {
 
   // Static methods
 
-  /*
-    This method returns a total_spent field for each specified budget, where each budget can have
-    zero to many linked time entries where their task_id is related to a billable task. These
-    TimeEntries contain a durationMinutes field, which we can use to determine the total number of
-    hours used, and thus multiplied by the hourly_rate set on each budget, giving us the total
-    expenditure.
-
-    Does cover
-    - Time entries that have task/budget pivot record is_billable flag set to true, will
-      return only those time entries.
-
-    Does not cover:
-    - Active timers durations won't have been added to the TimeEntries durationMinutes, so these
-      are not included in the output total_spent for each budget.
-  */
-  public static async getBudgetsMetrics(budgetIds: number[], filters?: BudgetFilters) {
+  public static async getMetricsForBudgets(budgetIds: number[], filters?: BudgetFilters) {
     const result = await Budget.query()
       .withScopes((scopes) => scopes.budgetMetrics())
       .whereIn('budgets.id', budgetIds)
@@ -355,10 +340,11 @@ export default class Budget extends BaseModel {
     return result
   }
 
-  public static async getBudgetMetrics(budgetId: number) {
+  public static async getMetricsForBudget(budgetId: number) {
     const result = await Budget.query()
       .withScopes((scopes) => scopes.budgetMetrics())
       .where('budgets.id', budgetId)
+      .preload('project')
       .first()
 
     return result

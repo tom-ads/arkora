@@ -20,6 +20,7 @@ import {
 import { setOrganisation } from '@/stores/slices/organisation'
 import hourlyRateSchema from '@/helpers/validation/hourly_rate'
 import { taskSchema } from '@/features/task'
+import { useAuthorization } from '@/hooks/useAuthorization'
 
 type SelectedTab = 'details' | 'tracking' | 'rates' | 'tasks'
 
@@ -73,7 +74,11 @@ export const ManageOrganisationModal = (props: ModalBaseProps): JSX.Element => {
 
   const { successToast, errorToast } = useToast()
 
-  const organisation = useSelector((state: RootState) => state.organisation)
+  const { checkPermission } = useAuthorization()
+
+  const { organisation } = useSelector((state: RootState) => ({
+    organisation: state.organisation,
+  }))
 
   const [updateOrganisation, { isLoading: updatingOrganisation, error }] =
     useUpdateOrganisationMutation()
@@ -127,18 +132,22 @@ export const ManageOrganisationModal = (props: ModalBaseProps): JSX.Element => {
             <TabItem isActive={selectedTab === 'details'} onClick={() => setSelectedTab('details')}>
               Details
             </TabItem>
-            <TabItem
-              isActive={selectedTab === 'tracking'}
-              onClick={() => setSelectedTab('tracking')}
-            >
-              Tracking
-            </TabItem>
-            <TabItem isActive={selectedTab === 'rates'} onClick={() => setSelectedTab('rates')}>
-              Rates
-            </TabItem>
-            <TabItem isActive={selectedTab === 'tasks'} onClick={() => setSelectedTab('tasks')}>
-              Tasks
-            </TabItem>
+            {checkPermission('organisation:update') && (
+              <>
+                <TabItem
+                  isActive={selectedTab === 'tracking'}
+                  onClick={() => setSelectedTab('tracking')}
+                >
+                  Tracking
+                </TabItem>
+                <TabItem isActive={selectedTab === 'rates'} onClick={() => setSelectedTab('rates')}>
+                  Rates
+                </TabItem>
+                <TabItem isActive={selectedTab === 'tasks'} onClick={() => setSelectedTab('tasks')}>
+                  Tasks
+                </TabItem>
+              </>
+            )}
           </TabGroup>
           <HorizontalDivider />
         </div>
@@ -167,13 +176,15 @@ export const ManageOrganisationModal = (props: ModalBaseProps): JSX.Element => {
               {selectedTab === 'rates' && <OrganisationRatesView {...props} {...methods} />}
               {selectedTab === 'tasks' && <OrganisationTasksView {...props} {...methods} />}
 
-              <ModalFooter className="!mt-11">
+              <ModalFooter>
                 <Button variant="blank" onClick={props.onClose} disabled={updatingOrganisation}>
                   Cancel
                 </Button>
-                <Button size="xs" type="submit" loading={updatingOrganisation}>
-                  Update Organisation
-                </Button>
+                {checkPermission('organisation:update') && (
+                  <Button size="xs" type="submit" loading={updatingOrganisation}>
+                    Update Organisation
+                  </Button>
+                )}
               </ModalFooter>
             </>
           )}

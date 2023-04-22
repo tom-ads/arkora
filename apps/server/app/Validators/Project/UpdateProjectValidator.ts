@@ -47,5 +47,7 @@ export default class UpdateProjectValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'name.projectName': 'Name already taken',
+  }
 }

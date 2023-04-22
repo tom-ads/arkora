@@ -5,14 +5,16 @@ import { RootState } from '@/stores/store'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { CreateBudgetTaskModal } from '../../Modals'
+import UserRole from '@/enums/UserRole'
 
 export const BudgetControlsWidget = (): JSX.Element => {
   const dispatch = useDispatch()
 
   const [openActionModal, setOpenActionModal] = useState(false)
 
-  const { selectedTab } = useSelector((state: RootState) => ({
+  const { selectedTab, authRole } = useSelector((state: RootState) => ({
     selectedTab: state.budgetFilters.tab,
+    authRole: state.auth.user?.role?.name,
   }))
 
   const handleSelectedTab = (tab: BudgetTab) => {
@@ -47,7 +49,7 @@ export const BudgetControlsWidget = (): JSX.Element => {
             </TabItem>
           </TabGroup>
 
-          {selectedTab !== 'time' && (
+          {selectedTab !== 'time' && authRole !== UserRole.MEMBER && (
             <Button
               size="xs"
               onClick={() => setOpenActionModal(true)}

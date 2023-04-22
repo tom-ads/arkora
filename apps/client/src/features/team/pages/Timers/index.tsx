@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { ActiveTimersList, InactiveTimersList, TimersStatsCard } from '../../components'
 
 export const TimersPage = (): JSX.Element => {
-  const { data } = useGetTimersQuery()
+  const { data } = useGetTimersQuery(undefined, { pollingInterval: 3000 })
 
   const teamTimers = useMemo(() => {
     return {

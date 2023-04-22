@@ -13,6 +13,7 @@ import { TabGroup, TabNavItem } from '../Navigation'
 import { clearAuth } from '@/stores/slices/auth'
 import { ProfileModal } from '@/features/account'
 import { ManageOrganisationModal } from '@/features/organisation'
+import UserRole from '@/enums/UserRole'
 
 const AvatarDropdown = () => {
   const [openProfileModal, setOpenProfileModal] = useState<boolean>(false)
@@ -91,8 +92,9 @@ export const Header = (): JSX.Element => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const { isAuthenticated } = useSelector((state: RootState) => ({
+  const { isAuthenticated, authRole } = useSelector((state: RootState) => ({
     isAuthenticated: state.auth.isAuthenticated,
+    authRole: state.auth.user?.role?.name,
   }))
 
   return (
@@ -110,8 +112,12 @@ export const Header = (): JSX.Element => {
             <nav className="sm:flex gap-2 px-3 items-center hidden">
               <NavItem to="timer">Timer</NavItem>
               <NavItem to="projects">Projects</NavItem>
-              <NavItem to="clients">Clients</NavItem>
-              <NavItem to="team">Team</NavItem>
+              {authRole !== UserRole.MEMBER && (
+                <>
+                  <NavItem to="clients">Clients</NavItem>
+                  <NavItem to="team">Team</NavItem>
+                </>
+              )}
             </nav>
           )}
         </div>

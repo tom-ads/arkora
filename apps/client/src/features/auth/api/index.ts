@@ -17,6 +17,9 @@ import {
   SessionResponse,
   VerifyInvitationResponse,
 } from './types/response'
+import { setAuth } from '@/stores/slices/auth'
+import { setOrganisation } from '@/stores/slices/organisation'
+import { startTracking } from '@/stores/slices/timer'
 
 const authBasePath = '/api/v1/auth'
 
@@ -117,6 +120,20 @@ const authEndpoints = appApi.injectEndpoints({
 
     getSession: build.query<SessionResponse, void>({
       query: () => `${authBasePath}/session `,
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: session } = await queryFulfilled
+          if (session) {
+            dispatch(setAuth(session.user))
+            dispatch(setOrganisation(session.organisation))
+            if (session?.timer) {
+              dispatch(startTracking(session.timer))
+            }
+          }
+        } catch {
+          //
+        }
+      },
     }),
   }),
   overrideExisting: false,

@@ -1,29 +1,32 @@
 import {
   Badge,
   Button,
-  DoubleProgressLineIndicator,
   FormatCurrency,
   InlineLink,
-  ProgressLineIndicator,
   SkeletonBox,
   TableData,
   TableRow,
-  ToolTip,
 } from '@/components'
+import { BillableProgressBar, SpentProgressBar } from '@/components/ProgressBars'
 import BudgetType from '@/enums/BudgetType'
-import { calculatePercentage, convertToPounds } from '@/helpers/currency'
-import { formatMinutesToHourMinutes } from '@/helpers/date'
+import UserRole from '@/enums/UserRole'
+import { convertToPounds } from '@/helpers/currency'
+import { useAuthorization } from '@/hooks/useAuthorization'
 import { RootState } from '@/stores/store'
 import { Budget } from '@/types'
 import { TableRowBaseProps } from '@/types/TableRow'
+import Project from '@/types/models/Project'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
-type RowProps = TableRowBaseProps<Budget>
+type RowProps = TableRowBaseProps<Budget & { project?: Project }>
 
 export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
-  const { currency } = useSelector((state: RootState) => ({
-    currency: state.organisation.currency,
+  const { checkPermission } = useAuthorization()
+
+  const { currencyCode, authRole } = useSelector((state: RootState) => ({
+    currencyCode: state.organisation.currency?.code,
+    authRole: state.auth.user?.role?.name,
   }))
 
   const handleManage = () => {
@@ -46,6 +49,8 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
     return transformedBudget
   }, [value])
 
+  const showCost = authRole === UserRole.MEMBER ? formattedBudget?.project?.showCost : true
+
   return (
     <TableRow>
       <TableData>
@@ -66,126 +71,42 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        {value.budgetType?.name !== BudgetType.NON_BILLABLE && value.hourlyRate ? (
-          <FormatCurrency value={formattedBudget?.hourlyRate} currency={currency?.code} />
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE && value.hourlyRate && showCost ? (
+          <FormatCurrency value={formattedBudget?.hourlyRate} currency={currencyCode} />
         ) : (
           <p>- - -</p>
         )}
       </TableData>
 
       <TableData>
-        {value.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <FormatCurrency value={formattedBudget.allocatedBudget} currency={currency?.code} />
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE && showCost ? (
+          <FormatCurrency value={formattedBudget.allocatedBudget} currency={currencyCode} />
         ) : (
           <p>- - -</p>
         )}
       </TableData>
 
       <TableData>
-        {value.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <ToolTip
-            width={198}
-            trigger={
-              <ProgressLineIndicator
-                percent={calculatePercentage(
-                  formattedBudget.spentCost,
-                  formattedBudget.allocatedBudget,
-                )}
-              />
-            }
-          >
-            <div className="divide-y divide-gray-40 divide-dashed">
-              <div className="flex flex-col items-start pb-[6px]">
-                <p className="font-medium text-xs text-gray-50">Total</p>
-                <div className="flex justify-between w-full">
-                  <p className="font-semibold text-xs text-gray-80">
-                    <FormatCurrency
-                      value={formattedBudget.allocatedBudget}
-                      currency={currency?.code}
-                    />
-                  </p>
-                  <p className="font-semibold text-xs text-gray-80">
-                    {formatMinutesToHourMinutes(value.allocatedDuration)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-start py-[6px]">
-                <p className="font-medium text-xs text-gray-50">Spent</p>
-                <div className="flex justify-between w-full">
-                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
-                    <FormatCurrency value={formattedBudget.spentCost} currency={currency?.code} />(
-                    {calculatePercentage(
-                      formattedBudget.spentCost,
-                      formattedBudget.allocatedBudget,
-                    )}
-                    %)
-                  </p>
-                  <p className="font-semibold text-xs text-gray-80">
-                    {formatMinutesToHourMinutes(value.billableDuration + value.unbillableDuration)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-start pt-[6px]">
-                <p className="font-medium text-xs text-gray-50">Remaining</p>
-                <div className="flex justify-between w-full">
-                  <p className="font-semibold text-xs text-gray-80 flex gap-1">
-                    <FormatCurrency
-                      value={formattedBudget.remainingCost}
-                      currency={currency?.code}
-                    />
-                    (
-                    {calculatePercentage(
-                      formattedBudget.remainingCost,
-                      formattedBudget.allocatedBudget,
-                    )}
-                    %)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </ToolTip>
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE && showCost ? (
+          <SpentProgressBar
+            width={200}
+            billableCost={formattedBudget.billableCost}
+            unbillableCost={formattedBudget.unbillableCost}
+            allocatedBudget={formattedBudget.allocatedBudget}
+            allocatedDuration={formattedBudget.allocatedDuration}
+          />
         ) : (
           <p>- - -</p>
         )}
       </TableData>
 
       <TableData>
-        {value.budgetType?.name !== BudgetType.NON_BILLABLE ? (
-          <ToolTip
-            width={198}
-            trigger={
-              <DoubleProgressLineIndicator
-                leftPercent={calculatePercentage(
-                  formattedBudget?.billableCost,
-                  formattedBudget?.spentCost,
-                )}
-                rightPercent={calculatePercentage(
-                  formattedBudget?.unbillableCost,
-                  formattedBudget?.spentCost,
-                )}
-              />
-            }
-          >
-            <div className="divide-y divide-gray-40 divide-dashed">
-              <div className="flex justify-between items-center py-1">
-                <p className="font-medium text-xs text-green-90">Billable</p>
-                <p className="font-semibold text-xs text-gray-80">
-                  <FormatCurrency value={formattedBudget?.billableCost} currency={currency?.code} />
-                </p>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <p className="font-medium text-xs text-red-90">Non-Billable</p>
-                <p className="font-semibold text-xs text-gray-80">
-                  <FormatCurrency
-                    value={formattedBudget?.unbillableCost}
-                    currency={currency?.code}
-                  />
-                </p>
-              </div>
-            </div>
-          </ToolTip>
+        {value.budgetType?.name !== BudgetType.NON_BILLABLE && showCost ? (
+          <BillableProgressBar
+            width={200}
+            billableTotal={formattedBudget.billableCost}
+            unbillableTotal={formattedBudget.unbillableCost}
+          />
         ) : (
           <p>- - -</p>
         )}
@@ -196,9 +117,11 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        <Button variant="blank" onClick={handleManage}>
-          Manage
-        </Button>
+        {checkPermission('project:update') && (
+          <Button variant="blank" onClick={handleManage}>
+            Manage
+          </Button>
+        )}
       </TableData>
     </TableRow>
   )

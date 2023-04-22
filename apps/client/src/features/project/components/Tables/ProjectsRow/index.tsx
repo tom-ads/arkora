@@ -9,10 +9,15 @@ import {
 } from '@/components'
 import { SkeletonCircle } from '@/components/Skeletons/Circle'
 import Status from '@/enums/Status'
+import UserRole from '@/enums/UserRole'
+import { RootState } from '@/stores/store'
 import ProjectBudget from '@/types/models/ProjectBudget'
 import { TableRowBaseProps } from '@/types/TableRow'
+import { useSelector } from 'react-redux'
 
 export const ProjectsRow = ({ value, onManage }: TableRowBaseProps<ProjectBudget>): JSX.Element => {
+  const authRole = useSelector((state: RootState) => state.auth.user?.role?.name)
+
   const handleManage = () => {
     if (onManage) {
       onManage(value.id)
@@ -47,9 +52,11 @@ export const ProjectsRow = ({ value, onManage }: TableRowBaseProps<ProjectBudget
         <TableData>{value.private ? 'Private' : 'Public'}</TableData>
 
         <TableData>
-          <Button variant="blank" onClick={handleManage}>
-            Manage
-          </Button>
+          {authRole !== UserRole.MEMBER && (
+            <Button variant="blank" onClick={handleManage}>
+              Manage
+            </Button>
+          )}
         </TableData>
       </TableRow>
     </>

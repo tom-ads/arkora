@@ -2,6 +2,8 @@ import { DateTime } from 'luxon'
 import {
   BaseModel,
   beforeDelete,
+  beforeFetch,
+  beforeFind,
   BelongsTo,
   belongsTo,
   column,
@@ -77,6 +79,12 @@ export default class Project extends BaseModel {
 
   // Hooks
 
+  @beforeFind()
+  @beforeFetch()
+  public static preloadRelations(query: ProjectBuilder) {
+    query.preload('client')
+  }
+
   @beforeDelete()
   public static async beforeDelete(project: Project) {
     await project.related('budgets').query().delete()
@@ -114,11 +122,17 @@ export default class Project extends BaseModel {
 
   // Instance Methods
 
+  public async isAssigned(this: Project, userId: number) {
+    const result = await this.related('members').query().where('users.id', userId).first()
+    return !!result
+  }
+
   public async getMetricsForMembers(this: Project, filters?: MemberInsightsFilter) {
     const budgetIds = (await this.related('budgets').query()).map((budget) => budget.id)
 
     const result = await this.related('members')
       .query()
+      .whereNotNull('verified_at')
       .withScopes((scope) => scope.userInsights({ budgets: budgetIds }))
       .if(filters?.search, (query) => {
         query
@@ -163,30 +177,13 @@ export default class Project extends BaseModel {
       })
       .exec()
 
-    const totalBillableDuration = sumBy(result, (b) => b.billableDuration ?? 0)
-    const totalBillableCost = sumBy(result, (b) => b.billableCost ?? 0)
-    const totalUnbillableDuration = sumBy(result, (b) => b.unbillableDuration ?? 0)
-    const totalUnbillableCost = sumBy(result, (b) => b.unbillableCost ?? 0)
-    const totalAllocatedBudget = sumBy(result, (b) => b.allocatedBudget ?? 0)
-    const totalAllocatedDuration = sumBy(result, (b) => b.allocatedDuration ?? 0)
-
     return {
-      allocatedCost: totalAllocatedBudget,
-      allocatedDuration: totalAllocatedDuration,
-      usedCost: totalBillableCost + totalUnbillableCost,
-      usedDuration: totalBillableDuration + totalUnbillableDuration,
-
-      billableDuration: totalBillableDuration,
-      billableCost: totalBillableCost,
-      unbillableDuration: totalUnbillableDuration,
-      unbillableCost: totalUnbillableCost,
-
-      revenue: totalBillableCost + totalUnbillableCost,
-      expenses: totalUnbillableCost,
-      profit: totalBillableCost - totalUnbillableCost,
-
-      remainingCost: totalAllocatedBudget - (totalBillableCost + totalUnbillableCost),
-      remainingDuration: totalAllocatedDuration - (totalUnbillableDuration + totalBillableDuration),
+      allocatedBudget: sumBy(result, (b) => b.allocatedBudget ?? 0),
+      allocatedDuration: sumBy(result, (b) => b.allocatedDuration ?? 0),
+      billableCost: sumBy(result, (b) => b.billableCost ?? 0),
+      billableDuration: sumBy(result, (b) => b.billableDuration ?? 0),
+      unbillableCost: sumBy(result, (b) => b.unbillableCost ?? 0),
+      unbillableDuration: sumBy(result, (b) => b.unbillableDuration ?? 0),
     }
   }
 }

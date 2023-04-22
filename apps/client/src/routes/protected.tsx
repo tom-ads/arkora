@@ -4,19 +4,16 @@ import { ClientRoutes } from '@/features/client'
 import { ProjectRoutes } from '@/features/project'
 import { TeamRoutes } from '@/features/team'
 import { TimerRoute } from '@/features/timer'
-import { RootState } from '@/stores/store'
-import { useSelector } from 'react-redux'
+import { useAuth } from '@/hooks/useAuth'
 import { Navigate, useLocation } from 'react-router-dom'
 
-export const PrivateRoutes = (): JSX.Element => {
+const ProtectedRoutes = (): JSX.Element => {
   const location = useLocation()
 
-  const { isAuthenticated } = useSelector((state: RootState) => ({
-    isAuthenticated: state.auth.isAuthenticated,
-  }))
+  const { isAuthenticated } = useAuth()
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace={true} />
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   return <MainLayout />
@@ -24,7 +21,7 @@ export const PrivateRoutes = (): JSX.Element => {
 
 export const privateRoutes = [
   {
-    element: <PrivateRoutes />,
+    element: <ProtectedRoutes />,
     children: [
       {
         path: '/projects/*',

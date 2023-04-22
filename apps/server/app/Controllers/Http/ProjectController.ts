@@ -109,6 +109,8 @@ export default class ProjectController {
 
     const payload = await ctx.request.validate(UpdateProjectValidator)
 
+    project.showCost = payload.show_cost
+
     if (payload.name !== project.name) {
       const nameTaken = await Project.isNameTaken(ctx.organisation!, payload.name, project.id)
       if (nameTaken) {
@@ -133,10 +135,6 @@ export default class ProjectController {
         const members = await ctx.organisation?.related('users').query()
         await project.related('members').sync(members?.map((member) => member.id) ?? [])
       }
-    }
-
-    if (payload.show_cost !== project.showCost) {
-      project.showCost = payload.show_cost
     }
 
     await project.save()
@@ -190,8 +188,14 @@ export default class ProjectController {
   }
 
   @bind()
-  public async insights(_: HttpContextContract, project: Project) {
+  public async insights(ctx: HttpContextContract, project: Project) {
     const insights = await project.getInsights()
+
+    if (ctx.auth.user?.role.name === UserRole.MEMBER && !project.showCost) {
+      insights.allocatedBudget = 0
+      insights.billableCost = 0
+      insights.unbillableCost = 0
+    }
 
     return {
       ...insights,

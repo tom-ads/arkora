@@ -1,14 +1,14 @@
 import classNames from 'classnames'
 
-type DoubleProgressLineIndicatorProps = {
+type DoubleProgressBarProps = {
   leftPercent: number | string
   rightPercent: number | string
 }
 
-export const DoubleProgressLineIndicator = ({
+export const DoubleProgressBar = ({
   leftPercent,
   rightPercent,
-}: DoubleProgressLineIndicatorProps): JSX.Element => {
+}: DoubleProgressBarProps): JSX.Element => {
   return (
     <div className="flex justify-between h-[10px] w-full bg-gray-20">
       <div

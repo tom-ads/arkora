@@ -5,11 +5,12 @@ import { LockIcon, OpenLockIcon } from '@/components/Icons'
 import { FormatCurrency } from '@/components/FormatCurrency'
 import { useMemo } from 'react'
 import { convertToPounds } from '@/helpers/currency'
-import { BudgetBaseMetrics } from '@/types'
+import { BaseMetrics } from '@/types'
 
-type CostBreakdownValue = BudgetBaseMetrics & {
+type CostBreakdownValue = BaseMetrics & {
   status?: Status
-  private: boolean
+  private?: boolean
+  showCost?: boolean
 }
 
 type CostBreakdownWidgetProps = {
@@ -22,6 +23,7 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
     const remainDur = value.allocatedDuration - (value.unbillableDuration + value.billableDuration)
     return {
       ...value,
+      showCost: value.showCost ?? true,
       allocatedCost: convertToPounds(value.allocatedBudget),
       usedCost: convertToPounds(value.billableCost + value.unbillableCost),
       usedDuration: value.billableDuration + value.unbillableDuration,
@@ -44,28 +46,29 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
       <div className="border-b border-dashed border-gray-30 px-[21px] py-4">
         <div className="flex items-center justify-between">
           <p>01st Jan - 24th June </p>
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 text-gray-80">
-                {formattedInsights.private ? <LockIcon /> : <OpenLockIcon />}
-              </div>
-              <span className="text-sm font-medium text-gray-80">
-                {formattedInsights.private ? 'Private' : 'Public'}
-              </span>
-            </div>
-            {formattedInsights.status && (
+          <div className="flex items-center gap-4">
+            {(formattedInsights?.private !== undefined || formattedInsights?.private !== null) && (
               <>
-                <span>-</span>
-                <p
-                  className={classNames('text-sm font-medium capitalize flex items-center gap-3', {
-                    'text-green-90': formattedInsights?.status === Status.ACTIVE,
-                    'text-yellow-90': formattedInsights?.status === Status.PENDING,
-                    'text-gray-70': formattedInsights?.status === Status.INACTIVE,
-                  })}
-                >
-                  <span>{formattedInsights.status?.toLowerCase()} Project</span>
-                </p>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-4 text-gray-80">
+                    {formattedInsights.private ? <LockIcon /> : <OpenLockIcon />}
+                  </div>
+                  <span className="text-sm font-medium text-gray-80">
+                    {formattedInsights.private ? 'Private' : 'Public'}
+                  </span>
+                </div>
               </>
+            )}
+            {formattedInsights.status && (
+              <p
+                className={classNames('text-sm font-medium capitalize flex items-center gap-3', {
+                  'text-green-90': formattedInsights?.status === Status.ACTIVE,
+                  'text-yellow-90': formattedInsights?.status === Status.PENDING,
+                  'text-gray-70': formattedInsights?.status === Status.INACTIVE,
+                })}
+              >
+                <span>{formattedInsights.status?.toLowerCase()} Project</span>
+              </p>
             )}
           </div>
         </div>
@@ -80,7 +83,11 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
               <p className="text-sm text-gray-70">Allocated</p>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-100">
-                  <FormatCurrency value={formattedInsights.allocatedCost} />
+                  {formattedInsights.showCost ? (
+                    <FormatCurrency value={formattedInsights.allocatedCost} />
+                  ) : (
+                    <span>- - -</span>
+                  )}
                 </p>
                 <p className="text-sm font-medium text-gray-100">
                   {formatMinutesToHourMinutes(formattedInsights.allocatedDuration)}
@@ -92,7 +99,11 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
               <p className="text-sm text-gray-70">Used</p>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-100">
-                  <FormatCurrency value={formattedInsights.usedCost} />
+                  {formattedInsights.showCost ? (
+                    <FormatCurrency value={formattedInsights.usedCost} />
+                  ) : (
+                    <span>- - -</span>
+                  )}
                 </p>
                 <p className="text-sm font-medium text-gray-100">
                   {formatMinutesToHourMinutes(formattedInsights.usedDuration)}
@@ -109,7 +120,11 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
               <p className="text-sm text-gray-70">Billable</p>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-green-90">
-                  <FormatCurrency value={formattedInsights.billableCost} />
+                  {formattedInsights.showCost ? (
+                    <FormatCurrency value={formattedInsights.billableCost} />
+                  ) : (
+                    <span>- - -</span>
+                  )}
                 </p>
                 <p className="text-sm font-medium text-gray-100">
                   {formatMinutesToHourMinutes(formattedInsights.billableDuration)}
@@ -121,7 +136,11 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
               <p className="text-sm text-gray-70">Non-billable</p>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-red-90">
-                  <FormatCurrency value={formattedInsights.unbillableCost} />
+                  {formattedInsights.showCost ? (
+                    <FormatCurrency value={formattedInsights.unbillableCost} />
+                  ) : (
+                    <span>- - -</span>
+                  )}
                 </p>
                 <p className="text-sm font-medium text-gray-100">
                   {formatMinutesToHourMinutes(formattedInsights.unbillableDuration)}
@@ -139,7 +158,11 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
                 <p className="text-sm text-gray-70">Gross Profit</p>
                 <div className="flex items-center">
                   <p className="text-sm font-medium text-gray-100">
-                    <FormatCurrency value={formattedInsights.revenue} />
+                    {formattedInsights.showCost ? (
+                      <FormatCurrency value={formattedInsights.revenue} />
+                    ) : (
+                      <span>- - -</span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -148,7 +171,11 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
                 <p className="text-sm text-gray-70">Expenses</p>
                 <div className="flex items-center">
                   <p className="text-sm font-medium text-gray-100">
-                    <FormatCurrency value={formattedInsights.expenses} />
+                    {formattedInsights.showCost ? (
+                      <FormatCurrency value={formattedInsights.expenses} />
+                    ) : (
+                      <span>- - -</span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -157,13 +184,17 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
                 <p className="text-sm text-gray-70 pr-2">Net Profit</p>
                 <div className="flex items-center">
                   <p className="text-sm font-medium text-gray-100">
-                    <FormatCurrency
-                      value={formattedInsights.profit}
-                      className={classNames({
-                        'text-red-90': formattedInsights.profit < 0,
-                        'text-green-90': formattedInsights.profit > 0,
-                      })}
-                    />
+                    {formattedInsights.showCost ? (
+                      <FormatCurrency
+                        value={formattedInsights.profit}
+                        className={classNames({
+                          'text-red-90': formattedInsights.profit < 0,
+                          'text-green-90': formattedInsights.profit > 0,
+                        })}
+                      />
+                    ) : (
+                      <span>- - -</span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -173,7 +204,11 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
               <p className="text-sm text-gray-70">Remaining</p>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-100">
-                  <FormatCurrency value={formattedInsights.remainingCost} />
+                  {formattedInsights.showCost ? (
+                    <FormatCurrency value={formattedInsights.remainingCost} />
+                  ) : (
+                    <span>- - -</span>
+                  )}
                 </p>
                 <p className="text-sm font-medium text-gray-100">
                   {formatMinutesToHourMinutes(formattedInsights.remainingDuration)}

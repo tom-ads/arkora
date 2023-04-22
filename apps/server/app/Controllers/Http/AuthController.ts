@@ -168,7 +168,6 @@ export default class AuthController {
 
   public async session(ctx: HttpContextContract) {
     const organisation = await Organisation.findOrFail(ctx.auth.user?.organisationId)
-
     /* 
       Active timer could've been running while the user left their
       browser etc. We need to ensure the additional time has been

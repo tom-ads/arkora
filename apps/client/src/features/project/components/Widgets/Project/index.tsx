@@ -6,14 +6,16 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ProjectTimeEntryFilters } from '../../Filters'
 import { AssignProjectMemberModal } from '../../Modals/AssignMembers'
+import UserRole from '@/enums/UserRole'
 
 export const ProjectWidget = (): JSX.Element => {
   const dispatch = useDispatch()
 
   const [openActionModal, setOpenActionModal] = useState(false)
 
-  const { selectedTab } = useSelector((state: RootState) => ({
+  const { selectedTab, authRole } = useSelector((state: RootState) => ({
     selectedTab: state.projectFilters.tab,
+    authRole: state.auth.user?.role?.name,
   }))
 
   const handleSelectedTab = (tab: ProjectTab) => {
@@ -46,7 +48,7 @@ export const ProjectWidget = (): JSX.Element => {
             Team
           </TabItem>
         </TabGroup>
-        {selectedTab !== 'entries' && (
+        {selectedTab !== 'entries' && authRole !== UserRole.MEMBER && (
           <Button
             size="xs"
             onClick={() => setOpenActionModal(true)}

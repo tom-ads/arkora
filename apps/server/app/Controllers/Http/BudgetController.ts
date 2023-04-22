@@ -68,7 +68,7 @@ export default class BudgetController {
   public async index(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(GetBudgetsValidator)
 
-    let budgets = await ctx.organisation?.getBudgets(
+    const budgets = await ctx.organisation?.getBudgets(
       {
         userId: payload?.user_id ?? ctx.auth.user!.id,
         projectId: payload?.project_id,
@@ -76,11 +76,7 @@ export default class BudgetController {
       { includeProject: payload?.include_project }
     )
 
-    ctx.response.abortIf(!budgets?.length, [], 200)
-
-    budgets = await Budget.getBudgetsMetrics(budgets!.map((budget) => budget.id))
-
-    return budgets.map((budget) => budget.serialize())
+    return budgets?.map((budget) => budget.serialize()) ?? []
   }
 
   @bind()
@@ -92,7 +88,7 @@ export default class BudgetController {
 
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-    const budgetWithMetrics = await Budget.getBudgetMetrics(budget.id)
+    const budgetWithMetrics = await Budget.getMetricsForBudget(budget.id)
 
     return budgetWithMetrics?.serialize()
   }
@@ -147,7 +143,7 @@ export default class BudgetController {
 
     await budget.save()
 
-    const updatedBudget = await Budget.getBudgetMetrics(budget.id)
+    const updatedBudget = await Budget.getMetricsForBudget(budget.id)
 
     return updatedBudget?.serialize()
   }

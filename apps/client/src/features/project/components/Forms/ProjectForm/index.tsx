@@ -138,13 +138,13 @@ export const ProjectForm = ({
                 title="Show"
                 icon={<OpenLockIcon />}
                 description="Assigned project members can view project and budget costs"
-                value={false}
+                value={true}
               />
               <FormStyledRadioOption
                 title="Hide"
                 icon={<LockIcon />}
                 description="Only managers and admins can view project and budget costs"
-                value={true}
+                value={false}
               />
             </FormStyledRadio>
           </FormControl>
