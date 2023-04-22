@@ -132,6 +132,7 @@ export default class Project extends BaseModel {
 
     const result = await this.related('members')
       .query()
+      .whereNotNull('verified_at')
       .withScopes((scope) => scope.userInsights({ budgets: budgetIds }))
       .if(filters?.search, (query) => {
         query

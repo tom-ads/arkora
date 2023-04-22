@@ -13,6 +13,8 @@ import Task from '@/types/models/Task'
 import { useParams } from 'react-router-dom'
 import { z } from 'zod'
 import { BudgetTaskRow, BudgetTaskSkeletonRow } from '../TasksRow'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/stores/store'
 
 type FormFields = {
   tasks: Task[]
@@ -27,7 +29,11 @@ type BudgetTasksTableProps = {
 export const BudgetTasksTable = ({ onManage }: BudgetTasksTableProps): JSX.Element => {
   const { budgetId } = useParams()
 
-  const { data: tasks, isLoading } = useGetBudgetTasksQuery(budgetId!, { skip: !budgetId })
+  const authRole = useSelector((state: RootState) => state.auth.user?.role?.name)
+
+  const { data: tasks, isLoading } = useGetBudgetTasksQuery(parseInt(budgetId!, 10), {
+    skip: !budgetId,
+  })
 
   return (
     <TableContainer

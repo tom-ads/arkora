@@ -11,6 +11,7 @@ import { BillableProgressBar, SpentProgressBar } from '@/components/ProgressBars
 import BudgetType from '@/enums/BudgetType'
 import UserRole from '@/enums/UserRole'
 import { convertToPounds } from '@/helpers/currency'
+import { useAuthorization } from '@/hooks/useAuthorization'
 import { RootState } from '@/stores/store'
 import { Budget } from '@/types'
 import { TableRowBaseProps } from '@/types/TableRow'
@@ -21,6 +22,8 @@ import { useSelector } from 'react-redux'
 type RowProps = TableRowBaseProps<Budget & { project?: Project }>
 
 export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
+  const { checkPermission } = useAuthorization()
+
   const { currencyCode, authRole } = useSelector((state: RootState) => ({
     currencyCode: state.organisation.currency?.code,
     authRole: state.auth.user?.role?.name,
@@ -114,7 +117,7 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        {authRole !== UserRole.MEMBER && (
+        {checkPermission('project:update') && (
           <Button variant="blank" onClick={handleManage}>
             Manage
           </Button>

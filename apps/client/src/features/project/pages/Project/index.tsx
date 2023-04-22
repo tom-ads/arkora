@@ -23,7 +23,7 @@ import { ProjectTab } from '@/stores/slices/filters/project'
 import { ProjectTimeView } from '../../components/Views/Time'
 import { useState } from 'react'
 import { isFetchBaseQueryError } from '@/hooks/useQueryError'
-import UserRole from '@/enums/UserRole'
+import { useAuthorization } from '@/hooks/useAuthorization'
 
 const views = {
   budgets: <ProjectBudgetView />,
@@ -44,7 +44,7 @@ export const ProjectPage = (): JSX.Element => {
 
   const [openManageProjectModal, setOpenManageProjectModal] = useState(false)
 
-  const authRole = useSelector((state: RootState) => state.auth.user?.role?.name)
+  const { checkPermission } = useAuthorization()
 
   const { projectId } = useParams()
 
@@ -75,7 +75,7 @@ export const ProjectPage = (): JSX.Element => {
             {project?.client?.name ?? 'Client'}
           </span>
         </div>
-        {authRole !== UserRole.MEMBER && (
+        {checkPermission('project:update') && (
           <Button variant="secondary" size="xs" onClick={() => setOpenManageProjectModal(true)}>
             Manage Project
           </Button>

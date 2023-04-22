@@ -3,18 +3,15 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useState } from 'react'
 import { CreateProjectModal, ManageProjectModal } from '../../components'
 import { ProjectsTable } from '../../components/Tables/ProjectsTable'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/stores/store'
-import UserRole from '@/enums/UserRole'
+import { useAuthorization } from '@/hooks/useAuthorization'
 
 export const ProjectsPage = (): JSX.Element => {
   useDocumentTitle('Projects')
 
-  const authRole = useSelector((state: RootState) => state.auth.user?.role?.name)
-
+  const [projectId, setProjectId] = useState<number | null>(null)
   const [openCreateProjectModal, setOpenCreateProjectModal] = useState(false)
 
-  const [projectId, setProjectId] = useState<number | null>(null)
+  const { checkPermission } = useAuthorization()
 
   return (
     <Page>
@@ -23,7 +20,7 @@ export const ProjectsPage = (): JSX.Element => {
           <PageTitle>Projects</PageTitle>
           <PageDescription>Manage your organisations projects and view insights</PageDescription>
         </div>
-        {authRole !== UserRole.MEMBER && (
+        {checkPermission('project:create') && (
           <Button variant="secondary" size="xs" onClick={() => setOpenCreateProjectModal(true)}>
             Create Project
           </Button>

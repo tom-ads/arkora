@@ -8,7 +8,6 @@ import { bind } from '@adonisjs/route-model-binding'
 import UpdateBudgetValidator from 'App/Validators/Budget/UpdateBudgetValidator'
 import BudgetKind from 'App/Enum/BudgetKind'
 import CommonTask from 'App/Models/CommonTask'
-import UserRole from 'App/Enum/UserRole'
 
 export default class BudgetController {
   public async create(ctx: HttpContextContract) {

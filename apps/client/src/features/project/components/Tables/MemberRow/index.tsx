@@ -2,6 +2,7 @@ import { Avatar, Button, TableData, TableRow, UserIcon } from '@/components'
 import { BillableProgressBar } from '@/components/ProgressBars'
 import UserRole from '@/enums/UserRole'
 import { formatMinutesToHourMinutes } from '@/helpers/date'
+import { useAuthorization } from '@/hooks/useAuthorization'
 import { RootState } from '@/stores/store'
 import { User } from '@/types'
 import { useMemo } from 'react'
@@ -14,6 +15,8 @@ type MemberRowProps = {
 }
 
 export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.Element => {
+  const { checkPermission } = useAuthorization()
+
   const { authId, authRole } = useSelector((state: RootState) => ({
     authId: state.auth.user?.id,
     authRole: state.auth.user?.role?.name,
@@ -67,7 +70,7 @@ export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.E
 
       <TableData>
         <div className="w-full flex items-center justify-end">
-          {value.id !== authId && authRole !== UserRole.MEMBER && (
+          {value.id !== authId && checkPermission('project:update') && (
             <Button
               variant="blank"
               onClick={() => onDelete(formattedMember.id)}
