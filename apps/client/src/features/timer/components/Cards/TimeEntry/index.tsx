@@ -100,7 +100,12 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
         </div>
 
         <div className="self-end">
-          <Button variant="blank" onClick={() => onManage(entry?.id)} className="min-h-0 text-base">
+          <Button
+            variant="blank"
+            onClick={() => onManage(entry?.id)}
+            className="min-h-0 text-base"
+            disabled={entry?.budget?.project?.status !== ProjectStatus.ACTIVE}
+          >
             Manage
           </Button>
         </div>

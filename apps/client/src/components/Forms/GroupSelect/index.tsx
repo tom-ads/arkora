@@ -1,3 +1,4 @@
+import { ClockIcon } from '@/components/Icons'
 import { ChevronIcon } from '@/components/Icons/ChevronIcon'
 import { Listbox, Transition } from '@headlessui/react'
 import { cva } from 'class-variance-authority'
@@ -14,6 +15,7 @@ type FormSelectProps = {
   error?: boolean
   disabled?: boolean
   fullWidth?: boolean
+  emptyState: JSX.Element
   children: JSX.Element[]
 }
 
@@ -72,6 +74,27 @@ const listBoxOptions = cva(
   },
 )
 
+type GroupSelectEmptyStateProps = {
+  title: string
+  description: string
+  icon: JSX.Element
+}
+
+export const FormGroupSelectEmptyState = ({
+  title,
+  description,
+  icon,
+}: GroupSelectEmptyStateProps) => {
+  return (
+    <li className="flex flex-col justify-center items-center my-auto">
+      <span className="text-purple-90 w-8 h-8">{icon}</span>
+
+      <span className="text-gray-80 text-md font-semibold">{title}</span>
+      <p className="text-gray-60 text-sm">{description}</p>
+    </li>
+  )
+}
+
 export const FormGroupSelect = ({
   name,
   control,
@@ -80,6 +103,7 @@ export const FormGroupSelect = ({
   error,
   disabled,
   fullWidth,
+  emptyState,
   children,
 }: FormSelectProps): JSX.Element => {
   const {
@@ -147,7 +171,7 @@ export const FormGroupSelect = ({
                 className={listBoxOptions({ fullWidth })}
                 static
               >
-                {children}
+                {validChildren?.length > 0 ? children : emptyState}
               </Listbox.Options>
             </Transition>
           </>
