@@ -1,4 +1,4 @@
-import { Badge, PauseIcon, PlayIcon } from '@/components'
+import { Badge, PauseIcon, PlayIcon, ToolTip } from '@/components'
 import TimeEntry from '@/types/models/TimeEntry'
 import { Button } from '@/components'
 import classNames from 'classnames'
@@ -6,6 +6,7 @@ import { formatMinutesToTime } from '@/helpers/date'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/stores/store'
+import ProjectStatus from '@/enums/ProjectStatus'
 
 type TimeEntryCardProps = {
   entry: TimeEntry
@@ -63,13 +64,26 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
       {/* Timer Details */}
       <div className="flex flex-col justify-between pl-2">
         <div className="flex gap-4 items-start">
-          <button
-            type="button"
-            onClick={() => onToggle(entry?.id)}
-            className="w-[38px] h-[38px] lg:w-[42px] lg:h-[42px] border-purple-90 text-purple-90 rounded-full border-2 p-2 outline-none"
+          <ToolTip
+            delay={150}
+            width={250}
+            disabled={entry?.budget?.project?.status === ProjectStatus.ACTIVE}
+            className="bg-gray-80 text-white text-sm"
+            tipFill="fill-gray-80"
+            trigger={
+              <button
+                type="button"
+                onClick={() => onToggle(entry?.id)}
+                disabled={entry?.budget?.project?.status !== ProjectStatus.ACTIVE}
+                className="w-[38px] h-[38px] lg:w-[42px] lg:h-[42px] border-purple-90 text-purple-90 rounded-full border-2 p-2 outline-none"
+              >
+                <span>{isActive ? <PauseIcon /> : <PlayIcon />}</span>
+              </button>
+            }
           >
-            {isActive ? <PauseIcon /> : <PlayIcon />}
-          </button>
+            <span>Cannot restart timers against non-active projects</span>
+          </ToolTip>
+
           <div className="text-left lg:space-y-[2px] w-[72px] lg:w-[77px]">
             <p
               className={classNames('text-xs lg:text-[13px] lg:leading-[18px] font-semibold', {

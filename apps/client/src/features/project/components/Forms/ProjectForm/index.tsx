@@ -96,46 +96,52 @@ export const ProjectForm = ({
             {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
           </FormControl>
 
-          <div className="flex items-start gap-3">
-            <FormControl>
-              <FormLabel htmlFor="client">Client</FormLabel>
-              <FormSelect
-                name="client"
-                control={control}
-                placeHolder="Select client"
-                error={!!errors?.client?.message}
-                fullWidth
-              >
-                {clientOptions?.map((option) => (
-                  <SelectOption key={option.id} id={option.id}>
-                    {option?.display}
-                  </SelectOption>
-                ))}
-              </FormSelect>
-              {errors?.client?.message && (
-                <FormErrorMessage>{errors.client?.message}</FormErrorMessage>
-              )}
-            </FormControl>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <FormControl>
+                <FormLabel htmlFor="client">Client</FormLabel>
+                <FormSelect
+                  name="client"
+                  control={control}
+                  placeHolder="Select client"
+                  error={!!errors?.client?.message}
+                  fullWidth
+                >
+                  {clientOptions?.map((option) => (
+                    <SelectOption key={option.id} id={option.id}>
+                      {option?.display}
+                    </SelectOption>
+                  ))}
+                </FormSelect>
+                {errors?.client?.message && (
+                  <FormErrorMessage>{errors.client?.message}</FormErrorMessage>
+                )}
+              </FormControl>
 
-            <FormControl>
-              <FormLabel htmlFor="status">Status</FormLabel>
-              <FormSelect
-                name="status"
-                control={control}
-                placeHolder="Select status"
-                error={!!errors?.status?.message}
-                fullWidth
-              >
-                {statusOptions?.map((option) => (
-                  <SelectOption key={option.id} id={option.id}>
-                    {startCase(upperFirst(option?.display?.toLowerCase()))}
-                  </SelectOption>
-                ))}
-              </FormSelect>
-              {errors?.status?.message && (
-                <FormErrorMessage>{errors.status?.message}</FormErrorMessage>
-              )}
-            </FormControl>
+              <FormControl>
+                <FormLabel htmlFor="status">Status</FormLabel>
+                <FormSelect
+                  name="status"
+                  control={control}
+                  placeHolder="Select status"
+                  error={!!errors?.status?.message}
+                  fullWidth
+                >
+                  {statusOptions?.map((option) => (
+                    <SelectOption key={option.id} id={option.id}>
+                      {startCase(upperFirst(option?.display?.toLowerCase()))}
+                    </SelectOption>
+                  ))}
+                </FormSelect>
+                {errors?.status?.message && (
+                  <FormErrorMessage>{errors.status?.message}</FormErrorMessage>
+                )}
+              </FormControl>
+            </div>
+
+            {[ProjectStatus.ARCHIVED, ProjectStatus.PENDING].includes(watch('status')) && (
+              <InlineTip value="Project members can't track their time until the status is active" />
+            )}
           </div>
 
           <div className="space-y-3">

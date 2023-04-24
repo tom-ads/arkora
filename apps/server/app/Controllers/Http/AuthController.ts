@@ -84,8 +84,6 @@ export default class AuthController {
       await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
       await owner.related('organisation').associate(createdOrganisation)
 
-      // TODO: send owner a verification link
-
       ctx.logger.info(`Created owner(${owner.id}) for tenant(${createdOrganisation.subdomain})`)
     } catch (err) {
       ctx.logger.error(

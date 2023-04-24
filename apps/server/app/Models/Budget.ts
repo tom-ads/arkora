@@ -252,7 +252,6 @@ export default class Budget extends BaseModel {
 
   @beforeDelete()
   public static async beforeDelete(budget: Budget) {
-    // TODO: use onDelete('cascade') instead on db
     await Promise.all([
       budget.related('members').detach(),
       budget.related('timeEntries').query().delete(),

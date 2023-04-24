@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/stores/store'
 import UserRole from '@/enums/UserRole'
+import Status from '@/enums/Status'
 
 export const ProjectInsights = (): JSX.Element => {
   const { projectId } = useParams()
@@ -12,7 +13,9 @@ export const ProjectInsights = (): JSX.Element => {
 
   const { data: project } = useGetProjectQuery(parseInt(projectId!, 10), { skip: !projectId })
 
-  const { data: insights } = useGetProjectInsightsQuery(projectId!, { skip: !projectId })
+  const { data: insights } = useGetProjectInsightsQuery(parseInt(projectId!, 10), {
+    skip: !projectId,
+  })
 
   return (
     <CostBreakdownWidget
@@ -24,7 +27,7 @@ export const ProjectInsights = (): JSX.Element => {
         unbillableCost: insights?.unbillableCost ?? 0,
         unbillableDuration: insights?.unbillableDuration ?? 0,
         private: project?.private,
-        status: project?.status,
+        status: project?.status as Status | undefined,
         // Members cannot view cost related information if project sets it to hidden
         showCost: authRole === UserRole.MEMBER ? project?.showCost : true,
       }}

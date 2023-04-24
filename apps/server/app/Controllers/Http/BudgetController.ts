@@ -74,6 +74,7 @@ export default class BudgetController {
       {
         userId: payload?.user_id ?? ctx.auth.user!.id,
         projectId: payload?.project_id,
+        projectStatus: payload.project_status,
       },
       { includeProject: payload?.include_project }
     )

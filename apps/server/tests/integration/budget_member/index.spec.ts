@@ -81,6 +81,7 @@ test.group('Budget Members : Index', (group) => {
     // Change auth user role
     const orgAdminRole = await RoleFactory.apply('orgAdmin').create()
     await authUser.related('role').associate(orgAdminRole)
+
     const response = await client
       .get(route('BudgetMemberController.index', { budgetId: budget.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })

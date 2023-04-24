@@ -1,24 +1,25 @@
 import { test } from '@japa/runner'
 import { DefaultTask } from 'App/Enum/DefaultTask'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 import Budget from 'App/Models/Budget'
 import Organisation from 'App/Models/Organisation'
 import Task from 'App/Models/Task'
-import { OrganisationFactory, UserFactory } from 'Database/factories'
+import User from 'App/Models/User'
+import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factories'
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 import { DateTime } from 'luxon'
 
-test.group('Timer : Create', ({ each }) => {
+test.group('Timer : Create', (group) => {
+  let authUser: User
   let organisation: Organisation
   let commonTasks: Task[]
   let budgets: Budget[]
 
-  /* 
-    Setup
-  */
+  group.tap((test) => test.tags(['@timer']))
 
-  each.setup(async () => {
+  group.each.setup(async () => {
     organisation = await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       return clientBuilder.with('projects', 2, (projectBuilder) => {
         return projectBuilder
@@ -58,24 +59,21 @@ test.group('Timer : Create', ({ each }) => {
           )
       )
     )
+
+    authUser = await UserFactory.merge({ organisationId: organisation.id }).create()
+    await Promise.all(
+      budgets.map(async (budget) => await budget.related('members').attach([authUser.id]))
+    )
   })
 
-  /* 
-    TESTS
-  */
-
-  test('organisation member can create a new time entry', async ({ client, route }) => {
-    const authUser = await UserFactory.with('role', 1, (roleBuilder) => {
-      roleBuilder.apply('member')
-    }).create()
-
-    // Associate authUser to relations
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      budgets.map(async (budget) => await budget.related('members').attach([authUser.id])),
-    ])
+  test('organisation member can create time entry', async ({ client, route }) => {
+    const memberRole = await RoleFactory.apply('member').create()
+    await authUser.related('role').associate(memberRole)
 
     const payload = {
+      budget_id: budgets[0]?.id,
+      task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
+      date: DateTime.now().toISO(),
       estimated_minutes: 480, // 8 hours
       duration_minutes: 0,
       description: 'example description',
@@ -84,34 +82,27 @@ test.group('Timer : Create', ({ each }) => {
     const response = await client
       .post(route('TimerController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        ...payload,
-        date: DateTime.now().toISO(),
-        budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
-      })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
-      ...payload,
+      estimated_minutes: 480,
+      duration_minutes: 0,
+      description: 'example description',
       status: TimeSheetStatus.PENDING,
     })
   })
 
-  test('organisation manager can create a new time entry', async ({ client, route }) => {
-    const authUser = await UserFactory.with('role', 1, (roleBuilder) => {
-      roleBuilder.apply('manager')
-    }).create()
-
-    // Associate authUser to relations
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      budgets.map(async (budget) => await budget.related('members').attach([authUser.id])),
-    ])
+  test('organisation manager can create time entry', async ({ client, route }) => {
+    const managerRole = await RoleFactory.apply('manager').create()
+    await authUser.related('role').associate(managerRole)
 
     const payload = {
+      budget_id: budgets[0]?.id,
+      task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
+      date: DateTime.now().toISO(),
       estimated_minutes: 480, // 8 hours
       duration_minutes: 0,
       description: 'example description',
@@ -120,34 +111,27 @@ test.group('Timer : Create', ({ each }) => {
     const response = await client
       .post(route('TimerController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        ...payload,
-        date: DateTime.now().toISO(),
-        budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
-      })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
-      ...payload,
+      estimated_minutes: 480,
+      duration_minutes: 0,
+      description: 'example description',
       status: TimeSheetStatus.PENDING,
     })
   })
 
-  test('organisation org_admin can create a new time entry', async ({ client, route }) => {
-    const authUser = await UserFactory.with('role', 1, (roleBuilder) => {
-      roleBuilder.apply('orgAdmin')
-    }).create()
-
-    // Associate authUser to relations
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      budgets.map(async (budget) => await budget.related('members').attach([authUser.id])),
-    ])
+  test('organisation org_admin can create time entry', async ({ client, route }) => {
+    const orgAdminRole = await RoleFactory.apply('orgAdmin').create()
+    await authUser.related('role').associate(orgAdminRole)
 
     const payload = {
+      budget_id: budgets[0]?.id,
+      task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
+      date: DateTime.now().toISO(),
       estimated_minutes: 480, // 8 hours
       duration_minutes: 0,
       description: 'example description',
@@ -156,32 +140,24 @@ test.group('Timer : Create', ({ each }) => {
     const response = await client
       .post(route('TimerController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        ...payload,
-        date: DateTime.now().toISO(),
-        budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
-      })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
-      ...payload,
+      estimated_minutes: 480,
+      duration_minutes: 0,
+      description: 'example description',
       status: TimeSheetStatus.PENDING,
     })
   })
 
-  test('organisation owner can create a new time entry', async ({ client, route }) => {
-    const authUser = await UserFactory.with('role').create()
-
-    // Associate authUser to relations
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      budgets.map(async (budget) => await budget.related('members').attach([authUser.id])),
-    ])
-
+  test('organisation owner can create time entry', async ({ client, route }) => {
     const payload = {
+      budget_id: budgets[0]?.id,
+      task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
+      date: DateTime.now().toISO(),
       estimated_minutes: 480, // 8 hours
       duration_minutes: 0,
       description: 'example description',
@@ -190,30 +166,56 @@ test.group('Timer : Create', ({ each }) => {
     const response = await client
       .post(route('TimerController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        ...payload,
-        date: DateTime.now().toISO(),
-        budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
-      })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
-      ...payload,
+      estimated_minutes: 480,
+      duration_minutes: 0,
+      description: 'example description',
       status: TimeSheetStatus.PENDING,
     })
+  })
+
+  test('organisation user cannot create time entry for non-active projects', async ({
+    client,
+    route,
+  }) => {
+    const payload = {
+      budget_id: budgets[0]?.id,
+      task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
+      date: DateTime.now().toISO(),
+      estimated_minutes: 480, // 8 hours
+      duration_minutes: 0,
+      description: 'example description',
+    }
+
+    // Change budget project status to pending, instead of active
+    await budgets[0].related('project').query().update({ status: ProjectStatus.PENDING })
+
+    const response = await client
+      .post(route('TimerController.create'))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .form(payload)
+      .loginAs(authUser)
+      .withCsrfToken()
+
+    response.assertStatus(400)
+    response.assertBodyContains({ message: 'Only active projects can be tracked against' })
   })
 
   test('organisation user cannot create time entry on unrelated budget', async ({
     client,
     route,
   }) => {
-    const authUser = await UserFactory.with('role').create()
-    authUser.related('organisation').associate(organisation)
+    await budgets[0].related('members').detach([authUser.id])
 
     const payload = {
+      budget_id: budgets[0]?.id,
+      task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
+      date: DateTime.now().toISO(),
       estimated_minutes: 480, // 8 hours
       duration_minutes: 0,
       description: 'example description',
@@ -222,14 +224,9 @@ test.group('Timer : Create', ({ each }) => {
     const response = await client
       .post(route('TimerController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        ...payload,
-        date: DateTime.now().toISO(),
-        budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
-      })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(403)
   })
@@ -239,21 +236,17 @@ test.group('Timer : Create', ({ each }) => {
     route,
     assert,
   }) => {
-    const authUser = await UserFactory.with('role').create()
-
-    // Associate authUser to relations
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      budgets.map(async (budget) => await budget.related('members').attach([authUser.id])),
-    ])
-
+    // Setup active timer
     const activeEntry = await TimeEntryFactory.merge({
+      userId: authUser.id,
       durationMinutes: 20,
       lastStartedAt: DateTime.now().minus({ minutes: 20 }),
     }).create()
-    await activeEntry.related('user').associate(authUser)
 
     const payload = {
+      budget_id: budgets[0]?.id,
+      task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
+      date: DateTime.now().toISO(),
       estimated_minutes: 480, // 8 hours
       duration_minutes: 0,
       description: 'example description',
@@ -262,12 +255,7 @@ test.group('Timer : Create', ({ each }) => {
     const response = await client
       .post(route('TimerController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        ...payload,
-        date: DateTime.now().toISO(),
-        budget_id: budgets[0]?.id,
-        task_id: commonTasks?.find((task) => task.name === DefaultTask.DEVELOPMENT)?.id,
-      })
+      .form(payload)
       .withCsrfToken()
       .loginAs(authUser)
 

@@ -64,7 +64,8 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
                 className={classNames('text-sm font-medium capitalize flex items-center gap-3', {
                   'text-green-90': formattedInsights?.status === Status.ACTIVE,
                   'text-yellow-90': formattedInsights?.status === Status.PENDING,
-                  'text-gray-70': formattedInsights?.status === Status.INACTIVE,
+                  'text-red-90': formattedInsights?.status === Status.INACTIVE,
+                  'text-gray-90': formattedInsights?.status === Status.ARCHIVED,
                 })}
               >
                 <span>{formattedInsights.status?.toLowerCase()} Project</span>

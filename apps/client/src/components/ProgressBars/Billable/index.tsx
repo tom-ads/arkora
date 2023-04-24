@@ -24,10 +24,12 @@ export const BillableProgressBar = ({
     <ToolTip
       width={width}
       trigger={
-        <DoubleProgressBar
-          leftPercent={calculatePercentage(billableTotal, grandTotal)}
-          rightPercent={calculatePercentage(unbillableTotal, grandTotal)}
-        />
+        <button type="button" className="outline-none w-full">
+          <DoubleProgressBar
+            leftPercent={calculatePercentage(billableTotal, grandTotal)}
+            rightPercent={calculatePercentage(unbillableTotal, grandTotal)}
+          />
+        </button>
       }
     >
       <div className="divide-y divide-gray-40 divide-dashed">

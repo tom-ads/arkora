@@ -26,6 +26,7 @@ import { string } from '@ioc:Adonis/Core/Helpers'
 import Role from './Role'
 import OrganisationInvitation from 'App/Mailers/OrganisationInvitation'
 import CommonTask from './CommonTask'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 
 type Invitee = {
   email: string
@@ -35,6 +36,7 @@ type Invitee = {
 type BudgetFilters = Partial<{
   userId: number
   projectId: number
+  projectStatus: ProjectStatus
 }>
 
 type TeamFilters = Partial<{
@@ -143,8 +145,11 @@ export default class Organisation extends BaseModel {
   public async getBudgets(this: Organisation, filters?: BudgetFilters, options?: BudgetOptions) {
     const projects = await this.related('projects')
       .query()
+      .if(filters?.projectStatus, (projectBuilder) => {
+        projectBuilder.where('status', filters?.projectStatus!)
+      })
       .if(filters?.projectId, (projectBuilder) => {
-        projectBuilder.where('projects.id', filters!.projectId!)
+        projectBuilder.where('projects.id', filters?.projectId!)
       })
       // Ensure related projects have a member with specified user_id
       .if(filters?.userId, (projectBuilder) => {

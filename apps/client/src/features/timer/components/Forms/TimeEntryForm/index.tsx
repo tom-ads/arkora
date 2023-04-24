@@ -17,6 +17,7 @@ import { groupBy, startCase } from 'lodash'
 import Task from '@/types/models/Task'
 import { UseFormReturn } from 'react-hook-form'
 import { useLazyGetBudgetTasksQuery } from '@/features/budget_tasks'
+import ProjectStatus from '@/enums/ProjectStatus'
 
 export type TimeEntryFields = {
   budget: number | undefined
@@ -42,7 +43,10 @@ export const TimeEntryForm = ({
 }: TimeEntryFormProps): JSX.Element => {
   const [budgetId, setBudgetId] = useState<number | undefined>(undefined)
 
-  const { data: budgets } = useGetBudgetsQuery({ includeProject: true }, { skip: !isOpen })
+  const { data: budgets } = useGetBudgetsQuery(
+    { projectStatus: ProjectStatus.ACTIVE, includeProject: true },
+    { skip: !isOpen },
+  )
 
   const [triggerTasks, { data: tasks }] = useLazyGetBudgetTasksQuery()
 
