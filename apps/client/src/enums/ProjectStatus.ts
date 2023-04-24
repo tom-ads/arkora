@@ -1,8 +1,7 @@
-enum Status {
+enum ProjectStatus {
   ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
   PENDING = 'PENDING',
   ARCHIVED = 'ARCHIVED',
 }
 
-export default Status
+export default ProjectStatus

@@ -11,6 +11,7 @@ import { ProjectForm, ProjectFormFields } from '../../Forms/ProjectForm'
 import { useState } from 'react'
 import { useToast } from '@/hooks/useToast'
 import { useNavigate } from 'react-router-dom'
+import ProjectStatus from '@/enums/ProjectStatus'
 
 type ManageProjectModalProps = ModalBaseProps & {
   projectId: number | null
@@ -43,6 +44,7 @@ export const ManageProjectModal = ({
       show_cost: data.hideCost,
       private: data.private,
       client_id: data.client!,
+      status: data.status,
     })
       .unwrap()
       .then(() => {
@@ -87,6 +89,7 @@ export const ManageProjectModal = ({
             client: project?.client?.id,
             private: project?.private ?? false,
             hideCost: project?.showCost ?? true,
+            status: project?.status ?? ProjectStatus.ACTIVE,
           }}
         >
           <ModalFooter className="!mt-20">

@@ -8,10 +8,12 @@ import { bind } from '@adonisjs/route-model-binding'
 import UpdateBudgetValidator from 'App/Validators/Budget/UpdateBudgetValidator'
 import BudgetKind from 'App/Enum/BudgetKind'
 import CommonTask from 'App/Models/CommonTask'
+import Project from 'App/Models/Project'
 
 export default class BudgetController {
   public async create(ctx: HttpContextContract) {
-    await ctx.bouncer.with('BudgetPolicy').authorize('create')
+    const project = await Project.findOrFail(ctx.request.input('project_id'))
+    await ctx.bouncer.with('BudgetPolicy').authorize('create', project)
 
     const payload = await ctx.request.validate(CreateBudgetValidator)
 

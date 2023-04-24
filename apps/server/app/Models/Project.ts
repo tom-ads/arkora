@@ -17,12 +17,12 @@ import {
   scope,
 } from '@ioc:Adonis/Lucid/Orm'
 import Client from './Client'
-import Status from 'App/Enum/Status'
 import Budget from './Budget'
 import User from './User'
 import Organisation from './Organisation'
 import { sumBy } from 'lodash'
 import TimeEntry from './TimeEntry'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 
 type ProjectInsightsFilter = {
   users: number[]
@@ -53,7 +53,7 @@ export default class Project extends BaseModel {
   public private: boolean
 
   @column()
-  public status: Status
+  public status: ProjectStatus
 
   @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime

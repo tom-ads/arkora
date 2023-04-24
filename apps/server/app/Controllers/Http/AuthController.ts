@@ -110,8 +110,6 @@ export default class AuthController {
 
     ctx.logger.info(`Tenant(${createdOrganisation.subdomain}) has been onboarded`)
 
-    await ctx.auth.login(owner)
-
     return {
       user: owner.serialize(),
       organisation: createdOrganisation.serialize(),

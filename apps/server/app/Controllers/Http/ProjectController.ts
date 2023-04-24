@@ -1,6 +1,5 @@
 import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Status from 'App/Enum/Status'
 import UserRole from 'App/Enum/UserRole'
 import Client from 'App/Models/Client'
 import Project from 'App/Models/Project'
@@ -44,7 +43,7 @@ export default class ProjectController {
         clientId: payload.client_id,
         showCost: payload.show_cost,
         private: payload.private,
-        status: Status.ACTIVE,
+        status: payload.status,
       })
 
       ctx.logger.info(`Created project for tenant(${ctx.organisation!.id})`)
@@ -109,8 +108,12 @@ export default class ProjectController {
 
     const payload = await ctx.request.validate(UpdateProjectValidator)
 
-    project.showCost = payload.show_cost
+    project.merge({
+      showCost: payload.show_cost,
+      status: payload.status,
+    })
 
+    // Change project name if it differs and is available
     if (payload.name !== project.name) {
       const nameTaken = await Project.isNameTaken(ctx.organisation!, payload.name, project.id)
       if (nameTaken) {

@@ -42,7 +42,7 @@ export const SubdomainForm = (): JSX.Element => {
             <div className="flex items-center gap-3">
               <FormInput
                 name="subdomain"
-                placeHolder="domain"
+                placeHolder="Your site"
                 error={!!errors.subdomain || (data?.exists !== undefined ? !data?.exists : false)}
               />
               <p className="text-purple-90 text-2xl">.arkora.co.uk</p>
