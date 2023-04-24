@@ -10,6 +10,8 @@ test.group('Budget Tasks : Index', (group) => {
   let authUser: User
   let budget: Budget
 
+  group.tap((test) => test.tags(['@budget-tasks']))
+
   group.each.setup(async () => {
     // Setup organisation
     organisation = await OrganisationFactory.create()
@@ -38,11 +40,6 @@ test.group('Budget Tasks : Index', (group) => {
 
     await budget.related('members').attach([authUser.id])
   })
-
-  /* 
-    organisation user unassigned to budget, cannot retrieve budget tasks
-    organisation user cannot index another organisations budget tasks
-  */
 
   test('organisation member can index assigned budget tasks', async ({ client, route }) => {
     // Change auth user role
@@ -128,7 +125,7 @@ test.group('Budget Tasks : Index', (group) => {
     response.assertStatus(403)
   })
 
-  test('organisation user cannot retrieve budget tasks from another organisation', async ({
+  test('organisation user cannot retrieve budget tasks for another organisation', async ({
     client,
     route,
   }) => {
@@ -146,6 +143,20 @@ test.group('Budget Tasks : Index', (group) => {
       .send()
 
     response.assertStatus(403)
+  })
+
+  test('organisation index budget tasks explicit route has correct form', async ({ client }) => {
+    const response = await client
+      .get(`/api/v1/budgets/${budget.id}/tasks`)
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .loginAs(authUser)
+      .withCsrfToken()
+      .send()
+
+    const budgetTasks = await budget.related('tasks').query()
+
+    response.assertStatus(200)
+    response.assertBodyContains(budgetTasks.map((task) => task.serialize()))
   })
 
   test('unauthenticated user cannot retrieve budget tasks', async ({ client, route }) => {
