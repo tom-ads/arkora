@@ -15,18 +15,16 @@ import BillableTypeFactory from 'Database/factories/BillableTypeFactory'
 import CommonTaskFactory from 'Database/factories/CommonTaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 
-test.group('Budgets : Index', ({ each }) => {
+test.group('Budgets : Index', (group) => {
   let organisation: Organisation
   let projects: Project[]
   let commonTasks: CommonTask[]
   let budgets: Budget[]
   let authUser: User
 
-  /* 
-    Setup
-  */
+  group.tap((test) => test.tags(['@budgets']))
 
-  each.setup(async () => {
+  group.each.setup(async () => {
     // Setup common tasks
     commonTasks = await CommonTaskFactory.merge([
       { name: DefaultTask.DESIGN },

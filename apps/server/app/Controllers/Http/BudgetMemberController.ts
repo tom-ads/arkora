@@ -19,10 +19,13 @@ export default class BudgetMemberController {
 
   @bind()
   public async create(ctx: HttpContextContract, budget: Budget) {
-    await ctx.bouncer.with('BudgetPolicy').authorize('create')
+    const project = await budget.related('project').query().first()
+
+    await ctx.bouncer.with('BudgetPolicy').authorize('create', project!)
 
     const payload = await ctx.request.validate(CreateBudgetMemberValidator)
 
+    // Attach member(s) to budget
     await budget.related('members').attach(payload.members)
     const updatedMembers = await budget.related('members').query()
 
@@ -33,9 +36,11 @@ export default class BudgetMemberController {
   public async delete(ctx: HttpContextContract, budget: Budget, member: User) {
     await ctx.bouncer.with('BudgetPolicy').authorize('delete', budget)
 
-    await budget.related('members').detach([member.id])
+    // Delete time entries for member against this budget
+    await budget.related('timeEntries').query().where('user_id', member.id).delete()
 
-    // TODO: remove time entries?
+    // Unassign member from budget
+    await budget.related('members').detach([member.id])
 
     return ctx.response.noContent()
   }
