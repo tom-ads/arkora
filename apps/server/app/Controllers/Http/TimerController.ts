@@ -39,6 +39,7 @@ export default class TimerController {
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
     await budget.load('project')
+
     if (budget?.project?.status !== ProjectStatus.ACTIVE) {
       return ctx.response.badRequest({ message: 'Only active projects can be tracked against' })
     }
