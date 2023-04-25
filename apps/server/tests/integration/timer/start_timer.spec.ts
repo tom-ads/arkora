@@ -13,9 +13,6 @@ test.group('Timer : Start', ({ each }) => {
   let timeEntry: TimeEntry
   let organisation: Organisation
 
-  /* 
-    Setup
-  */
   each.setup(async () => {
     organisation = await OrganisationFactory.create()
 
@@ -33,7 +30,7 @@ test.group('Timer : Start', ({ each }) => {
     )
 
     // Setup organisation budget and attach common tasks
-    const budget = await BudgetFactory.with('budgetType').create()
+    const budget = await BudgetFactory.with('budgetType').with('project').create()
     await budget.related('tasks').createMany(
       commonTasks.map((task) => ({
         name: task.name,
@@ -102,6 +99,9 @@ test.group('Timer : Start', ({ each }) => {
     const diffUserTimeEntry = await TimeEntryFactory.with('user', 1, (userBuilder) =>
       userBuilder.merge({ organisationId: organisation.id })
     )
+      .with('budget', 1, (budgetBuilder) =>
+        budgetBuilder.with('billableType').with('budgetType').with('project')
+      )
       .apply('lastStoppedAt')
       .create()
 
@@ -131,13 +131,17 @@ test.group('Timer : Start', ({ each }) => {
     const diffUser = await UserFactory.merge({ organisationId: organisation.id }).create()
 
     // Create time entries related to diff user
-    const diffUserTimeEntries = await TimeEntryFactory.merge([
-      { userId: diffUser.id, lastStoppedAt: null },
-      {
-        userId: diffUser.id,
-        lastStoppedAt: DateTime.now().plus({ minutes: 20 }).set({ millisecond: 0 }),
-      },
-    ]).createMany(2)
+    const diffUserTimeEntries = await TimeEntryFactory.with('budget', 1, (budgetBuilder) =>
+      budgetBuilder.with('billableType').with('budgetType').with('project')
+    )
+      .merge([
+        { userId: diffUser.id, lastStoppedAt: null },
+        {
+          userId: diffUser.id,
+          lastStoppedAt: DateTime.now().plus({ minutes: 20 }).set({ millisecond: 0 }),
+        },
+      ])
+      .createMany(2)
 
     const response = await client
       .put(route('TimerController.startTimer', { entryId: diffUserTimeEntries[1].id }))
