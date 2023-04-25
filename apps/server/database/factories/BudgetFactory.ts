@@ -6,6 +6,7 @@ import BudgetTypeFactory from './BudgetTypeFactory'
 import BillableTypeFactory from './BillableTypeFactory'
 import TimeEntryFactory from './TimeEntryFactory'
 import ProjectFactory from './ProjectFactory'
+import BudgetNoteFactory from './BudgetNoteFactory'
 
 export default Factory.define(Budget, ({ faker }) => {
   return {
@@ -16,6 +17,7 @@ export default Factory.define(Budget, ({ faker }) => {
     private: true,
   }
 })
+  .relation('notes', () => BudgetNoteFactory)
   .relation('tasks', () => TaskFactory)
   .relation('budgetType', () => BudgetTypeFactory)
   .relation('members', () => UserFactory)

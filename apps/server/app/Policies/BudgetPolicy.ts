@@ -23,7 +23,7 @@ export default class BudgetPolicy extends BasePolicy {
       return false
     }
 
-    if (user.role.name === UserRole.MEMBER) {
+    if (user?.role?.name === UserRole.MEMBER) {
       return false
     }
 

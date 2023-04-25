@@ -96,10 +96,10 @@ test.group('Budgets : Create', (group) => {
 
     const response = await client
       .post(route('BudgetController.create'))
-      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -149,7 +149,7 @@ test.group('Budgets : Create', (group) => {
     })
   })
 
-  test('organisation user cannot create a budget', async ({ client, route }) => {
+  test('organisation member cannot create a budget', async ({ client, route }) => {
     // Associate member role to auth user
     const memberRole = await RoleFactory.apply('member').create()
     await authUser.related('role').associate(memberRole)
@@ -157,8 +157,8 @@ test.group('Budgets : Create', (group) => {
     const response = await client
       .post(route('BudgetController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(403)
   })
@@ -208,12 +208,10 @@ test.group('Budgets : Create', (group) => {
       unbillable_duration: 0,
     })
 
-    // Load budget members
-    const budget = await Budget.find(response.body().id)
-    await budget?.load('members')
+    const budget = await Budget.query().where('id', response.body().id).preload('members').first()
 
     assert.notStrictEqual(
-      budget?.members.map((user) => user.serialize()),
+      budget?.members?.map((user) => user.serialize()),
       [authUser.serialize()]
     )
   })
@@ -292,7 +290,7 @@ test.group('Budgets : Create', (group) => {
 
   test('unauthenticated user cannot view organisation budgets', async ({ client, route }) => {
     const response = await client
-      .get(route('BudgetController.create'))
+      .post(route('BudgetController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 

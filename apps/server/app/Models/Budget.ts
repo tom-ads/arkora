@@ -216,6 +216,9 @@ export default class Budget extends BaseModel {
   @belongsTo(() => BillableType, { serializeAs: 'billable_type' })
   public billableType: BelongsTo<typeof BillableType>
 
+  @hasMany(() => BudgetNote)
+  public notes: HasMany<typeof BudgetNote>
+
   // Relations - manyToMany
 
   @manyToMany(() => User, {
@@ -230,9 +233,6 @@ export default class Budget extends BaseModel {
 
   @hasMany(() => TimeEntry)
   public timeEntries: HasMany<typeof TimeEntry>
-
-  @hasMany(() => BudgetNote)
-  public notes: HasMany<typeof BudgetNote>
 
   // Hooks
 
