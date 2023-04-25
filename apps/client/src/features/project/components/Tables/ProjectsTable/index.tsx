@@ -9,6 +9,9 @@ import {
 } from '@/components'
 import { useGetProjectsQuery } from '../../../api'
 import { ProjectsRow, ProjectsRowSkeleton } from '../ProjectsRow'
+import { useAuth } from '@/hooks/useAuth'
+import UserRole from '@/enums/UserRole'
+import { useAuthorization } from '@/hooks/useAuthorization'
 
 type ProjectTableProps = {
   onCreate: () => void
@@ -18,6 +21,9 @@ type ProjectTableProps = {
 export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.Element => {
   const { data: projects, isLoading } = useGetProjectsQuery()
 
+  const { authUser } = useAuth()
+  const { checkPermission } = useAuthorization()
+
   return (
     <TableContainer
       className="min-h-[738px]"
@@ -25,10 +31,12 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
         isEmpty: !projects?.length && !isLoading,
         title: 'Projects',
         btnText: 'Create Project',
-        onClick: onCreate,
+        onClick: checkPermission('project:create') ? onCreate : undefined,
         icon: <HouseIcon />,
         description:
-          'Create client projects to track costs and time for each budget and assign the team',
+          authUser?.role?.name !== UserRole.MEMBER
+            ? 'Create client projects to track costs and time for each budget and assign the team'
+            : 'There are no projects currently assigned to you, speak to your manager to get assigned!',
       }}
     >
       <Table>
