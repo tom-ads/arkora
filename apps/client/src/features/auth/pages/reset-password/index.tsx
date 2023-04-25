@@ -11,7 +11,6 @@ import {
 import { validatePassword } from '@/helpers/validation/fields'
 import validationIssuer from '@/helpers/validation/issuer'
 import { useToast } from '@/hooks/useToast'
-import { UseFormReturn } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 import { useResetPasswordMutation } from '../../api'

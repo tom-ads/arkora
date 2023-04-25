@@ -81,7 +81,7 @@ export const InvitationPage = (): JSX.Element => {
       firstname: data.firstname,
       lastname: data.lastname,
       password: data.password,
-      password_confirmation: data.passwordConfirmation,
+      passwordConfirmation: data.passwordConfirmation,
       token: invitationParams.token,
       email: invitationParams.email,
     })

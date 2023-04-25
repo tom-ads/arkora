@@ -17,7 +17,7 @@ export const WeekDaySelect = (): JSX.Element => {
   }
 
   const weekDays = useMemo(() => {
-    const currentStartDate = DateTime.fromISO(timesheet.startDate!)
+    const currentStartDate = DateTime.fromISO(timesheet!.startDate!)
     const days = Info.weekdaysFormat('short')
 
     return days.map((weekDay, idx) => ({
