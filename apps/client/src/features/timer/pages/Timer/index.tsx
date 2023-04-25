@@ -51,8 +51,8 @@ export const TimerPage = (): JSX.Element => {
 
   const { data: timesheet } = useGetTimesheetQuery(
     {
-      startDate: startDate ?? DateTime.now().startOf('week').toISODate(),
-      endDate: endDate ?? DateTime.now().endOf('week').toISODate(),
+      startDate: startDate ?? DateTime.now().startOf('week').toISODate()!,
+      endDate: endDate ?? DateTime.now().endOf('week').toISODate()!,
       userId: authId as number,
     },
     { skip: !authId },
@@ -78,12 +78,12 @@ export const TimerPage = (): JSX.Element => {
       const groupedEntries = groupBy(timesheet, (e) => e.date)
 
       return dates.map((day) => ({
-        weekDay: day.toISODate(),
+        weekDay: day!.toISODate(),
         dailyDuration: sumBy(
-          groupedEntries[day.toISODate() as keyof typeof groupedEntries],
+          groupedEntries[day!.toISODate() as keyof typeof groupedEntries],
           (e) => e.durationMinutes,
         ),
-        timeEntries: groupedEntries[day.toISODate() as keyof typeof groupedEntries],
+        timeEntries: groupedEntries[day!.toISODate() as keyof typeof groupedEntries],
       }))
     }
   }, [timesheet, startDate, endDate])

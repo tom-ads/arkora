@@ -13,7 +13,7 @@ export const WeekDaySelect = (): JSX.Element => {
   }))
 
   const handleSelectedDay = (selectedDay: string) => {
-    dispatch(setSelectedDay({ selectedDay: DateTime.fromISO(selectedDay).toISODate() }))
+    dispatch(setSelectedDay({ selectedDay: DateTime.fromISO(selectedDay).toISODate()! }))
   }
 
   const weekDays = useMemo(() => {
@@ -36,7 +36,7 @@ export const WeekDaySelect = (): JSX.Element => {
         <button
           type="button"
           key={weekDay.iso}
-          onClick={() => handleSelectedDay(weekDay.iso)}
+          onClick={() => handleSelectedDay(weekDay!.iso!)}
           className={classNames(
             'lg:space-y-[2px] px-1 pb-2 lg:pb-4 border-b-[2px] outline-none text-start transition-all group',
             {
