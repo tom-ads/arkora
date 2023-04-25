@@ -19,9 +19,9 @@ const initialState: TimerState = {
   isTracking: false,
   timeEntry: null,
   timesheet: {
-    selectedDay: DateTime.now().toISODate(),
-    startDate: DateTime.now().startOf('week').toISODate(),
-    endDate: DateTime.now().endOf('week').toISODate(),
+    selectedDay: DateTime.now().toISODate()!,
+    startDate: DateTime.now().startOf('week').toISODate()!,
+    endDate: DateTime.now().endOf('week').toISODate()!,
   },
 }
 
