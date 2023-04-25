@@ -27,8 +27,8 @@ export default class TimesheetController {
 
     const timesheet = await TimeEntry.getUserTimesheet(
       user.id,
-      payload.start_date.toISODate(),
-      payload.end_date.toISODate()
+      payload.start_date.toISODate()!,
+      payload.end_date.toISODate()!
     )
 
     return timesheet.map((entry) => entry.serialize())

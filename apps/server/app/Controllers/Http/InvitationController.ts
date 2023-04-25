@@ -63,7 +63,7 @@ export default class InvitationController {
     // Verification code expires 1 day after its creation
     const invitedUser = await User.query()
       .where('email', payload.email)
-      .where('updated_at', '>', DateTime.now().minus({ day: 1 }).toSQL())
+      .where('updated_at', '>', DateTime.now().minus({ day: 1 }).toSQL()!)
       .whereHas('organisation', (subQuery) => {
         subQuery.where('id', organisation.id)
       })

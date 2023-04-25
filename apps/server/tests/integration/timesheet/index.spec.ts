@@ -6,8 +6,6 @@ import User from 'App/Models/User'
 import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factories'
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
-import { getDatesBetweenPeriod } from 'Helpers/date'
-import { getTimeEntriesTotalMinutes } from 'Helpers/timer'
 import { groupBy } from 'lodash'
 import { DateTime } from 'luxon'
 

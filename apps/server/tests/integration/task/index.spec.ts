@@ -152,7 +152,7 @@ test.group('Tasks : Index', ({ each }) => {
     )
   })
 
-  test('organisation member can index related budget tasks', async ({ client, route, assert }) => {
+  test('organisation member can index related budget tasks', async ({ client, route }) => {
     const authUser = await UserFactory.with('role', 1, (roleBuilder) =>
       roleBuilder.apply('member')
     ).create()

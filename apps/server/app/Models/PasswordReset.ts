@@ -45,7 +45,7 @@ export default class PasswordReset extends BaseModel {
       .where(
         'created_at',
         '>',
-        DateTime.now().minus({ minutes: 60 }).toSQL({ includeOffset: false })
+        DateTime.now().minus({ minutes: 60 }).toSQL({ includeOffset: false })!
       )
       .first()
 
