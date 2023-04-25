@@ -1,4 +1,4 @@
-import { DetailsView, OrganisationsView, TeamView } from './../../components'
+import { DetailsView, OrganisationsView, TeamView } from '../../components'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/stores/store'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
