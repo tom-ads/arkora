@@ -25,6 +25,7 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
         show_cost: data.hideCost,
         private: data.private,
         client_id: data.client,
+        status: data.status,
       })
         .unwrap()
         .then(() => {
@@ -32,9 +33,7 @@ export const CreateProjectModal = (props: CreateProjectModalProps): JSX.Element 
           successToast('Project has been created')
         })
         .catch((error) => {
-          if (error.status === 422) {
-            return
-          }
+          if (error.status === 422) return
           reset()
           errorToast('Unable to create project, please try again later')
         })

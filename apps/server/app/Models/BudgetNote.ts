@@ -8,12 +8,18 @@ export default class BudgetNote extends BaseModel {
   public id: number
 
   @column()
+  public budgetId: number
+
+  @column()
+  public userId: number
+
+  @column()
   public note: string
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   public updatedAt: DateTime
 
   // Relationships

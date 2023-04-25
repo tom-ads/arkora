@@ -7,6 +7,7 @@ import CreateTimerValidator from 'App/Validators/Timer/CreateTimerValidator'
 import StopTimerValidator from 'App/Validators/Timer/StopTimerValidator'
 import { bind } from '@adonisjs/route-model-binding'
 import { DateTime } from 'luxon'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 
 export default class TimerController {
   /**
@@ -37,6 +38,11 @@ export default class TimerController {
 
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
+    await budget.load('project')
+    if (budget?.project?.status !== ProjectStatus.ACTIVE) {
+      return ctx.response.badRequest({ message: 'Only active projects can be tracked against' })
+    }
+
     const currentTimer = await ctx.auth.user!.getActiveTimer()
     if (currentTimer) {
       await currentTimer.stopTimer()
@@ -57,7 +63,7 @@ export default class TimerController {
       })
       ctx.logger.info(`Create Timer: created new time entry for user(${ctx.auth.user!.id})`)
     } catch (err) {
-      ctx.logger.info(
+      ctx.logger.error(
         `Failed to create timer for user(${ctx.auth.user!.id}) due to: ${err.message}`
       )
       return ctx.response.internalServerError()
@@ -122,6 +128,11 @@ export default class TimerController {
   @bind()
   public async startTimer(ctx: HttpContextContract, entry: TimeEntry) {
     await ctx.bouncer.with('TimeEntryPolicy').authorize('update', entry)
+
+    const entryBudget = await entry.related('budget').query().preload('project').first()
+    if (entryBudget?.project?.status !== ProjectStatus.ACTIVE) {
+      return ctx.response.badRequest({ message: 'Only active projects can be tracked against' })
+    }
 
     // Deactivate any related timer to timeEntry user
     const activeTimer = await entry.user.getActiveTimer()

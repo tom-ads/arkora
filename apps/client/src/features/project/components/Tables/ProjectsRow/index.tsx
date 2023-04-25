@@ -8,7 +8,7 @@ import {
   SkeletonBox,
 } from '@/components'
 import { SkeletonCircle } from '@/components/Skeletons/Circle'
-import Status from '@/enums/Status'
+import ProjectStatus from '@/enums/ProjectStatus'
 import UserRole from '@/enums/UserRole'
 import { RootState } from '@/stores/store'
 import ProjectBudget from '@/types/models/ProjectBudget'
@@ -45,8 +45,9 @@ export const ProjectsRow = ({ value, onManage }: TableRowBaseProps<ProjectBudget
         </TableData>
 
         <TableData>
-          {value.status === Status.ACTIVE && <Badge variant="success">Active</Badge>}
-          {value.status === Status.INACTIVE && <Badge variant="warn">Inactive</Badge>}
+          {value.status === ProjectStatus.ACTIVE && <Badge variant="success">Active</Badge>}
+          {value.status === ProjectStatus.PENDING && <Badge variant="warn">Pending</Badge>}
+          {value.status === ProjectStatus.ARCHIVED && <Badge variant="default">Archived</Badge>}
         </TableData>
 
         <TableData>{value.private ? 'Private' : 'Public'}</TableData>

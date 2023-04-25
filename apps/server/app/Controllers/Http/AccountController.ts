@@ -6,6 +6,7 @@ import UpdateAccountValidator from 'App/Validators/Accounts/UpdateAccountValidat
 import Role from 'App/Models/Role'
 import UserRole from 'App/Enum/UserRole'
 import InsightsValidator from 'App/Validators/Project/InsightsValidator'
+import Project from 'App/Models/Project'
 
 export default class AccountController {
   public async index(ctx: HttpContextContract) {
@@ -49,8 +50,8 @@ export default class AccountController {
       user.email = payload.email
     }
 
+    // Only ORG_ADMIN and OWNER can change roles. Owner cannot change theirs.
     const authRole = ctx.auth.user?.role?.name
-
     if (
       (authRole === UserRole.ORG_ADMIN || authRole === UserRole.OWNER) &&
       user.role?.name !== UserRole.OWNER
@@ -59,6 +60,10 @@ export default class AccountController {
         const newRole = await Role.findBy('name', payload.role)
         await user.related('role').associate(newRole!)
         await user.load('role')
+
+        if (newRole?.name !== UserRole.MEMBER) {
+          await Project.assignMemberToProjects(user, ctx.organisation!)
+        }
       }
     }
 

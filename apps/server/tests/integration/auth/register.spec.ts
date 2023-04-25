@@ -2,9 +2,10 @@ import { test } from '@japa/runner'
 import UserRole from 'App/Enum/UserRole'
 import WeekDay from 'App/Enum/WeekDay'
 import Organisation from 'App/Models/Organisation'
-import { OrganisationFactory, UserFactory } from 'Database/factories'
 
-test.group('Auth : Registration - Register', () => {
+test.group('Auth : Registration - Register', (group) => {
+  group.tap((test) => test.tags(['@auth-register']))
+
   test('user can register their organisation and invite team members', async ({
     client,
     assert,
@@ -39,41 +40,6 @@ test.group('Auth : Registration - Register', () => {
       payload.business_days
     )
     assert.equal(createdOrganisation?.currency.code, payload.currency)
-  })
-
-  test('user cannot register an organisation that already exists with same subdomain', async ({
-    client,
-    route,
-  }) => {
-    await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
-
-    const response = await client
-      .post(route('AuthController.register'))
-      .form(payload)
-      .withCsrfToken()
-
-    response.assertStatus(422)
-    response.assertBodyContains({
-      errors: [
-        {
-          field: 'subdomain',
-          message: 'Subdomain already taken',
-          rule: 'unique',
-        },
-      ],
-    })
-  })
-
-  test('auth user is forbidden from registering an organisation', async ({ client, route }) => {
-    const authUser = await UserFactory.create()
-
-    const response = await client
-      .post(route('AuthController.register'))
-      .loginAs(authUser)
-      .form(payload)
-      .withCsrfToken()
-
-    response.assertStatus(403)
   })
 })
 

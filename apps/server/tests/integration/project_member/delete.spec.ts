@@ -10,6 +10,8 @@ test.group('Project Member : Delete', (group) => {
   let project: Project
   let projectMembers: User[]
 
+  group.tap((test) => test.tags(['@project-members']))
+
   group.each.setup(async () => {
     // Setup organisation
     organisation = await OrganisationFactory.with('users', 5, (userBuilder) => {
@@ -70,11 +72,7 @@ test.group('Project Member : Delete', (group) => {
     assert.isTrue(!projectMember)
   })
 
-  test('organisation org_admin can remove a member from a project', async ({
-    client,
-    route,
-    assert,
-  }) => {
+  test('organisation org_admin can unassign project members', async ({ client, route, assert }) => {
     const member = projectMembers[0]
 
     // Update authUser role to be ORG_ADMIN
@@ -102,11 +100,7 @@ test.group('Project Member : Delete', (group) => {
     assert.isTrue(!projectMember)
   })
 
-  test('organisation owner can remove a member from a project', async ({
-    client,
-    route,
-    assert,
-  }) => {
+  test('organisation owner can unassign project members', async ({ client, route, assert }) => {
     const member = projectMembers[0]
 
     const response = await client
@@ -130,7 +124,7 @@ test.group('Project Member : Delete', (group) => {
     assert.isTrue(!projectMember)
   })
 
-  test('organisation member cannot remove a member from a project', async ({ client, route }) => {
+  test('organisation member cannot unassign project members', async ({ client, route }) => {
     const member = projectMembers[0]
 
     // Update authUser role to be MEMBER
@@ -151,23 +145,7 @@ test.group('Project Member : Delete', (group) => {
     response.assertStatus(403)
   })
 
-  test('unauthenticated user cannot delete a project member', async ({ client, route }) => {
-    const member = projectMembers[0]
-
-    const response = await client
-      .delete(
-        route('ProjectMemberController.delete', {
-          projectId: project.id,
-          memberId: member.id,
-        })
-      )
-      .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
-
-    response.assertStatus(401)
-  })
-
-  test('organisation user cannot delete another organisations project member', async ({
+  test('organisation user cannot unassign another organisations project member', async ({
     client,
     route,
   }) => {
@@ -192,5 +170,21 @@ test.group('Project Member : Delete', (group) => {
       .loginAs(diffUser)
 
     response.assertStatus(403)
+  })
+
+  test('unauthenticated user cannot unassign project members', async ({ client, route }) => {
+    const member = projectMembers[0]
+
+    const response = await client
+      .delete(
+        route('ProjectMemberController.delete', {
+          projectId: project.id,
+          memberId: member.id,
+        })
+      )
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+
+    response.assertStatus(401)
   })
 })

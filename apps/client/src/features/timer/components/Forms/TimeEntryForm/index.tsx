@@ -6,8 +6,10 @@ import {
   FormTextArea,
   FormTimeInput,
   FormErrorMessage,
+  DoubleCashIcon,
+  ClipboardIcon,
 } from '@/components'
-import { FormGroupSelect } from '@/components/Forms/GroupSelect'
+import { FormGroupSelect, FormGroupSelectEmptyState } from '@/components/Forms/GroupSelect'
 import { GroupOption } from '@/components/Forms/GroupSelect/option'
 import { useGetBudgetsQuery } from '../../../../budget/api'
 import { Budget, ModalBaseProps } from '@/types'
@@ -17,6 +19,7 @@ import { groupBy, startCase } from 'lodash'
 import Task from '@/types/models/Task'
 import { UseFormReturn } from 'react-hook-form'
 import { useLazyGetBudgetTasksQuery } from '@/features/budget_tasks'
+import ProjectStatus from '@/enums/ProjectStatus'
 
 export type TimeEntryFields = {
   budget: number | undefined
@@ -42,7 +45,10 @@ export const TimeEntryForm = ({
 }: TimeEntryFormProps): JSX.Element => {
   const [budgetId, setBudgetId] = useState<number | undefined>(undefined)
 
-  const { data: budgets } = useGetBudgetsQuery({ includeProject: true }, { skip: !isOpen })
+  const { data: budgets } = useGetBudgetsQuery(
+    { projectStatus: ProjectStatus.ACTIVE, includeProject: true },
+    { skip: !isOpen },
+  )
 
   const [triggerTasks, { data: tasks }] = useLazyGetBudgetTasksQuery()
 
@@ -107,6 +113,13 @@ export const TimeEntryForm = ({
               control={control}
               placeHolder="Select budget"
               error={!!errors?.budget?.message}
+              emptyState={
+                <FormGroupSelectEmptyState
+                  icon={<DoubleCashIcon />}
+                  title="No Budgets"
+                  description="You are not assigned to any project budgets"
+                />
+              }
               fullWidth
             >
               {Object.entries(budgetOptions)?.map(([groupName, budgets]) => (
@@ -126,6 +139,13 @@ export const TimeEntryForm = ({
               placeHolder="Select task"
               disabled={!watch('budget')}
               error={!!errors?.task?.message && !!watch('budget')}
+              emptyState={
+                <FormGroupSelectEmptyState
+                  icon={<ClipboardIcon />}
+                  title="No Budget Tasks"
+                  description="The selected budget has no tasks to track against"
+                />
+              }
               fullWidth
             >
               {Object.entries(taskOptions)?.map(([groupName, tasks]) => (

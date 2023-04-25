@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 import Client from 'App/Models/Client'
 import Organisation from 'App/Models/Organisation'
 import Project from 'App/Models/Project'
@@ -35,7 +36,6 @@ test.group('Projects : Update', (group) => {
   })
 
   test('organisation manager can update a project', async ({ client, route }) => {
-    // Set authUser role to MANAGER
     const managerRole = await RoleFactory.apply('manager').create()
     await authUser.related('role').associate(managerRole)
 
@@ -44,14 +44,15 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: organisation.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client
       .put(route('ProjectController.update', { projectId: project.id }))
-      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -74,6 +75,7 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: organisation.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client
@@ -100,6 +102,7 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: organisation.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client
@@ -130,6 +133,7 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: organisation.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client
@@ -154,6 +158,7 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: organisation.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client
@@ -178,6 +183,7 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: organisation.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client
@@ -200,6 +206,7 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: organisation.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client
@@ -223,6 +230,7 @@ test.group('Projects : Update', (group) => {
       show_cost: false,
       private: false,
       client_id: diffOrg.clients[0].id,
+      status: ProjectStatus.ACTIVE,
     }
 
     const response = await client

@@ -28,7 +28,11 @@ export const SpentProgressBar = ({
   return (
     <ToolTip
       width={width}
-      trigger={<SingleProgressBar percent={calculatePercentage(spentCost, allocatedBudget)} />}
+      trigger={
+        <button type="button" className="outline-none w-full">
+          <SingleProgressBar percent={calculatePercentage(spentCost, allocatedBudget)} />
+        </button>
+      }
     >
       <div className="divide-y divide-gray-40 divide-dashed">
         <div className="flex flex-col items-start pb-[6px]">

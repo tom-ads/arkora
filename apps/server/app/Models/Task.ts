@@ -2,7 +2,6 @@ import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Budget from './Budget'
 import Organisation from './Organisation'
-import { camelCase, startCase } from 'lodash'
 import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class Task extends BaseModel {
@@ -23,7 +22,7 @@ export default class Task extends BaseModel {
   @column()
   public budgetId: number
 
-  @column({ serialize: (value: string) => startCase(camelCase(value)) })
+  @column()
   public name: string
 
   @column({ serialize: Boolean })

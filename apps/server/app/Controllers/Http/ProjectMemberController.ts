@@ -26,7 +26,7 @@ export default class ProjectMemberController {
     await project.related('members').attach(payload.members)
     const updatedMembers = await project.related('members').query()
 
-    return updatedMembers.map((member) => member.serialize())
+    return updatedMembers?.map((member) => member.serialize())
   }
 
   @bind()

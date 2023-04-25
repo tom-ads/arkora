@@ -1,11 +1,11 @@
-import Status from '@/enums/Status'
+import ProjectStatus from '@/enums/ProjectStatus'
 
 type Project = {
   id: number
   name: string
   showCost: boolean
   private: boolean
-  status: Status
+  status: ProjectStatus
 }
 
 export default Project

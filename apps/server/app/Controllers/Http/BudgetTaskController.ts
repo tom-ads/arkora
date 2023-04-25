@@ -9,7 +9,8 @@ import UpdateBudgetTaskValidator from 'App/Validators/BudgetTask/UpdateBudgetTas
 export default class BudgetTaskController {
   @bind()
   public async create(ctx: HttpContextContract, budget: Budget) {
-    await ctx.bouncer.with('BudgetPolicy').authorize('create')
+    const project = await budget.related('project').query().first()
+    await ctx.bouncer.with('BudgetPolicy').authorize('create', project!)
 
     const payload = await ctx.request.validate(CreateBudgetTaskValidator)
 
@@ -33,12 +34,12 @@ export default class BudgetTaskController {
   public async view(ctx: HttpContextContract, budget: Budget, task: Task) {
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-    const budgetTask = await budget.related('tasks').query().where('tasks.id', task.id).first()
+    const budgetTask = await budget.related('tasks').query().where('tasks.id', task?.id).first()
     if (!budgetTask) {
       return ctx.response.notFound()
     }
 
-    return budgetTask.serialize()
+    return budgetTask?.serialize()
   }
 
   @bind()

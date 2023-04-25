@@ -38,6 +38,20 @@ Route.group(() => {
             .prefix(':userId')
             .where('users', Route.matchers.number())
         }).prefix('/members')
+
+        // Budget Notes
+        Route.group(() => {
+          Route.post('/', 'BudgetNoteController.create')
+          Route.get('/', 'BudgetNoteController.index')
+
+          Route.group(() => {
+            Route.get('/', 'BudgetNoteController.view')
+            Route.put('/', 'BudgetNoteController.update')
+            Route.delete('/', 'BudgetNoteController.delete')
+          })
+            .prefix(':noteId')
+            .where('budget_notes', Route.matchers.number())
+        }).prefix('/notes')
       })
         .prefix(':budgetId')
         .where('budget', Route.matchers.number())
