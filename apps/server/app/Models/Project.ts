@@ -109,6 +109,22 @@ export default class Project extends BaseModel {
 
   // Static methods
 
+  public static async assignMemberToProjects(member: User, organisation: Organisation) {
+    const projects = await organisation.related('projects').query()
+
+    if (projects?.length) {
+      const projectIds = projects.map((project) => project.id)
+      const budgets = await Budget.query().whereIn('project_id', projectIds)
+
+      await Promise.all([
+        ...projects?.map(
+          async (project) => await project.related('members').sync([member.id], false)
+        ),
+        ...budgets?.map(async (budget) => await budget.related('members').sync([member.id], false)),
+      ])
+    }
+  }
+
   public static async isNameTaken(organisation: Organisation, name: string, projectId?: number) {
     const result = await organisation
       .related('projects')

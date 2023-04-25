@@ -136,6 +136,7 @@ export default class Organisation extends BaseModel {
   public async getPrivilegedUsers(this: Organisation) {
     return await this.related('users')
       .query()
+      .whereNotNull('verified_at')
       .whereHas('role', (roleQuery) => {
         roleQuery.whereIn('name', [UserRole.OWNER, UserRole.ORG_ADMIN, UserRole.MANAGER])
       })

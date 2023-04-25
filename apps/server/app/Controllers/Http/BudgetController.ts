@@ -12,8 +12,12 @@ import Project from 'App/Models/Project'
 
 export default class BudgetController {
   public async create(ctx: HttpContextContract) {
-    const project = await Project.findOrFail(ctx.request.input('project_id'))
-    await ctx.bouncer.with('BudgetPolicy').authorize('create', project)
+    let project: Project
+    if (ctx.request.input('project_id')) {
+      project = await Project.findOrFail(ctx.request.input('project_id'))
+    }
+
+    await ctx.bouncer.with('BudgetPolicy').authorize('create', project!)
 
     const payload = await ctx.request.validate(CreateBudgetValidator)
 
@@ -48,11 +52,8 @@ export default class BudgetController {
       return ctx.response.internalServerError()
     }
 
-    // Assign organisation administrators as default budget members
-    const pivilegedUsers = await ctx.organisation?.getPrivilegedUsers()
-    if (pivilegedUsers?.length) {
-      await createdBudget.related('members').attach(pivilegedUsers.map((member) => member.id))
-    }
+    // Assign project members based on the private flag
+    await createdBudget.assignMembers()
 
     // Assign organisation default tasks to budget
     const organisationTasks = await CommonTask.getOrganisationTasks(ctx.organisation!.id)

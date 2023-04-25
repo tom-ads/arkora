@@ -311,6 +311,7 @@ export default class Budget extends BaseModel {
   public async getMetricsForMembers(this: Budget, filters?: MemberFilters) {
     const result = await this.related('members')
       .query()
+      .whereNotNull('verified_at')
       .withScopes((scope) => scope.userInsights({ budgets: [this.id] }))
       .if(filters?.search, (query) => {
         query
@@ -323,6 +324,19 @@ export default class Budget extends BaseModel {
   }
 
   // Static methods
+
+  public async assignMembers(this: Budget) {
+    await this.load('project')
+
+    const members = await this.project
+      .related('members')
+      .query()
+      .if(this.private, (query) => {
+        query.withScopes((scope) => scope.organisationAdmins())
+      })
+
+    await this.related('members').sync(members?.map((member) => member.id))
+  }
 
   public static async getMetricsForBudgets(budgetIds: number[], filters?: BudgetFilters) {
     const result = await Budget.query()

@@ -14,7 +14,7 @@ export default class BudgetMemberController {
 
     const budgetMembers = await budget.getMetricsForMembers(payload)
 
-    return budgetMembers.map((member) => member.serialize())
+    return budgetMembers?.map((member) => member.serialize())
   }
 
   @bind()
@@ -29,7 +29,7 @@ export default class BudgetMemberController {
     await budget.related('members').attach(payload.members)
     const updatedMembers = await budget.related('members').query()
 
-    return updatedMembers.map((member) => member.serialize())
+    return updatedMembers?.map((member) => member.serialize())
   }
 
   @bind()
