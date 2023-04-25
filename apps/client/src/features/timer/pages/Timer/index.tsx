@@ -78,9 +78,9 @@ export const TimerPage = (): JSX.Element => {
       const groupedEntries = groupBy(timesheet, (e) => e.date)
 
       return dates.map((day) => ({
-        weekDay: day.toISODate(),
-        dailyDuration: sumBy(groupedEntries[day.toISODate()], (e) => e.durationMinutes),
-        timeEntries: groupedEntries[day.toISODate()],
+        weekDay: day!.toISODate(),
+        dailyDuration: sumBy(groupedEntries[day!.toISODate()], (e) => e.durationMinutes),
+        timeEntries: groupedEntries[day!.toISODate()],
       }))
     }
   }, [timesheet, startDate, endDate])
