@@ -25,7 +25,7 @@ const registrationViews = {
 }
 
 export const RegistrationPage = (): JSX.Element => {
-  useDocumentTitle('Register')
+  useDocumentTitle('Registration')
 
   const step = useSelector((state: RootState) => state.registration.misc.step)
 

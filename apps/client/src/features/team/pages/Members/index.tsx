@@ -4,8 +4,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { InviteMembersModal, ManageMemberModal } from '../../components'
 import { MemberFilters } from '../../components/Filters/MemberFilters'
 import { TeamMembersTable } from '../../components/Tables'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const MembersPage = (): JSX.Element => {
+  useDocumentTitle('Team')
+
   const navigate = useNavigate()
 
   const { memberId } = useParams()

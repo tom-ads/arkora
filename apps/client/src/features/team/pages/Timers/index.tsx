@@ -2,8 +2,11 @@ import { Page, PageContent, PageDescription, PageHeader, PageTitle } from '@/com
 import { useGetTimersQuery } from '@/features/timer'
 import { useMemo } from 'react'
 import { ActiveTimersList, InactiveTimersList, TimersStatsCard } from '../../components'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const TimersPage = (): JSX.Element => {
+  useDocumentTitle('Team Timers')
+
   const { data } = useGetTimersQuery(undefined, { pollingInterval: 3000 })
 
   const teamTimers = useMemo(() => {

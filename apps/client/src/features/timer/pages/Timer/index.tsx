@@ -31,8 +31,11 @@ import {
 } from '../../components'
 import { cloneDeep, groupBy, sumBy } from 'lodash'
 import { TimesheetDayInsights } from '../../components/Insights'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const TimerPage = (): JSX.Element => {
+  useDocumentTitle('Timer')
+
   const [openNewTimeEntryModal, setOpenNewTimeEntryModal] = useState(false)
   const [timeEntryId, setTimeEntryId] = useState<number | null>(null)
 

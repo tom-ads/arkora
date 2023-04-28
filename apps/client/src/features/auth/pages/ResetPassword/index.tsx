@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/useToast'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 import { useResetPasswordMutation } from '../../api'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 type ResetPasswordFormFields = {
   password: string
@@ -35,6 +36,8 @@ const resetPasswordFormFields = z
   })
 
 export const ResetPasswordPage = (): JSX.Element => {
+  useDocumentTitle('Reset Password')
+
   const navigate = useNavigate()
 
   const { successToast } = useToast()

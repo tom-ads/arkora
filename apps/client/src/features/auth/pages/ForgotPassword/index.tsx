@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/useToast'
 import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import { useForgotPasswordMutation } from '../../api'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 type ForgotPasswordFormFields = {
   email: string
@@ -21,6 +22,8 @@ const forgotPasswordSchema = z.object({
 })
 
 export const ForgotPasswordPage = (): JSX.Element => {
+  useDocumentTitle('Forgot Password')
+
   const [resetPassword, { isLoading }] = useForgotPasswordMutation()
 
   const { successToast, errorToast } = useToast()

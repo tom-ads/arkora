@@ -23,6 +23,8 @@ const BudgetView = () => {
 }
 
 export const BudgetPage = (): JSX.Element => {
+  useDocumentTitle('Budget')
+
   const { budgetId } = useParams()
 
   const { data: budget } = useGetBudgetQuery(parseInt(budgetId!, 10)!, { skip: !budgetId })
