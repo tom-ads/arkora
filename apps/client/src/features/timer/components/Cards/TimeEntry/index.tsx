@@ -15,11 +15,14 @@ type TimeEntryCardProps = {
 }
 
 export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps) => {
-  const duration = useSelector((state: RootState) => state.timer.timeEntry?.durationMinutes ?? 0)
+  const { timerId, duration } = useSelector((state: RootState) => ({
+    timerId: state.timer.timeEntry?.id,
+    duration: state.timer.timeEntry?.durationMinutes ?? 0,
+  }))
 
   const [entryDuration, setEntryDuration] = useState(entry.durationMinutes)
 
-  const isActive = !entry.lastStoppedAt
+  const isActive = entry.id === timerId
 
   useEffect(() => {
     if (isActive && entryDuration < duration) {
