@@ -111,7 +111,7 @@ export default class InvitationController {
   public async resend(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(ResendInvitationValidator)
 
-    const user = await User.findOrFail(payload.userId)
+    const user = await User.findOrFail(payload.user_id)
 
     await ctx.bouncer.with('UserPolicy').authorize('update', user)
 
