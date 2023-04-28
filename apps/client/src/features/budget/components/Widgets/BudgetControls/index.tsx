@@ -4,7 +4,7 @@ import { BudgetTab, setFilters } from '@/stores/slices/filters/budgets'
 import { RootState } from '@/stores/store'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { CreateBudgetTaskModal } from '../../Modals'
+import { CreateBudgetNoteModal, CreateBudgetTaskModal } from '../../Modals'
 import UserRole from '@/enums/UserRole'
 
 export const BudgetControlsWidget = (): JSX.Element => {
@@ -47,6 +47,13 @@ export const BudgetControlsWidget = (): JSX.Element => {
             >
               Members
             </TabItem>
+            <TabItem
+              size="md"
+              isActive={selectedTab === 'notes'}
+              onClick={() => handleSelectedTab('notes')}
+            >
+              Notes
+            </TabItem>
           </TabGroup>
 
           {selectedTab !== 'time' && authRole !== UserRole.MEMBER && (
@@ -57,6 +64,7 @@ export const BudgetControlsWidget = (): JSX.Element => {
               block
             >
               {selectedTab === 'tasks' && <span>Create Task</span>}
+              {selectedTab === 'notes' && <span>Create Note</span>}
               {selectedTab === 'members' && <span>Assign Members</span>}
             </Button>
           )}
@@ -69,6 +77,11 @@ export const BudgetControlsWidget = (): JSX.Element => {
 
       <CreateBudgetTaskModal
         isOpen={openActionModal && selectedTab === 'tasks'}
+        onClose={() => setOpenActionModal(false)}
+      />
+
+      <CreateBudgetNoteModal
+        isOpen={openActionModal && selectedTab === 'notes'}
         onClose={() => setOpenActionModal(false)}
       />
 

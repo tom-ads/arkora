@@ -22,10 +22,11 @@ export const ConfirmationModal = ({
   btnText = 'Confirm',
   title,
   description,
+  afterLeave,
   loading = false,
 }: ConfirmationModalProps): JSX.Element => {
   return (
-    <Transition show={isOpen} as={Fragment} appear>
+    <Transition show={isOpen} as={Fragment} afterLeave={afterLeave} appear>
       <Dialog as="div" onClose={onClose} className="relative z-50">
         {/* Backdrop */}
         <Transition.Child

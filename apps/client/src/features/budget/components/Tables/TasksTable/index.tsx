@@ -13,8 +13,6 @@ import Task from '@/types/models/Task'
 import { useParams } from 'react-router-dom'
 import { z } from 'zod'
 import { BudgetTaskRow, BudgetTaskSkeletonRow } from '../TasksRow'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/stores/store'
 
 type FormFields = {
   tasks: Task[]
@@ -29,21 +27,20 @@ type BudgetTasksTableProps = {
 export const BudgetTasksTable = ({ onManage }: BudgetTasksTableProps): JSX.Element => {
   const { budgetId } = useParams()
 
-  const authRole = useSelector((state: RootState) => state.auth.user?.role?.name)
-
   const { data: tasks, isLoading } = useGetBudgetTasksQuery(parseInt(budgetId!, 10), {
     skip: !budgetId,
   })
 
   return (
     <TableContainer
+      className="min-h-[768px]"
       emptyState={{
         isEmpty: !tasks?.length && !isLoading,
         icon: <ClipboardIcon />,
         title: 'No Tasks',
         btnText: 'Create Task',
         description:
-          'Budget tasks define what is considered billable and non-billable for each time entry created against this budget',
+          'Tasks represent different services and billability of tracked time against the budget',
       }}
     >
       <Form<FormFields, typeof validationSchema> defaultValues={{ tasks: tasks ?? [] }}>

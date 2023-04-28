@@ -44,7 +44,7 @@ const budgetTaskEndpoints = appApi.injectEndpoints({
         url: `${budgetTasksBasePath}/${budgetId}/tasks/${taskId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['BudgetTasks', 'BudgetTask'],
+      invalidatesTags: ['BudgetTasks'],
     }),
   }),
   overrideExisting: false,

@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import { FormEvent, ReactNode, useEffect } from 'react'
 import {
   DeepPartial,
@@ -14,6 +13,7 @@ import { cloneDeep, isEqual } from 'lodash'
 import { useQueryError } from '@/hooks/useQueryError'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
 import { SerializedError } from '@reduxjs/toolkit'
+import { twMerge } from 'tailwind-merge'
 
 export type FormChangeCallback<TFormValues extends FieldValues> = (
   fields: TFormValues,
@@ -90,7 +90,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit} className="w-full">
-        <fieldset className={classNames('flex flex-col w-full', className)}>
+        <fieldset className={twMerge('flex flex-col w-full', className)}>
           {children(methods)}
         </fieldset>
       </form>

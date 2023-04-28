@@ -64,7 +64,7 @@ export const ManageBudgetTaskModal = ({
         .catch(() => errorToast('We failed to delete the budget task, please try again later.'))
 
       setOpenConfirmationModal(false)
-      onClose()
+      setTimeout(() => onClose(), 100)
     }
   }
 
@@ -78,13 +78,13 @@ export const ManageBudgetTaskModal = ({
   return (
     <>
       <Modal
-        title="Manage Budget Task"
-        description="Manage task configuration"
+        title="Manage Task"
+        description="Update task configuration"
         icon={<ClipboardIcon />}
         isOpen={isOpen}
         onClose={onClose}
         loading={fetchingBudgetTask}
-        className="max-w-[500px] min-h-[600px]"
+        className="max-w-[500px]"
       >
         <BudgetTaskForm
           onSubmit={onSubmit}
@@ -94,7 +94,7 @@ export const ManageBudgetTaskModal = ({
             isBillable: budgetTask?.isBillable ?? true,
           }}
         >
-          <ModalFooter>
+          <ModalFooter className="!mt-32">
             <Button
               variant="blank"
               onClick={() => setOpenConfirmationModal(true)}
@@ -107,7 +107,8 @@ export const ManageBudgetTaskModal = ({
               size="xs"
               type="submit"
               className="max-w-[161px]"
-              loading={deletingTask || updatingTask}
+              loading={updatingTask}
+              disabled={deletingTask}
             >
               Update Task
             </Button>
@@ -120,8 +121,8 @@ export const ManageBudgetTaskModal = ({
         onClose={() => setOpenConfirmationModal(false)}
         onConfirm={onConfirm}
         loading={deletingTask}
-        title="You're about to delete a budget task"
-        btnText="Delete Task"
+        title="You're about to remove a task"
+        btnText="Remove Task"
         description="Performing this action will permanently remove all tracked time against this task. It cannot be recovered."
       />
     </>

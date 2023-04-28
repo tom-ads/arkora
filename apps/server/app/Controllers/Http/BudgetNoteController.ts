@@ -14,7 +14,11 @@ export default class BudgetNoteController {
 
     let createdNote: BudgetNote
     try {
-      createdNote = await BudgetNote.create(payload)
+      createdNote = await BudgetNote.create({
+        userId: ctx.auth.user!.id,
+        budgetId: budget.id,
+        ...payload,
+      })
       ctx.logger.info(`User(${ctx.auth.user?.id}) created note for budget(${budget.id})`)
     } catch (error) {
       ctx.logger.error(`Failed to create note for budget ${budget.id} due to ${error.message}`)

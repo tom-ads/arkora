@@ -28,7 +28,7 @@ export const TimeEntriesTable = ({ onManage }: TableProps): JSX.Element => {
       className="min-h-[768px]"
       emptyState={{
         isEmpty: !projectEntries?.length && !isLoading,
-        title: 'No Entries Found',
+        title: 'No Entries',
         description:
           'When budget members track their time against this budget you will see their entries here',
         icon: <ClockIcon />,

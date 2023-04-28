@@ -1,7 +1,17 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  BelongsTo,
+  ModelQueryBuilderContract,
+  beforeFetch,
+  beforeFind,
+  belongsTo,
+  column,
+} from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
 import Budget from './Budget'
+
+type NoteBuilder = ModelQueryBuilderContract<typeof BudgetNote>
 
 export default class BudgetNote extends BaseModel {
   @column({ isPrimary: true })
@@ -29,4 +39,12 @@ export default class BudgetNote extends BaseModel {
 
   @belongsTo(() => Budget)
   public budget: BelongsTo<typeof Budget>
+
+  // Hooks
+
+  @beforeFind()
+  @beforeFetch()
+  public static preloadRelations(query: NoteBuilder) {
+    query.preload('user')
+  }
 }

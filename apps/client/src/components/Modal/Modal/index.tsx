@@ -1,9 +1,9 @@
 import { Spinner } from '@/components/Spinner'
 import { ModalBaseProps } from '@/types'
 import { Dialog, Transition } from '@headlessui/react'
-import classNames from 'classnames'
 import { Fragment, ReactNode } from 'react'
 import { ModalHeader } from '../ModalHeader'
+import { twMerge } from 'tailwind-merge'
 
 type ModalProps = ModalBaseProps & {
   icon?: JSX.Element
@@ -53,7 +53,7 @@ export const Modal = ({
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center lg:p-4">
               <Dialog.Panel
-                className={classNames(
+                className={twMerge(
                   'relative rounded bg-white mx-auto max-w-xl w-full flex flex-col divide-y divide-gray-30 shadow-glow min-h-[500px]',
                   className,
                 )}

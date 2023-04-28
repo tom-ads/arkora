@@ -36,19 +36,19 @@ export const CreateBudgetTaskModal = ({
 
   return (
     <Modal
-      title="Create Budget Task"
-      description="Setup billable or non-billable tasks for a budget"
+      title="Create Task"
+      description="Time can be tracked against the task"
       icon={<ClipboardIcon />}
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[500px] min-h-[600px]"
+      className="max-w-[500px]"
     >
       <BudgetTaskForm
         queryError={error}
         onSubmit={handleSubmit}
         defaultValues={{ name: '', isBillable: true }}
       >
-        <ModalFooter>
+        <ModalFooter className="!mt-32">
           <Button variant="blank" onClick={() => onClose()} disabled={isLoading}>
             Cancel
           </Button>

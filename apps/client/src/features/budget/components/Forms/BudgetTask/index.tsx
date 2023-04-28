@@ -52,19 +52,19 @@ export const BudgetTaskForm = ({
             {errors.name?.message && <FormErrorMessage>{errors.name?.message}</FormErrorMessage>}
           </FormControl>
 
-          <FormControl className="!mb-[165px]">
+          <FormControl>
             <FormLabel htmlFor="private">Type</FormLabel>
             <FormStyledRadio className="flex-col sm:flex-row" name="isBillable">
               <FormStyledRadioOption
                 title="Billable"
                 icon={<DoubleCashIcon className="stroke-[2px]" />}
-                description="All time tracked against this budget task is billed to the client."
+                description="Tracked time against this task are billable to the client."
                 value={true}
               />
               <FormStyledRadioOption
                 title="Non-Billable"
                 icon={<DoubleCashIcon className="stroke-[2px]" />}
-                description="All time tracked against this budget task is not billed to the client."
+                description="Tracked time against this task are not billable to the client."
                 value={false}
               />
             </FormStyledRadio>

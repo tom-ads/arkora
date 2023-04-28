@@ -18,6 +18,7 @@ const baseUrl = (): string => {
 }
 
 const prepareHeaders = (headers: Headers) => {
+  // Set XSRF cookie onto the request
   const xsrfCookie = document.cookie.match(new RegExp('(XSRF-TOKEN)=([^;]*)'))
   if (xsrfCookie) {
     headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrfCookie[2]))
@@ -32,6 +33,7 @@ const rootQuery = fetchBaseQuery({
 })
 
 const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) => {
+  // Recursively transform request to snake_case before request execution
   if (typeof args === 'object') {
     if (args?.params) {
       args.params = transformRequest(args.params)
@@ -42,6 +44,7 @@ const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) =
     }
   }
 
+  // Execute HTTP request
   const result = await rootQuery(args, api, extraOptions)
 
   // Logout if response is 401
@@ -59,6 +62,10 @@ const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) =
 
 const appApi = createApi({
   reducerPath: 'arkoraApi',
+  /* 
+    Tag list for query cache invalidation mechanism
+    built into RTK Query
+  */
   tagTypes: [
     'Project',
     'Projects',
@@ -70,6 +77,8 @@ const appApi = createApi({
     'BudgetTask',
     'BudgetMembers',
     'BudgetMember',
+    'BudgetNote',
+    'BudgetNotes',
     'Members',
     'Member',
     'ProjectMembers',

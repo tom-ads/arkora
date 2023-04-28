@@ -105,7 +105,7 @@ export const UpdateBudgetForm = ({ onClose, budgetId }: UpdateBudgetFormProps): 
       .catch(() => errorToast('Unable to delete budget, please try again later.'))
 
     setOpenConfirmationModal(false)
-    onClose()
+    setTimeout(() => onClose(), 100)
   }
 
   const onFormChange = (data: BudgetFormFields, methods: UseFormReturn<BudgetFormFields>) => {

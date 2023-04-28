@@ -7,11 +7,14 @@ import { useGetBudgetQuery } from '../../api'
 import { BudgetMemberView, BudgetTaskView, BudgetTimeView } from '../../components/Views'
 import { BudgetControlsWidget } from '../../components/Widgets/BudgetControls'
 import { BudgetCostInsights } from '../../components'
+import { BudgetNoteView } from '../../components/Views/NoteView'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 const views = {
   tasks: <BudgetTaskView />,
   time: <BudgetTimeView />,
   members: <BudgetMemberView />,
+  notes: <BudgetNoteView />,
 }
 
 const BudgetView = () => {
