@@ -2,6 +2,7 @@ import classNames from 'classnames'
 import { forwardRef, HTMLAttributes } from 'react'
 import { Spinner } from '../Spinner'
 import { cva, VariantProps } from 'class-variance-authority'
+import { twMerge } from 'tailwind-merge'
 
 const button = cva(
   'relative border rounded transition-all duration-100 outline-none font-semibold flex items-center justify-center my-auto min-h-[39px] whitespace-nowrap',
@@ -85,7 +86,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {...props}
       ref={ref}
       type={type}
-      className={classNames(button({ danger, block, ...props }), className)}
+      className={twMerge(button({ danger, block, ...props }), className)}
     >
       <Spinner
         className={classNames('w-4 h-4 text-white absolute grid place-content-center', {

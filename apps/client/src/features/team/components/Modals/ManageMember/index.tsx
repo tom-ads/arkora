@@ -52,7 +52,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
 
   const { successToast, errorToast } = useToast()
 
-  const [updateMember, { isLoading: updatingMember }] = useUpdateAccountMutation()
+  const [updateMember, { isLoading: updatingMember, error }] = useUpdateAccountMutation()
 
   const [deleteMember, { isLoading: deletingMember }] = useDeleteAccountMutation()
 
@@ -135,7 +135,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
           role: member?.role?.name ?? null,
         }}
         className="space-y-6"
-        queryError={fetchMemberError}
+        queryError={error}
         validationSchema={manageMemberSchema}
       >
         {({ watch, control, formState: { errors } }) => (
