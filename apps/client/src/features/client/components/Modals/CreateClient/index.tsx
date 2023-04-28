@@ -33,6 +33,7 @@ export const CreateClientModal = (props: CreateClientModalProps): JSX.Element =>
       icon={<UserIcon />}
       isOpen={props.isOpen}
       onClose={props.onClose}
+      className="max-w-[500px]"
     >
       <ClientForm
         {...props}

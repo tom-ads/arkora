@@ -1,16 +1,10 @@
 import { Button, UserIcon } from '@/components'
 import { Modal, ModalFooter } from '@/components/Modal'
-import {
-  useCreateClientMutation,
-  useDeleteClientMutation,
-  useGetClientQuery,
-  useUpdateClientMutation,
-} from '../../../api'
+import { useDeleteClientMutation, useGetClientQuery, useUpdateClientMutation } from '../../../api'
 import { ModalBaseProps } from '@/types'
 import { ClientForm, ClientFormFields } from '../../Forms'
 import { useToast } from '@/hooks/useToast'
 import { useParams } from 'react-router-dom'
-import { skipToken } from '@reduxjs/toolkit/dist/query'
 import { ConfirmationModal } from '@/components/Modals'
 import { useState } from 'react'
 
@@ -27,7 +21,7 @@ export const ManageClientModal = (props: ManageClientModalProps): JSX.Element =>
     skip: !clientId,
   })
 
-  const [updateClient, { error: updateClientError, isLoading: creatingClient }] =
+  const [updateClient, { error: updateClientError, isLoading: updatingClient }] =
     useUpdateClientMutation()
 
   const [deleteClient, { isLoading: deletingClient }] = useDeleteClientMutation()
@@ -55,7 +49,7 @@ export const ManageClientModal = (props: ManageClientModalProps): JSX.Element =>
       })
 
     setOpenConfirmationModal(false)
-    props.onClose()
+    setTimeout(() => props.onClose(), 100)
   }
 
   return (
@@ -66,25 +60,24 @@ export const ManageClientModal = (props: ManageClientModalProps): JSX.Element =>
       isOpen={props.isOpen}
       onClose={props.onClose}
       loading={fetchingClient}
+      className="max-w-[500px]"
     >
       <ClientForm
         {...props}
         error={updateClientError}
         onSubmit={handleSubmit}
-        defaultValues={{
-          name: client?.name ?? '',
-        }}
+        defaultValues={{ name: client?.name ?? '' }}
       >
         <ModalFooter className="!mt-56">
           <Button
-            variant="blank"
-            onClick={() => setOpenConfirmationModal(true)}
-            disabled={creatingClient}
             danger
+            variant="blank"
+            disabled={updatingClient}
+            onClick={() => setOpenConfirmationModal(true)}
           >
             Remove
           </Button>
-          <Button size="xs" type="submit" className="max-w-[161px] w-full" loading={creatingClient}>
+          <Button size="xs" type="submit" className="max-w-[161px] w-full" loading={updatingClient}>
             Update Client
           </Button>
         </ModalFooter>
