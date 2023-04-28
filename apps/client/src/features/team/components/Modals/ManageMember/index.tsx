@@ -77,11 +77,12 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
     })
       .unwrap()
       .then(() => successToast(`${data.forename ?? 'Member'} has been updated`))
-      .catch(() =>
+      .catch((error) => {
+        if (error.state === 422) return
         errorToast(
           `Unable to update ${data.forename ?? 'Member'} at the moment, please try again later`,
-        ),
-      )
+        )
+      })
 
     props.onClose()
   }
@@ -93,7 +94,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
       .catch(() => errorToast(`Unable to remove ${name}, please try again later.`))
 
     setOpenConfirmationModal(false)
-    props.onClose()
+    setTimeout(() => props.onClose(), 100)
   }
 
   const roleOptions = useMemo(
@@ -123,13 +124,14 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
       isOpen={props.isOpen}
       onClose={props.onClose}
       loading={fetchingMember}
+      className="max-w-[500px]"
     >
       <Form<FormFields, typeof manageMemberSchema>
         onSubmit={handleSubmit}
         defaultValues={{
           forename: member?.firstname ?? null,
           surname: member?.lastname ?? null,
-          email: member?.email ?? null,
+          email: member?.email?.toLowerCase() ?? null,
           role: member?.role?.name ?? null,
         }}
         className="space-y-6"
@@ -230,9 +232,9 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
               onClose={() => setOpenConfirmationModal(false)}
               onConfirm={onConfirm}
               loading={deletingMember}
-              title={`You're about to remove ${member?.firstname ?? 'a Member'}`}
+              title={`You're about to remove ${member?.firstname ?? 'a member'}`}
               btnText={`Remove ${member?.firstname ?? 'Member'}`}
-              description="Performing this action will permanently delete all related time entries. It cannot be recovered."
+              description="Performing this action will permanently remove all related time entries for this member. It cannot be recovered."
             />
           </>
         )}

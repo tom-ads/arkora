@@ -75,8 +75,8 @@ export const ManageTimeEntryModal = ({
 
     await triggerDelete(entryId!)
       .unwrap()
-      .then(() => successToast('Entry has been deleted'))
-      .catch(() => errorToast('Unable to delete entry, please try again later.'))
+      .then(() => successToast('Entry has been removed'))
+      .catch(() => errorToast('Unable to remove entry, please try again later.'))
 
     onClose()
   }
@@ -126,9 +126,9 @@ export const ManageTimeEntryModal = ({
         onClose={() => setOpenConfirmationModal(false)}
         onConfirm={onConfirm}
         loading={deletingEntry}
-        title="You're about to delete a time entry"
+        title="You're about to remove a time entry"
         btnText="Delete Entry"
-        description="Performing this action will permanently delete all time tracked for this entry. It cannot be recovered."
+        description="Performing this action will permanently remove the tracked time for this entry. It cannot be recovered."
       />
     </>
   )

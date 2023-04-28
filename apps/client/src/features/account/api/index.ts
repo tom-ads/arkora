@@ -36,7 +36,7 @@ const accountEndpoints = appApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['Members'],
+      invalidatesTags: ['Members', 'Member'],
     }),
 
     deleteAccount: build.mutation<void, number>({
@@ -44,7 +44,7 @@ const accountEndpoints = appApi.injectEndpoints({
         url: `${accountBasePath}/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Members', 'Member'],
+      invalidatesTags: ['Members'],
     }),
 
     getAccountsInsights: build.query<User[], GetInsightsRequest>({
