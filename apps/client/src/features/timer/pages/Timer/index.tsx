@@ -78,7 +78,7 @@ export const TimerPage = (): JSX.Element => {
   const formattedWeek = useMemo(() => {
     if (startDate && endDate) {
       const dates = getDatesBetweenPeriod(DateTime.fromISO(startDate), DateTime.fromISO(endDate))
-      const groupedEntries = groupBy(timesheet, (e) => e.date)
+      const groupedEntries = groupBy(cloneDeep(timesheet), (e) => e.date)
 
       return dates.map((day) => ({
         weekDay: day!.toISODate(),

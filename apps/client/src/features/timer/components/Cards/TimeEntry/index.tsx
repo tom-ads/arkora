@@ -20,17 +20,11 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
     duration: state.timer.timeEntry?.durationMinutes ?? 0,
   }))
 
-  const [entryDuration, setEntryDuration] = useState(entry.durationMinutes)
+  const isActive = entry?.id === timerId
 
-  const isActive = entry.id === timerId
-
-  useEffect(() => {
-    if (isActive && entryDuration < duration) {
-      setEntryDuration(duration)
-    } else if (!isActive && entryDuration !== entry.durationMinutes) {
-      setEntryDuration(entry.durationMinutes)
-    }
-  }, [entryDuration, duration, isActive, entry.durationMinutes])
+  if (isActive && entry.durationMinutes < duration) {
+    entry.durationMinutes = duration
+  }
 
   return (
     <div
@@ -97,7 +91,7 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
               {entry.task.isBillable ? 'Billable' : 'Non-Billable'}
             </p>
             <p className="text-xl lg:text-2xl text-gray-100 font-medium">
-              {formatMinutesToTime(entryDuration)}
+              {formatMinutesToTime(entry.durationMinutes)}
             </p>
           </div>
         </div>
@@ -107,7 +101,7 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
             variant="blank"
             onClick={() => onManage(entry?.id)}
             className="min-h-0 text-base"
-            disabled={entry?.budget?.project?.status !== ProjectStatus.ACTIVE}
+            disabled={entry?.budget?.project?.status !== ProjectStatus.ACTIVE || isActive}
           >
             Manage
           </Button>
