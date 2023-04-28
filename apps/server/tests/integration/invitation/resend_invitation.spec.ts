@@ -32,7 +32,7 @@ test.group('Invitation : Resend', (group) => {
     const mailer = Mail.fake()
 
     const payload = {
-      userId: invitedUser.id,
+      user_id: invitedUser.id,
     }
 
     const response = await client
@@ -58,7 +58,7 @@ test.group('Invitation : Resend', (group) => {
       .create()
 
     const payload = {
-      userId: authUser.id,
+      user_id: authUser.id,
     }
 
     const response = await client
