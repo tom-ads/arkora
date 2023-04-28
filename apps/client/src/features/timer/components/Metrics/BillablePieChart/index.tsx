@@ -32,20 +32,18 @@ export const BillablePieChart = ({
         tooltip: {
           custom: function ({ series }) {
             return `
-              <div class="bg-white shadow-lg shadow-gray-50 py-2 px-3 rounded-sm select-none">
-                <div class="divide-y divide-gray-40 divide-dashed min-w-[200px]">
-                  <div class="flex justify-between items-center py-1 gap-2">
-                    <p class="font-medium text-sm text-green-90">Billable</p>
-                    <p class="font-semibold text-sm text-gray-80">
-                      ${formatMinutesToHourMinutes(series[0])}
-                    </p>
-                  </div>
-                  <div class="flex justify-between items-center py-1 gap-2">
-                    <p class="font-medium text-sm text-red-90">Non-Billable</p>
-                    <p class="font-semibold text-sm text-gray-80">
-                      ${formatMinutesToHourMinutes(series[1])}
-                    </p>
-                  </div>
+              <div class="divide-y divide-gray-40 divide-dashed min-w-[200px]">
+                <div class="flex justify-between items-center py-1 gap-2">
+                  <p class="font-medium text-sm text-green-90">Billable</p>
+                  <p class="font-semibold text-sm text-gray-80">
+                    ${formatMinutesToHourMinutes(series[0])}
+                  </p>
+                </div>
+                <div class="flex justify-between items-center py-1 gap-2">
+                  <p class="font-medium text-sm text-red-90">Non-Billable</p>
+                  <p class="font-semibold text-sm text-gray-80">
+                    ${formatMinutesToHourMinutes(series[1])}
+                  </p>
                 </div>
               </div>
             `
