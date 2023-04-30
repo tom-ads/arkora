@@ -64,7 +64,7 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
             delay={150}
             width={250}
             disabled={entry?.budget?.project?.status === ProjectStatus.ACTIVE}
-            className="bg-gray-80 text-white text-sm"
+            className="text-gray-80 text-sm"
             tipFill="fill-gray-80"
             trigger={
               <button
