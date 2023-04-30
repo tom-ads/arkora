@@ -8,12 +8,14 @@ import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 import { DateTime } from 'luxon'
 
-test.group('Timer : Start', ({ each }) => {
+test.group('Timer : Start', (group) => {
   let authUser: User
   let timeEntry: TimeEntry
   let organisation: Organisation
 
-  each.setup(async () => {
+  group.tap((test) => test.tags(['@timer']))
+
+  group.each.setup(async () => {
     organisation = await OrganisationFactory.create()
 
     // Setup common organisation tasks
@@ -163,6 +165,24 @@ test.group('Timer : Start', ({ each }) => {
       id: diffUserTimeEntries[1].id,
       last_stopped_at: null,
     })
+  })
+
+  test('organisation member cannot start a timer that exceeds the daily entry duration, returns a 422 response', async ({
+    client,
+    route,
+  }) => {
+    // Switch entry duration to be 23:59 (daily duration limit)
+    timeEntry.durationMinutes = 1439
+    await timeEntry.save()
+
+    const response = await client
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .loginAs(authUser)
+      .withCsrfToken()
+
+    response.assertStatus(422)
+    response.assertBody({ message: 'Entry cannot exceed 24 hours' })
   })
 
   test('organisation admin cannot start a timer of another organisations member', async ({

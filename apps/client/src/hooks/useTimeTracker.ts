@@ -8,7 +8,6 @@ import { useDispatch } from 'react-redux'
 import { CreateTimerRequest } from '@/features/timer'
 import { useToast } from './useToast'
 import { startTracking, stopTracking } from '@/stores/slices/timer'
-import { isFetchBaseQueryError } from './useQueryError'
 
 export interface UseTimerControls {
   startTimer: (fields: CreateTimerRequest) => Promise<void>
@@ -30,7 +29,7 @@ export function useTimeTracker(): UseTimerControls {
       await createTimerMutation(fields)
         .unwrap()
         .then((createdEntry) => dispatch(startTracking(createdEntry)))
-        .catch(() => errorToast('Error occured'))
+        .catch(() => errorToast('We failed to create a new timer.'))
     },
     [createTimerMutation],
   )

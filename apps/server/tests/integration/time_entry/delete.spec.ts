@@ -9,17 +9,15 @@ import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factorie
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 
-test.group('Time Entry : Delete', ({ each }) => {
+test.group('Time Entry : Delete', (group) => {
   let organisation: Organisation
   let commonTasks: Task[]
   let budgets: Budget[]
   let authUser: User
 
-  /* 
-    Setup
-  */
+  group.tap((test) => test.tags(['@time-entry']))
 
-  each.setup(async () => {
+  group.each.setup(async () => {
     organisation = await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       return clientBuilder.with('projects', 2, (projectBuilder) => {
         return projectBuilder

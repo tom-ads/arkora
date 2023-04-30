@@ -135,6 +135,8 @@ export default class TimerController {
       return ctx.response.badRequest({ message: 'Only active projects can be tracked against' })
     }
 
+    await entry.load('user')
+
     // Deactivate any related timer to timeEntry user
     const activeTimer = await entry.user.getActiveTimer()
     if (activeTimer) {
@@ -146,6 +148,13 @@ export default class TimerController {
         )
         return ctx.response.internalServerError()
       }
+    }
+
+    // Check entry has not already exceeded the daily duration
+    if (entry.isEntryDurationExceeded()) {
+      return ctx.response.unprocessableEntity({
+        message: 'This time entry has reached the daily 24hr limit',
+      })
     }
 
     // Restart timer

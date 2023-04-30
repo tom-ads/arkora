@@ -16,13 +16,15 @@ import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 import { union } from 'lodash'
 import { stringify } from 'qs'
 
-test.group('Time Entries : Index', ({ each }) => {
+test.group('Time Entries : Index', (group) => {
   let organisation: Organisation
   let authUser: User
   let projects: Project[]
   let commonTasks: CommonTask[]
 
-  each.setup(async () => {
+  group.tap((test) => test.tags(['@time-entry']))
+
+  group.each.setup(async () => {
     const budgetType = await BudgetTypeFactory.apply('variable').create()
     const billableType = await BillableTypeFactory.apply('total_cost').create()
 

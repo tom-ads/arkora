@@ -56,5 +56,7 @@ export default class UpdateEntryValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'task_id.exists': 'Task must be related to budget',
+  }
 }

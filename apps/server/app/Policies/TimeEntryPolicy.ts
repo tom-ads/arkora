@@ -4,59 +4,63 @@ import TimeEntry from 'App/Models/TimeEntry'
 import UserRole from 'App/Enum/UserRole'
 
 export default class TimeEntryPolicy extends BasePolicy {
-  public async update(user: User, timeEntry: TimeEntry) {
-    if (!timeEntry) {
+  public async update(authUser: User, timeEntry: TimeEntry) {
+    if (!authUser || !timeEntry) {
       return false
     }
 
-    await timeEntry.load('user')
-    if (user?.organisationId !== timeEntry.user?.organisationId) {
+    const entryUser = await timeEntry.related('user').query().first()
+    if (authUser?.organisationId !== entryUser?.organisationId) {
       return false
     }
 
-    if (user.role?.name === UserRole.MEMBER && user.id !== timeEntry.user?.id) {
-      return false
-    }
-
-    return true
-  }
-
-  public async view(user: User, timeEntry: TimeEntry) {
-    if (!timeEntry) {
-      return false
-    }
-
-    await timeEntry.load('user')
-    if (user?.organisationId !== timeEntry.user?.organisationId) {
-      return false
-    }
-
-    if (user.role?.name === UserRole.MEMBER && user.id !== timeEntry.user?.id) {
+    if (authUser.role?.name === UserRole.MEMBER && authUser.id !== entryUser.id) {
       return false
     }
 
     return true
   }
 
-  public async delete(user: User, timeEntry: TimeEntry) {
-    if (!timeEntry) {
+  public async view(authUser: User, timeEntry: TimeEntry) {
+    if (!authUser || !timeEntry) {
       return false
     }
 
-    await timeEntry.load('user')
-    if (user?.organisationId !== timeEntry.user?.organisationId) {
+    const entryUser = await timeEntry.related('user').query().first()
+    if (authUser?.organisationId !== entryUser?.organisationId) {
       return false
     }
 
-    if (user.role?.name === UserRole.MEMBER && user.id !== timeEntry.user?.id) {
+    if (authUser.role?.name === UserRole.MEMBER && authUser.id !== entryUser.id) {
       return false
     }
 
     return true
   }
 
-  public async index(user: User) {
-    if (user.role?.name === UserRole.MEMBER) {
+  public async delete(authUser: User, timeEntry: TimeEntry) {
+    if (!authUser || !timeEntry) {
+      return false
+    }
+
+    const entryUser = await timeEntry.related('user').query().first()
+    if (authUser?.organisationId !== entryUser?.organisationId) {
+      return false
+    }
+
+    if (authUser.role?.name === UserRole.MEMBER && authUser.id !== entryUser.id) {
+      return false
+    }
+
+    return true
+  }
+
+  public async index(authUser: User) {
+    if (!authUser) {
+      return false
+    }
+
+    if (authUser.role?.name === UserRole.MEMBER) {
       return false
     }
 

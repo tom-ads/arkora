@@ -49,7 +49,7 @@ const projectEndpoints = appApi.injectEndpoints({
           //
         }
       },
-      invalidatesTags: ['Projects'],
+      invalidatesTags: ['Projects', 'Budgets'],
     }),
 
     deleteProject: build.mutation<void, number>({

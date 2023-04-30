@@ -67,7 +67,7 @@ export const ManageProjectModal = ({
       .catch(() => errorToast('Unable to remove project, please try again later.'))
 
     setOpenConfirmationModal(false)
-    onClose()
+    setTimeout(() => onClose(), 100)
   }
 
   return (

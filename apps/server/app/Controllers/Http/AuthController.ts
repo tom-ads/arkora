@@ -137,10 +137,17 @@ export default class AuthController {
 
     await ctx.auth.login(user)
 
-    const activeTimer = await ctx.auth.user!.getActiveTimer()
+    let activeTimer = await ctx.auth.user!.getActiveTimer()
     if (activeTimer) {
+      // Add timer duration difference
       const diffMinutes = timerDifference(activeTimer.lastStartedAt)
       activeTimer.durationMinutes += diffMinutes
+
+      // If time exceeds daily entry duration, then stop it and don't return it
+      if (activeTimer.isEntryDurationExceeded()) {
+        await activeTimer.stopTimer()
+        activeTimer = null
+      }
     }
 
     return {
@@ -165,15 +172,22 @@ export default class AuthController {
   public async session(ctx: HttpContextContract) {
     const organisation = await Organisation.findOrFail(ctx.auth.user?.organisationId)
     /* 
-      Active timer could've been running while the user left their
-      browser etc. We need to ensure the additional time has been
-      set onto the durationMinutes for the client. This does not
-      persist to the db until the user forces the timer to stop.
+      Active timer could've been running while user was inactive,
+      so the additional time needs to be added on, this does not
+      persist to the DB. Additionally, the timer should not have
+      run over the entry duration limit (24hrs)
     */
-    const activeTimer = await ctx.auth.user!.getActiveTimer()
+    let activeTimer = await ctx.auth.user!.getActiveTimer()
     if (activeTimer) {
+      // Add timer duration difference
       const diffMinutes = timerDifference(activeTimer.lastStartedAt)
       activeTimer.durationMinutes += diffMinutes
+
+      // If time exceeds daily entry duration, then stop it and don't return it
+      if (activeTimer.isEntryDurationExceeded()) {
+        await activeTimer.stopTimer()
+        activeTimer = null
+      }
     }
 
     return {

@@ -6,6 +6,7 @@ import UpdateEntryValidator from 'App/Validators/Entry/UpdateEntryValidator'
 import Budget from 'App/Models/Budget'
 import Task from 'App/Models/Task'
 import UserRole from 'App/Enum/UserRole'
+import { isEntryDurationExceeded } from 'Helpers/timer'
 
 export default class TimeEntriesController {
   public async index(ctx: HttpContextContract) {
@@ -50,12 +51,12 @@ export default class TimeEntriesController {
     const budget = await Budget.findOrFail(payload.budget_id ?? entry.budgetId)
 
     if (await ctx.bouncer.with('BudgetPolicy').allows('view', budget)) {
-      if (payload.budget_id !== entry.budgetId) {
+      if (payload.budget_id && payload.budget_id !== entry.budgetId) {
         await entry.related('budget').associate(budget)
         await entry.load('budget')
       }
 
-      if (payload.task_id !== entry.taskId) {
+      if (payload.budget_id && payload.task_id !== entry.taskId) {
         const task = await Task.findOrFail(payload.task_id ?? entry.taskId)
         await entry.related('task').associate(task)
         await entry.load('task')
@@ -71,11 +72,15 @@ export default class TimeEntriesController {
     }
 
     if (payload.estimated_minutes !== entry.estimatedMinutes) {
-      entry.estimatedMinutes = payload.estimated_minutes ?? null
+      if (!isEntryDurationExceeded(payload.estimated_minutes ?? 0)) {
+        entry.estimatedMinutes = payload.estimated_minutes ?? null
+      }
     }
 
     if (payload.duration_minutes !== entry.durationMinutes) {
-      entry.durationMinutes = payload.duration_minutes
+      if (!isEntryDurationExceeded(payload.duration_minutes)) {
+        entry.durationMinutes = payload.duration_minutes
+      }
     }
 
     await entry.save()

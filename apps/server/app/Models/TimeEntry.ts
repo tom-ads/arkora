@@ -112,7 +112,18 @@ export default class TimeEntry extends BaseModel {
     const diffMinutes = timerDifference(this.lastStartedAt)
     this.durationMinutes += diffMinutes
     this.lastStoppedAt = DateTime.now()
+
+    // Ensure updated duration does not exceed daily duration (23:59 -> 1439mins)
+    if (this.isEntryDurationExceeded()) {
+      this.durationMinutes = 1439
+    }
+
     this.save()
+  }
+
+  public isEntryDurationExceeded() {
+    // Duration cannot exceed 23:59 -> 1439 minutes
+    return this.durationMinutes >= 1439
   }
 
   public async restartTimer() {
