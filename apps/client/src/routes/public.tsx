@@ -6,7 +6,7 @@ import {
   RegistrationPage,
   ResetPasswordPage,
 } from '@/features/auth'
-import { SubdomainPage, SubdomainNotFoundPage, useCheckSubdomainQuery } from '@/features/subdomain'
+import { SubdomainPage, NotFoundPage, useCheckSubdomainQuery } from '@/features/subdomain'
 import { setOrganisation } from '@/stores/slices/organisation'
 import { RootState } from '@/stores/store'
 import { useEffect } from 'react'
@@ -57,7 +57,7 @@ export const PublicRoutes = (): JSX.Element => {
     subdomain !== import.meta.env.VITE_ARKORA_STATIC_HOSTNAME &&
     subdomain !== 'arkora'
   ) {
-    return <SubdomainNotFoundPage />
+    return <NotFoundPage />
   }
 
   if (isAuthenticated) {
