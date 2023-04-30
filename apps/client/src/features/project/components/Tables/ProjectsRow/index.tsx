@@ -93,10 +93,6 @@ export const ProjectsRowSkeleton = (): JSX.Element => {
         </TableData>
 
         <TableData>
-          <SkeletonBox height={20} width={80} />
-        </TableData>
-
-        <TableData>
           <SkeletonBox height={20} width={50} />
         </TableData>
       </TableRow>
