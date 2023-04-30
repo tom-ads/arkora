@@ -182,7 +182,7 @@ test.group('Timer : Start', (group) => {
       .withCsrfToken()
 
     response.assertStatus(422)
-    response.assertBody({ message: 'Entry cannot exceed 24 hours' })
+    response.assertBody({ message: 'This time entry has reached the daily 24hr limit' })
   })
 
   test('organisation admin cannot start a timer of another organisations member', async ({
