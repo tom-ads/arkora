@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import classNames from 'classnames'
+import { twMerge } from 'tailwind-merge'
 
 type ToolTipProps = {
   width: number
@@ -33,7 +33,7 @@ export const ToolTip = ({
           <Tooltip.Content
             sideOffset={5}
             style={{ width }}
-            className={classNames(
+            className={twMerge(
               'bg-white shadow-md shadow-gray-50 py-2 px-3 rounded-sm select-none',
               className,
             )}
