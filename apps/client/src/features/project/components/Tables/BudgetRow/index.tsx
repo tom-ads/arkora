@@ -24,8 +24,7 @@ type RowProps = TableRowBaseProps<Budget & { project?: Project }>
 export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
   const { checkPermission } = useAuthorization()
 
-  const { currencyCode, authRole } = useSelector((state: RootState) => ({
-    currencyCode: state.organisation.currency?.code,
+  const { authRole } = useSelector((state: RootState) => ({
     authRole: state.auth.user?.role?.name,
   }))
 
@@ -67,12 +66,12 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        <Badge variant="default">{value?.budgetType?.name}</Badge>
+        <Badge variant="default">{value?.budgetType?.name?.replace('_', ' ')}</Badge>
       </TableData>
 
       <TableData>
         {value.budgetType?.name !== BudgetType.NON_BILLABLE && value.hourlyRate && showCost ? (
-          <FormatCurrency value={formattedBudget?.hourlyRate} currency={currencyCode} />
+          <FormatCurrency value={formattedBudget?.hourlyRate} />
         ) : (
           <p>- - -</p>
         )}
@@ -80,7 +79,7 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
 
       <TableData>
         {value.budgetType?.name !== BudgetType.NON_BILLABLE && showCost ? (
-          <FormatCurrency value={formattedBudget.allocatedBudget} currency={currencyCode} />
+          <FormatCurrency value={formattedBudget.allocatedBudget} />
         ) : (
           <p>- - -</p>
         )}
