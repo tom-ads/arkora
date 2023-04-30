@@ -115,7 +115,7 @@ export const ManageOrganisationModal = (props: ModalBaseProps): JSX.Element => {
       isOpen={props.isOpen}
       onClose={props.onClose}
       afterLeave={handleAfterLeave}
-      className="max-w-[500px]"
+      className="max-w-[550px]"
     >
       <>
         <div className="flex gap-x-10 items-center">
