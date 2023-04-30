@@ -34,6 +34,9 @@ export default class UpdateEntryValidator {
       rules.exists({
         table: 'tasks',
         column: 'id',
+        where: {
+          budget_id: this.ctx.request.input('budget_id'),
+        },
       }),
     ]),
     date: schema.date({ format: 'iso' }),

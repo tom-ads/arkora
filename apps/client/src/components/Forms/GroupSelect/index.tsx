@@ -1,4 +1,3 @@
-import { ClockIcon } from '@/components/Icons'
 import { ChevronIcon } from '@/components/Icons/ChevronIcon'
 import { Listbox, Transition } from '@headlessui/react'
 import { cva } from 'class-variance-authority'
@@ -15,6 +14,7 @@ type FormSelectProps = {
   error?: boolean
   disabled?: boolean
   fullWidth?: boolean
+  onChange?: (id: number) => void
   emptyState: JSX.Element
   children: JSX.Element[]
 }
@@ -103,11 +103,12 @@ export const FormGroupSelect = ({
   error,
   disabled,
   fullWidth,
+  onChange,
   emptyState,
   children,
 }: FormSelectProps): JSX.Element => {
   const {
-    field: { value, onChange },
+    field: { value, onChange: onFormChange },
   } = useController({ name, control })
 
   const [focused, setFocused] = useState(false)
@@ -124,10 +125,17 @@ export const FormGroupSelect = ({
 
   const selectedItem = validChildren?.find((child) => child?.id === value)
 
+  const handleChange = (id: number) => {
+    onFormChange(id)
+    if (onChange) {
+      onChange(id)
+    }
+  }
+
   return (
     <div className="relative w-full">
       {/* Listbox will not change last selected if passed undefined, so we need to pass null instead */}
-      <Listbox value={value ?? null} onChange={(id) => onChange(id)} disabled={disabled}>
+      <Listbox value={value ?? null} onChange={handleChange} disabled={disabled}>
         {({ open }) => (
           <>
             <Listbox.Button className={listBoxButton({ size, error, focused, disabled })}>
