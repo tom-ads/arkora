@@ -1,16 +1,15 @@
+import { RootState } from '@/stores/store'
 import { useMemo } from 'react'
+import { useSelector } from 'react-redux'
 
 type FormatCurrencyProps = {
   value: number | null
-  currency?: string
   className?: string
 }
 
-export const FormatCurrency = ({
-  value,
-  currency = 'GBP',
-  className,
-}: FormatCurrencyProps): JSX.Element => {
+export const FormatCurrency = ({ value, className }: FormatCurrencyProps): JSX.Element => {
+  const currency = useSelector((state: RootState) => state.organisation.currency?.code)
+
   const formatter = useMemo(() => {
     // Locale will default to users browser
     return new Intl.NumberFormat(undefined, {

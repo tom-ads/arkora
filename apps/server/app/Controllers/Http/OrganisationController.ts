@@ -20,8 +20,8 @@ export default class OrganisationController {
       breakDuration: payload.break_duration,
     })
 
-    if (payload.currency !== organisation?.currency?.name) {
-      const currency = await Currency.findBy('name', payload.currency)
+    if (payload.currency !== organisation?.currency?.code) {
+      const currency = await Currency.findBy('code', payload.currency)
       if (currency) {
         await organisation.related('currency').associate(currency)
         await organisation.load('currency')
