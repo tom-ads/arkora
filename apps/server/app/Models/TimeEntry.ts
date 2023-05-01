@@ -108,7 +108,7 @@ export default class TimeEntry extends BaseModel {
 
   // Instance Methods
 
-  public async stopTimer() {
+  public async stopTimer(this: TimeEntry) {
     const diffMinutes = timerDifference(this.lastStartedAt)
     this.durationMinutes += diffMinutes
     this.lastStoppedAt = DateTime.now()
@@ -126,7 +126,7 @@ export default class TimeEntry extends BaseModel {
     return this.durationMinutes >= 1439
   }
 
-  public async restartTimer() {
+  public async restartTimer(this: TimeEntry) {
     this.lastStartedAt = DateTime.now()
     this.lastStoppedAt = null
     this.save()
