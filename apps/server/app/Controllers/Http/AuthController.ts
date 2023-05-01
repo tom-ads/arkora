@@ -184,10 +184,10 @@ export default class AuthController {
       activeTimer.durationMinutes += diffMinutes
 
       // If time exceeds daily entry duration, then stop it and don't return it
-      // if (activeTimer.isEntryDurationExceeded()) {
-      //   await activeTimer.stopTimer()
-      //   activeTimer = null
-      // }
+      if (activeTimer.isEntryDurationExceeded()) {
+        await activeTimer.stopTimer()
+        activeTimer = null
+      }
     }
 
     return {
