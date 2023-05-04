@@ -71,6 +71,27 @@ validator.rule('currencyCode', (currencyCode, _, options) => {
   }
 })
 
+validator.rule('reservedSubdomain', (subdomain, _, options) => {
+  if (typeof subdomain !== 'string') {
+    throw new Error('"reservedSubdomain" rule can only be used with a number schema type')
+  }
+
+  const reservedSubdomains = ['arkora', 'api']
+
+  const isReserved = reservedSubdomains.find(
+    (reservedSubdomain) => reservedSubdomain.toLowerCase() === subdomain.toLowerCase()
+  )
+
+  if (isReserved) {
+    options.errorReporter.report(
+      options.pointer,
+      'reservedSubdomain',
+      'reservedSubdomain validation failed',
+      options.arrayExpressionPointer
+    )
+  }
+})
+
 validator.rule('workDays', (workDays, _, options) => {
   if (!Array.isArray(workDays)) {
     return

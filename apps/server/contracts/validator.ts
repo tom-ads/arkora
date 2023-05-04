@@ -9,5 +9,6 @@ declare module '@ioc:Adonis/Core/Validator' {
     organisationProject(organisationId: number): Rule
     organisationClient(organisationId: number): Rule
     organisationEmail(organisationId: number, authEmail: string): Rule
+    reservedSubdomain(): Rule
   }
 }
