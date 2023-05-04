@@ -62,7 +62,7 @@ const projectEndpoints = appApi.injectEndpoints({
 
     getProjectInsights: build.query<GetProjectInsightsResponse, number | string>({
       query: (id) => `${projectsBasePath}/${id}/insights`,
-      providesTags: ['Projects', 'Budget'],
+      providesTags: ['Projects', 'Budget', 'TimeEntries', 'TimeEntry'],
     }),
   }),
   overrideExisting: false,

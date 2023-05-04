@@ -36,7 +36,7 @@ const timeEntryEndpoints = appApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['TimeEntries', 'TimeEntry'],
+      invalidatesTags: ['TimeEntries', 'TimeEntry', 'Budget', 'Budgets'],
     }),
 
     deleteTimeEntry: build.mutation<void, number>({
