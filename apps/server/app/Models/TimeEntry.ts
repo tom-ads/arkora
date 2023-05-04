@@ -54,7 +54,7 @@ export default class TimeEntry extends BaseModel {
   @column()
   public durationMinutes: number
 
-  @column.dateTime({ autoUpdate: false })
+  @column.dateTime()
   public lastStartedAt: DateTime
 
   // This column is used to determine whether it is an active timer

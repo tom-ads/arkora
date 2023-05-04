@@ -35,7 +35,8 @@ export const ManageProjectModal = ({
   const [updateProject, { isLoading: updatingProject, error: updateError }] =
     useUpdateProjectMutation()
 
-  const [deleteProject, { isLoading: deletingProject }] = useDeleteProjectMutation()
+  const [deleteProject, { isLoading: deletingProject, isSuccess: isDeleted }] =
+    useDeleteProjectMutation()
 
   const onSubmit = async (data: ProjectFormFields) => {
     await updateProject({
@@ -58,16 +59,24 @@ export const ManageProjectModal = ({
       })
   }
 
+  const handleConfirmationLeave = () => {
+    if (isDeleted) {
+      onClose()
+    }
+  }
+
+  const handleProjectLeave = () => {
+    if (isDeleted) {
+      navigate('/projects')
+    }
+  }
+
   const onConfirm = async () => {
     await deleteProject(projectId!)
-      .then(() => {
-        navigate('/projects')
-        successToast('Project has been removed')
-      })
+      .then(() => successToast('Project has been removed'))
       .catch(() => errorToast('Unable to remove project, please try again later.'))
 
     setOpenConfirmationModal(false)
-    setTimeout(() => onClose(), 100)
   }
 
   return (
@@ -79,6 +88,7 @@ export const ManageProjectModal = ({
         isOpen={isOpen}
         onClose={onClose}
         loading={loadingProject}
+        afterLeave={handleProjectLeave}
       >
         <ProjectForm
           isOpen={isOpen}
@@ -115,6 +125,7 @@ export const ManageProjectModal = ({
       </Modal>
 
       <ConfirmationModal
+        afterLeave={handleConfirmationLeave}
         isOpen={openConfirmationModal}
         onClose={() => setOpenConfirmationModal(false)}
         onConfirm={onConfirm}
