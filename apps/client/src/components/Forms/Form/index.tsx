@@ -90,7 +90,7 @@ export const Form = <TFormValues extends FieldValues, ValidationSchema extends Z
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit} className="w-full">
-        <fieldset className={twMerge('flex flex-col w-full', className)}>
+        <fieldset className={twMerge('flex flex-col w-full min-w-0', className)}>
           {children(methods)}
         </fieldset>
       </form>
