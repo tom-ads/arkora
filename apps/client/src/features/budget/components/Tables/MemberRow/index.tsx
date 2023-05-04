@@ -56,11 +56,13 @@ export const MemberRow = ({ onDelete, value, isPrivate }: MemberRowProps): JSX.E
 
       <TableData>
         {authRole !== UserRole.MEMBER ? (
-          <BillableProgressBar
-            width={215}
-            billableTotal={formattedMember.billableDuration}
-            unbillableTotal={formattedMember.unbillableDuration}
-          />
+          <div className="w-[215px]">
+            <BillableProgressBar
+              width={215}
+              billableTotal={formattedMember.billableDuration}
+              unbillableTotal={formattedMember.unbillableDuration}
+            />
+          </div>
         ) : (
           <p>- - -</p>
         )}

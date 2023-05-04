@@ -11,5 +11,7 @@ export const PageTitle = ({ loading, children }: PageTitleProps): JSX.Element =>
     return <SkeletonBox className="bg-purple-80" height={50} width={400} />
   }
 
-  return <h1 className="text-white font-semibold text-4xl mb-1">{children}</h1>
+  return (
+    <h1 className="text-white font-semibold text-xl md:text-2xl lg:text-4xl mb-1">{children}</h1>
+  )
 }

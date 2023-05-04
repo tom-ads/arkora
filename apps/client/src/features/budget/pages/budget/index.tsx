@@ -43,7 +43,7 @@ export const BudgetPage = (): JSX.Element => {
       <PageBackBtn to={`/projects/${budget?.projectId}`}>Back to Project</PageBackBtn>
       <PageHeader>
         <div>
-          <p className="text-xl text-gray-40 font-medium">Budget</p>
+          <p className="text-lg lg:text-xl text-gray-40 font-medium">Budget</p>
           <PageTitle>{budget?.name}</PageTitle>
         </div>
         {checkPermission('project:update') && (

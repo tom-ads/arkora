@@ -49,7 +49,7 @@ export const TimeEntriesRow = ({ value, onManage }: RowProps): JSX.Element => {
           <ColourRing size="sm" colour={value.budget?.colour} />
           <div className="flex flex-col">
             <span className="font-medium">{value.budget?.name}</span>
-            <span className="font-medium text-gray-60">{value.task?.name}</span>
+            <span className="font-medium text-gray-60 whitespace-pre-wrap">{value.task?.name}</span>
           </div>
         </div>
       </TableData>

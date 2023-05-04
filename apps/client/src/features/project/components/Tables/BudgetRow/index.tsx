@@ -87,13 +87,15 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
 
       <TableData>
         {value.budgetType?.name !== BudgetType.NON_BILLABLE && showCost ? (
-          <SpentProgressBar
-            width={200}
-            billableCost={formattedBudget.billableCost}
-            unbillableCost={formattedBudget.unbillableCost}
-            allocatedBudget={formattedBudget.allocatedBudget}
-            allocatedDuration={formattedBudget.allocatedDuration}
-          />
+          <div className="w-[200px]">
+            <SpentProgressBar
+              width={200}
+              billableCost={formattedBudget.billableCost}
+              unbillableCost={formattedBudget.unbillableCost}
+              allocatedBudget={formattedBudget.allocatedBudget}
+              allocatedDuration={formattedBudget.allocatedDuration}
+            />
+          </div>
         ) : (
           <p>- - -</p>
         )}
@@ -101,11 +103,13 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
 
       <TableData>
         {value.budgetType?.name !== BudgetType.NON_BILLABLE && showCost ? (
-          <BillableProgressBar
-            width={200}
-            billableTotal={formattedBudget.billableCost}
-            unbillableTotal={formattedBudget.unbillableCost}
-          />
+          <div className="w-[200px]">
+            <BillableProgressBar
+              width={200}
+              billableTotal={formattedBudget.billableCost}
+              unbillableTotal={formattedBudget.unbillableCost}
+            />
+          </div>
         ) : (
           <p>- - -</p>
         )}
