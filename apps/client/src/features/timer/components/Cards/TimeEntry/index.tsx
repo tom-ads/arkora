@@ -33,23 +33,22 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
       })}
     >
       {/* Project, Budget and Task */}
-      <div className="pr-2">
+      <div className="pr-2 min-w-0">
         <p
-          className={classNames('font-semibold text-sm lg:text-base mb-[6px] lg:mb-2', {
-            'text-gray-50': !isActive,
-            'text-gray-60': isActive,
-          })}
+          className={classNames(
+            'font-semibold text-sm lg:text-base mb-[6px] lg:mb-2 truncate max-w-[450px]',
+            {
+              'text-gray-50': !isActive,
+              'text-gray-60': isActive,
+            },
+          )}
         >
-          {entry.budget?.project?.name}
+          {entry.task.name}
         </p>
         <div className="flex gap-4">
-          <h2 className="font-medium text-base lg:text-xl text-gray-100">{entry.budget.name}</h2>
-          <Badge
-            variant="primary"
-            className={classNames('hidden sm:flex', { '!bg-purple-20': isActive })}
-          >
-            {entry.task.name}
-          </Badge>
+          <h2 className="font-medium text-base lg:text-xl text-gray-100 truncate">
+            {entry.budget.name}
+          </h2>
         </div>
         <div className="pt-[7px] pb-3 lg:pt-[10px] lg:pb-4">
           <div className="rounded max-w-[120px] bg-green-60 h-1"></div>
@@ -77,7 +76,7 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
               </button>
             }
           >
-            <span>Cannot restart timers against non-active projects</span>
+            <span>Cannot restart timers against inactive projects</span>
           </ToolTip>
 
           <div className="text-left lg:space-y-[2px] w-[72px] lg:w-[77px]">
