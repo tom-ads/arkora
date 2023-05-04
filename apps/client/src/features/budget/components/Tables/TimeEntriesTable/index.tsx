@@ -37,13 +37,13 @@ export const TimeEntriesTable = ({ onManage }: TableProps): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[160px]" first></TableHeading>
-            <TableHeading className="w-[270px]">DESCRIPTION</TableHeading>
-            <TableHeading className="w-[90px]">Date</TableHeading>
-            <TableHeading className="w-[80px]">ESTIMATE</TableHeading>
-            <TableHeading className="w-[80px]">TIME</TableHeading>
-            <TableHeading className="w-[65px]">BILLABLE</TableHeading>
-            <TableHeading className="w-[65px]" last></TableHeading>
+            <TableHeading first></TableHeading>
+            <TableHeading>DESCRIPTION</TableHeading>
+            <TableHeading>Date</TableHeading>
+            <TableHeading>ESTIMATE</TableHeading>
+            <TableHeading>TIME</TableHeading>
+            <TableHeading>BILLABLE</TableHeading>
+            <TableHeading className="w-10" last></TableHeading>
           </TableRow>
         </TableHead>
         <TableBody>

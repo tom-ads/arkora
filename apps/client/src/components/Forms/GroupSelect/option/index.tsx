@@ -47,7 +47,7 @@ export const GroupOption = ({ name, group }: GroupOptionProps): JSX.Element => {
               </span>
               {selected && (
                 <span className="w-4 h-4 shrink-0 mr-1" aria-hidden>
-                  <CircleTick aria-hidden />
+                  <CircleTick />
                 </span>
               )}
             </>

@@ -16,6 +16,7 @@ import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 import { TeamMembersTableRow } from './row'
+import { useToast } from '@/hooks/useToast'
 
 type FormFields = {
   selectedMembers: number[]
@@ -37,6 +38,8 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
     authId: state.auth.user?.id,
   }))
 
+  const { errorToast } = useToast()
+
   const [triggerResend] = useResendInvitationMutation()
 
   const { data: members, isLoading } = useGetAccountsQuery({
@@ -47,7 +50,9 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
   })
 
   const handleAction = async (userId: number) => {
-    await triggerResend({ userId })
+    await triggerResend({ userId }).catch(() =>
+      errorToast('Unable to resent invite. Please try again later.'),
+    )
   }
 
   const filteredMembers = useMemo(() => {
@@ -72,15 +77,15 @@ export const TeamMembersTable = ({ onCreate }: TeamMembersTableProps): JSX.Eleme
           <Table>
             <TableHead>
               <TableRow>
-                <TableHeading className="w-[32px]" first>
+                <TableHeading first>
                   <FormCheckbox name="select-all" />
                 </TableHeading>
-                <TableHeading className="w-[30px]"></TableHeading>
-                <TableHeading className="w-[150px]">NAME</TableHeading>
-                <TableHeading className="w-[200px]">EMAIL</TableHeading>
-                <TableHeading className="w-[100px]">ROLE</TableHeading>
-                <TableHeading className="w-[100px]">JOINED</TableHeading>
-                <TableHeading className="w-[60px]" last></TableHeading>
+                <TableHeading></TableHeading>
+                <TableHeading>NAME</TableHeading>
+                <TableHeading>EMAIL</TableHeading>
+                <TableHeading>ROLE</TableHeading>
+                <TableHeading>JOINED</TableHeading>
+                <TableHeading last></TableHeading>
               </TableRow>
             </TableHead>
             <TableBody>

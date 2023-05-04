@@ -47,12 +47,10 @@ export const BudetNotesTable = ({ onManage }: BudgetTasksTableProps): JSX.Elemen
           <Table>
             <TableHead>
               <TableRow>
-                <TableHeading className="w-[200px]" first>
-                  NAME
-                </TableHeading>
-                <TableHeading className="w-[500px]">Description</TableHeading>
-                <TableHeading className="w-[100px]">Created</TableHeading>
-                <TableHeading className="w-[80px]" last></TableHeading>
+                <TableHeading first>NAME</TableHeading>
+                <TableHeading>Description</TableHeading>
+                <TableHeading>Created</TableHeading>
+                <TableHeading className="w-10" last></TableHeading>
               </TableRow>
             </TableHead>
             <TableBody>

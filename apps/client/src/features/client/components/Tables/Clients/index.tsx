@@ -39,11 +39,9 @@ export const ClientsTable = ({ onCreate }: ClientsTableProps): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[350px]" first>
-              NAME
-            </TableHeading>
-            <TableHeading className="w-[50px]">Created</TableHeading>
-            <TableHeading className="w-[10px]" last></TableHeading>
+            <TableHeading first>NAME</TableHeading>
+            <TableHeading>Created</TableHeading>
+            <TableHeading className="w-10" last></TableHeading>
           </TableRow>
         </TableHead>
         <TableBody>

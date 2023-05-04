@@ -42,14 +42,12 @@ export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.El
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[270px]" first>
-              NAME
-            </TableHeading>
-            <TableHeading className="w-[270px]">CLIENT</TableHeading>
-            <TableHeading className="w-[200px]">TEAM</TableHeading>
-            <TableHeading className="w-[120px]">STATUS</TableHeading>
-            <TableHeading className="w-[120px]">VISIBILITY</TableHeading>
-            <TableHeading className="w-[75px]" last></TableHeading>
+            <TableHeading first>NAME</TableHeading>
+            <TableHeading>CLIENT</TableHeading>
+            <TableHeading>TEAM</TableHeading>
+            <TableHeading>STATUS</TableHeading>
+            <TableHeading>VISIBILITY</TableHeading>
+            <TableHeading className="w-10" last></TableHeading>
           </TableRow>
         </TableHead>
         <TableBody>

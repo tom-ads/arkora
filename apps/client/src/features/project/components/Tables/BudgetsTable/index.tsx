@@ -44,15 +44,15 @@ export const BudgetsTable = ({ onManage }: TableProps): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[32px]" first></TableHeading>
-            <TableHeading className="w-[225px]">NAME</TableHeading>
-            <TableHeading className="w-[160px]">TYPE</TableHeading>
-            <TableHeading className="w-[100px]">RATE (HRS)</TableHeading>
+            <TableHeading first></TableHeading>
+            <TableHeading>NAME</TableHeading>
+            <TableHeading>TYPE</TableHeading>
+            <TableHeading>RATE (HRS)</TableHeading>
             <TableHeading>BUDGET</TableHeading>
-            <TableHeading className="w-[200px] 2xl:w-[230px]">SPENT</TableHeading>
-            <TableHeading className="w-[200px] 2xl:w-[230px]">BILLABLE / NON-BILLABLE</TableHeading>
-            <TableHeading className="w-[95px]">VISIBILITY</TableHeading>
-            <TableHeading className="w-[100px]" last></TableHeading>
+            <TableHeading>SPENT</TableHeading>
+            <TableHeading>BILLABLE / NON-BILLABLE</TableHeading>
+            <TableHeading>VISIBILITY</TableHeading>
+            <TableHeading className="w-10" last></TableHeading>
           </TableRow>
         </TableHead>
         <TableBody>

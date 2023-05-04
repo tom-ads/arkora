@@ -19,7 +19,7 @@ type TableProps = {
 export const MembersTable = ({ onDelete }: TableProps): JSX.Element => {
   const { projectId } = useParams()
 
-  const { data: project } = useGetProjectQuery(projectId!, { skip: !projectId })
+  const { data: project } = useGetProjectQuery(parseInt(projectId!, 10), { skip: !projectId })
 
   const { data: projectMembers, isLoading: loadingMembers } = useGetProjectMembersQuery(
     { projectId: projectId! },
@@ -40,11 +40,11 @@ export const MembersTable = ({ onDelete }: TableProps): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeading className="w-[220px]"></TableHeading>
-            <TableHeading className="w-[210px]">Email</TableHeading>
-            <TableHeading className="w-[100px]">SPENT</TableHeading>
-            <TableHeading className="w-[150px]">BILLABLE / NON-BILLABLE</TableHeading>
-            <TableHeading className="w-[100px]" last></TableHeading>
+            <TableHeading></TableHeading>
+            <TableHeading>Email</TableHeading>
+            <TableHeading>SPENT</TableHeading>
+            <TableHeading>BILLABLE / NON-BILLABLE</TableHeading>
+            <TableHeading last></TableHeading>
           </TableRow>
         </TableHead>
         <TableBody>

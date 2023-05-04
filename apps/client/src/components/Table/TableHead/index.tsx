@@ -1,5 +1,5 @@
-import classNames from 'classnames'
 import { ReactNode } from 'react'
+import { twMerge } from 'tailwind-merge'
 
 type TableHeadProps = {
   className?: string
@@ -7,5 +7,5 @@ type TableHeadProps = {
 }
 
 export const TableHead = ({ className, children }: TableHeadProps): JSX.Element => {
-  return <thead className={classNames('bg-gray-20', className)}>{children}</thead>
+  return <thead className={twMerge('bg-gray-20', className)}>{children}</thead>
 }

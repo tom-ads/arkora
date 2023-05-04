@@ -22,7 +22,9 @@ export const BudgetTaskRow = ({ value, onManage }: TasksRowProps): JSX.Element =
   return (
     <TableRow>
       <TableData>
-        <span>{value.name}</span>
+        <div className="font-medium max-w-xl truncate">
+          <span>{value.name}</span>
+        </div>
       </TableData>
 
       <TableData>

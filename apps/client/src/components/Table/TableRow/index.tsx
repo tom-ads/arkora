@@ -5,5 +5,5 @@ type TableRowProps = {
 }
 
 export const TableRow = ({ children }: TableRowProps): JSX.Element => {
-  return <tr className="">{children}</tr>
+  return <tr>{children}</tr>
 }
