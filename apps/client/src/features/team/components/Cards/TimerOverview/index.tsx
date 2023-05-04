@@ -1,5 +1,7 @@
 import { Avatar, Card, VerticalDivider } from '@/components'
+import { formatMinutesToTime } from '@/helpers/date'
 import { Timer } from '@/types/models/Timer'
+import classNames from 'classnames'
 
 type ReadOnlyProps = {
   label: string
@@ -20,8 +22,10 @@ type TimerOverviewCardProps = {
 }
 
 export const TimerOverviewCard = ({ value }: TimerOverviewCardProps): JSX.Element => {
+  const isActive = value?.timer?.lastStoppedAt === null
+
   return (
-    <Card className="px-8 py-5 flex justify-between">
+    <Card className="px-8 py-5 flex justify-between min-h-[50px]">
       <div className="flex gap-4 items-center">
         <Avatar className="w-10 h-10 bg-purple-10">{value.initials}</Avatar>
         <VerticalDivider />
@@ -41,7 +45,23 @@ export const TimerOverviewCard = ({ value }: TimerOverviewCardProps): JSX.Elemen
         <Readonly label="Task" value={value.timer?.task?.name} />
       </div>
 
-      <div></div>
+      <div className="flex flex-col justify-between pl-2">
+        <div className="flex gap-4 items-start">
+          <div className="text-left lg:space-y-[2px] w-[72px] lg:w-[77px]">
+            <p
+              className={classNames('text-xs lg:text-[13px] lg:leading-[18px] font-semibold', {
+                'text-gray-50': !isActive,
+                'text-gray-60': isActive,
+              })}
+            >
+              {value?.timer?.isBillable ? 'Billable' : 'Non-Billable'}
+            </p>
+            <p className="text-xl text-gray-100 font-medium">
+              {formatMinutesToTime(value?.timer?.durationMinutes ?? 0)}
+            </p>
+          </div>
+        </div>
+      </div>
     </Card>
   )
 }
