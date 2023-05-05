@@ -171,6 +171,13 @@ export default class AuthController {
 
   public async session(ctx: HttpContextContract) {
     const organisation = await Organisation.findOrFail(ctx.auth.user?.organisationId)
+
+    const originHeader = ctx.request.header('origin')?.toLowerCase()
+
+    const originSubdomain = getOriginSubdomain(originHeader!)
+    if (!originSubdomain || originSubdomain !== organisation.subdomain) {
+      return ctx.response.abort({ message: 'Not authenticated' }, 401)
+    }
     /* 
       Active timer could've been running while user was inactive,
       so the additional time needs to be added on, this does not
