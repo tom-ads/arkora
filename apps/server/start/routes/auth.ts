@@ -13,7 +13,7 @@ Route.group(() => {
           Route.post('/details', 'AuthController.verifyDetails')
           Route.post('/organisation', 'AuthController.verifyOrganisation')
         }).prefix('/register')
-      }).middleware('blockAuth')
+      })
 
       Route.group(() => {
         Route.get('/session', 'AuthController.session')
