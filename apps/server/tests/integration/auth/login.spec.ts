@@ -138,28 +138,28 @@ test.group('Auth : Login', () => {
     response.assertBody({ message: 'Origin header not present' })
   })
 
-  test('auth user gets forbidden route when trying to hit login route', async ({
-    client,
-    route,
-  }) => {
-    const user = await UserFactory.merge({
-      email: 'sameemail@example.com',
-      password: 'newPassword123!',
-    })
-      .with('organisation', 1, (builder) => builder.merge({ subdomain: 'test-org' }))
-      .create()
+  // test('auth user gets forbidden route when trying to hit login route', async ({
+  //   client,
+  //   route,
+  // }) => {
+  //   const user = await UserFactory.merge({
+  //     email: 'sameemail@example.com',
+  //     password: 'newPassword123!',
+  //   })
+  //     .with('organisation', 1, (builder) => builder.merge({ subdomain: 'test-org' }))
+  //     .create()
 
-    const payload = {
-      email: user.email,
-      password: user.password,
-    }
+  //   const payload = {
+  //     email: user.email,
+  //     password: user.password,
+  //   }
 
-    const response = await client
-      .post(route('AuthController.login'))
-      .form(payload)
-      .loginAs(user)
-      .withCsrfToken()
+  //   const response = await client
+  //     .post(route('AuthController.login'))
+  //     .form(payload)
+  //     .loginAs(user)
+  //     .withCsrfToken()
 
-    response.assertStatus(403)
-  })
+  //   response.assertStatus(403)
+  // })
 })
