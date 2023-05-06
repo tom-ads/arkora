@@ -29,7 +29,7 @@ export const ManageBudgetModal = ({
 
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false)
 
-  const { data: budget, isFetching: fetchingBudget } = useGetBudgetQuery(budgetId ?? skipToken)
+  const { data: budget, isLoading: loadingBudget } = useGetBudgetQuery(budgetId ?? skipToken)
 
   const [triggerDelete, { isLoading: deletingBudget, isSuccess: isDeleted }] =
     useDeleteBudgetMutation()
@@ -118,7 +118,7 @@ export const ManageBudgetModal = ({
         isOpen={isOpen}
         onClose={onClose}
         afterLeave={handleBudgetLeave}
-        loading={fetchingBudget}
+        loading={loadingBudget}
         className="max-w-[655px]"
       >
         <UpdateBudgetForm

@@ -212,6 +212,7 @@ export const TimerPage = (): JSX.Element => {
       </PageContent>
 
       <NewTimeEntryModal
+        activeProject={true}
         isOpen={openNewTimeEntryModal}
         onClose={() => setOpenNewTimeEntryModal((state) => !state)}
       />
@@ -219,6 +220,7 @@ export const TimerPage = (): JSX.Element => {
         entryId={timeEntryId}
         isOpen={!!timeEntryId}
         onClose={() => setTimeEntryId(null)}
+        activeProject={true}
       />
     </Page>
   )

@@ -9,7 +9,12 @@ export const ProjectTimeView = (): JSX.Element => {
     <>
       <TimeEntriesTable onManage={(id) => setEntryId(id)} />
 
-      <ManageTimeEntryModal entryId={entryId} isOpen={!!entryId} onClose={() => setEntryId(null)} />
+      <ManageTimeEntryModal
+        entryId={entryId}
+        isOpen={!!entryId}
+        onClose={() => setEntryId(null)}
+        activeProject={false}
+      />
     </>
   )
 }

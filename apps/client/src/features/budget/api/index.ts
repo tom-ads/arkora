@@ -40,7 +40,7 @@ const budgetEndpoints = appApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['Budgets', 'Budget', 'BudgetTasks'],
+      invalidatesTags: ['Budgets', 'Budget', 'BudgetTasks', 'BudgetTask'],
     }),
 
     deleteBudget: build.mutation<void, number>({

@@ -29,6 +29,7 @@ export type TimeEntryFields = {
 }
 
 type TimeEntryFormProps = ModalBaseProps & {
+  activeProject?: boolean
   onSubmit: (data: TimeEntryFields) => void
   defaultValues: TimeEntryFields
   validationSchema: ZodType
@@ -37,11 +38,19 @@ type TimeEntryFormProps = ModalBaseProps & {
 
 type FormWrapperProps = UseFormReturn<TimeEntryFields> & {
   children: any
+  activeProject?: boolean
 }
 
-const FormWrapper = ({ formState, control, watch, setValue, children }: FormWrapperProps) => {
+const FormWrapper = ({
+  activeProject,
+  formState,
+  control,
+  watch,
+  setValue,
+  children,
+}: FormWrapperProps) => {
   const { data: budgets } = useGetBudgetsQuery({
-    projectStatus: ProjectStatus.ACTIVE,
+    ...(activeProject && { projectStatus: ProjectStatus.ACTIVE }),
     includeProject: true,
   })
 
@@ -137,7 +146,7 @@ const FormWrapper = ({ formState, control, watch, setValue, children }: FormWrap
 
       <div className="flex justify-between gap-8">
         <FormControl>
-          <FormLabel htmlFor="estimatedTime">Est. Time</FormLabel>
+          <FormLabel htmlFor="estimatedTime">Est. Time (Optional)</FormLabel>
           <FormTimeInput name="estimatedTime" size="sm" error={!!formState?.errors.estimatedTime} />
           {formState?.errors?.estimatedTime?.message && (
             <FormErrorMessage>{formState?.errors.estimatedTime?.message}</FormErrorMessage>
@@ -172,6 +181,7 @@ export const TimeEntryForm = ({
   onSubmit,
   defaultValues,
   validationSchema,
+  activeProject,
   children,
 }: TimeEntryFormProps): JSX.Element => {
   return (
@@ -181,7 +191,11 @@ export const TimeEntryForm = ({
       validationSchema={validationSchema}
       defaultValues={defaultValues}
     >
-      {(methods) => <FormWrapper {...methods}>{children}</FormWrapper>}
+      {(methods) => (
+        <FormWrapper {...methods} activeProject={activeProject}>
+          {children}
+        </FormWrapper>
+      )}
     </Form>
   )
 }

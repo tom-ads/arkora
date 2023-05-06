@@ -83,7 +83,7 @@ export const TimeEntriesRow = ({ value, onManage }: RowProps): JSX.Element => {
       </TableData>
 
       <TableData>
-        <Button variant="blank" onClick={handleManage}>
+        <Button variant="blank" onClick={handleManage} disabled={!value.lastStoppedAt}>
           Manage
         </Button>
       </TableData>

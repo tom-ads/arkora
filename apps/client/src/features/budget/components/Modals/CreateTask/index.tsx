@@ -46,7 +46,7 @@ export const CreateBudgetTaskModal = ({
       <BudgetTaskForm
         queryError={error}
         onSubmit={handleSubmit}
-        defaultValues={{ name: '', isBillable: true }}
+        defaultValues={{ name: '', isBillable: false }}
       >
         <ModalFooter className="!mt-32">
           <Button variant="blank" onClick={() => onClose()} disabled={isLoading}>

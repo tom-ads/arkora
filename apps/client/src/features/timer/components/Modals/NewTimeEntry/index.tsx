@@ -18,7 +18,15 @@ export const newEntrySchema = z.object({
   description: z.string().optional(),
 })
 
-export const NewTimeEntryModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Element => {
+type NewTimeEntryProps = ModalBaseProps & {
+  activeProject?: boolean
+}
+
+export const NewTimeEntryModal = ({
+  isOpen,
+  onClose,
+  activeProject,
+}: NewTimeEntryProps): JSX.Element => {
   const dispatch = useDispatch()
 
   const { errorToast } = useToast()
@@ -54,6 +62,7 @@ export const NewTimeEntryModal = ({ isOpen, onClose }: ModalBaseProps): JSX.Elem
       onClose={onClose}
     >
       <TimeEntryForm
+        activeProject={activeProject}
         onSubmit={onSubmit}
         validationSchema={newEntrySchema}
         defaultValues={{

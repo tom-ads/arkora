@@ -91,7 +91,7 @@ export const ManageBudgetTaskModal = ({
           queryError={updateError}
           defaultValues={{
             name: budgetTask?.name ?? '',
-            isBillable: budgetTask?.isBillable ?? true,
+            isBillable: budgetTask?.isBillable ?? false,
           }}
         >
           <ModalFooter className="!mt-32">

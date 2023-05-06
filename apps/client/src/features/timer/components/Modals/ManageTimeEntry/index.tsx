@@ -30,11 +30,13 @@ export const manageEntrySchema = z.object({
 })
 
 type ManageTimeEntryModalProps = ModalBaseProps & {
+  activeProject?: boolean
   entryId: number | null
 }
 
 export const ManageTimeEntryModal = ({
   entryId,
+  activeProject,
   isOpen,
   onClose,
 }: ManageTimeEntryModalProps): JSX.Element => {
@@ -91,6 +93,7 @@ export const ManageTimeEntryModal = ({
         onClose={onClose}
       >
         <TimeEntryForm
+          activeProject={activeProject}
           isOpen={isOpen}
           onClose={onClose}
           onSubmit={onSubmit}
