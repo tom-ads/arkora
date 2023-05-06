@@ -129,9 +129,9 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
       <Form<FormFields, typeof manageMemberSchema>
         onSubmit={handleSubmit}
         defaultValues={{
-          forename: member?.firstname ?? null,
-          surname: member?.lastname ?? null,
-          email: member?.email?.toLowerCase() ?? null,
+          forename: member?.firstname ?? '',
+          surname: member?.lastname ?? '',
+          email: member?.email?.toLowerCase() ?? '',
           role: member?.role?.name ?? null,
         }}
         className="space-y-6"

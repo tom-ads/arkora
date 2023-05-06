@@ -72,7 +72,7 @@ export const OrganisationDetailsView = ({
             <div>
               <p className="text-gray-100 font-semibold text-sm">Delete Organisation</p>
               <p className="text-xs">
-                Performing this action will permanently the entire organisation from Arkora
+                Performing this action will permanently delete your organisation from Arkora.
               </p>
             </div>
             <Button

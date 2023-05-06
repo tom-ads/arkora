@@ -75,6 +75,7 @@ export default class AuthController {
     let owner: User
     try {
       owner = await User.create({
+        organisationId: createdOrganisation.id,
         firstname: details.firstname,
         lastname: details.lastname,
         email: details.email,
@@ -82,7 +83,6 @@ export default class AuthController {
         verifiedAt: DateTime.now(),
       })
       await owner.related('role').associate(userRoles.find((r) => r.name === UserRole.OWNER)!)
-      await owner.related('organisation').associate(createdOrganisation)
 
       ctx.logger.info(`Created owner(${owner.id}) for tenant(${createdOrganisation.subdomain})`)
     } catch (err) {

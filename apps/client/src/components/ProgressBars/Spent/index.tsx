@@ -44,11 +44,13 @@ export const SpentProgressBar = ({
         </div>
 
         <div className="flex flex-col items-start py-[6px]">
-          <p className="font-medium text-xs text-gray-50">Spent</p>
+          <p className="font-medium text-xs text-gray-50">
+            Spent ({calculatePercentage(spentCost, allocatedBudget)}
+            %)
+          </p>
           <div className="flex justify-between w-full">
             <p className="font-semibold text-xs text-gray-80 flex gap-1">
-              <FormatCurrency value={spentCost} />({calculatePercentage(spentCost, allocatedBudget)}
-              %)
+              <FormatCurrency value={spentCost} />
             </p>
             <p className="font-semibold text-xs text-gray-80">
               {formatMinutesToHourMinutes(spentCost)}
@@ -57,12 +59,13 @@ export const SpentProgressBar = ({
         </div>
 
         <div className="flex flex-col items-start pt-[6px]">
-          <p className="font-medium text-xs text-gray-50">Remaining</p>
+          <p className="font-medium text-xs text-gray-50">
+            Remaining ({calculatePercentage(remainingBudget, allocatedBudget)}
+            %)
+          </p>
           <div className="flex justify-between w-full">
             <p className="font-semibold text-xs text-gray-80 flex gap-1">
-              <FormatCurrency value={remainingBudget} />(
-              {calculatePercentage(remainingBudget, allocatedBudget)}
-              %)
+              <FormatCurrency value={remainingBudget} />
             </p>
           </div>
         </div>

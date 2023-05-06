@@ -32,7 +32,9 @@ export const BudgetNoteRow = ({ onManage, value }: NoteRowProps): JSX.Element =>
         </div>
       </TableData>
 
-      <TableData>{value.note}</TableData>
+      <TableData>
+        <span className="whitespace-pre-line">{value.note}</span>
+      </TableData>
 
       <TableData>
         <FormatDateTime value={value.createdAt} format={DateTime.DATE_MED} />

@@ -198,7 +198,7 @@ export const TeamView = (): JSX.Element => {
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
 
   const handleSubmit = async (data: InviteFormFields) => {
-    dispatch(setTeam({ ...data.members }))
+    dispatch(setTeam(data.members))
     await register({
       firstname: details.firstname,
       lastname: details.lastname,
@@ -215,10 +215,7 @@ export const TeamView = (): JSX.Element => {
       defaultRate: convertToPennies(organisation.defaultRate ?? 0),
       breakDuration: convertTimeToMinutes(organisation.breakDuration ?? '00:00'),
 
-      members: team.map((member) => ({
-        email: member.email,
-        role: member.role,
-      })),
+      members: data.members,
     })
       .unwrap()
       .then((response) => {
@@ -270,9 +267,9 @@ export const TeamView = (): JSX.Element => {
             </Button>
             <Button
               size="sm"
-              className="max-w-[220px] w-full"
               type="submit"
               loading={isRegistering}
+              className="max-w-[220px] w-full"
             >
               Finish
             </Button>
