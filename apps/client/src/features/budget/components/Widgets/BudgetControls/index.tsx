@@ -47,13 +47,15 @@ export const BudgetControlsWidget = (): JSX.Element => {
             >
               Members
             </TabItem>
-            <TabItem
-              size="md"
-              isActive={selectedTab === 'notes'}
-              onClick={() => handleSelectedTab('notes')}
-            >
-              Notes
-            </TabItem>
+            {authRole !== UserRole.MEMBER && (
+              <TabItem
+                size="md"
+                isActive={selectedTab === 'notes'}
+                onClick={() => handleSelectedTab('notes')}
+              >
+                Notes
+              </TabItem>
+            )}
           </TabGroup>
 
           {selectedTab !== 'time' && authRole !== UserRole.MEMBER && (
