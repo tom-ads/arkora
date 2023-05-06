@@ -13,6 +13,7 @@ import {
   FormDebouncedInput,
   FormErrorMessage,
   FormLabel,
+  FormLabelInfo,
 } from '@/components'
 import { WeekDaysSelect } from '@/components/WeekDays'
 import { SelectOption } from '@/components/Forms/Select/option'
@@ -135,7 +136,7 @@ export const OrganisationsView = (): JSX.Element => {
           <Descriptor>
             <DescriptorInsights
               title="Organisation Details"
-              description="Determine the name that your team will visit"
+              description="Specify the domain that your team will use to access the organisation."
               className="max-w-md md:max-w-[325px]"
             />
             <DescriptorContent className="max-w-[405px]">
@@ -151,9 +152,17 @@ export const OrganisationsView = (): JSX.Element => {
                   )}
                 </FormControl>
                 <FormControl>
-                  <FormLabel htmlFor="subdomain" size="sm">
-                    Subdomain
-                  </FormLabel>
+                  <div className="flex items-center gap-2">
+                    <FormLabel htmlFor="subdomain" size="sm">
+                      Subdomain
+                    </FormLabel>
+                    <FormLabelInfo width={300}>
+                      <span className="text-sm font-medium">
+                        The subdomain will be used to access your organisation site with Arkora.
+                      </span>
+                    </FormLabelInfo>
+                  </div>
+
                   <FormDebouncedInput
                     name="subdomain"
                     placeHolder="Enter subdomain"
@@ -196,10 +205,8 @@ export const OrganisationsView = (): JSX.Element => {
           {/* Operating Hours */}
           <Descriptor>
             <DescriptorInsights
-              title="Operating Hours"
-              description="Specify your organisations working days and
-                hours. This lets Arkora know when to send
-                notifications, stop timers and more"
+              title="Tracking Requirements"
+              description="Working days and hours determine the daily and weekly tracking goals for the team."
               className="max-w-md md:max-w-[325px]"
             />
             <DescriptorContent className="max-w-[405px]">
@@ -252,9 +259,7 @@ export const OrganisationsView = (): JSX.Element => {
           <Descriptor>
             <DescriptorInsights
               title="Rates and Cost"
-              description="Project budgets can be billable on an hourly
-                rate, you can even set fixed cost on any
-                budget instead"
+              description="Specify how you want costs to be displayed and the default rate for budgets."
               className="max-w-md md:max-w-[325px]"
             />
             <DescriptorContent className="max-w-[405px]">
@@ -277,7 +282,7 @@ export const OrganisationsView = (): JSX.Element => {
 
                 <FormControl>
                   <FormLabel htmlFor="defaultRate" size="sm">
-                    Hourly Rate
+                    Default Rate (Hourly)
                   </FormLabel>
                   <FormCurrencyInput
                     size="sm"

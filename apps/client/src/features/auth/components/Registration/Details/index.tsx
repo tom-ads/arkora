@@ -101,17 +101,17 @@ export const DetailsView = (): JSX.Element => {
           <Descriptor>
             <DescriptorInsights
               title="Your Details"
-              description="Basic details about you that are displayed across your account and to other team members."
+              description="Basic details for managing your account"
             />
             <DescriptorContent className="max-w-[402px]">
               <div className="flex justify-between gap-3">
                 <FormControl>
                   <FormLabel htmlFor="firstname" size="sm">
-                    Firstname
+                    Forename
                   </FormLabel>
                   <FormInput
                     name="firstname"
-                    placeHolder="Enter firstname"
+                    placeHolder="Enter forename"
                     size="sm"
                     error={!!errors.firstname}
                   />
@@ -122,11 +122,11 @@ export const DetailsView = (): JSX.Element => {
 
                 <FormControl>
                   <FormLabel htmlFor="lastname" size="sm">
-                    Lastname
+                    Surname
                   </FormLabel>
                   <FormInput
                     name="lastname"
-                    placeHolder="Enter lastname"
+                    placeHolder="Enter surname"
                     size="sm"
                     error={!!errors.lastname}
                   />
