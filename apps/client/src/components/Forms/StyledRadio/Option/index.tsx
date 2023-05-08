@@ -3,7 +3,7 @@ import { RadioGroup } from '@headlessui/react'
 import { cva } from 'class-variance-authority'
 
 const radioItemStyling = cva(
-  'relative border w-full rounded transition-all outline-none appearance-none text-left p-[10px] cursor-pointer',
+  'relative border w-full rounded transition-all outline-none appearance-none text-left p-[10px]',
   {
     variants: {
       checked: {
@@ -12,6 +12,7 @@ const radioItemStyling = cva(
       },
       disabled: {
         true: 'bg-gray-20 cursor-default',
+        false: 'cursor-pointer',
       },
     },
     defaultVariants: {

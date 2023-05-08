@@ -58,11 +58,12 @@ export default class BudgetController {
     // Assign organisation default tasks to budget
     const organisationTasks = await CommonTask.getOrganisationTasks(ctx.organisation!.id)
     if (organisationTasks?.length) {
-      await createdBudget
-        .related('tasks')
-        .createMany(
-          organisationTasks.map((task) => ({ name: task.name, isBillable: task.isBillable }))
-        )
+      await createdBudget.related('tasks').createMany(
+        organisationTasks.map((task) => ({
+          name: task.name,
+          isBillable: budgetType?.name !== BudgetKind.NON_BILLABLE ? task.isBillable : false,
+        }))
+      )
     }
 
     return createdBudget.serialize()
