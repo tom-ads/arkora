@@ -4,6 +4,8 @@ Arkora is an essential time tracking tool for organisationS that require full co
 
 Visit: https://arkora.co.uk
 
+![poster_new](https://user-images.githubusercontent.com/86882192/236873370-e65e7f4b-6995-479c-8b92-6c786acb62bb.jpg)
+
 # Technology
 
 Arkora uses Yarn Workspaces to construct a monorepo.
