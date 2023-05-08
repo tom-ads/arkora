@@ -45,7 +45,7 @@ export const CostBreakdownWidget = ({ value }: CostBreakdownWidgetProps): JSX.El
       {/* Insights Controls */}
       <div className="border-b border-dashed border-gray-30 px-[21px] py-4">
         <div className="flex items-center justify-between">
-          <p>01st Jan - 24th June </p>
+          <p></p>
           <div className="flex items-center gap-4">
             {(formattedInsights?.private !== undefined || formattedInsights?.private !== null) && (
               <>
