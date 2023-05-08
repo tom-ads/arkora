@@ -25,9 +25,9 @@ type TimerOverviewCardProps = {
 export const TimerOverviewCard = ({ value }: TimerOverviewCardProps): JSX.Element => {
   const isActive = value?.timer?.lastStoppedAt === null
 
-  let date = ''
+  let date = DateTime.now().toFormat('dd/LL/yyyy')
   if (value.timer?.date) {
-    date = DateTime.fromISO(value?.timer?.date).toFormat('YYYY')
+    date = DateTime.fromISO(value?.timer?.date).toFormat('dd/LL/yyyy')
   }
 
   return (
