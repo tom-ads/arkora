@@ -8,6 +8,7 @@ import StopTimerValidator from 'App/Validators/Timer/StopTimerValidator'
 import { bind } from '@adonisjs/route-model-binding'
 import { DateTime } from 'luxon'
 import ProjectStatus from 'App/Enum/ProjectStatus'
+import { timerDifference } from 'Helpers/timer'
 
 export default class TimerController {
   /**
@@ -101,6 +102,13 @@ export default class TimerController {
     const result = await Promise.all(
       organisationTeam.map(async (member) => {
         const activeTimer = await member.getActiveTimer()
+        if (activeTimer) {
+          const diffMinutes = timerDifference(activeTimer.lastStartedAt)
+          const pendingDuration = activeTimer.durationMinutes + diffMinutes
+          if (pendingDuration !== activeTimer.durationMinutes) {
+            activeTimer.durationMinutes += diffMinutes
+          }
+        }
 
         return {
           ...member.serialize(),
