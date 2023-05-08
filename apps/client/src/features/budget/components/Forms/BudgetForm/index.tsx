@@ -191,17 +191,17 @@ export const BudgetForm = ({
           <FormStyledRadio name="budgetType" className="flex-col sm:flex-row gap-[6px]">
             <FormStyledRadioOption
               title="Variable"
-              description="Est. budget. Charge and track by the hour. Can overrun."
+              description="Est. budget. Charge and track by the hour."
               value={BudgetType.VARIABLE}
             />
             <FormStyledRadioOption
               title="Fixed"
-              description="Set budget or cost. Tracked by the hour, cannot overrun"
+              description="Set cost and rate. Tracked by the hour."
               value={BudgetType.FIXED}
             />
             <FormStyledRadioOption
               title="Non-Billable"
-              description="No cost, budget hours only. Track by hour, can overrun."
+              description="No cost, only time. Tracked by hour."
               value={BudgetType.NON_BILLABLE}
             />
           </FormStyledRadio>
