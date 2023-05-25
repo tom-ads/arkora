@@ -25,6 +25,7 @@ export const ClientsPage = (): JSX.Element => {
           Create Client
         </Button>
       </PageHeader>
+
       <PageContent>
         <ClientsTable onCreate={() => setOpenCreateClientModal(true)} />
       </PageContent>
