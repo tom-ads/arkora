@@ -28,7 +28,6 @@ export default class AccountController {
   @bind()
   public async view(ctx: HttpContextContract, user: User) {
     await ctx.bouncer.with('UserPolicy').authorize('view', user)
-
     return user.serialize()
   }
 
