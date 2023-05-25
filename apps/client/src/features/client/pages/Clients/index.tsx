@@ -3,8 +3,11 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ClientsTable } from '../../components'
 import { CreateClientModal, ManageClientModal } from '../../components/Modals'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const ClientsPage = (): JSX.Element => {
+  useDocumentTitle('Clients')
+
   const [openCreateClientModal, setOpenCreateClientModal] = useState(false)
 
   const navigate = useNavigate()

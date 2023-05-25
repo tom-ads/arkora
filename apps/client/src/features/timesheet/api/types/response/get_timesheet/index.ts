@@ -1,14 +1,5 @@
-import TimeEntry from '@/types/TimeEntry'
+import TimeEntry from '@/types/models/TimeEntry'
 
-type TimesheetDay = {
-  day: string
-  totalMinutes: number
-  entries: TimeEntry[]
-}
-
-type GetTimesheetResponse = {
-  totalMinutes: string
-  days: TimesheetDay[]
-}
+type GetTimesheetResponse = Record<number, TimeEntry[]>
 
 export default GetTimesheetResponse

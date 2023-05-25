@@ -4,7 +4,6 @@ import {
   FormControl,
   FormInput,
   HorizontalDivider,
-  MouseIcon,
   FormErrorMessage,
 } from '@/components'
 import { ModalFooter } from '@/components/Modal'
@@ -108,12 +107,6 @@ export const InviteMemberFields = ({
           contentLeft={
             <p className="whitespace-nowrap font-medium text-base text-gray-100">Invites</p>
           }
-          contentRight={
-            <div className="flex items-center gap-1 text-gray-80">
-              <MouseIcon className="w-5 h-5 shrink-0" />
-              <p className="whitespace-nowrap text-sm font-medium">Scroll to view list</p>
-            </div>
-          }
         />
       </div>
 
@@ -137,10 +130,10 @@ export const InviteMembersForm = ({ onClose }: InviteMembersFormProps): JSX.Elem
         successToast('Members have been invited to the organisation')
       })
       .catch((error) => {
-        if (error?.status !== 422) {
-          errorToast('Unable to invite members, please try again later.')
-          onClose()
-        }
+        if (error?.status === 422) return
+
+        errorToast('Unable to invite members, please try again later.')
+        onClose()
       })
   }
 
@@ -162,7 +155,7 @@ export const InviteMembersForm = ({ onClose }: InviteMembersFormProps): JSX.Elem
           <InviteMemberFields {...methods} />
 
           <ModalFooter>
-            <Button variant="blank" onClick={onClose} danger>
+            <Button variant="blank" onClick={onClose}>
               Cancel
             </Button>
             <Button

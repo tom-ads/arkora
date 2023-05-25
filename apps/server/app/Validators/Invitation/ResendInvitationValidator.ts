@@ -24,7 +24,7 @@ export default class ResendInvitationValidator {
    *    ```
    */
   public schema = schema.create({
-    userId: schema.number([
+    user_id: schema.number([
       rules.exists({
         table: 'users',
         column: 'id',

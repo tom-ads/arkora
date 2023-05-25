@@ -19,15 +19,21 @@ export default class InvitationController {
 
     const existingUsers = await ctx.organisation?.related('users').query()
 
-    // Prevent invitee emails to already exist as organisation members
-    const filteredInvites = uniqBy(payload.members, 'email').filter(
-      (invitee) => !existingUsers?.some((user) => user.email === invitee.email)
+    // Emails should be case insensitive
+    const transformedInvitees = payload.members.map((invitee) => ({
+      ...invitee,
+      email: invitee.email.toLowerCase(),
+    }))
+
+    // Prevent duplicate members
+    const filteredInvites = uniqBy(transformedInvitees, 'email').filter(
+      (invitee) => !existingUsers?.some((user) => user.email.toLowerCase() === invitee.email)
     )
 
     if (filteredInvites?.length) {
       try {
         // Create and send organisation invitation notification
-        const invitedMembers = await ctx.organisation!.inviteMembers(payload.members)
+        const invitedMembers = await ctx.organisation!.inviteMembers(filteredInvites)
 
         // Link invited members to all associated entities, ie. public projects and budgets
         await ctx.organisation!.associateMembers(invitedMembers)
@@ -57,7 +63,7 @@ export default class InvitationController {
     // Verification code expires 1 day after its creation
     const invitedUser = await User.query()
       .where('email', payload.email)
-      .where('updated_at', '>', DateTime.now().minus({ day: 1 }).toSQL())
+      .where('updated_at', '>', DateTime.now().minus({ day: 1 }).toSQL()!)
       .whereHas('organisation', (subQuery) => {
         subQuery.where('id', organisation.id)
       })
@@ -105,7 +111,7 @@ export default class InvitationController {
   public async resend(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(ResendInvitationValidator)
 
-    const user = await User.findOrFail(payload.userId)
+    const user = await User.findOrFail(payload.user_id)
 
     await ctx.bouncer.with('UserPolicy').authorize('update', user)
 

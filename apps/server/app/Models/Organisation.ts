@@ -7,6 +7,7 @@ import {
   BelongsTo,
   belongsTo,
   column,
+  computed,
   HasMany,
   hasMany,
   HasManyThrough,
@@ -19,12 +20,13 @@ import Currency from './Currency'
 import WorkDay from './WorkDay'
 import Client from './Client'
 import Project from './Project'
-import Task from './Task'
 import UserRole from 'App/Enum/UserRole'
 import Verify from 'App/Enum/Verify'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Role from './Role'
 import OrganisationInvitation from 'App/Mailers/OrganisationInvitation'
+import CommonTask from './CommonTask'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 
 type Invitee = {
   email: string
@@ -34,12 +36,14 @@ type Invitee = {
 type BudgetFilters = Partial<{
   userId: number
   projectId: number
+  projectStatus: ProjectStatus
 }>
 
 type TeamFilters = Partial<{
   search: string
   role: UserRole
   status: Verify
+  projectId: number
   page: number
 }>
 
@@ -52,7 +56,7 @@ type OrganisationBuilder = ModelQueryBuilderContract<typeof Organisation>
 export default class Organisation extends BaseModel {
   // Columns
 
-  @column({ isPrimary: true, serializeAs: null })
+  @column({ isPrimary: true })
   public id: number
 
   @column({ serializeAs: null })
@@ -77,18 +81,34 @@ export default class Organisation extends BaseModel {
   public closingTime: DateTime
 
   @column()
+  public breakDuration: number
+
+  @column()
   public defaultRate: number
 
-  @column.dateTime({ serializeAs: null, autoCreate: true })
+  @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ serializeAs: null, autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
+  // Computed
+
+  @computed({ serializeAs: 'business_days' })
+  public get businessDays() {
+    return this.workDays?.map((day) => day.name) ?? []
+  }
+
   // Relationships
 
   @hasMany(() => User, { serializeAs: null })
   public users: HasMany<typeof User>
+
+  @hasMany(() => CommonTask, { serializeAs: 'common_tasks' })
+  public commonTasks: HasMany<typeof CommonTask>
+
+  @hasMany(() => Client)
+  public clients: HasMany<typeof Client>
 
   @belongsTo(() => Currency)
   public currency: BelongsTo<typeof Currency>
@@ -96,17 +116,9 @@ export default class Organisation extends BaseModel {
   @manyToMany(() => WorkDay, {
     pivotTable: 'organisation_work_days',
     pivotRelatedForeignKey: 'workday_id',
+    serializeAs: null,
   })
   public workDays: ManyToMany<typeof WorkDay>
-
-  @manyToMany(() => Task, {
-    pivotTable: 'common_tasks',
-    pivotColumns: ['is_billable'],
-  })
-  public tasks: ManyToMany<typeof Task>
-
-  @hasMany(() => Client)
-  public clients: HasMany<typeof Client>
 
   @hasManyThrough([() => Project, () => Client])
   public projects: HasManyThrough<typeof Project>
@@ -116,7 +128,7 @@ export default class Organisation extends BaseModel {
   @beforeFind()
   @beforeFetch()
   public static preloadRelations(query: OrganisationBuilder) {
-    query.preload('currency').preload('workDays')
+    query.preload('currency').preload('workDays').preload('commonTasks')
   }
 
   // Instance Methods
@@ -124,6 +136,7 @@ export default class Organisation extends BaseModel {
   public async getPrivilegedUsers(this: Organisation) {
     return await this.related('users')
       .query()
+      .whereNotNull('verified_at')
       .whereHas('role', (roleQuery) => {
         roleQuery.whereIn('name', [UserRole.OWNER, UserRole.ORG_ADMIN, UserRole.MANAGER])
       })
@@ -133,8 +146,11 @@ export default class Organisation extends BaseModel {
   public async getBudgets(this: Organisation, filters?: BudgetFilters, options?: BudgetOptions) {
     const projects = await this.related('projects')
       .query()
+      .if(filters?.projectStatus, (projectBuilder) => {
+        projectBuilder.where('status', filters?.projectStatus!)
+      })
       .if(filters?.projectId, (projectBuilder) => {
-        projectBuilder.where('projects.id', filters!.projectId!)
+        projectBuilder.where('projects.id', filters?.projectId!)
       })
       // Ensure related projects have a member with specified user_id
       .if(filters?.userId, (projectBuilder) => {
@@ -142,6 +158,7 @@ export default class Organisation extends BaseModel {
       })
       .preload('budgets', (budgetQuery) => {
         budgetQuery
+          .withScopes((scope) => scope.budgetMetrics())
           // Ensure related budgets have a member with specified user_id
           .if(filters?.userId, (budgetBuilder) => {
             budgetBuilder.withScopes((scope) => scope.relatedMember(filters?.userId!))
@@ -168,37 +185,38 @@ export default class Organisation extends BaseModel {
     return !!result
   }
 
-  public async getTeamMembers(this: Organisation, userId: number, filters?: TeamFilters) {
+  public async getTeamMembers(this: Organisation, filters?: TeamFilters) {
     const result = await this.related('users')
       .query()
       .select('users.*')
-      .where((builder) => {
+      .if(filters?.search, (builder) => {
         builder
-          .whereNot('users.id', userId)
-          .if(filters?.search, (builder) => {
-            builder
-              .whereILike('users.firstname', `%${filters!.search!}%`)
-              .orWhereILike('users.lastname', `%${filters!.search!}%`)
-          })
-          .match(
-            [
-              filters?.status === Verify.INVITE_ACCEPTED,
-              (userBuilder) => userBuilder.whereNotNull('verified_at'),
-            ],
-            [
-              filters?.status === Verify.INVITE_PENDING,
-              (userBuilder) => userBuilder.whereNull('verified_at'),
-            ]
-          )
+          .whereILike('users.firstname', `%${filters!.search!}%`)
+          .orWhereILike('users.lastname', `%${filters!.search!}%`)
+      })
+      .if(filters?.projectId, (builder) => {
+        builder.whereHas('projects', (projectBuilder) => {
+          projectBuilder.where('id', filters?.projectId!)
+        })
       })
       .if(filters?.role, (userBuilder) =>
-        userBuilder.join('roles', (builder) => {
-          builder.on('users.role_id', '=', 'roles.id').andOnVal('roles.name', filters!.role!)
+        userBuilder.whereHas('role', (roleBuilder) => {
+          roleBuilder.where('name', filters?.role!)
         })
       )
       .if(filters?.page, (userBuilder) => {
         userBuilder.forPage(filters!.page!, 10)
       })
+      .match(
+        [
+          filters?.status === Verify.INVITE_ACCEPTED,
+          (userBuilder) => userBuilder.whereNotNull('verified_at'),
+        ],
+        [
+          filters?.status === Verify.INVITE_PENDING,
+          (userBuilder) => userBuilder.whereNull('verified_at'),
+        ]
+      )
       .orderBy('users.lastname')
 
     return result

@@ -5,5 +5,5 @@ type TableProps = {
 }
 
 export const Table = ({ children }: TableProps): JSX.Element => {
-  return <table className="w-full table-fixed">{children}</table>
+  return <table className="min-w-full">{children}</table>
 }

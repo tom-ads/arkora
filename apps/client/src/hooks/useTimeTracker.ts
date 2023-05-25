@@ -3,23 +3,20 @@ import {
   useStartTimerMutation,
   useStopTimerMutation,
 } from '@/features/timer'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import { useInterval } from './useInterval'
 import { CreateTimerRequest } from '@/features/timer'
 import { useToast } from './useToast'
-import { endTimer, startTimer } from '@/stores/slices/timer'
+import { startTracking, stopTracking } from '@/stores/slices/timer'
 
 export interface UseTimerControls {
-  startTracking: (fields: CreateTimerRequest) => Promise<void>
-  stopTracking: (timerId?: number) => Promise<void>
-  restartTracking: (timeid: number) => Promise<void>
-  trackingLoading: boolean
+  startTimer: (fields: CreateTimerRequest) => Promise<void>
+  stopTimer: (timerId?: number) => Promise<void>
+  restartTimer: (timeid: number) => Promise<void>
+  loading: boolean
 }
 
-export type UseTimeTrackerReturn = [number, UseTimerControls]
-
-export function useTimeTracker(delay?: number): UseTimeTrackerReturn {
+export function useTimeTracker(): UseTimerControls {
   const dispatch = useDispatch()
   const { errorToast } = useToast()
 
@@ -27,59 +24,40 @@ export function useTimeTracker(delay?: number): UseTimeTrackerReturn {
   const [startTimerMutation, { isLoading: startingTimer }] = useStartTimerMutation()
   const [stopTimerMutation, { isLoading: stoppingTimer }] = useStopTimerMutation()
 
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [increment, setIncrement] = useState<number>(0)
-
-  const startTracking = useCallback(
+  const startTimer = useCallback(
     async (fields: CreateTimerRequest): Promise<void> => {
       await createTimerMutation(fields)
         .unwrap()
-        .then((res) => {
-          dispatch(startTimer(res))
-          setIsPlaying(true)
-        })
-        .catch(() => errorToast('Error occured'))
+        .then((createdEntry) => dispatch(startTracking(createdEntry)))
+        .catch(() => errorToast('We failed to create a new timer.'))
     },
     [createTimerMutation],
   )
 
-  const restartTracking = useCallback(
+  const restartTimer = useCallback(
     async (timerId: number) => {
-      await startTimerMutation({ timer_id: timerId })
+      await startTimerMutation(timerId)
         .unwrap()
-        .then((res) => {
-          setIsPlaying(true)
-          dispatch(startTimer(res))
-          setIncrement(res.durationMinutes)
-        })
-        .catch(() => errorToast('Error occured'))
+        .then((res) => dispatch(startTracking(res)))
+        .catch((error) => errorToast(error?.data?.message ?? 'Unable to restart timer'))
     },
     [startTimerMutation],
   )
 
-  const stopTracking = useCallback(
+  const stopTimer = useCallback(
     async (timerId?: number): Promise<void> => {
-      await stopTimerMutation({ timer_id: timerId })
+      await stopTimerMutation(timerId)
         .unwrap()
-        .then(() => {
-          dispatch(endTimer())
-          setIsPlaying(false)
-          setIncrement(0)
-        })
+        .then(() => dispatch(stopTracking()))
         .catch(() => errorToast('Error occured'))
     },
     [stopTimerMutation],
   )
 
-  useInterval(() => setIncrement(increment + 1), isPlaying ? delay ?? 1000 : null)
-
-  return [
-    increment,
-    {
-      startTracking,
-      stopTracking,
-      restartTracking,
-      trackingLoading: creatingTimer || startingTimer || stoppingTimer,
-    },
-  ]
+  return {
+    startTimer,
+    stopTimer,
+    restartTimer,
+    loading: creatingTimer || startingTimer || stoppingTimer,
+  }
 }

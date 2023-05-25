@@ -1,13 +1,14 @@
-import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 import Budget from 'App/Models/Budget'
 import Task from 'App/Models/Task'
 import TimeEntry from 'App/Models/TimeEntry'
-import CreateTimeEntryValidator from 'App/Validators/Timer/CreateTimeEntryValidator'
-import StartTimerValidator from 'App/Validators/Timer/StartTimerValidator'
+import CreateTimerValidator from 'App/Validators/Timer/CreateTimerValidator'
 import StopTimerValidator from 'App/Validators/Timer/StopTimerValidator'
+import { bind } from '@adonisjs/route-model-binding'
 import { DateTime } from 'luxon'
+import ProjectStatus from 'App/Enum/ProjectStatus'
+import { timerDifference } from 'Helpers/timer'
 
 export default class TimerController {
   /**
@@ -29,7 +30,7 @@ export default class TimerController {
    * @errorResponse (422)  UnprocessableEntity   Only valid payloads can be used to create a timer
    */
   public async create(ctx: HttpContextContract) {
-    const payload = await ctx.request.validate(CreateTimeEntryValidator)
+    const payload = await ctx.request.validate(CreateTimerValidator)
 
     const [budget, task] = await Promise.all([
       Budget.findOrFail(payload.budget_id),
@@ -38,7 +39,11 @@ export default class TimerController {
 
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-    // Todo: prevent timers after a certain point
+    await budget.load('project')
+
+    if (budget?.project?.status !== ProjectStatus.ACTIVE) {
+      return ctx.response.badRequest({ message: 'Only active projects can be tracked against' })
+    }
 
     const currentTimer = await ctx.auth.user!.getActiveTimer()
     if (currentTimer) {
@@ -46,25 +51,30 @@ export default class TimerController {
       ctx.logger.info(`Create Timer: stopped active timer for user(${ctx.auth.user!.id})`)
     }
 
-    const timeEntry = await ctx.auth.user!.related('timeEntries').create({
-      date: payload.date,
-      description: payload.description,
-      durationMinutes: payload?.duration_minutes ?? 0,
-      estimatedMinutes: payload?.estimated_minutes ?? 0,
-      lastStartedAt: DateTime.now(),
-      status: TimeSheetStatus.PENDING,
-    })
-    await Promise.all([
-      timeEntry.related('budget').associate(budget),
-      timeEntry.related('task').associate(task),
-    ])
-
-    ctx.logger.info(`Create Timer: created new time entry for user(${ctx.auth.user!.id})`)
+    let createdEntry: TimeEntry
+    try {
+      createdEntry = await ctx.auth.user!.related('timeEntries').create({
+        budgetId: budget.id,
+        taskId: task.id,
+        date: payload.date,
+        description: payload.description,
+        durationMinutes: payload?.duration_minutes ?? 0,
+        estimatedMinutes: payload?.estimated_minutes ?? 0,
+        lastStartedAt: DateTime.now(),
+        status: TimeSheetStatus.PENDING,
+      })
+      ctx.logger.info(`Create Timer: created new time entry for user(${ctx.auth.user!.id})`)
+    } catch (err) {
+      ctx.logger.error(
+        `Failed to create timer for user(${ctx.auth.user!.id}) due to: ${err.message}`
+      )
+      return ctx.response.internalServerError()
+    }
 
     return {
-      ...timeEntry?.serialize(),
+      ...createdEntry?.serialize(),
       last_stopped_at: null,
-      description: timeEntry.description ?? null,
+      description: createdEntry.description ?? null,
     }
   }
 
@@ -92,6 +102,13 @@ export default class TimerController {
     const result = await Promise.all(
       organisationTeam.map(async (member) => {
         const activeTimer = await member.getActiveTimer()
+        if (activeTimer) {
+          const diffMinutes = timerDifference(activeTimer.lastStartedAt)
+          const pendingDuration = activeTimer.durationMinutes + diffMinutes
+          if (pendingDuration !== activeTimer.durationMinutes) {
+            activeTimer.durationMinutes += diffMinutes
+          }
+        }
 
         return {
           ...member.serialize(),
@@ -117,15 +134,19 @@ export default class TimerController {
    * @errorResponse (404)  Not Found             Only existing time entries can be started
    * @errorResponse (422)  UnprocessableEntity   Only valid timers can be started
    */
-  public async startTimer(ctx: HttpContextContract) {
-    const payload = await ctx.request.validate(StartTimerValidator)
+  @bind()
+  public async startTimer(ctx: HttpContextContract, entry: TimeEntry) {
+    await ctx.bouncer.with('TimeEntryPolicy').authorize('update', entry)
 
-    const timeEntry = await TimeEntry.findOrFail(payload.timer_id)
+    const entryBudget = await entry.related('budget').query().preload('project').first()
+    if (entryBudget?.project?.status !== ProjectStatus.ACTIVE) {
+      return ctx.response.badRequest({ message: 'Only active projects can be tracked against' })
+    }
 
-    await ctx.bouncer.with('TimeEntryPolicy').authorize('update', timeEntry)
+    await entry.load('user')
 
     // Deactivate any related timer to timeEntry user
-    const activeTimer = await timeEntry.user.getActiveTimer()
+    const activeTimer = await entry.user.getActiveTimer()
     if (activeTimer) {
       try {
         await activeTimer.stopTimer()
@@ -137,33 +158,22 @@ export default class TimerController {
       }
     }
 
+    // Check entry has not already exceeded the daily duration
+    if (entry.isEntryDurationExceeded()) {
+      return ctx.response.unprocessableEntity({
+        message: 'This time entry has reached the daily 24hr limit',
+      })
+    }
+
     // Restart timer
-    await timeEntry.restartTimer()
-    await timeEntry.refresh()
+    await entry.restartTimer()
+    await entry.refresh()
 
     return {
-      ...timeEntry?.serialize(),
+      ...entry?.serialize(),
       last_stopped_at: null,
-      description: timeEntry.description ?? null,
+      description: entry.description ?? null,
     }
-  }
-
-  /**
-   * @route DELETE api/v1/timers/:timeEntryId
-   * @description Delete a specific time entry
-   *
-   * @successStatus 204 - No Content
-   *
-   * @errorResponse (401)  Unauthorized  Only authenticated users can delete an entry
-   * @errorResponse (403)  Forbidden     Only admins can delete other team members entries
-   */
-  @bind()
-  public async delete(ctx: HttpContextContract, entry: TimeEntry) {
-    await ctx.bouncer.with('TimeEntryPolicy').authorize('delete', entry)
-
-    await entry.delete()
-
-    return ctx.response.noContent()
   }
 
   /**

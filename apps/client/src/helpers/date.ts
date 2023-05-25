@@ -1,11 +1,11 @@
 import { DateTime, Interval } from 'luxon'
 
 /* credit to thread for solution: https://github.com/moment/luxon/issues/118 */
-function getOrdinalSuffix(n: number) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
+export function getOrdinalSuffix(n: number) {
+  const ordinals = ['th', 'st', 'nd', 'rd']
+  const remainder = n % 100
 
-  return s[(v - 20) % 10] || s[v] || s[0]
+  return ordinals[(remainder - 20) % 10] || ordinals[remainder] || ordinals[0]
 }
 
 /* 
@@ -22,30 +22,49 @@ export function addOrdinalSuffix(date: DateTime, format: string) {
   return formattedDate.replace(/(?<=\d)\s/, getOrdinalSuffix(monthDay))
 }
 
-export function durationToFormattedTime(duration: number) {
-  const hours = Math.floor(Math.abs(duration / 60))
-  const minutes = duration % 60
-
-  return {
-    displayFormat: `${hours}h ${minutes}m`,
-    consumableFormat: `${hours < 10 ? `0${hours}` : hours}:${
-      minutes < 10 ? `0${minutes}` : minutes
-    }`,
-  }
-}
-
 export function getDatesBetweenPeriod(startDate: DateTime, endDate: DateTime) {
   return Interval.fromDateTimes(startDate, endDate.plus(1))
     .splitBy({ day: 1 })
     .map((d) => d.start)
 }
 
-export function formatToHours(minutes: number) {
-  const totalHours = minutes / 60
-  const totalMinutes = minutes % 60
+export function formatMinutesToTime(durationMinutes: number) {
+  const minutes = durationMinutes % 60
+  const hours = Math.abs(durationMinutes - minutes) / 60
 
-  const formattedHours = totalHours < 10 ? `0${totalHours}` : totalHours
-  const formattedMinutes = totalMinutes < 10 ? `0${totalMinutes}` : totalMinutes
+  const formattedMinutes = padTimeUnit(minutes)
+  const formattedHours = padTimeUnit(hours)
+
+  return `${formattedHours}:${formattedMinutes}`
+}
+
+export function formatMinutesToHourMinutes(durationMinutes: number) {
+  let minutes = 0
+  let hours = 0
+
+  if (durationMinutes > 0) {
+    minutes = durationMinutes % 60
+    hours = (durationMinutes - minutes) / 60
+  }
+
+  const formattedHours = padTimeUnit(hours)
+  const formattedMinutes = padTimeUnit(minutes)
 
   return `${formattedHours}h ${formattedMinutes}m`
+}
+
+export function convertTimeToMinutes(time: string) {
+  const splitTime = time.split(':').map(Number)
+  const hours = splitTime[0] * 60
+  const minutes = splitTime[1]
+
+  return hours + minutes
+}
+
+export function convertMinutesToHours(minutes: number) {
+  return minutes / 60
+}
+
+export function padTimeUnit(value: number) {
+  return value < 10 ? `0${value}` : value
 }

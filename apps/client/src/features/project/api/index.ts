@@ -2,12 +2,13 @@ import appApi from 'api'
 import { CreateProjectRequest, UpdateProjectRequest } from './types/requests'
 import {
   CreateProjectResponse,
+  GetProjectInsightsResponse,
   GetProjectResponse,
   GetProjectsResponse,
   UpdateProjectResponse,
 } from './types/response'
 
-const projectsBasePath = '/projects'
+const projectsBasePath = '/api/v1/projects'
 
 const projectEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
@@ -36,7 +37,19 @@ const projectEndpoints = appApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['Projects', 'Project'],
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedProject } = await queryFulfilled
+          dispatch(
+            projectEndpoints.util.updateQueryData('getProject', id, (draft) => {
+              Object.assign(draft, updatedProject)
+            }),
+          )
+        } catch {
+          //
+        }
+      },
+      invalidatesTags: ['Projects', 'Budgets'],
     }),
 
     deleteProject: build.mutation<void, number>({
@@ -45,6 +58,11 @@ const projectEndpoints = appApi.injectEndpoints({
         method: 'DELETE',
       }),
       invalidatesTags: ['Projects', 'Project'],
+    }),
+
+    getProjectInsights: build.query<GetProjectInsightsResponse, number | string>({
+      query: (id) => `${projectsBasePath}/${id}/insights`,
+      providesTags: ['Projects', 'Budget', 'TimeEntries', 'TimeEntry'],
     }),
   }),
   overrideExisting: false,
@@ -57,4 +75,5 @@ export const {
   useUpdateProjectMutation,
   useLazyGetProjectQuery,
   useDeleteProjectMutation,
+  useGetProjectInsightsQuery,
 } = projectEndpoints

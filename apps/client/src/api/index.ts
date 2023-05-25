@@ -1,4 +1,4 @@
-import { transformResponse } from '@/helpers/transform'
+import { transformRequest, transformResponse } from '@/helpers/transform'
 import { clearAuth } from '@/stores/slices/auth'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
@@ -18,6 +18,7 @@ const baseUrl = (): string => {
 }
 
 const prepareHeaders = (headers: Headers) => {
+  // Set XSRF cookie onto the request
   const xsrfCookie = document.cookie.match(new RegExp('(XSRF-TOKEN)=([^;]*)'))
   if (xsrfCookie) {
     headers.set('X-XSRF-TOKEN', decodeURIComponent(xsrfCookie[2]))
@@ -32,6 +33,18 @@ const rootQuery = fetchBaseQuery({
 })
 
 const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) => {
+  // Recursively transform request to snake_case before request execution
+  if (typeof args === 'object') {
+    if (args?.params) {
+      args.params = transformRequest(args.params)
+    }
+
+    if (args.body) {
+      args.body = transformRequest(args.body)
+    }
+  }
+
+  // Execute HTTP request
   const result = await rootQuery(args, api, extraOptions)
 
   // Logout if response is 401
@@ -49,14 +62,27 @@ const baseQueryInterceptor: typeof rootQuery = async (args, api, extraOptions) =
 
 const appApi = createApi({
   reducerPath: 'arkoraApi',
+  /* 
+    Tag list for query cache invalidation mechanism
+    built into RTK Query
+  */
   tagTypes: [
     'Project',
     'Projects',
     'TimeEntries',
+    'TimeEntry',
     'Budgets',
     'Budget',
+    'BudgetTasks',
+    'BudgetTask',
+    'BudgetMembers',
+    'BudgetMember',
+    'BudgetNote',
+    'BudgetNotes',
     'Members',
     'Member',
+    'ProjectMembers',
+    'ProjectMember',
     'Clients',
     'Client',
   ],

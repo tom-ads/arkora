@@ -1,8 +1,8 @@
-import TimeEntry from '@/types/TimeEntry'
+import TimeEntry from '@/types/models/TimeEntry'
 import appApi from 'api'
-import { CreateTimerRequest, GetTimersResponse, StartTimerRequest, StopTimerRequest } from './types'
+import { CreateTimerRequest, GetTimersResponse } from './types'
 
-const timerBasePath = '/timers'
+const timerBasePath = '/api/v1/timers'
 
 const taskEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
@@ -20,28 +20,21 @@ const taskEndpoints = appApi.injectEndpoints({
       invalidatesTags: ['TimeEntries'],
     }),
 
-    deleteTimer: build.mutation<void, number>({
+    startTimer: build.mutation<TimeEntry, number>({
       query: (id) => ({
-        url: `${timerBasePath}/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['TimeEntries'],
-    }),
-
-    startTimer: build.mutation<TimeEntry, StartTimerRequest>({
-      query: (params) => ({
-        url: `${timerBasePath}/start`,
+        url: `${timerBasePath}/${id}/start`,
         method: 'PUT',
-        params,
       }),
       invalidatesTags: ['TimeEntries'],
     }),
 
-    stopTimer: build.mutation<TimeEntry, StopTimerRequest>({
-      query: (params) => ({
+    stopTimer: build.mutation<TimeEntry, number | undefined>({
+      query: (id) => ({
         url: `${timerBasePath}/stop`,
         method: 'PUT',
-        params,
+        params: {
+          ...(id && { timer_id: id }),
+        },
       }),
       invalidatesTags: ['TimeEntries'],
     }),
@@ -52,7 +45,6 @@ const taskEndpoints = appApi.injectEndpoints({
 export const {
   useCreateTimerMutation,
   useGetTimersQuery,
-  useDeleteTimerMutation,
   useStartTimerMutation,
   useStopTimerMutation,
 } = taskEndpoints

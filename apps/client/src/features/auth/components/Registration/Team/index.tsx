@@ -8,7 +8,6 @@ import {
   FormControl,
   FormInput,
   FormErrorMessage,
-  MouseIcon,
   List,
   Avatar,
   UserIcon,
@@ -34,7 +33,8 @@ import {
 import { UseFormReturn } from 'react-hook-form'
 import { useMemo } from 'react'
 import { SelectOption } from '@/components/Forms/Select/option'
-import { isEqual } from 'lodash'
+import { convertTimeToMinutes } from '@/helpers/date'
+import { useToast } from '@/hooks/useToast'
 
 const InviteMemberList = ({ watch, control }: { watch: any; control: any }): JSX.Element => {
   const roleOptions = useMemo(
@@ -55,6 +55,7 @@ const InviteMemberList = ({ watch, control }: { watch: any; control: any }): JSX
       </div>
     )
   }
+
   return (
     <List<InviteFormFields, 'members'>
       name="members"
@@ -178,12 +179,6 @@ const InviteTeamFormFields = ({
           contentLeft={
             <p className="whitespace-nowrap font-medium text-base text-gray-100">Invites</p>
           }
-          contentRight={
-            <div className="flex items-center gap-1 text-gray-80">
-              <MouseIcon className="w-5 h-5 shrink-0" />
-              <p className="whitespace-nowrap text-sm font-medium">Scroll list</p>
-            </div>
-          }
         />
       </div>
 
@@ -196,31 +191,31 @@ export const TeamView = (): JSX.Element => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  const { errorToast } = useToast()
+
   const { organisation, details, team } = useSelector((state: RootState) => state.registration)
 
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
 
   const handleSubmit = async (data: InviteFormFields) => {
-    dispatch(setTeam({ ...data.members }))
+    dispatch(setTeam(data.members))
     await register({
       firstname: details.firstname,
       lastname: details.lastname,
       email: details.email,
       password: details.password,
-      password_confirmation: details.password,
+      passwordConfirmation: details.password,
 
       name: organisation.name,
       subdomain: organisation.subdomain,
-      opening_time: organisation.openingTime,
-      closing_time: organisation.closingTime,
-      work_days: organisation.workDays,
+      openingTime: organisation.openingTime,
+      closingTime: organisation.closingTime,
+      businessDays: organisation.businessDays,
       currency: organisation.currency,
-      hourly_rate: convertToPennies(parseInt(organisation.hourlyRate, 10)),
+      defaultRate: convertToPennies(organisation.defaultRate ?? 0),
+      breakDuration: convertTimeToMinutes(organisation.breakDuration ?? '00:00'),
 
-      members: team.map((member) => ({
-        email: member.email,
-        role: member.role,
-      })),
+      members: data.members,
     })
       .unwrap()
       .then((response) => {
@@ -233,26 +228,23 @@ export const TeamView = (): JSX.Element => {
         dispatch(setOrganisation(response.organisation))
         dispatch(clearRegistration())
       })
-  }
-
-  const handleFormChange = (data: InviteFormFields) => {
-    if (!isEqual(team, data.members)) {
-      dispatch(setTeam(data.members))
-    }
+      .catch((err) => {
+        if (err.status === 422) return
+        errorToast('We failed to create your organisation. Please try again or contact us.')
+      })
   }
 
   return (
     <Form<InviteFormFields, typeof inviteMembersSchema>
       className="gap-0"
       onSubmit={handleSubmit}
-      onChange={handleFormChange}
       validationSchema={inviteMembersSchema}
       defaultValues={{
         email: null,
         selectedFile: null,
         selectedHeader: null,
         containsHeaders: false,
-        members: team,
+        members: team ?? [],
       }}
     >
       {(methods) => (
@@ -275,9 +267,9 @@ export const TeamView = (): JSX.Element => {
             </Button>
             <Button
               size="sm"
-              className="max-w-[220px] w-full"
               type="submit"
               loading={isRegistering}
+              className="max-w-[220px] w-full"
             >
               Finish
             </Button>

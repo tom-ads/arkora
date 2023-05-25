@@ -1,6 +1,6 @@
 import { useDebounce } from '@/hooks/useDebounce'
+import classNames from 'classnames'
 import { useEffect, useState } from 'react'
-import { useFormContext } from 'react-hook-form'
 import { FormInputBaseProps, inputStyling } from '../Input'
 
 export interface FormDebouncedInputProps extends Omit<FormInputBaseProps, 'onChange'> {
@@ -15,11 +15,10 @@ export const FormDebouncedInput = ({
   error,
   placeHolder,
   value,
+  className,
   onChange,
 }: FormDebouncedInputProps): JSX.Element => {
   const [inputVal, setInputVal] = useState<string>(value)
-
-  const { register } = useFormContext()
 
   const debouncedInput = useDebounce<string>(inputVal, 500)
 
@@ -29,13 +28,12 @@ export const FormDebouncedInput = ({
 
   return (
     <input
-      {...register(name)}
       type="text"
       name={name}
       value={inputVal}
       onChange={(e) => setInputVal(e.target.value)}
       placeholder={placeHolder}
-      className={inputStyling({ size, error })}
+      className={classNames(inputStyling({ size, error }), className)}
     />
   )
 }

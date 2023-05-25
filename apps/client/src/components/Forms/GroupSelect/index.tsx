@@ -14,6 +14,8 @@ type FormSelectProps = {
   error?: boolean
   disabled?: boolean
   fullWidth?: boolean
+  onChange?: (id: number) => void
+  emptyState: JSX.Element
   children: JSX.Element[]
 }
 
@@ -66,20 +68,48 @@ const listBoxOptions = cva(
         false: 'max-w-[350px] lg:max-w-[450px]',
       },
     },
+    defaultVariants: {
+      fullWidth: false,
+    },
   },
 )
+
+type GroupSelectEmptyStateProps = {
+  title: string
+  description: string
+  icon: JSX.Element
+}
+
+export const FormGroupSelectEmptyState = ({
+  title,
+  description,
+  icon,
+}: GroupSelectEmptyStateProps) => {
+  return (
+    <li className="flex flex-col justify-center items-center my-auto">
+      <span className="text-purple-90 w-8 h-8">{icon}</span>
+
+      <span className="text-gray-80 text-md font-semibold">{title}</span>
+      <p className="text-gray-60 text-sm">{description}</p>
+    </li>
+  )
+}
 
 export const FormGroupSelect = ({
   name,
   control,
-  size = 'sm',
+  size,
   placeHolder = 'Select option',
   error,
   disabled,
-  fullWidth = false,
+  fullWidth,
+  onChange,
+  emptyState,
   children,
 }: FormSelectProps): JSX.Element => {
-  const { field } = useController({ name, control })
+  const {
+    field: { value, onChange: onFormChange },
+  } = useController({ name, control })
 
   const [focused, setFocused] = useState(false)
 
@@ -89,29 +119,33 @@ export const FormGroupSelect = ({
       .flat()
       .map((child) => ({
         id: child.id,
-        value: child.value,
         display: child.display,
       }))
   }, [children])
 
-  const handleChange = (selectedItem: number) => {
-    field.onChange(validChildren?.find((child) => child.id === selectedItem))
+  const selectedItem = validChildren?.find((child) => child?.id === value)
+
+  const handleChange = (id: number) => {
+    onFormChange(id)
+    if (onChange) {
+      onChange(id)
+    }
   }
 
   return (
     <div className="relative w-full">
       {/* Listbox will not change last selected if passed undefined, so we need to pass null instead */}
-      <Listbox value={field.value?.id ?? null} onChange={handleChange} disabled={disabled}>
+      <Listbox value={value ?? null} onChange={handleChange} disabled={disabled}>
         {({ open }) => (
           <>
             <Listbox.Button className={listBoxButton({ size, error, focused, disabled })}>
               <span
                 className={classNames('text-gray-60 text-start truncate capitalize', {
-                  'text-gray-90': field.value?.display,
+                  'text-gray-90': selectedItem?.display,
                 })}
               >
                 {/* Child of SelectOption, a.k.a the display prop */}
-                {field.value?.display ?? placeHolder}
+                {selectedItem?.display ?? placeHolder}
               </span>
               <span
                 aria-hidden
@@ -121,7 +155,7 @@ export const FormGroupSelect = ({
                 })}
               >
                 <ChevronIcon
-                  className={classNames('transform transition-transform', {
+                  className={classNames('transform transition-transform w-5', {
                     '-rotate-180': focused,
                     'text-gray-60': disabled,
                   })}
@@ -145,7 +179,7 @@ export const FormGroupSelect = ({
                 className={listBoxOptions({ fullWidth })}
                 static
               >
-                {children}
+                {validChildren?.length > 0 ? children : emptyState}
               </Listbox.Options>
             </Transition>
           </>

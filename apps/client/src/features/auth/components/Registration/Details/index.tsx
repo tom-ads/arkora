@@ -16,7 +16,9 @@ import { setDetails, setStep } from '@/stores/slices/registration'
 import { useDispatch, useSelector } from 'react-redux'
 import * as z from 'zod'
 import { RootState } from '@/stores/store'
-import { isEqual } from 'lodash'
+import { validatePassword } from '@/helpers/validation/fields'
+import validationIssuer from '@/helpers/validation/issuer'
+import { useToast } from '@/hooks/useToast'
 
 const DetailsFormSchema = z
   .object({
@@ -27,7 +29,7 @@ const DetailsFormSchema = z
     lastname: z
       .string()
       .min(1, { message: 'Lastname is required' })
-      .regex(/^([^0-9]+)$/, { message: ' Lastname cannot contain numbers' }),
+      .regex(/^([^0-9]+)$/, { message: 'Lastname cannot contain numbers' }),
     email: z
       .string()
       .min(1, { message: 'Email is required' })
@@ -38,6 +40,10 @@ const DetailsFormSchema = z
   .refine((data) => data.password === data.passwordConfirmation, {
     message: 'Passwords do not match',
     path: ['passwordConfirmation'],
+  })
+  .superRefine((fields, ctx) => {
+    const passwordValidation = validatePassword(fields.password)
+    validationIssuer('password', passwordValidation, ctx)
   })
 
 type FormFields = {
@@ -51,6 +57,8 @@ type FormFields = {
 export const DetailsView = (): JSX.Element => {
   const dispatch = useDispatch()
 
+  const { errorToast } = useToast()
+
   const details = useSelector((state: RootState) => state.registration.details)
 
   const [verifyDetails, { isLoading: isVerifying }] = useVerifyDetailsMutation()
@@ -62,21 +70,22 @@ export const DetailsView = (): JSX.Element => {
       lastname: data.lastname,
       email: data.email,
       password: data.password,
-      password_confirmation: data.passwordConfirmation,
-    }).then(() => dispatch(setStep({ step: 'organisation' })))
-  }
-
-  const handleFormChange = (data: FormFields) => {
-    if (!isEqual(details, data)) {
-      dispatch(setDetails(data))
-    }
+      passwordConfirmation: data.passwordConfirmation,
+    })
+      .unwrap()
+      .then(() => dispatch(setStep({ step: 'organisation' })))
+      .catch((err) => {
+        if (err.status === 422) return
+        errorToast(
+          'We failed to verify your organisations details, please try again or contact us.',
+        )
+      })
   }
 
   return (
     <Form<FormFields, typeof DetailsFormSchema>
       className="gap-0"
       onSubmit={handleSubmit}
-      onChange={handleFormChange}
       validationSchema={DetailsFormSchema}
       defaultValues={{
         firstname: details?.firstname ?? '',
@@ -88,53 +97,40 @@ export const DetailsView = (): JSX.Element => {
     >
       {({ watch, formState: { errors } }) => (
         <>
-          {/* Profile Image */}
-          {/* <Descriptor>
-            <DescriptorInsights
-              title="Profile Image"
-              description="Displayed on your profile for others to see"
-            />
-            <DescriptorContent className="flex justify-between gap-3 max-w-[402px]">
-              <div></div>
-            </DescriptorContent>
-          </Descriptor>
-
-          <HorizontalDivider /> */}
-
           {/* Your Details */}
           <Descriptor>
             <DescriptorInsights
               title="Your Details"
-              description="Basic details about you that are displayed across your account and to other team members."
+              description="Basic details for managing your account"
             />
             <DescriptorContent className="max-w-[402px]">
               <div className="flex justify-between gap-3">
                 <FormControl>
                   <FormLabel htmlFor="firstname" size="sm">
-                    Firstname
+                    Forename
                   </FormLabel>
                   <FormInput
                     name="firstname"
-                    placeHolder="Enter firstname"
+                    placeHolder="Enter forename"
                     size="sm"
                     error={!!errors.firstname}
                   />
-                  {errors.firstname?.message && (
+                  {!!errors.firstname?.message && (
                     <FormErrorMessage size="sm">{errors.firstname?.message}</FormErrorMessage>
                   )}
                 </FormControl>
 
                 <FormControl>
                   <FormLabel htmlFor="lastname" size="sm">
-                    Lastname
+                    Surname
                   </FormLabel>
                   <FormInput
                     name="lastname"
-                    placeHolder="Enter lastname"
+                    placeHolder="Enter surname"
                     size="sm"
                     error={!!errors.lastname}
                   />
-                  {errors.lastname?.message && (
+                  {!!errors.lastname?.message && (
                     <FormErrorMessage size="sm">{errors.lastname?.message}</FormErrorMessage>
                   )}
                 </FormControl>
@@ -150,7 +146,7 @@ export const DetailsView = (): JSX.Element => {
                   size="sm"
                   error={!!errors.email}
                 />
-                {errors.email?.message && (
+                {!!errors.email?.message && (
                   <FormErrorMessage size="sm">{errors.email?.message}</FormErrorMessage>
                 )}
               </FormControl>
@@ -176,7 +172,7 @@ export const DetailsView = (): JSX.Element => {
                   placeHolder="Enter confirmation"
                   error={!!errors.passwordConfirmation?.message}
                 />
-                {errors.passwordConfirmation?.message && (
+                {!!errors.passwordConfirmation?.message && (
                   <FormErrorMessage>{errors.passwordConfirmation?.message}</FormErrorMessage>
                 )}
               </FormControl>

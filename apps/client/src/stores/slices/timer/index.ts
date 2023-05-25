@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { DateTime } from 'luxon'
-import TimeEntry from '@/types/TimeEntry'
+import TimeEntry from '@/types/models/TimeEntry'
 
 interface TimesheetState {
   selectedDay: string
@@ -11,17 +11,17 @@ interface TimesheetState {
 
 interface TimerState {
   isTracking: boolean
-  trackedEntry?: TimeEntry
+  timeEntry: TimeEntry | null
   timesheet: TimesheetState
 }
 
 const initialState: TimerState = {
   isTracking: false,
-  trackedEntry: undefined,
+  timeEntry: null,
   timesheet: {
-    selectedDay: DateTime.now().toISODate(),
-    startDate: DateTime.now().startOf('week').toISODate(),
-    endDate: DateTime.now().endOf('week').toISODate(),
+    selectedDay: DateTime.now().toISODate()!,
+    startDate: DateTime.now().startOf('week').toISODate()!,
+    endDate: DateTime.now().endOf('week').toISODate()!,
   },
 }
 
@@ -29,14 +29,20 @@ const timerSlice = createSlice({
   name: 'timer',
   initialState,
   reducers: {
-    startTimer: (currentState, action: PayloadAction<TimeEntry>) => {
+    startTracking: (currentState, action: PayloadAction<TimeEntry>) => {
       currentState.isTracking = true
-      currentState.trackedEntry = action.payload
+      currentState.timeEntry = action.payload
     },
 
-    endTimer: (currentState) => {
+    setDurationMinutes: (currentState, action: PayloadAction<number>) => {
+      if (currentState.timeEntry) {
+        currentState.timeEntry.durationMinutes = action.payload
+      }
+    },
+
+    stopTracking: (currentState) => {
       currentState.isTracking = false
-      currentState.trackedEntry = undefined
+      currentState.timeEntry = null
     },
 
     setTimesheetPeriod: (
@@ -53,5 +59,11 @@ const timerSlice = createSlice({
   },
 })
 
-export const { startTimer, endTimer, setTimesheetPeriod, setSelectedDay } = timerSlice.actions
+export const {
+  startTracking,
+  stopTracking,
+  setDurationMinutes,
+  setTimesheetPeriod,
+  setSelectedDay,
+} = timerSlice.actions
 export default timerSlice.reducer

@@ -1,4 +1,4 @@
-import ProjectBudget from '@/types/ProjectBudget'
+import ProjectBudget from '@/types/models/ProjectBudget'
 
 type GetProjectsResponse = ProjectBudget[]
 

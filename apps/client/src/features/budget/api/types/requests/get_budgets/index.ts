@@ -1,7 +1,10 @@
+import ProjectStatus from '@/enums/ProjectStatus'
+
 type GetBudgetsRequest = Partial<{
-  project_id: number
-  user_id: number
-  include_project: boolean
+  projectId: number | string
+  userId: number | string
+  projectStatus: ProjectStatus
+  includeProject: boolean
 }>
 
 export default GetBudgetsRequest

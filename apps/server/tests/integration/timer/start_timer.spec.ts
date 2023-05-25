@@ -1,5 +1,5 @@
 import { test } from '@japa/runner'
-import { CommonTask } from 'App/Enum/CommonTask'
+import { DefaultTask } from 'App/Enum/DefaultTask'
 import Organisation from 'App/Models/Organisation'
 import TimeEntry from 'App/Models/TimeEntry'
 import User from 'App/Models/User'
@@ -8,28 +8,37 @@ import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 import { DateTime } from 'luxon'
 
-test.group('Timers : Start Timer', ({ each }) => {
+test.group('Timer : Start', (group) => {
   let authUser: User
   let timeEntry: TimeEntry
   let organisation: Organisation
 
-  /* 
-    Setup
-  */
-  each.setup(async () => {
+  group.tap((test) => test.tags(['@timer']))
+
+  group.each.setup(async () => {
     organisation = await OrganisationFactory.create()
 
     // Setup common organisation tasks
     const commonTasks = await TaskFactory.merge([
-      { name: CommonTask.DESIGN },
-      { name: CommonTask.DEVELOPMENT },
-      { name: CommonTask.DISCOVERY },
+      { name: DefaultTask.DESIGN },
+      { name: DefaultTask.DEVELOPMENT },
+      { name: DefaultTask.DISCOVERY },
     ]).createMany(3)
-    await organisation.related('tasks').attach(commonTasks.map((task) => task.id))
+    await organisation.related('commonTasks').createMany(
+      commonTasks.map((task) => ({
+        name: task.name,
+        isBillable: task.isBillable,
+      }))
+    )
 
     // Setup organisation budget and attach common tasks
-    const budget = await BudgetFactory.with('budgetType').create()
-    await budget.related('tasks').attach(commonTasks.map((task) => task.id))
+    const budget = await BudgetFactory.with('budgetType').with('project').create()
+    await budget.related('tasks').createMany(
+      commonTasks.map((task) => ({
+        name: task.name,
+        isBillable: task.isBillable,
+      }))
+    )
 
     // Setup organisation owner
     authUser = await UserFactory.merge({ organisationId: organisation.id }).with('role').create()
@@ -51,11 +60,8 @@ test.group('Timers : Start Timer', ({ each }) => {
     await authUser.related('role').associate(memberRole)
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: timeEntry.id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
@@ -66,7 +72,7 @@ test.group('Timers : Start Timer', ({ each }) => {
     })
   })
 
-  test('organisation member cannot restart an existing time entry of another organisation team member', async ({
+  test('organisation member cannot restart another team members timer', async ({
     client,
     route,
   }) => {
@@ -78,21 +84,15 @@ test.group('Timers : Start Timer', ({ each }) => {
     const diffTimeEntry = await TimeEntryFactory.with('user', 1).apply('lastStoppedAt').create()
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: diffTimeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: diffTimeEntry.id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
     response.assertStatus(403)
   })
 
-  test('organisation admin can restart an existing time entry of another organisation team member', async ({
-    client,
-    route,
-  }) => {
+  test('organisation admin can restart a team members timer', async ({ client, route }) => {
     // Associate org_admin role to auth user
     const orgAdminRole = await RoleFactory.apply('orgAdmin').create()
     await authUser.related('role').associate(orgAdminRole)
@@ -101,15 +101,15 @@ test.group('Timers : Start Timer', ({ each }) => {
     const diffUserTimeEntry = await TimeEntryFactory.with('user', 1, (userBuilder) =>
       userBuilder.merge({ organisationId: organisation.id })
     )
+      .with('budget', 1, (budgetBuilder) =>
+        budgetBuilder.with('billableType').with('budgetType').with('project')
+      )
       .apply('lastStoppedAt')
       .create()
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: diffUserTimeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: diffUserTimeEntry.id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
@@ -133,20 +133,21 @@ test.group('Timers : Start Timer', ({ each }) => {
     const diffUser = await UserFactory.merge({ organisationId: organisation.id }).create()
 
     // Create time entries related to diff user
-    const diffUserTimeEntries = await TimeEntryFactory.merge([
-      { userId: diffUser.id, lastStoppedAt: null },
-      {
-        userId: diffUser.id,
-        lastStoppedAt: DateTime.now().plus({ minutes: 20 }).set({ millisecond: 0 }),
-      },
-    ]).createMany(2)
+    const diffUserTimeEntries = await TimeEntryFactory.with('budget', 1, (budgetBuilder) =>
+      budgetBuilder.with('billableType').with('budgetType').with('project')
+    )
+      .merge([
+        { userId: diffUser.id, lastStoppedAt: null },
+        {
+          userId: diffUser.id,
+          lastStoppedAt: DateTime.now().plus({ minutes: 20 }).set({ millisecond: 0 }),
+        },
+      ])
+      .createMany(2)
 
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: diffUserTimeEntries[1].id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: diffUserTimeEntries[1].id,
-      })
       .loginAs(authUser)
       .withCsrfToken()
 
@@ -166,7 +167,25 @@ test.group('Timers : Start Timer', ({ each }) => {
     })
   })
 
-  test('diff organisation auth user, cannot start timer from another organisation', async ({
+  test('organisation member cannot start a timer that exceeds the daily entry duration, returns a 422 response', async ({
+    client,
+    route,
+  }) => {
+    // Switch entry duration to be 23:59 (daily duration limit)
+    timeEntry.durationMinutes = 1439
+    await timeEntry.save()
+
+    const response = await client
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .loginAs(authUser)
+      .withCsrfToken()
+
+    response.assertStatus(422)
+    response.assertBody({ message: 'This time entry has reached the daily 24hr limit' })
+  })
+
+  test('organisation admin cannot start a timer of another organisations member', async ({
     client,
     route,
   }) => {
@@ -179,21 +198,18 @@ test.group('Timers : Start Timer', ({ each }) => {
     ).create()
 
     const response = await client
-      .put(route('TimerController.startTimer'))
-      .headers({ origin: `http://test-org.arkora.co.uk` })
-      .form({
-        timer_id: timeEntry.id,
-      })
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
+      .headers({ origin: `http://diff-org.arkora.co.uk` })
       .loginAs(diffUser)
       .withCsrfToken()
 
-    response.assertStatus(404)
-    response.assertBody({ message: 'Organisation account does not exist' })
+    response.assertStatus(403)
+    response.assertBody({ message: [{ message: 'Not authorized to perform this action' }] })
   })
 
-  test('unauthenticated user cannot start a timer', async ({ client, route }) => {
+  test('unauthenticated user cannot restart a timer', async ({ client, route }) => {
     const response = await client
-      .put(route('TimerController.startTimer'))
+      .put(route('TimerController.startTimer', { entryId: timeEntry.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 

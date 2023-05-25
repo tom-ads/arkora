@@ -17,7 +17,7 @@ export const FormTextArea = ({ name, size, error, ...props }: FormTextAreaProps)
   return (
     <textarea
       id={name}
-      rows={3}
+      rows={props?.row ?? 3}
       className={inputStyling({ size, error })}
       {...props}
       {...register(name)}

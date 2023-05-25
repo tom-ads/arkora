@@ -53,10 +53,12 @@ export const FixedBudgetSection = ({
             placeHolder={
               watch('billableType') === BillableType.TOTAL_HOURS ? '- - -' : 'Enter rate'
             }
-            error={!!errors.hourlyRate?.message}
+            error={
+              !!errors.hourlyRate?.message && watch('billableType') !== BillableType.TOTAL_HOURS
+            }
             disabled={watch('billableType') === BillableType.TOTAL_HOURS}
           />
-          {errors?.hourlyRate?.message && (
+          {errors?.hourlyRate?.message && watch('billableType') !== BillableType.TOTAL_HOURS && (
             <FormErrorMessage>{errors.hourlyRate.message}</FormErrorMessage>
           )}
         </FormControl>

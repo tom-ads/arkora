@@ -1,11 +1,13 @@
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 import BillableKind from 'App/Enum/BillableKind'
 import UserRole from 'App/Enum/UserRole'
+import CommonTask from 'App/Models/CommonTask'
+import Currency from 'App/Models/Currency'
 import Role from 'App/Models/Role'
 import { OrganisationFactory, UserFactory } from 'Database/factories'
 import { getBillableTypes } from './BillableType'
 import { getBudgetTypes } from './BudgetType'
-import { getCommonTasks } from './Task'
+import { getWorkDays } from './WorkDay'
 
 export default class extends BaseSeeder {
   public static environment = ['development']
@@ -29,7 +31,7 @@ export default class extends BaseSeeder {
       clientBuilder.with('projects', 5, (projectBuilder) => {
         projectBuilder
           .with('members', 5, (memberBuilder) => {
-            memberBuilder.merge({ organisationId: 1, roleId: 4 })
+            memberBuilder.merge({ organisationId: 1, roleId: 4, password: 'newPassword123!' })
           })
           .with('budgets', 5, (budgetBuilder) => {
             return budgetBuilder.merge({
@@ -41,15 +43,31 @@ export default class extends BaseSeeder {
     }).create()
   }
 
+  public async createCommonTasks(organisationId: number) {
+    return await CommonTask.createDefaultTasks(organisationId)
+  }
+
   public async run() {
-    const [organisation, testUser, commonTasks] = await Promise.all([
+    const [organisation, testUser] = await Promise.all([
       this.createOrganisation(),
       this.createUser({
         email: 'ta@example.com',
         password: 'newPassword123!',
       }),
-      getCommonTasks(),
     ])
+
+    // Assign default work days
+    const defaultWorkDays = await getWorkDays(true)
+    await organisation.related('workDays').attach(defaultWorkDays.map((day) => day.id))
+
+    // Assign default currency to organisation
+    const gbpCurrency = await Currency.findBy('code', 'GBP')
+    if (gbpCurrency) {
+      await organisation.related('currency').associate(gbpCurrency!)
+    }
+
+    // Assign default tasks to organisation
+    const organisationTasks = await this.createCommonTasks(organisation.id)
 
     // Load projects and budgets
     await organisation.load('projects')
@@ -59,12 +77,16 @@ export default class extends BaseSeeder {
     const budgets = projects.map((project) => project.budgets).flat()
 
     // Link common tasks to each organisation and budget
-    await Promise.all([
-      organisation.related('tasks').attach(commonTasks.map((task) => task.id)),
-      ...budgets.map(
-        async (budget) => await budget.related('tasks').attach(commonTasks.map((task) => task.id))
-      ),
-    ])
+    await Promise.all(
+      budgets.map(
+        async (budget) =>
+          await budget
+            .related('tasks')
+            .createMany(
+              organisationTasks.map((task) => ({ name: task.name, isBillable: task.isBillable }))
+            )
+      )
+    )
 
     // Link testUser to organisation and relations
     await Promise.all([

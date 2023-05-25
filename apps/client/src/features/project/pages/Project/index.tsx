@@ -1,68 +1,98 @@
 import {
   Button,
-  Card,
+  NoPermissionCard,
   Page,
+  PageBackBtn,
   PageContent,
-  PageDescription,
   PageHeader,
   PageTitle,
 } from '@/components'
-import {
-  BudgetsTable,
-  CreateBudgetModal,
-  ManageBudgetModal,
-  useGetBudgetsQuery,
-} from '@/features/budget'
-import { BudgetRow } from '@/features/budget'
-import { useState } from 'react'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { RootState } from '@/stores/store'
+import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
+import { useGetProjectQuery } from '../../api'
+import {
+  ManageProjectModal,
+  ProjectBudgetView,
+  ProjectInsights,
+  ProjectTeamView,
+  ProjectWidget,
+} from '../../components'
+import { ProjectTab } from '@/stores/slices/filters/project'
+import { ProjectTimeView } from '../../components/Views/Time'
+import { useState } from 'react'
+import { isFetchBaseQueryError } from '@/hooks/useQueryError'
+import { useAuthorization } from '@/hooks/useAuthorization'
+
+const views = {
+  budgets: <ProjectBudgetView />,
+  entries: <ProjectTimeView />,
+  team: <ProjectTeamView />,
+}
+
+const ProjectView = () => {
+  const { selectedTab } = useSelector((state: RootState) => ({
+    selectedTab: state.projectFilters.tab,
+  }))
+
+  return views[selectedTab as ProjectTab]
+}
 
 export const ProjectPage = (): JSX.Element => {
-  const [budgetId, setBudgetId] = useState<number | null>(null)
-  const [openCreateBudgetModal, setOpenCreateBudgetModal] = useState(false)
+  useDocumentTitle('Project')
+
+  const [openManageProjectModal, setOpenManageProjectModal] = useState(false)
+
+  const { checkPermission } = useAuthorization()
 
   const { projectId } = useParams()
 
-  const { data: projectBudgets } = useGetBudgetsQuery(
-    { project_id: parseInt(projectId!, 10) },
-    { skip: !projectId },
-  )
+  const {
+    data: project,
+    isLoading,
+    error,
+  } = useGetProjectQuery(parseInt(projectId!, 10), {
+    skip: !projectId,
+  })
+
+  if (isFetchBaseQueryError(error) && error?.status === 403) {
+    return (
+      <Page>
+        <NoPermissionCard redirectTo="/projects" redirectTxt="Back to projects" />
+      </Page>
+    )
+  }
 
   return (
     <Page>
+      <PageBackBtn to="/projects">Back to Projects</PageBackBtn>
+
       <PageHeader>
         <div>
-          <PageTitle>Projects</PageTitle>
-          <PageDescription>Manage your organisations projects and view insights</PageDescription>
+          <PageTitle loading={isLoading}>{project?.name ?? 'Project'}</PageTitle>
+          <span className="text-xl text-gray-40 font-medium">
+            {project?.client?.name ?? 'Client'}
+          </span>
         </div>
+        {checkPermission('project:update') && (
+          <Button variant="secondary" size="xs" onClick={() => setOpenManageProjectModal(true)}>
+            Manage Project
+          </Button>
+        )}
       </PageHeader>
       <PageContent className="space-y-5">
-        <Card>
-          <Button size="xs" onClick={() => setOpenCreateBudgetModal(true)}>
-            Create Budget
-          </Button>
-        </Card>
+        <ProjectInsights />
 
-        <BudgetsTable>
-          {projectBudgets?.map((budget) => (
-            <BudgetRow
-              key={budget.id}
-              budget={budget}
-              onManage={(budgetId) => setBudgetId(budgetId)}
-            />
-          ))}
-        </BudgetsTable>
+        <ProjectWidget />
+
+        <ProjectView />
       </PageContent>
 
-      <CreateBudgetModal
-        isOpen={openCreateBudgetModal}
-        onClose={() => setOpenCreateBudgetModal(false)}
-      />
-      <ManageBudgetModal
+      <ManageProjectModal
+        isOpen={openManageProjectModal}
+        onClose={() => setOpenManageProjectModal(false)}
         projectId={projectId ? parseInt(projectId, 10) : null}
-        budgetId={budgetId}
-        isOpen={!!budgetId}
-        onClose={() => setBudgetId(null)}
       />
     </Page>
   )

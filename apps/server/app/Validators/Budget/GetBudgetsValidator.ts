@@ -1,5 +1,6 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 
 export default class GetBudgetsValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -26,6 +27,7 @@ export default class GetBudgetsValidator {
   public schema = schema.create({
     user_id: schema.number.optional(),
     project_id: schema.number.optional(),
+    project_status: schema.enum.optional(Object.values(ProjectStatus)),
     include_project: schema.boolean.optional(),
     page: schema.number.optional(),
   })

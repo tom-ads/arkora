@@ -1,6 +1,7 @@
 type GetTimesheetRequest = {
-  start_date: string
-  end_date: string
+  startDate: string
+  endDate: string
+  userId: number | string
 }
 
 export default GetTimesheetRequest

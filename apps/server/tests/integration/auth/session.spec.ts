@@ -1,30 +1,53 @@
 import { test } from '@japa/runner'
-import { UserFactory } from 'Database/factories'
+import { OrganisationFactory, UserFactory } from 'Database/factories'
 
-const sessionRoute = '/auth/session'
+test.group('Auth : Session', (group) => {
+  group.tap((test) => test.tags(['@auth']))
 
-test.group('Auth: Session', () => {
-  test('authenticated user can pull their session', async ({ client }) => {
-    const authUser = await UserFactory.with('organisation', 1, (builder) =>
-      builder.merge({ subdomain: 'test-org' }).with('currency').with('workDays')
-    )
+  test('authenticated user can retrieve their session', async ({ client, route, assert }) => {
+    const organisation = await OrganisationFactory.create()
+    const authUser = await UserFactory.merge({ organisationId: organisation.id })
       .with('role')
       .create()
 
-    const response = await client.get(sessionRoute).loginAs(authUser).withCsrfToken()
+    const response = await client
+      .get(route('AuthController.session'))
+      .headers({ Origin: 'http://test-org.arkora.co.uk' })
+      .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
-    response.assertBodyContains({
+    assert.notStrictEqual(response.body(), {
       user: authUser.serialize(),
-      organisation: authUser.organisation.serialize(),
+      organisation: {
+        ...organisation.serialize(),
+        currency: null,
+        common_tasks: [],
+        business_days: [],
+      },
     })
   })
 
-  test('unauthenticated user receives unauthenticed when trying to pull session', async ({
+  test('authenticated user not requesting from their organisation, receives 401', async ({
     client,
+    route,
   }) => {
-    const response = await client.get(sessionRoute).withCsrfToken()
+    const organisation = await OrganisationFactory.create()
+    const authUser = await UserFactory.merge({ organisationId: organisation.id })
+      .with('role')
+      .create()
 
+    const response = await client
+      .get(route('AuthController.session'))
+      .headers({ Origin: 'http://arkora.co.uk' })
+      .loginAs(authUser)
+      .withCsrfToken()
+
+    response.assertStatus(401)
+  })
+
+  test('unauthenticated user receives unauthenticated response', async ({ client, route }) => {
+    const response = await client.get(route('AuthController.session')).withCsrfToken()
     response.assertStatus(401)
   })
 })

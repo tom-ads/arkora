@@ -1,0 +1,5 @@
+export enum DefaultTask {
+  DEVELOPMENT = 'DEVELOPMENT',
+  DISCOVERY = 'DISCOVERY',
+  DESIGN = 'DESIGN',
+}

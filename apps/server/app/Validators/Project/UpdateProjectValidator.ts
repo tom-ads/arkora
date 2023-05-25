@@ -1,5 +1,6 @@
 import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import ProjectStatus from 'App/Enum/ProjectStatus'
 
 export default class UpdateProjectValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -27,14 +28,14 @@ export default class UpdateProjectValidator {
     name: schema.string([rules.trim()]),
     private: schema.boolean(),
     show_cost: schema.boolean(),
-    team: schema.array.optional([rules.requiredWhen('private', '=', true)]).members(
-      schema.number([
-        rules.exists({
-          table: 'users',
-          column: 'id',
-        }),
-      ])
-    ),
+    status: schema.enum(Object.values(ProjectStatus)),
+    client_id: schema.number([
+      rules.exists({
+        table: 'clients',
+        column: 'id',
+      }),
+      rules.organisationClient(this.ctx.organisation!.id),
+    ]),
   })
 
   /**
@@ -48,5 +49,7 @@ export default class UpdateProjectValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'name.projectName': 'Name already taken',
+  }
 }

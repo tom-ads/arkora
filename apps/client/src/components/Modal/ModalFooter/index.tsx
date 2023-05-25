@@ -1,5 +1,5 @@
-import classNames from 'classnames'
 import { ReactNode } from 'react'
+import { twMerge } from 'tailwind-merge'
 
 type ModalFooterProps = {
   className?: string
@@ -8,7 +8,7 @@ type ModalFooterProps = {
 
 export const ModalFooter = ({ className, children }: ModalFooterProps): JSX.Element => {
   return (
-    <div className={classNames('w-full flex justify-between items-center gap-x-2 mt-6', className)}>
+    <div className={twMerge('w-full flex justify-between items-center gap-x-2 mt-6', className)}>
       {children}
     </div>
   )

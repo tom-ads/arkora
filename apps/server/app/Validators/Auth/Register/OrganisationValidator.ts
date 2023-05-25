@@ -34,13 +34,14 @@ export default class OrganisationValidator {
       }),
       // TODO: check for reserved words, ie. Arkora/arkora
     ]),
-    work_days: schema
+    business_days: schema
       .array([rules.minLength(1), rules.maxLength(7), rules.workDays()])
       .members(schema.string()),
     opening_time: schema.date({ format: 'iso' }, [rules.beforeField('closing_time')]),
     closing_time: schema.date({ format: 'iso' }, [rules.afterField('opening_time')]),
     currency: schema.string([rules.currencyCode()]),
-    hourly_rate: schema.number([rules.range(0, maxHourlyRate)]),
+    break_duration: schema.number(),
+    default_rate: schema.number([rules.range(0, maxHourlyRate)]),
   })
 
   /**
@@ -61,10 +62,10 @@ export default class OrganisationValidator {
     'subdomain.unique': 'Subdomain already taken',
     'subdomain.regex': 'Invalid subdomain, can only have letters and hyphens',
 
-    'work_days.required': 'Work days are required',
-    'work_days.enum': 'Invalid weekday',
-    'work_days.minLength': '1 work day required',
-    'work_days.maxLength': 'Can only have 7 work days per week',
+    'business_days.required': 'Business days are required',
+    'business_days.enum': 'Invalid business day',
+    'business_days.minLength': '1 work day required',
+    'business_days.maxLength': 'Can only have 7 business days per week',
 
     'opening_time.required': 'Opening time is required',
     'opening_time.beforeField': 'Opening time must be before the closing time',

@@ -5,20 +5,13 @@ import {
   TableHead,
   TableHeading,
   TableRow,
-  TableData,
-  InlineLink,
-  ChevronIcon,
-  Badge,
-  AvatarLimit,
-  Button,
-  TableEmpty,
   HouseIcon,
 } from '@/components'
-import { ExpandableRow } from '@/components/Table/ExpandableRow'
-import Status from '@/enums/Status'
-import classNames from 'classnames'
-import { Fragment, useState } from 'react'
 import { useGetProjectsQuery } from '../../../api'
+import { ProjectsRow, ProjectsRowSkeleton } from '../ProjectsRow'
+import { useAuth } from '@/hooks/useAuth'
+import UserRole from '@/enums/UserRole'
+import { useAuthorization } from '@/hooks/useAuthorization'
 
 type ProjectTableProps = {
   onCreate: () => void
@@ -26,102 +19,53 @@ type ProjectTableProps = {
 }
 
 export const ProjectsTable = ({ onCreate, onManage }: ProjectTableProps): JSX.Element => {
-  const [expandedRow, setExpandedRow] = useState<number | null>(null)
+  const { data: projects, isLoading } = useGetProjectsQuery()
 
-  const { data } = useGetProjectsQuery()
-
-  const handleExpandedRow = (projectId: number) => {
-    setExpandedRow(expandedRow !== projectId ? projectId : null)
-  }
+  const { authUser } = useAuth()
+  const { checkPermission } = useAuthorization()
 
   return (
-    <>
-      {data && data?.length > 0 ? (
-        <TableContainer className="min-h-[800px]">
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeading className="w-[32px]" first></TableHeading>
-                <TableHeading className="max-w-[355px]">NAME</TableHeading>
-                <TableHeading className="max-w-[355px]">CLIENT</TableHeading>
-                <TableHeading className="max-w-[255px]">TEAM</TableHeading>
-                <TableHeading className="max-w-[255px]">STATUS</TableHeading>
-                <TableHeading className="max-w-[100px]">VISIBILITY</TableHeading>
-                <TableHeading className="w-[86px]" last></TableHeading>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data?.map((project) => (
-                <Fragment key={`project-${project?.id}`}>
-                  <TableRow>
-                    <TableData>
-                      <button onClick={() => handleExpandedRow(project.id)}>
-                        <ChevronIcon
-                          className={classNames(
-                            'w-5 h-5 transition-transform duration-150 transform text-gray-90',
-                            {
-                              '-rotate-90': project.id !== expandedRow,
-                            },
-                          )}
-                        />
-                      </button>
-                    </TableData>
-                    <TableData className="truncate">
-                      <InlineLink className="font-medium" to={`/projects/${project.id}`}>
-                        {project.name}
-                      </InlineLink>
-                    </TableData>
-                    <TableData>{project.client.name}</TableData>
-                    <TableData>
-                      <AvatarLimit
-                        values={project.members.map((member) => ({
-                          id: member.id,
-                          value: member.initials,
-                        }))}
-                      />
-                    </TableData>
-                    <TableData>
-                      {project.status === Status.ACTIVE && <Badge variant="success">Active</Badge>}
-                      {project.status === Status.INACTIVE && <Badge variant="warn">Inactive</Badge>}
-                    </TableData>
-                    <TableData>{project.private ? 'Private' : 'Public'}</TableData>
-                    <TableData>
-                      <Button variant="blank" onClick={() => onManage(project.id)}>
-                        Manage
-                      </Button>
-                    </TableData>
-                  </TableRow>
-                  {/* Project Budgets Expandable */}
-                  <ExpandableRow show={expandedRow === project.id}>
-                    <TableData colSpan={6}>
-                      <Table>
-                        <TableHead>
-                          <TableHeading className="max-w-[255px]">Budget</TableHeading>
-                          <TableHeading className="max-w-[255px]">Type</TableHeading>
-                          <TableHeading className="max-w-[255px]">Rate</TableHeading>
-                          <TableHeading className="max-w-[255px]">Alloc. Hours</TableHeading>
-                          <TableHeading className="max-w-[255px]">Spent / Remaining</TableHeading>
-                          <TableHeading className="max-w-[255px]">
-                            Billable / Non-Billable
-                          </TableHeading>
-                        </TableHead>
-                      </Table>
-                    </TableData>
-                  </ExpandableRow>
-                </Fragment>
+    <TableContainer
+      className="min-h-[738px]"
+      emptyState={{
+        isEmpty: !projects?.length && !isLoading,
+        title: 'Projects',
+        btnText: 'Create Project',
+        onClick: checkPermission('project:create') ? onCreate : undefined,
+        icon: <HouseIcon />,
+        description:
+          authUser?.role?.name !== UserRole.MEMBER
+            ? 'Create client projects to track costs and time for each budget and assign the team'
+            : 'There are no projects currently assigned to you, speak to your manager to get assigned!',
+      }}
+    >
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableHeading first>NAME</TableHeading>
+            <TableHeading>CLIENT</TableHeading>
+            <TableHeading>TEAM</TableHeading>
+            <TableHeading>STATUS</TableHeading>
+            <TableHeading>VISIBILITY</TableHeading>
+            <TableHeading className="w-10" last></TableHeading>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {isLoading ? (
+            <>
+              {Array.from({ length: 10 }).map((_, idx) => (
+                <ProjectsRowSkeleton key={idx} />
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        <TableEmpty
-          icon={<HouseIcon />}
-          title="Projects"
-          btnText="Create Project"
-          btnOnClick={onCreate}
-          description="Create client projects to track costs and time for each budget and assign the team"
-        />
-      )}
-    </>
+            </>
+          ) : (
+            <>
+              {projects?.map((project) => (
+                <ProjectsRow key={project.id} value={project} onManage={onManage} />
+              ))}
+            </>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
   )
 }

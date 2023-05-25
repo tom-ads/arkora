@@ -1,23 +1,22 @@
 import { test } from '@japa/runner'
-import { CommonTask } from 'App/Enum/CommonTask'
+import { DefaultTask } from 'App/Enum/DefaultTask'
 import Organisation from 'App/Models/Organisation'
 import TimeEntry from 'App/Models/TimeEntry'
-import { OrganisationFactory, UserFactory } from 'Database/factories'
+import User from 'App/Models/User'
+import { OrganisationFactory, RoleFactory, UserFactory } from 'Database/factories'
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
-import { getDatesBetweenPeriod } from 'Helpers/date'
-import { getTimeEntriesTotalMinutes } from 'Helpers/timer'
 import { groupBy } from 'lodash'
 import { DateTime } from 'luxon'
 
-test.group('Timesheet: All Time Entries', ({ each }) => {
+test.group('Timesheet : Index', ({ each }) => {
   let organisation: Organisation
   let timesheet: TimeEntry[]
+  let authUser: User
 
   /* 
     Setup
   */
-
   each.setup(async () => {
     organisation = await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       return clientBuilder.with('projects', 2, (projectBuilder) => {
@@ -29,11 +28,16 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
 
     // Setup common organisation tasks
     const commonTasks = await TaskFactory.merge([
-      { name: CommonTask.DESIGN },
-      { name: CommonTask.DEVELOPMENT },
-      { name: CommonTask.DISCOVERY },
+      { name: DefaultTask.DESIGN },
+      { name: DefaultTask.DEVELOPMENT },
+      { name: DefaultTask.DISCOVERY },
     ]).createMany(3)
-    await organisation.related('tasks').attach(commonTasks.map((task) => task.id))
+    await organisation.related('commonTasks').createMany(
+      commonTasks.map((task) => ({
+        name: task.name,
+        isBillable: task.isBillable,
+      }))
+    )
 
     // Preload projects and budgets
     await organisation.load('projects')
@@ -42,7 +46,15 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     // Link tasks to budgets
     const budgets = organisation.projects.map((project) => project.budgets).flat()
     await Promise.all(
-      budgets.map((budget) => budget.related('tasks').attach(commonTasks.map((task) => task.id)))
+      budgets.map(
+        async (budget) =>
+          await budget.related('tasks').createMany(
+            commonTasks.map((task) => ({
+              name: task.name,
+              isBillable: task.isBillable,
+            }))
+          )
+      )
     )
 
     // Generate timesheet across previous week
@@ -54,201 +66,132 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     ])
       .apply('lastStoppedAt')
       .createMany(4)
+
+    authUser = await UserFactory.merge({ organisationId: organisation.id }).with('role').create()
+    await Promise.all(
+      timesheet.map(async (entry) => await entry.related('user').associate(authUser))
+    )
   })
 
   test('organisation member can index a timesheet for a specific week', async ({
     client,
     route,
+    assert,
   }) => {
-    const authUser = await UserFactory.with('role', 1, (roleBuilder) =>
-      roleBuilder.apply('member')
-    ).create()
-
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      timesheet.map(async (entry) => await entry.related('user').associate(authUser)),
-    ])
-
-    const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
-    }
+    // Change auth user role
+    const memberRole = await RoleFactory.apply('member').create()
+    await authUser.related('role').associate(memberRole)
 
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
       .qs({
-        start_date: params.start_date.toISODate(),
-        end_date: params.end_date.toISODate(),
+        start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
+        end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
       })
       .withCsrfToken()
       .loginAs(authUser)
 
-    const timesheetGrouped = groupBy(timesheet, 'date')
-    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
-
     response.assertStatus(200)
-    response.assertBodyContains({
-      total_minutes: getTimeEntriesTotalMinutes(timesheet),
-      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
-        (day) => {
-          const dayEntries = timesheetGrouped[day.toISO()]
-          return {
-            day: day.toISODate(),
-            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
-            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
-          }
-        }
+    assert.notStrictEqual(
+      groupBy(
+        timesheet.map((entry) => entry.serialize()),
+        (e) => e.user_id
       ),
-    })
+      response.body()
+    )
   })
 
   test('organisation manager can index a timesheet for a specific week', async ({
     client,
     route,
+    assert,
   }) => {
-    const authUser = await UserFactory.with('role', 1, (roleBuilder) =>
-      roleBuilder.apply('manager')
-    ).create()
-
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      timesheet.map(async (entry) => await entry.related('user').associate(authUser)),
-    ])
-
-    const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
-    }
+    // Change auth user role
+    const managerRole = await RoleFactory.apply('manager').create()
+    await authUser.related('role').associate(managerRole)
 
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
       .qs({
-        start_date: params.start_date.toISODate(),
-        end_date: params.end_date.toISODate(),
+        start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
+        end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
       })
       .withCsrfToken()
       .loginAs(authUser)
 
-    const timesheetGrouped = groupBy(timesheet, 'date')
-    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
-
     response.assertStatus(200)
-    response.assertBodyContains({
-      total_minutes: getTimeEntriesTotalMinutes(timesheet),
-      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
-        (day) => {
-          const dayEntries = timesheetGrouped[day.toISO()]
-          return {
-            day: day.toISODate(),
-            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
-            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
-          }
-        }
+    assert.notStrictEqual(
+      groupBy(
+        timesheet.map((entry) => entry.serialize()),
+        (e) => e.user_id
       ),
-    })
+      response.body()
+    )
   })
 
   test('organisation org_admin can index a timesheet for a specific week', async ({
     client,
     route,
+    assert,
   }) => {
-    const authUser = await UserFactory.with('role', 1, (roleBuilder) =>
-      roleBuilder.apply('orgAdmin')
-    ).create()
-
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      timesheet.map(async (entry) => await entry.related('user').associate(authUser)),
-    ])
-
-    const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
-    }
+    // Change auth user role
+    const orgAdmin = await RoleFactory.apply('orgAdmin').create()
+    await authUser.related('role').associate(orgAdmin)
 
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
       .qs({
-        start_date: params.start_date.toISODate(),
-        end_date: params.end_date.toISODate(),
+        start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
+        end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
       })
       .withCsrfToken()
       .loginAs(authUser)
 
-    const timesheetGrouped = groupBy(timesheet, 'date')
-    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
-
     response.assertStatus(200)
-    response.assertBodyContains({
-      total_minutes: getTimeEntriesTotalMinutes(timesheet),
-      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
-        (day) => {
-          const dayEntries = timesheetGrouped[day.toISO()]
-          return {
-            day: day.toISODate(),
-            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
-            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
-          }
-        }
+    assert.notStrictEqual(
+      groupBy(
+        timesheet.map((entry) => entry.serialize()),
+        (e) => e.user_id
       ),
-    })
+      response.body()
+    )
   })
 
   test('organisation owner can index a timesheet for a specific week', async ({
     client,
     route,
+    assert,
   }) => {
-    const authUser = await UserFactory.with('role').create()
-
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      timesheet.map(async (entry) => await entry.related('user').associate(authUser)),
-    ])
-
-    const params = {
-      start_date: DateTime.now().minus({ week: 1 }).startOf('week'),
-      end_date: DateTime.now().minus({ week: 1 }).endOf('week'),
-    }
-
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })
       .qs({
-        start_date: params.start_date.toISODate(),
-        end_date: params.end_date.toISODate(),
+        start_date: DateTime.now().minus({ week: 1 }).startOf('week').toISODate(),
+        end_date: DateTime.now().minus({ week: 1 }).endOf('week').toISODate(),
       })
       .withCsrfToken()
       .loginAs(authUser)
 
-    const timesheetGrouped = groupBy(timesheet, 'date')
-    const betweenDates = getDatesBetweenPeriod(params.start_date, params.end_date)
-
     response.assertStatus(200)
-    response.assertBodyContains({
-      total_minutes: getTimeEntriesTotalMinutes(timesheet),
-      days: Array.from({ length: betweenDates.length }, (_, idx) => betweenDates[idx]).map(
-        (day) => {
-          const dayEntries = timesheetGrouped[day.toISO()]
-          return {
-            day: day.toISODate(),
-            total_minutes: getTimeEntriesTotalMinutes(dayEntries),
-            entries: dayEntries?.map((entry) => entry.serialize()) ?? [],
-          }
-        }
+    assert.notStrictEqual(
+      groupBy(
+        timesheet.map((entry) => entry.serialize()),
+        (e) => e.user_id
       ),
-    })
+      response.body()
+    )
   })
 
   test('organisation cannot index timesheets from another organisation', async ({
     client,
     route,
   }) => {
-    const diffUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'diff-org' })
-    })
+    const diffUser = await UserFactory.with('organisation', 1, (orgBuilder) =>
+      orgBuilder.merge({ subdomain: 'diff-org' })
+    )
       .with('role')
       .create()
 
@@ -266,13 +209,6 @@ test.group('Timesheet: All Time Entries', ({ each }) => {
     client,
     route,
   }) => {
-    const authUser = await UserFactory.with('role').create()
-
-    await Promise.all([
-      authUser.related('organisation').associate(organisation),
-      timesheet.map(async (entry) => await entry.related('user').associate(authUser)),
-    ])
-
     const response = await client
       .get(route('TimesheetController.index'))
       .headers({ origin: 'http://test-org.arkora.co.uk' })

@@ -1,9 +1,9 @@
 import { test } from '@japa/runner'
 
-test.group('Auth: Registration - Verify Details', () => {
-  test('valid details for registration step', async ({ client }) => {
+test.group('Auth : Registration - Verify Details', () => {
+  test('valid details receives a 204 response', async ({ client, route }) => {
     const response = await client
-      .post('/auth/register/details')
+      .post(route('AuthController.verifyDetails'))
       .form({
         firstname: 'bob',
         lastname: 'marley',
@@ -16,9 +16,9 @@ test.group('Auth: Registration - Verify Details', () => {
     response.assertStatus(204)
   })
 
-  test('invalid details for registration step', async ({ client }) => {
+  test('invalid details receives a 422 response', async ({ client, route }) => {
     const response = await client
-      .post('/auth/register/details')
+      .post(route('AuthController.verifyDetails'))
       .form({
         firstname: undefined,
         lastname: undefined,

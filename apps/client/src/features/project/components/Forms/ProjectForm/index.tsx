@@ -6,16 +6,18 @@ import {
   FormSelect,
   FormStyledRadio,
   HorizontalDivider,
-  InfoCircleIcon,
   LockIcon,
   OpenLockIcon,
   FormErrorMessage,
+  InlineTip,
 } from '@/components'
 import { SelectOption } from '@/components/Forms/Select/option'
 import { FormStyledRadioOption } from '@/components/Forms/StyledRadio/Option'
+import ProjectStatus from '@/enums/ProjectStatus'
 import { useGetClientsQuery } from '@/features/client'
 import { SerializedError } from '@reduxjs/toolkit'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
+import { startCase, upperFirst } from 'lodash'
 import { ReactNode, useMemo } from 'react'
 import { z } from 'zod'
 
@@ -24,6 +26,7 @@ export type ProjectFormFields = {
   client: number | undefined
   private: boolean
   hideCost: boolean
+  status: ProjectStatus
 }
 
 export const projectSchema = z.object({
@@ -31,6 +34,7 @@ export const projectSchema = z.object({
   private: z.boolean(),
   hideCost: z.boolean(),
   client: z.number(),
+  status: z.nativeEnum(ProjectStatus),
 })
 
 type ProjectFormProps = {
@@ -61,6 +65,15 @@ export const ProjectForm = ({
     [clients],
   )
 
+  const statusOptions = useMemo(
+    () =>
+      Object.values(ProjectStatus)?.map((status) => ({
+        id: status,
+        display: status,
+      })) ?? [],
+    [clients],
+  )
+
   return (
     <Form<ProjectFormFields, typeof projectSchema>
       onSubmit={onSubmit}
@@ -72,6 +85,7 @@ export const ProjectForm = ({
         client: defaultValues?.client ?? undefined,
         private: defaultValues?.private ?? false,
         hideCost: defaultValues?.hideCost ?? true,
+        status: defaultValues?.status ?? ProjectStatus.ACTIVE,
       }}
     >
       {({ control, watch, formState: { errors } }) => (
@@ -82,25 +96,53 @@ export const ProjectForm = ({
             {errors?.name?.message && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
           </FormControl>
 
-          <FormControl>
-            <FormLabel htmlFor="client">Client</FormLabel>
-            <FormSelect
-              name="client"
-              control={control}
-              placeHolder="Select client"
-              error={!!errors?.client?.message}
-              fullWidth
-            >
-              {clientOptions?.map((option) => (
-                <SelectOption key={option.id} id={option.id}>
-                  {option?.display}
-                </SelectOption>
-              ))}
-            </FormSelect>
-            {errors?.client?.message && (
-              <FormErrorMessage>{errors.client?.message}</FormErrorMessage>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <FormControl>
+                <FormLabel htmlFor="client">Client</FormLabel>
+                <FormSelect
+                  name="client"
+                  control={control}
+                  placeHolder="Select client"
+                  error={!!errors?.client?.message}
+                  fullWidth
+                >
+                  {clientOptions?.map((option) => (
+                    <SelectOption key={option.id} id={option.id}>
+                      {option?.display}
+                    </SelectOption>
+                  ))}
+                </FormSelect>
+                {errors?.client?.message && (
+                  <FormErrorMessage>{errors.client?.message}</FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel htmlFor="status">Status</FormLabel>
+                <FormSelect
+                  name="status"
+                  control={control}
+                  placeHolder="Select status"
+                  error={!!errors?.status?.message}
+                  fullWidth
+                >
+                  {statusOptions?.map((option) => (
+                    <SelectOption key={option.id} id={option.id}>
+                      {startCase(upperFirst(option?.display?.toLowerCase()))}
+                    </SelectOption>
+                  ))}
+                </FormSelect>
+                {errors?.status?.message && (
+                  <FormErrorMessage>{errors.status?.message}</FormErrorMessage>
+                )}
+              </FormControl>
+            </div>
+
+            {[ProjectStatus.ARCHIVED, ProjectStatus.PENDING].includes(watch('status')) && (
+              <InlineTip value="Project members can't track their time until the status is active" />
             )}
-          </FormControl>
+          </div>
 
           <div className="space-y-3">
             <FormControl>
@@ -122,12 +164,7 @@ export const ProjectForm = ({
             </FormControl>
 
             {!!watch('private') && (
-              <div className="flex items-center gap-2">
-                <InfoCircleIcon className="w-5 h-5" />
-                <p className="text-gray-80 text-sm">
-                  Members can be assigned after project has been created
-                </p>
-              </div>
+              <InlineTip value="Members can be assigned after project has been created." />
             )}
           </div>
 
@@ -143,13 +180,13 @@ export const ProjectForm = ({
                 title="Show"
                 icon={<OpenLockIcon />}
                 description="Assigned project members can view project and budget costs"
-                value={false}
+                value={true}
               />
               <FormStyledRadioOption
                 title="Hide"
                 icon={<LockIcon />}
                 description="Only managers and admins can view project and budget costs"
-                value={true}
+                value={false}
               />
             </FormStyledRadio>
           </FormControl>

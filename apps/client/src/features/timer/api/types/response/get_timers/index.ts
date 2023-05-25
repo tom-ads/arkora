@@ -1,4 +1,4 @@
-import { Timer } from '@/types/Timer'
+import { Timer } from '@/types/models/Timer'
 
 type GetTimersResponse = Timer[]
 

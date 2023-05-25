@@ -29,6 +29,8 @@ export default class GetAccountsValidator {
     search: schema.string.optional([rules.trim()]),
     role: schema.enum.optional(Object.values(UserRole)),
     status: schema.enum.optional(Object.values(Verify)),
+    project_id: schema.number.optional(),
+    include_unverified: schema.boolean.optional(),
     page: schema.number.optional(),
   })
 

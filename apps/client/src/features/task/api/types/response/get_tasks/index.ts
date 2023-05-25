@@ -1,5 +1,5 @@
-import Task from '@/types/Task'
+import Task from '@/types/models/Task'
 
-type GetTasksResponse = Task[] | Record<string, Task[]>
+type GetTasksResponse = Task[]
 
 export default GetTasksResponse

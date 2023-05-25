@@ -10,16 +10,14 @@ import {
 } from 'Database/factories'
 import BillableTypeFactory from 'Database/factories/BillableTypeFactory'
 
-test.group('Budgets : Delete Budget', ({ each }) => {
+test.group('Budgets : Delete Budget', (group) => {
   let budget: Budget
   let authUser: User
   let organisation: Organisation
 
-  /* 
-    Setup
-  */
+  group.tap((test) => test.tags(['@budgets']))
 
-  each.setup(async () => {
+  group.each.setup(async () => {
     const budgetType = await BudgetTypeFactory.apply('variable').create()
     const billableType = await BillableTypeFactory.apply('total_cost').create()
 

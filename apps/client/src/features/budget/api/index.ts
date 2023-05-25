@@ -1,4 +1,4 @@
-import { Budget } from '@/types'
+import { Budget, BudgetWithProject } from '@/types'
 import appApi from 'api'
 import {
   CreateBudgetRequest,
@@ -8,7 +8,7 @@ import {
 } from './types/requests'
 import { GetBudgetsResponse } from './types/response'
 
-const budgetBasePath = '/budgets'
+const budgetBasePath = '/api/v1/budgets'
 
 const budgetEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
@@ -21,7 +21,7 @@ const budgetEndpoints = appApi.injectEndpoints({
       invalidatesTags: ['Budgets', 'Budget'],
     }),
 
-    getBudget: build.query<Budget, GetBudgetRequest>({
+    getBudget: build.query<BudgetWithProject, GetBudgetRequest>({
       query: (id) => `${budgetBasePath}/${id}`,
       providesTags: ['Budget'],
     }),
@@ -40,7 +40,7 @@ const budgetEndpoints = appApi.injectEndpoints({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['Budgets', 'Budget'],
+      invalidatesTags: ['Budgets', 'Budget', 'BudgetTasks', 'BudgetTask'],
     }),
 
     deleteBudget: build.mutation<void, number>({

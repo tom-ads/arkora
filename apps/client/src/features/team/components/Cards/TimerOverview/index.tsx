@@ -1,5 +1,8 @@
 import { Avatar, Card, VerticalDivider } from '@/components'
-import { Timer } from '@/types/Timer'
+import { formatMinutesToTime } from '@/helpers/date'
+import { Timer } from '@/types/models/Timer'
+import classNames from 'classnames'
+import { DateTime } from 'luxon'
 
 type ReadOnlyProps = {
   label: string
@@ -10,7 +13,7 @@ const Readonly = ({ label, value }: ReadOnlyProps) => {
   return (
     <div className="min-w-[50px] md:min-w-[100px] lg:min-w-[150px]">
       <p className="font-semibold text-[13px] text-gray-50">{label}</p>
-      <p className="text-base font-semibold text-gray-100">{value ?? '---'}</p>
+      <p className="text-base font-semibold text-gray-100">{value || '---'}</p>
     </div>
   )
 }
@@ -20,8 +23,15 @@ type TimerOverviewCardProps = {
 }
 
 export const TimerOverviewCard = ({ value }: TimerOverviewCardProps): JSX.Element => {
+  const isActive = value?.timer?.lastStoppedAt === null
+
+  let date = DateTime.now().toFormat('dd/LL/yyyy')
+  if (value.timer?.date) {
+    date = DateTime.fromISO(value?.timer?.date).toFormat('dd/LL/yyyy')
+  }
+
   return (
-    <Card className="px-8 py-5 flex justify-between">
+    <Card className="px-8 py-5 flex justify-between min-h-[50px]">
       <div className="flex gap-4 items-center">
         <Avatar className="w-10 h-10 bg-purple-10">{value.initials}</Avatar>
         <VerticalDivider />
@@ -34,6 +44,8 @@ export const TimerOverviewCard = ({ value }: TimerOverviewCardProps): JSX.Elemen
       </div>
 
       <div className="flex items-center gap-x-8">
+        <Readonly label="Date" value={date} />
+        <VerticalDivider />
         <Readonly label="Project" value={value.timer?.budget?.project?.name} />
         <VerticalDivider />
         <Readonly label="Budget" value={value.timer?.budget?.name} />
@@ -41,7 +53,23 @@ export const TimerOverviewCard = ({ value }: TimerOverviewCardProps): JSX.Elemen
         <Readonly label="Task" value={value.timer?.task?.name} />
       </div>
 
-      <div></div>
+      <div className="flex flex-col justify-between pl-2">
+        <div className="flex gap-4 items-start">
+          <div className="text-left lg:space-y-[2px] w-[72px] lg:w-[77px]">
+            <p
+              className={classNames('text-xs lg:text-[13px] lg:leading-[18px] font-semibold', {
+                'text-gray-50': !isActive,
+                'text-gray-60': isActive,
+              })}
+            >
+              {value?.timer?.isBillable ? 'Billable' : 'Non-Billable'}
+            </p>
+            <p className="text-lg text-gray-100 font-medium">
+              {isActive ? formatMinutesToTime(value?.timer?.durationMinutes ?? 0) : '--:--'}
+            </p>
+          </div>
+        </div>
+      </div>
     </Card>
   )
 }

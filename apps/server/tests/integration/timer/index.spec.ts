@@ -6,7 +6,7 @@ import { BudgetFactory, OrganisationFactory, RoleFactory, UserFactory } from 'Da
 import TaskFactory from 'Database/factories/TaskFactory'
 import TimeEntryFactory from 'Database/factories/TimeEntryFactory'
 
-test.group('Timers: Index Timers', ({ each }) => {
+test.group('Timer : Index', ({ each }) => {
   let authUser: User
   let timeEntry: TimeEntry
   let organisation: Organisation
@@ -22,8 +22,10 @@ test.group('Timers: Index Timers', ({ each }) => {
     const commonTask = await TaskFactory.create()
 
     // Setup organisation budget and attach common tasks
-    const budget = await BudgetFactory.with('budgetType').create()
-    await budget.related('tasks').attach([commonTask.id])
+    const budget = await BudgetFactory.with('budgetType').with('tasks').create()
+    await budget
+      .related('tasks')
+      .create({ name: commonTask.name, isBillable: commonTask.isBillable })
 
     // Create organisation members with active timers
     await UserFactory.merge({ organisationId: organisation.id })

@@ -30,7 +30,6 @@ export default class GetTasksValidator {
         column: 'id',
       }),
     ]),
-    group_by: schema.enum.optional(['BILLABLE'] as const),
   })
 
   /**

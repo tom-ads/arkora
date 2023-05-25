@@ -1,10 +1,6 @@
-import { ReactNode, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { ReactNode } from 'react'
 import { Spinner } from './components'
 import { useGetSessionQuery } from './features/auth'
-import { setAuth } from './stores/slices/auth'
-import { setOrganisation } from './stores/slices/organisation'
-import { startTimer } from './stores/slices/timer'
 
 const Loader = () => {
   return (
@@ -19,19 +15,7 @@ type AppProps = {
 }
 
 const App = ({ children }: AppProps): JSX.Element => {
-  const dispatch = useDispatch()
-
-  const { data: authResponse, isLoading } = useGetSessionQuery()
-
-  useEffect(() => {
-    if (authResponse) {
-      dispatch(setAuth(authResponse.user))
-      dispatch(setOrganisation(authResponse.organisation))
-      if (authResponse.timer) {
-        dispatch(startTimer(authResponse.timer))
-      }
-    }
-  }, [authResponse])
+  const { isLoading } = useGetSessionQuery()
 
   if (isLoading) {
     return <Loader />

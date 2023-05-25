@@ -23,6 +23,7 @@ import { isFetchBaseQueryError } from '@/hooks/useQueryError'
 import { useToast } from '@/hooks/useToast'
 import { RootState } from '@/stores/store'
 import { ModalBaseProps } from '@/types'
+import { camelCase, startCase } from 'lodash'
 import { DateTime } from 'luxon'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -51,12 +52,12 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
 
   const { successToast, errorToast } = useToast()
 
-  const [updateMember, { isLoading: updatingMember }] = useUpdateAccountMutation()
+  const [updateMember, { isLoading: updatingMember, error }] = useUpdateAccountMutation()
 
   const [deleteMember, { isLoading: deletingMember }] = useDeleteAccountMutation()
 
-  const { authUserRole } = useSelector((state: RootState) => ({
-    authUserRole: state.auth.user?.role?.name,
+  const { authUser } = useSelector((state: RootState) => ({
+    authUser: state.auth.user,
   }))
 
   const {
@@ -76,11 +77,12 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
     })
       .unwrap()
       .then(() => successToast(`${data.forename ?? 'Member'} has been updated`))
-      .catch(() =>
+      .catch((error) => {
+        if (error.state === 422) return
         errorToast(
           `Unable to update ${data.forename ?? 'Member'} at the moment, please try again later`,
-        ),
-      )
+        )
+      })
 
     props.onClose()
   }
@@ -92,7 +94,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
       .catch(() => errorToast(`Unable to remove ${name}, please try again later.`))
 
     setOpenConfirmationModal(false)
-    props.onClose()
+    setTimeout(() => props.onClose(), 100)
   }
 
   const roleOptions = useMemo(
@@ -122,17 +124,18 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
       isOpen={props.isOpen}
       onClose={props.onClose}
       loading={fetchingMember}
+      className="max-w-[500px]"
     >
       <Form<FormFields, typeof manageMemberSchema>
         onSubmit={handleSubmit}
         defaultValues={{
-          forename: member?.firstname ?? null,
-          surname: member?.lastname ?? null,
-          email: member?.email ?? null,
+          forename: member?.firstname ?? '',
+          surname: member?.lastname ?? '',
+          email: member?.email?.toLowerCase() ?? '',
           role: member?.role?.name ?? null,
         }}
         className="space-y-6"
-        queryError={fetchMemberError}
+        queryError={error}
         validationSchema={manageMemberSchema}
       >
         {({ watch, control, formState: { errors } }) => (
@@ -190,7 +193,9 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
 
             <FormControl>
               <FormLabel htmlFor="surname">Role</FormLabel>
-              {authUserRole === UserRole.ORG_ADMIN || authUserRole === UserRole.OWNER ? (
+              {(authUser?.role?.name === UserRole.ORG_ADMIN ||
+                authUser?.role?.name === UserRole.OWNER) &&
+              member?.role?.name !== UserRole.OWNER ? (
                 <FormSelect name="role" control={control} placeHolder="Select role" fullWidth>
                   {roleOptions?.map((option) => (
                     <SelectOption key={option.id} id={option.id}>
@@ -199,27 +204,25 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
                   ))}
                 </FormSelect>
               ) : (
-                <ReadOnly value={watch('role')} />
+                <ReadOnly value={camelCase(startCase(watch('role') ?? ''))} />
               )}
             </FormControl>
 
             <ModalFooter className="!mt-24">
-              <Button
-                variant="blank"
-                onClick={() => setOpenConfirmationModal(true)}
-                disabled={updatingMember || deletingMember}
-                danger
-              >
-                Remove
-              </Button>
-              <Button
-                size="xs"
-                className="max-w-[160px]"
-                type="submit"
-                loading={updatingMember}
-                disabled={deletingMember}
-                block
-              >
+              {authUser?.id !== member?.id || member?.role?.name !== UserRole.OWNER ? (
+                <Button
+                  variant="blank"
+                  onClick={() => setOpenConfirmationModal(true)}
+                  disabled={updatingMember || deletingMember}
+                  danger
+                >
+                  Remove
+                </Button>
+              ) : (
+                <span></span>
+              )}
+
+              <Button size="xs" type="submit" loading={updatingMember} disabled={deletingMember}>
                 Update {member?.firstname ?? 'Member'}
               </Button>
             </ModalFooter>
@@ -229,9 +232,9 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
               onClose={() => setOpenConfirmationModal(false)}
               onConfirm={onConfirm}
               loading={deletingMember}
-              title={`You're about to remove ${member?.firstname ?? 'a Member'}`}
+              title={`You're about to remove ${member?.firstname ?? 'a member'}`}
               btnText={`Remove ${member?.firstname ?? 'Member'}`}
-              description="Performing this action will permanently delete all related time entries. It cannot be recovered."
+              description="Performing this action will permanently remove all related time entries for this member. It cannot be recovered."
             />
           </>
         )}

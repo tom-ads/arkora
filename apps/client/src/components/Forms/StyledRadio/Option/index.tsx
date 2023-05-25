@@ -3,16 +3,21 @@ import { RadioGroup } from '@headlessui/react'
 import { cva } from 'class-variance-authority'
 
 const radioItemStyling = cva(
-  'relative border w-full rounded transition-all outline-none appearance-none text-left p-[10px] cursor-pointer',
+  'relative border w-full rounded transition-all outline-none appearance-none text-left p-[10px]',
   {
     variants: {
       checked: {
         true: 'border-purple-90 shadow-sm shadow-purple-70 bg-purple-10 focus:bg-purple-10',
         false: 'border-gray-40',
       },
+      disabled: {
+        true: 'bg-gray-20 cursor-default',
+        false: 'cursor-pointer',
+      },
     },
     defaultVariants: {
       checked: false,
+      disabled: false,
     },
   },
 )
@@ -21,17 +26,23 @@ type StyledRadioOptionProps = {
   title: string
   description?: string
   icon?: JSX.Element
+  disabled?: boolean
   value: string | number | boolean
 }
 
 export const FormStyledRadioOption = ({
   title,
   description,
+  disabled,
   icon,
   value,
 }: StyledRadioOptionProps) => {
   return (
-    <RadioGroup.Option value={value} className={({ checked }) => radioItemStyling({ checked })}>
+    <RadioGroup.Option
+      value={value}
+      className={({ checked }) => radioItemStyling({ checked, disabled })}
+      disabled={disabled}
+    >
       {({ checked }) => (
         <>
           <div className="flex gap-[6px] items-center">

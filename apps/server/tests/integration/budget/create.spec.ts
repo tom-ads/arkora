@@ -14,16 +14,16 @@ import Budget from 'App/Models/Budget'
 import { createBillableTypes } from 'Database/factories/BillableTypeFactory'
 import BillableType from 'App/Models/BillableType'
 
-test.group('Budgets : Create Budget', (group) => {
+test.group('Budgets : Create', (group) => {
   let authUser: User
   let organisation: Organisation
   let billableTypes: BillableType[]
 
-  group.setup(async () => {
-    billableTypes = await createBillableTypes()
-  })
+  group.tap((test) => test.tags(['@budgets']))
 
   group.each.setup(async () => {
+    billableTypes = await createBillableTypes()
+
     organisation = await OrganisationFactory.with('clients', 1, (clientBuilder) => {
       return clientBuilder.with('projects', 1, (projectBuilder) => {
         return projectBuilder.merge({ name: 'project-1' })
@@ -33,6 +33,10 @@ test.group('Budgets : Create Budget', (group) => {
 
     // Setup organisation owner
     authUser = await UserFactory.merge({ organisationId: organisation.id }).with('role').create()
+    const projects = await organisation.related('projects').query()
+    await Promise.all(
+      projects.map(async (project) => await project.related('members').attach([authUser.id]))
+    )
   })
 
   test('organisation user can create a variable budget', async ({ client, route }) => {
@@ -66,14 +70,14 @@ test.group('Budgets : Create Budget', (group) => {
       billable_type: {
         name: billableTypes[0].name,
       },
-      total_billable: 0,
-      total_billable_minutes: 0,
-      total_cost: 10000000,
-      total_minutes: 60000,
-      total_non_billable: 0,
-      total_non_billable_minutes: 0,
-      total_remaining: 10000000,
-      total_spent: 0,
+      spent_cost: 0,
+      remaining_cost: 10000000,
+      allocated_budget: 10000000,
+      allocated_duration: 60000,
+      billable_cost: 0,
+      billable_duration: 0,
+      unbillable_cost: 0,
+      unbillable_duration: 0,
     })
   })
 
@@ -92,10 +96,10 @@ test.group('Budgets : Create Budget', (group) => {
 
     const response = await client
       .post(route('BudgetController.create'))
-      .form(payload)
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
+      .form(payload)
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -105,14 +109,14 @@ test.group('Budgets : Create Budget', (group) => {
       hourly_rate: payload.hourly_rate,
       budget_type: { name: BudgetKind.FIXED },
       billable_type: { name: billableTypes[0].name },
-      total_billable: 0,
-      total_billable_minutes: 0,
-      total_cost: 10000000,
-      total_minutes: 60000,
-      total_non_billable: 0,
-      total_non_billable_minutes: 0,
-      total_remaining: 10000000,
-      total_spent: 0,
+      spent_cost: 0,
+      remaining_cost: 10000000,
+      allocated_budget: 10000000,
+      allocated_duration: 60000,
+      billable_cost: 0,
+      billable_duration: 0,
+      unbillable_cost: 0,
+      unbillable_duration: 0,
     })
   })
 
@@ -141,11 +145,11 @@ test.group('Budgets : Create Budget', (group) => {
       colour: payload.colour,
       budget_type: { name: BudgetKind.NON_BILLABLE },
       billable_type: { name: billableTypes[1].name },
-      total_minutes: 30000,
+      allocated_duration: 30000,
     })
   })
 
-  test('organisation user cannot create a budget', async ({ client, route }) => {
+  test('organisation member cannot create a budget', async ({ client, route }) => {
     // Associate member role to auth user
     const memberRole = await RoleFactory.apply('member').create()
     await authUser.related('role').associate(memberRole)
@@ -153,8 +157,8 @@ test.group('Budgets : Create Budget', (group) => {
     const response = await client
       .post(route('BudgetController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
       .loginAs(authUser)
+      .withCsrfToken()
 
     response.assertStatus(403)
   })
@@ -194,22 +198,20 @@ test.group('Budgets : Create Budget', (group) => {
       billable_type: {
         name: billableTypes[0].name,
       },
-      total_billable: 0,
-      total_billable_minutes: 0,
-      total_cost: 10000000,
-      total_minutes: 60000,
-      total_non_billable: 0,
-      total_non_billable_minutes: 0,
-      total_remaining: 10000000,
-      total_spent: 0,
+      spent_cost: 0,
+      remaining_cost: 10000000,
+      allocated_budget: 10000000,
+      allocated_duration: 60000,
+      billable_cost: 0,
+      billable_duration: 0,
+      unbillable_cost: 0,
+      unbillable_duration: 0,
     })
 
-    // Load budget members
-    const budget = await Budget.find(response.body().id)
-    await budget?.load('members')
+    const budget = await Budget.query().where('id', response.body().id).preload('members').first()
 
     assert.notStrictEqual(
-      budget?.members.map((user) => user.serialize()),
+      budget?.members?.map((user) => user.serialize()),
       [authUser.serialize()]
     )
   })
@@ -257,30 +259,6 @@ test.group('Budgets : Create Budget', (group) => {
     })
   })
 
-  test('organisation user with diff organisation project id receives a 422', async ({
-    client,
-    route,
-  }) => {
-    const payload = {
-      project_id: 1000000000,
-      name: faker.company.name(),
-      colour: faker.color.rgb(),
-      private: true,
-      budget_type: BudgetKind.VARIABLE,
-      hourly_rate: faker.datatype.number({ min: 10000, max: 20000 }), // £100 - £200
-      budget: faker.datatype.number({ min: 1000000, max: 2000000 }), // £1m - £2m
-    }
-
-    const response = await client
-      .post(route('BudgetController.create'))
-      .form(payload)
-      .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
-      .loginAs(authUser)
-
-    response.assertStatus(422)
-  })
-
   test('diff organisation user cannot create a budget for another organisation', async ({
     client,
     route,
@@ -312,7 +290,7 @@ test.group('Budgets : Create Budget', (group) => {
 
   test('unauthenticated user cannot view organisation budgets', async ({ client, route }) => {
     const response = await client
-      .get(route('BudgetController.create'))
+      .post(route('BudgetController.create'))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 

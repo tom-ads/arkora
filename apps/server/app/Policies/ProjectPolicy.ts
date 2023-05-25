@@ -4,17 +4,13 @@ import UserRole from 'App/Enum/UserRole'
 import Project from 'App/Models/Project'
 
 export default class ProjectPolicy extends BasePolicy {
-  /* 
- 	  Check auth user can view an organisations project 
-  */
   public async view(user: User, project: Project) {
-    await project.load('client')
-
-    if (project.client.organisationId !== user.organisationId) {
+    if (!user || !project) {
       return false
     }
 
-    if (user.role?.name === UserRole.MEMBER) {
+    const isAssigned = await project.isAssigned(user.id)
+    if (!isAssigned) {
       return false
     }
 

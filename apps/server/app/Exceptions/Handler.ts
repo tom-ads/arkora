@@ -16,6 +16,7 @@
 import Logger from '@ioc:Adonis/Core/Logger'
 import HttpExceptionHandler from '@ioc:Adonis/Core/HttpExceptionHandler'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { nodeEnv } from 'Config/app'
 
 export default class ExceptionHandler extends HttpExceptionHandler {
   constructor() {
@@ -44,6 +45,12 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     if (error.code === 'E_UNAUTHORIZED_ACCESS') {
       return ctx.response.unauthorized({
         message: [{ message: 'Unauthenticated. Please login.' }],
+      })
+    }
+
+    if (ctx.response.getStatus() >= 500 && nodeEnv !== 'development') {
+      return ctx.response.internalServerError({
+        message: [{ message: 'Internal Server Error' }],
       })
     }
 

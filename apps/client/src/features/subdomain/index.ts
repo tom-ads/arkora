@@ -1,5 +1,5 @@
 export * from './components/SubdomainForm'
-export * from './pages/SubdomainPage'
-export * from './pages/SubdomainNotFound'
+export * from './pages/Subdomain'
+export * from './pages/NotFound'
 export * from './routes'
 export * from './api'

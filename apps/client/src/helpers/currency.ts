@@ -8,12 +8,12 @@ export function convertToPounds(value: number) {
   return value / 100
 }
 
-export function calculatePercentage(cost: number, total: number) {
+export function calculatePercentage(cost: number, total: number, places?: number) {
   if (!isValidNumber(cost) || !isValidNumber(total)) {
     return 0
   }
 
-  return Math.round(Math.abs((cost / total) * 100))
+  return ((cost / total) * 100).toFixed(places ?? 2)
 }
 
 export function isValidNumber(number: number) {

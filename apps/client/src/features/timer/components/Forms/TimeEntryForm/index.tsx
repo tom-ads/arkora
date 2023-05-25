@@ -1,122 +1,74 @@
 import {
   Form,
-  FormChangeCallback,
   FormControl,
   FormLabel,
   FormTextArea,
-  FormTimeTrackingInput,
-  TimeEntryResult,
+  FormTimeInput,
   FormErrorMessage,
+  DoubleCashIcon,
+  ClipboardIcon,
 } from '@/components'
-import { FormGroupSelect } from '@/components/Forms/GroupSelect'
+import { FormGroupSelect, FormGroupSelectEmptyState } from '@/components/Forms/GroupSelect'
 import { GroupOption } from '@/components/Forms/GroupSelect/option'
 import { useGetBudgetsQuery } from '../../../../budget/api'
 import { Budget, ModalBaseProps } from '@/types'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { z } from 'zod'
+import { ReactNode, useMemo } from 'react'
+import { ZodType } from 'zod'
 import { groupBy, startCase } from 'lodash'
-import { useLazyGetTasksQuery } from '@/features/task'
-import Task from '@/types/Task'
-import { useCreateTimerMutation } from '../../../api'
-import { DateTime } from 'luxon'
-import { useToast } from '@/hooks/useToast'
+import Task from '@/types/models/Task'
 import { UseFormReturn } from 'react-hook-form'
-import { useDispatch } from 'react-redux'
-import { startTimer } from '@/stores/slices/timer'
+import { useGetBudgetTasksQuery } from '@/features/budget_tasks'
+import ProjectStatus from '@/enums/ProjectStatus'
 
 export type TimeEntryFields = {
-  budget: {
-    id: number | undefined
-    value: string | undefined
-    children: string | undefined
-  }
-  task: {
-    id: number | undefined
-    value: string | undefined
-    children: string | undefined
-  }
-  est_time: TimeEntryResult
-  tracked_time: TimeEntryResult
-  description: string
+  budget: number | undefined
+  task: number | undefined
+  estimatedTime: string
+  trackedTime: string
+  description: string | undefined
 }
 
-export const timeEntrySchema = z.object({
-  budget: z.object({
-    id: z.number(),
-    value: z.string({ required_error: 'Budget is required' }),
-  }),
-  task: z.object({
-    id: z.number(),
-    value: z.string({ required_error: 'Task is required' }),
-  }),
-  est_time: z.object({
-    durationMinutes: z.number(),
-  }),
-  tracked_time: z.object({
-    durationMinutes: z.number(),
-  }),
-  description: z.string().optional(),
-})
-
 type TimeEntryFormProps = ModalBaseProps & {
+  activeProject?: boolean
+  onSubmit: (data: TimeEntryFields) => void
+  defaultValues: TimeEntryFields
+  validationSchema: ZodType
   children: ReactNode
 }
 
-export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps): JSX.Element => {
-  const dispatch = useDispatch()
-  const { errorToast } = useToast()
+type FormWrapperProps = UseFormReturn<TimeEntryFields> & {
+  children: any
+  activeProject?: boolean
+}
 
-  const [budgetId, setBudgetId] = useState<number | undefined>(undefined)
+const FormWrapper = ({
+  activeProject,
+  formState,
+  control,
+  watch,
+  setValue,
+  children,
+}: FormWrapperProps) => {
+  const { data: budgets } = useGetBudgetsQuery({
+    ...(activeProject && { projectStatus: ProjectStatus.ACTIVE }),
+    includeProject: true,
+  })
 
-  const [createTimer] = useCreateTimerMutation()
+  const { data: tasks } = useGetBudgetTasksQuery(watch('budget')!, {
+    skip: !watch('budget'),
+  })
 
-  const { data: budgets } = useGetBudgetsQuery({ include_project: true }, { skip: !isOpen })
-
-  const [triggerTasks, { data: tasks }] = useLazyGetTasksQuery()
-
-  const onSubmit = async (data: TimeEntryFields) => {
-    if (data?.budget?.id && data?.task?.id) {
-      await createTimer({
-        date: DateTime.now().toSQLDate(),
-        budget_id: data.budget.id,
-        task_id: data.task.id,
-        description: data.description,
-        duration_minutes: data.tracked_time.durationMinutes,
-        estimated_minutes: data.est_time.durationMinutes,
-      })
-        .unwrap()
-        .then((data) => dispatch(startTimer(data)))
-        .catch(() => errorToast('Unable to start timer, please contact your administrator'))
-
-      onClose()
-    }
+  const handleBudget = () => {
+    setValue('task', undefined)
   }
-
-  const handleFormChange = useCallback<FormChangeCallback<TimeEntryFields>>(
-    (fields: TimeEntryFields, methods: UseFormReturn<TimeEntryFields>) => {
-      if (fields?.budget?.id !== budgetId) {
-        setBudgetId(fields.budget.id)
-        methods.resetField('task')
-      }
-    },
-    [budgetId, triggerTasks],
-  )
-
-  useEffect(() => {
-    if (budgetId) {
-      triggerTasks({ budget_id: budgetId, group_by: 'BILLABLE' })
-    }
-  }, [budgetId])
 
   const budgetOptions: Record<string, GroupOption[]> = useMemo(() => {
     const groupedBudgets: Record<string, Budget[]> = groupBy(budgets, (p) => p.project?.name)
-
     return Object.fromEntries(
-      Object.entries(groupedBudgets).map(([key, value]) => [
+      Object.entries(groupedBudgets ?? {}).map(([key, value]) => [
         startCase(key),
         value.map((budget: Budget) => ({
           id: budget.id,
-          value: budget.name,
           display: budget.name,
         })),
       ]),
@@ -124,17 +76,13 @@ export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps)
   }, [budgets])
 
   const taskOptions: Record<string, GroupOption[]> = useMemo(() => {
-    if (!tasks) {
-      return {}
-    }
-
+    const groupedTasks: Record<string, Task[]> = groupBy(tasks, (p) => p.isBillable)
     return Object.fromEntries(
-      Object.entries(tasks).map(([key, value]) => {
+      Object.entries(groupedTasks ?? {}).map(([key, value]) => {
         return [
-          startCase(key),
+          key === 'true' ? 'Billable' : 'Non-Billable',
           value.map((task: Task) => ({
             id: task.id,
-            value: task.name,
             display: task.name,
           })),
         ]
@@ -143,105 +91,110 @@ export const TimeEntryForm = ({ isOpen, onClose, children }: TimeEntryFormProps)
   }, [tasks])
 
   return (
-    <Form<TimeEntryFields, typeof timeEntrySchema>
+    <>
+      <FormControl>
+        <FormLabel htmlFor="budget">Budget</FormLabel>
+        <FormGroupSelect
+          name="budget"
+          control={control}
+          placeHolder="Select budget"
+          onChange={handleBudget}
+          error={!!formState?.errors?.budget?.message}
+          emptyState={
+            <FormGroupSelectEmptyState
+              icon={<DoubleCashIcon />}
+              title="No Budgets"
+              description="You are not assigned to any project budgets"
+            />
+          }
+          fullWidth
+        >
+          {Object.entries(budgetOptions)?.map(([groupName, budgets]) => (
+            <GroupOption key={groupName} name={groupName} group={budgets} />
+          ))}
+        </FormGroupSelect>
+        {formState?.errors?.budget?.message && (
+          <FormErrorMessage>{formState?.errors?.budget?.message}</FormErrorMessage>
+        )}
+      </FormControl>
+
+      <FormControl>
+        <FormLabel htmlFor="task">Task</FormLabel>
+        <FormGroupSelect
+          name="task"
+          control={control}
+          placeHolder="Select task"
+          disabled={!watch('budget')}
+          error={!!formState?.errors?.task?.message && !!watch('budget')}
+          emptyState={
+            <FormGroupSelectEmptyState
+              icon={<ClipboardIcon />}
+              title="No Budget Tasks"
+              description="The selected budget has no tasks to track against"
+            />
+          }
+          fullWidth
+        >
+          {Object.entries(taskOptions)?.map(([groupName, tasks]) => (
+            <GroupOption key={groupName} name={groupName} group={tasks} />
+          ))}
+        </FormGroupSelect>
+        {formState?.errors?.task?.message && (
+          <FormErrorMessage>{formState?.errors.task?.message}</FormErrorMessage>
+        )}
+      </FormControl>
+
+      <div className="flex justify-between gap-8">
+        <FormControl>
+          <FormLabel htmlFor="estimatedTime">Est. Time (Optional)</FormLabel>
+          <FormTimeInput name="estimatedTime" size="sm" error={!!formState?.errors.estimatedTime} />
+          {formState?.errors?.estimatedTime?.message && (
+            <FormErrorMessage>{formState?.errors.estimatedTime?.message}</FormErrorMessage>
+          )}
+        </FormControl>
+
+        <FormControl>
+          <FormLabel htmlFor="trackedTime">Tracked Time</FormLabel>
+          <FormTimeInput name="trackedTime" size="sm" error={!!formState?.errors.trackedTime} />
+          {formState?.errors?.trackedTime?.message && (
+            <FormErrorMessage>{formState?.errors.trackedTime?.message}</FormErrorMessage>
+          )}
+        </FormControl>
+      </div>
+
+      <FormControl>
+        <FormLabel htmlFor="description">Description (Optional)</FormLabel>
+        <FormTextArea
+          name="description"
+          size="sm"
+          error={!!formState?.errors.description}
+          placeholder="What are you working on?"
+        />
+      </FormControl>
+
+      {children}
+    </>
+  )
+}
+
+export const TimeEntryForm = ({
+  onSubmit,
+  defaultValues,
+  validationSchema,
+  activeProject,
+  children,
+}: TimeEntryFormProps): JSX.Element => {
+  return (
+    <Form<TimeEntryFields, typeof validationSchema>
       onSubmit={onSubmit}
       className="space-y-6"
-      onChange={handleFormChange}
-      defaultValues={{
-        budget: {
-          id: undefined,
-          value: undefined,
-          children: undefined,
-        },
-        task: {
-          id: undefined,
-          value: undefined,
-          children: undefined,
-        },
-        est_time: {
-          original: '00:00',
-          durationMinutes: 0,
-        },
-        tracked_time: {
-          original: '00:00',
-          durationMinutes: 0,
-        },
-      }}
-      validationSchema={timeEntrySchema}
+      validationSchema={validationSchema}
+      defaultValues={defaultValues}
     >
-      {({ control, watch, formState: { errors } }) => (
-        <>
-          <FormControl>
-            <FormLabel htmlFor="budget">Budget</FormLabel>
-            <FormGroupSelect
-              name="budget"
-              control={control}
-              placeHolder="Select budget"
-              error={!!errors?.budget?.value?.message}
-              fullWidth
-            >
-              {Object.entries(budgetOptions)?.map(([groupName, budgets]) => (
-                <GroupOption key={groupName} name={groupName} group={budgets} />
-              ))}
-            </FormGroupSelect>
-            {errors?.budget?.value?.message && (
-              <FormErrorMessage>{errors.budget.value?.message}</FormErrorMessage>
-            )}
-          </FormControl>
-
-          <FormControl>
-            <FormLabel htmlFor="task">Task</FormLabel>
-            <FormGroupSelect
-              name="task"
-              control={control}
-              placeHolder="Select task"
-              disabled={!watch('budget.id')}
-              error={!!errors?.task?.value?.message}
-              fullWidth
-            >
-              {Object.entries(taskOptions)?.map(([groupName, tasks]) => (
-                <GroupOption key={groupName} name={groupName} group={tasks} />
-              ))}
-            </FormGroupSelect>
-            {errors?.task?.value?.message && (
-              <FormErrorMessage>{errors.task.value?.message}</FormErrorMessage>
-            )}
-          </FormControl>
-
-          <div className="flex justify-between">
-            <FormControl className="max-w-[200px]">
-              <FormLabel htmlFor="est_time">Est. Time</FormLabel>
-              <FormTimeTrackingInput
-                name="est_time"
-                control={control}
-                size="sm"
-                error={!!errors.est_time}
-              />
-            </FormControl>
-
-            <FormControl className="max-w-[260px]">
-              <FormLabel htmlFor="tracked_time">Tracked Time</FormLabel>
-              <FormTimeTrackingInput
-                name="tracked_time"
-                control={control}
-                size="sm"
-                error={!!errors.tracked_time}
-              />
-            </FormControl>
-          </div>
-
-          <FormControl>
-            <FormLabel htmlFor="description">Description (Optional)</FormLabel>
-            <FormTextArea
-              name="description"
-              size="sm"
-              error={!!errors.description}
-              placeholder="What are you working on?"
-            />
-          </FormControl>
-
+      {(methods) => (
+        <FormWrapper {...methods} activeProject={activeProject}>
           {children}
-        </>
+        </FormWrapper>
       )}
     </Form>
   )

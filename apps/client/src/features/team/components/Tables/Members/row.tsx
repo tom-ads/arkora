@@ -53,7 +53,7 @@ export const TeamMembersTableRow = ({ onResend, value }: TeamMembersTableRowProp
       </TableData>
 
       <TableData>
-        <Badge variant="default">{value?.role?.name}</Badge>
+        <Badge variant="default">{value?.role?.name?.replace('_', ' ')}</Badge>
       </TableData>
 
       <TableData>

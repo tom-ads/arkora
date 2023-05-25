@@ -17,3 +17,7 @@ export function getTimeEntriesTotalMinutes(entries: TimeEntry[]): number {
     .map((entry) => entry.durationMinutes)
     .reduce((prev: number, curr: number) => (prev ? (curr += prev) : curr), 0)
 }
+
+export function isEntryDurationExceeded(duration: number) {
+  return duration > 1439
+}

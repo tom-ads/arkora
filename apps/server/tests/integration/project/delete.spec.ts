@@ -1,87 +1,75 @@
 import { test } from '@japa/runner'
-import UserRole from 'App/Enum/UserRole'
-import { OrganisationFactory, UserFactory } from 'Database/factories'
+import Organisation from 'App/Models/Organisation'
+import Project from 'App/Models/Project'
+import User from 'App/Models/User'
+import { OrganisationFactory, ProjectFactory, RoleFactory, UserFactory } from 'Database/factories'
 
-test.group('Projects: Delete Project', () => {
-  test('organisation manager can delete a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({ name: 'new-project' })
-          })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.MANAGER }))
-      .create()
+test.group('Projects: Delete', (group) => {
+  let authUser: User
+  let organisation: Organisation
+  let project: Project
 
-    const response = await client
-      .get(route('ProjectController.delete', { project: 1 }))
-      .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
-      .loginAs(authUser)
-
-    response.assertStatus(200)
-  })
-
-  test('organisation org_admin can delete a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({ name: 'new-project' })
-          })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.ORG_ADMIN }))
-      .create()
-
-    const response = await client
-      .get(route('ProjectController.delete', { project: 1 }))
-      .headers({ origin: `http://test-org.arkora.co.uk` })
-      .withCsrfToken()
-      .loginAs(authUser)
-
-    response.assertStatus(200)
-  })
-
-  test('organisation owner can delete a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({ name: 'new-project' })
-          })
+  group.each.setup(async () => {
+    organisation = await OrganisationFactory.with('users', 5, (userBuilder) => {
+      userBuilder.with('role', 1, (roleBuilder) => {
+        roleBuilder.apply('member')
       })
     }).create()
 
+    project = await ProjectFactory.merge({ name: 'new-project' })
+      .with('client', 1, (clientBuilder) =>
+        clientBuilder.merge({ organisationId: organisation.id })
+      )
+      .create()
+
+    authUser = await UserFactory.merge({ organisationId: organisation.id }).with('role').create()
+  })
+
+  test('organisation manager can delete a project', async ({ client, route }) => {
+    // Change authUser role to Manager
+    const managerRole = await RoleFactory.apply('manager').create()
+    await authUser.related('role').associate(managerRole)
+
     const response = await client
-      .get(route('ProjectController.delete', { project: 1 }))
+      .delete(route('ProjectController.delete', { projectId: project.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
 
-    response.assertStatus(200)
+    response.assertStatus(204)
+  })
+
+  test('organisation org_admin can delete a project', async ({ client, route }) => {
+    // Change authUser role to OrgAdmin
+    const orgAdminRole = await RoleFactory.apply('orgAdmin').create()
+    await authUser.related('role').associate(orgAdminRole)
+
+    const response = await client
+      .delete(route('ProjectController.delete', { projectId: project.id }))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(204)
+  })
+
+  test('organisation owner can delete a project', async ({ client, route }) => {
+    const response = await client
+      .delete(route('ProjectController.delete', { projectId: project.id }))
+      .headers({ origin: `http://test-org.arkora.co.uk` })
+      .withCsrfToken()
+      .loginAs(authUser)
+
+    response.assertStatus(204)
   })
 
   test('organisation member cannot delete a project', async ({ client, route }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            return projectBuilder.merge({ name: 'new-project' })
-          })
-      })
-    })
-      .with('role', 1, (roleBuilder) => roleBuilder.merge({ name: UserRole.MEMBER }))
-      .create()
+    // Change authUser role to member
+    const memberRole = await RoleFactory.apply('member').create()
+    await authUser.related('role').associate(memberRole)
 
     const response = await client
-      .get(route('ProjectController.delete', { project: 1 }))
+      .delete(route('ProjectController.delete', { projectId: project.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)
@@ -90,41 +78,26 @@ test.group('Projects: Delete Project', () => {
   })
 
   test('unauthenticated user cannot delete an organisations project', async ({ client, route }) => {
-    await OrganisationFactory.merge({ subdomain: 'test-org' }).create()
-
     const response = await client
-      .get(route('ProjectController.delete', { project: 1 }))
+      .delete(route('ProjectController.delete', { projectId: project.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
 
-    response.assertStatus(404)
-    response.assertBody({ message: [{ message: 'Resource not found' }] })
+    response.assertStatus(401)
+    response.assertBody({ message: [{ message: 'Unauthenticated. Please login.' }] })
   })
 
-  test('test organisation user cannot delete diff organisations project', async ({
+  test('organisation user cannot delete another organisations project', async ({
     client,
     route,
   }) => {
-    const authUser = await UserFactory.with('organisation', 1, (orgBuilder) => {
-      return orgBuilder.merge({ subdomain: 'test-org' }).with('clients', 1, (clientBuilder) => {
-        return clientBuilder
-          .merge({ organisationId: clientBuilder.parent.id })
-          .with('projects', 1, (projectBuilder) => {
-            projectBuilder.merge({ name: 'new-project' })
-          })
-      })
-    })
-      .with('role')
-      .create()
-
-    await OrganisationFactory.merge({ subdomain: 'diff-org' })
-      .with('clients', 1, (clientBuilder) => {
-        return clientBuilder.merge({ organisationId: clientBuilder.parent.id }).with('projects', 1)
-      })
+    const diffOrg = await OrganisationFactory.merge({ subdomain: 'diff-org' }).create()
+    const diffOrgProject = await ProjectFactory.merge({ name: 'new-project' })
+      .with('client', 1, (clientBuilder) => clientBuilder.merge({ organisationId: diffOrg.id }))
       .create()
 
     const response = await client
-      .get(route('ProjectController.view', { project: 2 }))
+      .delete(route('ProjectController.view', { projectId: diffOrgProject.id }))
       .headers({ origin: `http://test-org.arkora.co.uk` })
       .withCsrfToken()
       .loginAs(authUser)

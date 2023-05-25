@@ -22,6 +22,14 @@ import Project from './Project'
 import Budget from './Budget'
 import UserRole from 'App/Enum/UserRole'
 import TimeEntry from './TimeEntry'
+import Database from '@ioc:Adonis/Lucid/Database'
+import PasswordReset from './PasswordReset'
+
+type InsightFilters = Partial<{
+  users: number[]
+  projects: number[]
+  budgets: number[]
+}>
 
 type UserBuilder = ModelQueryBuilderContract<typeof User>
 
@@ -77,6 +85,21 @@ export default class User extends BaseModel {
     return `${fnInitial}${lsInitial}`
   }
 
+  @computed({ serializeAs: 'spent_duration' })
+  public get spentDuration() {
+    return this.billableDuration + this.unbillableDuration
+  }
+
+  @computed({ serializeAs: 'billable_duration' })
+  public get billableDuration() {
+    return parseInt(this.$extras.billable_duration ?? 0, 10)
+  }
+
+  @computed({ serializeAs: 'unbillable_duration' })
+  public get unbillableDuration() {
+    return parseInt(this.$extras.unbillable_duration ?? 0, 10)
+  }
+
   // Relationships
 
   @belongsTo(() => Role)
@@ -97,6 +120,9 @@ export default class User extends BaseModel {
 
   @hasMany(() => TimeEntry)
   public timeEntries: HasMany<typeof TimeEntry>
+
+  @hasMany(() => PasswordReset)
+  public passwordResets: HasMany<typeof PasswordReset>
 
   // Hooks
 
@@ -134,7 +160,53 @@ export default class User extends BaseModel {
     )
   })
 
-  // Methods
+  public static userInsights = scope((query: UserBuilder, filters?: InsightFilters) => {
+    query
+      .select(
+        'users.*',
+        Database.raw(
+          'SUM(CASE WHEN tasks.is_billable = true THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS billable_duration'
+        ),
+        Database.raw(
+          'SUM(CASE WHEN tasks.is_billable = false THEN IFNULL(time_entries.duration_minutes, 0) ELSE 0 END) AS unbillable_duration'
+        )
+      )
+      .leftJoin('time_entries', (query) => {
+        query.on('users.id', '=', 'time_entries.user_id')
+        if (filters?.budgets?.length) {
+          query.andOnIn('time_entries.budget_id', filters?.budgets)
+        }
+      })
+      .leftJoin('tasks', (query) => {
+        query
+          .on('time_entries.budget_id', '=', 'tasks.budget_id')
+          .andOn('time_entries.task_id', '=', 'tasks.id')
+      })
+      .groupBy('users.id')
+  })
+
+  // Static Methods
+
+  public static async getProjectInsights(organisationId: number, projectId: number) {
+    const project = await Project.query().where('id', projectId).preload('budgets').first()
+    const budgetIds = project?.budgets.map((budget) => budget.id)
+
+    const result = await User.query()
+      .where('users.organisation_id', organisationId)
+      .whereIn(
+        'users.id',
+        Database.query()
+          .from('project_members')
+          .where('project_members.project_id', projectId)
+          .distinct('project_members.user_id')
+      )
+      .withScopes((scopes) => scopes.userInsights({ budgets: budgetIds }))
+      .orderBy('users.lastname')
+
+    return result
+  }
+
+  // Instance Methods
 
   // TODO: After create, assign user to organisation budgets that are not private
 

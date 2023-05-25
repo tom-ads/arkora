@@ -4,7 +4,7 @@ type VerifyInvitationRequest = {
   firstname: string
   lastname: string
   password: string
-  password_confirmation: string
+  passwordConfirmation: string
 }
 
 export default VerifyInvitationRequest

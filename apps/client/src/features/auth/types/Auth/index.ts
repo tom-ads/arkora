@@ -1,5 +1,5 @@
 import { Organisation, User } from '@/types'
-import TimeEntry from '@/types/TimeEntry'
+import TimeEntry from '@/types/models/TimeEntry'
 
 export type Auth = {
   user: User

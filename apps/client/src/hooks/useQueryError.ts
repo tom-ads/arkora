@@ -25,7 +25,11 @@ export function useQueryError<TFields extends FieldValues>({
           setError(field as Path<TFields>, { message })
         })
       } else if (errorData?.message) {
-        errorToast(errorData?.message?.[0]?.message)
+        if (typeof errorData?.message === 'string') {
+          errorToast(errorData?.message)
+        } else {
+          errorToast(errorData?.message?.[0]?.message)
+        }
       }
     }
   }, [error])

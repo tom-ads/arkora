@@ -1,3 +1,4 @@
+import { User } from '@/types'
 import appApi from 'api'
 import {
   VerifyDetailsRequest,
@@ -7,6 +8,8 @@ import {
   LoginRequest,
   ResendInvitationRequest,
   InviteMembersRequest,
+  ChangePasswordRequest,
+  ResetPasswordRequest,
 } from './types/requests'
 import {
   RegisterResponse,
@@ -14,8 +17,11 @@ import {
   SessionResponse,
   VerifyInvitationResponse,
 } from './types/response'
+import { setAuth } from '@/stores/slices/auth'
+import { setOrganisation } from '@/stores/slices/organisation'
+import { startTracking } from '@/stores/slices/timer'
 
-const authBasePath = '/auth'
+const authBasePath = '/api/v1/auth'
 
 const authEndpoints = appApi.injectEndpoints({
   endpoints: (build) => ({
@@ -76,8 +82,58 @@ const authEndpoints = appApi.injectEndpoints({
       }),
     }),
 
+    logout: build.mutation<void, void>({
+      query: () => ({
+        url: `${authBasePath}/logout`,
+        method: 'POST',
+      }),
+    }),
+
+    changePassword: build.mutation<User, ChangePasswordRequest>({
+      query: (body) => ({
+        url: `${authBasePath}/change-password`,
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    forgotPassword: build.mutation<void, string>({
+      query: (email) => ({
+        url: `${authBasePath}/forgot-password`,
+        method: 'POST',
+        body: { email },
+      }),
+    }),
+
+    resetPassword: build.mutation<void, ResetPasswordRequest>({
+      query: (body) => ({
+        url: `${authBasePath}/reset-password`,
+        method: 'POST',
+        body: {
+          user_id: body.userId,
+          token: body.token,
+          password: body.password,
+          password_confirmation: body.passwordConfirmation,
+        },
+      }),
+    }),
+
     getSession: build.query<SessionResponse, void>({
       query: () => `${authBasePath}/session `,
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: session } = await queryFulfilled
+          if (session) {
+            dispatch(setAuth(session.user))
+            dispatch(setOrganisation(session.organisation))
+            if (session?.timer) {
+              dispatch(startTracking(session.timer))
+            }
+          }
+        } catch {
+          //
+        }
+      },
     }),
   }),
   overrideExisting: false,
@@ -91,5 +147,9 @@ export const {
   useInviteMembersMutation,
   useRegisterMutation,
   useLoginMutation,
+  useLogoutMutation,
+  useChangePasswordMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useGetSessionQuery,
 } = authEndpoints

@@ -6,10 +6,18 @@ import CreateBudgetValidator from 'App/Validators/Budget/CreateBudgetValidator'
 import GetBudgetsValidator from 'App/Validators/Budget/GetBudgetsValidator'
 import { bind } from '@adonisjs/route-model-binding'
 import UpdateBudgetValidator from 'App/Validators/Budget/UpdateBudgetValidator'
+import BudgetKind from 'App/Enum/BudgetKind'
+import CommonTask from 'App/Models/CommonTask'
+import Project from 'App/Models/Project'
 
 export default class BudgetController {
   public async create(ctx: HttpContextContract) {
-    await ctx.bouncer.with('BudgetPolicy').authorize('create')
+    let project: Project
+    if (ctx.request.input('project_id')) {
+      project = await Project.findOrFail(ctx.request.input('project_id'))
+    }
+
+    await ctx.bouncer.with('BudgetPolicy').authorize('create', project!)
 
     const payload = await ctx.request.validate(CreateBudgetValidator)
 
@@ -44,22 +52,17 @@ export default class BudgetController {
       return ctx.response.internalServerError()
     }
 
-    // Assign organisation administrators as default budget members
-    const pivilegedUsers = await ctx.organisation?.getPrivilegedUsers()
-    if (pivilegedUsers?.length) {
-      await createdBudget.related('members').attach(pivilegedUsers.map((member) => member.id))
-    }
-
-    await ctx.organisation?.load('tasks')
+    // Assign project members based on the private flag
+    await createdBudget.assignMembers()
 
     // Assign organisation default tasks to budget
-    const defaultTasks = ctx.organisation?.tasks
-    if (defaultTasks?.length) {
-      await createdBudget.related('tasks').attach(
-        defaultTasks.reduce((prev, curr) => {
-          prev[curr.id] = { is_billable: Boolean(curr.$extras.pivot_is_billable) }
-          return prev
-        }, {})
+    const organisationTasks = await CommonTask.getOrganisationTasks(ctx.organisation!.id)
+    if (organisationTasks?.length) {
+      await createdBudget.related('tasks').createMany(
+        organisationTasks.map((task) => ({
+          name: task.name,
+          isBillable: budgetType?.name !== BudgetKind.NON_BILLABLE ? task.isBillable : false,
+        }))
       )
     }
 
@@ -69,24 +72,16 @@ export default class BudgetController {
   public async index(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(GetBudgetsValidator)
 
-    let budgets = await ctx.organisation?.getBudgets(
+    const budgets = await ctx.organisation?.getBudgets(
       {
         userId: payload?.user_id ?? ctx.auth.user!.id,
         projectId: payload?.project_id,
+        projectStatus: payload.project_status,
       },
       { includeProject: payload?.include_project }
     )
 
-    if (!budgets?.length) {
-      return ctx.response.ok([])
-    }
-
-    budgets = await Budget.getBudgetsMetrics(
-      budgets.map((budget) => budget.id),
-      { page: payload.page }
-    )
-
-    return budgets
+    return budgets?.map((budget) => budget.serialize()) ?? []
   }
 
   @bind()
@@ -98,9 +93,9 @@ export default class BudgetController {
 
     await ctx.bouncer.with('BudgetPolicy').authorize('view', budget)
 
-    const budgetWithMetrics = (await Budget.getBudgetMetrics(budget.id)) as Budget
+    const budgetWithMetrics = await Budget.getMetricsForBudget(budget.id)
 
-    return budgetWithMetrics.serialize()
+    return budgetWithMetrics?.serialize()
   }
 
   @bind()
@@ -114,35 +109,33 @@ export default class BudgetController {
 
     const payload = await ctx.request.validate(UpdateBudgetValidator)
 
-    if (payload.name !== budget.name) {
-      budget.name = payload.name
-    }
-
-    if (payload.colour !== budget.colour) {
-      budget.colour = payload.colour
-    }
+    budget.merge({
+      name: payload.name,
+      colour: payload.colour,
+      fixedPrice: payload.fixed_price ?? null,
+      budget: payload.budget ?? null,
+      hourlyRate: payload.hourly_rate ?? null,
+    })
 
     if (payload.private !== budget.private) {
-      // TODO: remove members who aren't assigned?
+      await budget.load('project')
+      if (!payload.private) {
+        const projectMembers = await budget.project.related('members').query()
+        await budget.related('members').sync(projectMembers.map((member) => member.id))
+      }
+
       budget.private = payload.private
-    }
-
-    if (payload.fixed_price !== budget.fixedPrice) {
-      budget.fixedPrice = payload.fixed_price ?? null
-    }
-
-    if (payload.budget !== budget.budget) {
-      budget.budget = payload.budget
-    }
-
-    if (payload.hourly_rate !== budget.hourlyRate) {
-      budget.hourlyRate = payload.hourly_rate ?? null
     }
 
     if (payload.budget_type !== budget.budgetType?.name) {
       const newBudgetType = await BudgetType.findBy('name', payload.budget_type)
       if (newBudgetType) {
         await budget.related('budgetType').associate(newBudgetType)
+
+        // All non-billable tasks related to budget need to be non-billable tasks
+        if (payload.budget_type === BudgetKind.NON_BILLABLE) {
+          await budget.related('tasks').query().update({ is_billable: false })
+        }
       }
     }
 
@@ -155,9 +148,9 @@ export default class BudgetController {
 
     await budget.save()
 
-    const updatedBudget = await Budget.getBudgetMetrics(budget.id)
+    const updatedBudget = await Budget.getMetricsForBudget(budget.id)
 
-    return updatedBudget!.serialize()
+    return updatedBudget?.serialize()
   }
 
   @bind()

@@ -13,22 +13,24 @@ import {
   FormDebouncedInput,
   FormErrorMessage,
   FormLabel,
+  FormLabelInfo,
 } from '@/components'
 import { WeekDaysSelect } from '@/components/WeekDays'
-import { WeekDay } from '@/enums/WeekDay'
 import { SelectOption } from '@/components/Forms/Select/option'
 import { useMemo } from 'react'
 import currencies from '@/assets/currency/currency.json'
 import { z } from 'zod'
 import { DateTime } from 'luxon'
-import { useVerifyOrganisationMutation } from '../../../api'
-import { CurrencyCode } from '@/types/CurrencyCode'
+import { useVerifyOrganisationMutation } from './../../../api'
 import { useDispatch, useSelector } from 'react-redux'
 import { setOrganisation, setStep } from '@/stores/slices/registration'
 import { useLazyCheckSubdomainQuery } from '@/features/subdomain'
 import { RootState } from '@/stores/store'
-import { isEqual } from 'lodash'
 import hourlyRateSchema from '@/helpers/validation/hourly_rate'
+import { OrganisationFormFields } from '@/features/organisation'
+import { convertToPennies } from '@/helpers/currency'
+import { useToast } from '@/hooks/useToast'
+import { convertTimeToMinutes } from '@/helpers/date'
 
 const OrganisationSchema = z
   .object({
@@ -38,15 +40,16 @@ const OrganisationSchema = z
       .trim()
       .min(1, { message: 'Subdomain is required' })
       .regex(/^[a-z-]+$/, { message: 'Subdomains can only contain lowercase letters and hyphens' }),
-    workDays: z.array(z.string()).nonempty({ message: 'At least 1 work day required' }),
+    businessDays: z.array(z.string()).nonempty({ message: 'At least 1 work day required' }),
     openingTime: z.string().trim().min(1, { message: 'Opening time is required' }),
     closingTime: z.string().trim().min(1, { message: 'Closing time is required' }),
+    breakDuration: z.string().trim().min(1, { message: 'Break duration is required' }),
     currency: z.string(),
-    hourlyRate: hourlyRateSchema,
+    defaultRate: hourlyRateSchema,
   })
-  .superRefine((val, ctx) => {
-    const openingTime = DateTime.fromFormat(val.openingTime, 'HH:mm')
-    const closingTime = DateTime.fromFormat(val.closingTime, 'HH:mm')
+  .superRefine((fields, ctx) => {
+    const openingTime = DateTime.fromFormat(fields.openingTime, 'HH:mm')
+    const closingTime = DateTime.fromFormat(fields.closingTime, 'HH:mm')
 
     if (openingTime > closingTime) {
       ctx.addIssue({
@@ -63,47 +66,45 @@ const OrganisationSchema = z
         path: ['closingTime'],
       })
     }
-  })
 
-type FormFields = {
-  name: string
-  subdomain: string
-  workDays: WeekDay[]
-  openingTime: string
-  closingTime: string
-  currency: CurrencyCode
-  hourlyRate: string
-}
+    const workDayDuration = closingTime.diff(openingTime).as('minutes')
+    const breakDuration = convertTimeToMinutes(fields.breakDuration ?? 0)
+
+    if (breakDuration >= workDayDuration) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Break duration cannot exceed work day duration',
+        path: ['breakDuration'],
+      })
+    }
+  })
 
 export const OrganisationsView = (): JSX.Element => {
   const dispatch = useDispatch()
 
   const organisation = useSelector((state: RootState) => state.registration.organisation)
 
+  const { errorToast } = useToast()
+
   const [verifyOrganisation, { isLoading: isVerifying }] = useVerifyOrganisationMutation()
 
   const [checkSubdomainTrigger, { data: checkSubdomainResult }] = useLazyCheckSubdomainQuery()
 
-  const handleSubmit = async (data: FormFields) => {
+  const handleSubmit = async (data: OrganisationFormFields) => {
     dispatch(setOrganisation(data))
     await verifyOrganisation({
-      name: data.name,
-      subdomain: data.subdomain,
-      opening_time: data.openingTime,
-      closing_time: data.closingTime,
-      currency: data.currency,
-      work_days: data.workDays,
-      hourly_rate: parseFloat(data.hourlyRate),
+      ...data,
+      breakDuration: convertTimeToMinutes(data.breakDuration),
+      defaultRate: convertToPennies(data.defaultRate),
     })
       .unwrap()
       .then(() => dispatch(setStep({ step: 'team' })))
-      .catch()
-  }
-
-  const handleFormChange = (data: FormFields) => {
-    if (!isEqual(organisation, data)) {
-      dispatch(setOrganisation(data))
-    }
+      .catch((err) => {
+        if (err.status === 422) return
+        errorToast(
+          'We failed to verify your organisation details. Please try again or contact our support.',
+        )
+      })
   }
 
   const currencyOptions = useMemo(() => {
@@ -114,19 +115,19 @@ export const OrganisationsView = (): JSX.Element => {
   }, [])
 
   return (
-    <Form<FormFields, typeof OrganisationSchema>
+    <Form<OrganisationFormFields, typeof OrganisationSchema>
       className="gap-0"
       onSubmit={handleSubmit}
-      onChange={handleFormChange}
       validationSchema={OrganisationSchema}
       defaultValues={{
         name: organisation?.name ?? '',
         subdomain: organisation?.subdomain ?? '',
-        workDays: organisation?.workDays ?? [],
+        businessDays: organisation?.businessDays ?? [],
         openingTime: organisation?.openingTime ?? '',
         closingTime: organisation?.closingTime ?? '',
         currency: organisation?.currency ?? 'GBP',
-        hourlyRate: organisation?.hourlyRate ?? '',
+        defaultRate: (organisation?.defaultRate as number) ?? null,
+        breakDuration: organisation?.breakDuration ?? undefined,
       }}
     >
       {({ control, setValue, watch, trigger, formState: { errors } }) => (
@@ -135,7 +136,7 @@ export const OrganisationsView = (): JSX.Element => {
           <Descriptor>
             <DescriptorInsights
               title="Organisation Details"
-              description="Determine the name that your team will visit"
+              description="Specify the domain that your team will use to access the organisation."
               className="max-w-md md:max-w-[325px]"
             />
             <DescriptorContent className="max-w-[405px]">
@@ -151,9 +152,17 @@ export const OrganisationsView = (): JSX.Element => {
                   )}
                 </FormControl>
                 <FormControl>
-                  <FormLabel htmlFor="subdomain" size="sm">
-                    Subdomain
-                  </FormLabel>
+                  <div className="flex items-center gap-2">
+                    <FormLabel htmlFor="subdomain" size="sm">
+                      Subdomain
+                    </FormLabel>
+                    <FormLabelInfo width={300}>
+                      <span className="text-sm font-medium">
+                        The subdomain will be used to access your organisation site with Arkora.
+                      </span>
+                    </FormLabelInfo>
+                  </div>
+
                   <FormDebouncedInput
                     name="subdomain"
                     placeHolder="Enter subdomain"
@@ -196,20 +205,18 @@ export const OrganisationsView = (): JSX.Element => {
           {/* Operating Hours */}
           <Descriptor>
             <DescriptorInsights
-              title="Operating Hours"
-              description="Specify your organisations working days and
-                hours. This lets Arkora know when to send
-                notifications, stop timers and more"
+              title="Tracking Requirements"
+              description="Working days and hours determine the daily and weekly tracking goals for the team."
               className="max-w-md md:max-w-[325px]"
             />
             <DescriptorContent className="max-w-[405px]">
               <FormControl>
-                <FormLabel htmlFor="workDays" size="sm">
+                <FormLabel htmlFor="businessDays" size="sm">
                   Work Days
                 </FormLabel>
-                <WeekDaysSelect name="workDays" control={control} />
-                {errors.workDays?.message && (
-                  <FormErrorMessage size="sm">{errors.workDays?.message}</FormErrorMessage>
+                <WeekDaysSelect name="businessDays" control={control} />
+                {errors.businessDays?.message && (
+                  <FormErrorMessage size="sm">{errors.businessDays?.message}</FormErrorMessage>
                 )}
               </FormControl>
               <div className="flex justify-between gap-3">
@@ -232,6 +239,16 @@ export const OrganisationsView = (): JSX.Element => {
                     <FormErrorMessage size="sm">{errors.closingTime?.message}</FormErrorMessage>
                   )}
                 </FormControl>
+
+                <FormControl>
+                  <FormLabel htmlFor="breakDuration" size="sm">
+                    Break Duration
+                  </FormLabel>
+                  <FormTimeInput name="breakDuration" size="sm" error={!!errors.breakDuration} />
+                  {errors.breakDuration?.message && (
+                    <FormErrorMessage size="sm">{errors.breakDuration?.message}</FormErrorMessage>
+                  )}
+                </FormControl>
               </div>
             </DescriptorContent>
           </Descriptor>
@@ -242,9 +259,7 @@ export const OrganisationsView = (): JSX.Element => {
           <Descriptor>
             <DescriptorInsights
               title="Rates and Cost"
-              description="Project budgets can be billable on an hourly
-                rate, you can even set fixed cost on any
-                budget instead"
+              description="Specify how you want costs to be displayed and the default rate for budgets."
               className="max-w-md md:max-w-[325px]"
             />
             <DescriptorContent className="max-w-[405px]">
@@ -266,17 +281,18 @@ export const OrganisationsView = (): JSX.Element => {
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel htmlFor="hourlyRate" size="sm">
-                    Hourly Rate
+                  <FormLabel htmlFor="defaultRate" size="sm">
+                    Default Rate (Hourly)
                   </FormLabel>
                   <FormCurrencyInput
                     size="sm"
                     currency={watch('currency')}
-                    name="hourlyRate"
-                    error={!!errors?.hourlyRate?.message}
+                    name="defaultRate"
+                    placeHolder="Enter rate"
+                    error={!!errors?.defaultRate?.message}
                   />
-                  {errors.hourlyRate?.message && (
-                    <FormErrorMessage size="sm">{errors.hourlyRate?.message}</FormErrorMessage>
+                  {errors.defaultRate?.message && (
+                    <FormErrorMessage size="sm">{errors.defaultRate?.message}</FormErrorMessage>
                   )}
                 </FormControl>
               </div>

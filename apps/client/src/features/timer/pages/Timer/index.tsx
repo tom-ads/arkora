@@ -1,82 +1,121 @@
 import {
   Button,
   Card,
+  ClockIcon,
+  FormatDateTime,
+  HorizontalDivider,
   Page,
   PageContent,
   PageDescription,
   PageHeader,
   PageTitle,
-  PauseIcon,
-  PlayIcon,
 } from '@/components'
 import { useGetTimesheetQuery } from '@/features/timesheet'
-import { durationToFormattedTime, getDatesBetweenPeriod } from '@/helpers/date'
+import {
+  formatMinutesToHourMinutes,
+  formatMinutesToTime,
+  getDatesBetweenPeriod,
+} from '@/helpers/date'
 import { useTimeTracker } from '@/hooks/useTimeTracker'
 import { RootState } from '@/stores/store'
 import { Transition } from '@headlessui/react'
 import { DateTime } from 'luxon'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { NewTimeEntryModal } from '../../components/Modals/NewTimeEntry'
 import {
   ManageTimeEntryModal,
   TimeEntryCard,
   TimesheetPeriod,
   WeekDaySelect,
 } from '../../components'
-import { NewTimeEntryModal } from '../../components/Modals/NewTimeEntry'
+import { cloneDeep, groupBy, sumBy } from 'lodash'
+import { TimesheetDayInsights } from '../../components/Insights'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const TimerPage = (): JSX.Element => {
+  useDocumentTitle('Timer')
+
   const [openNewTimeEntryModal, setOpenNewTimeEntryModal] = useState(false)
   const [timeEntryId, setTimeEntryId] = useState<number | null>(null)
 
-  const { timesheet, timer } = useSelector((state: RootState) => ({
-    timesheet: state.timer.timesheet,
-    timer: state.timer,
-  }))
+  const { startDate, endDate, timer, isTracking, selectedDate, authId } = useSelector(
+    (state: RootState) => ({
+      startDate: state.timer.timesheet.startDate,
+      endDate: state.timer.timesheet.endDate,
+      selectedDate: state.timer.timesheet.selectedDay,
+      timer: state.timer.timeEntry,
+      isTracking: state.timer.isTracking,
+      authId: state.auth.user?.id,
+    }),
+  )
 
-  const [minutes, { restartTracking, stopTracking }] = useTimeTracker(60000)
+  const { restartTimer, stopTimer } = useTimeTracker()
 
-  const { data: weekDays } = useGetTimesheetQuery({
-    start_date: timesheet.startDate ?? DateTime.now().startOf('week').toISODate(),
-    end_date: timesheet.endDate ?? DateTime.now().endOf('week').toISODate(),
-  })
+  const { data: timesheet } = useGetTimesheetQuery(
+    {
+      startDate: startDate ?? DateTime.now().startOf('week').toISODate()!,
+      endDate: endDate ?? DateTime.now().endOf('week').toISODate()!,
+      userId: authId as number,
+    },
+    { skip: !authId },
+  )
 
   const handleTracking = async (timerId?: number) => {
-    if (timer.isTracking) {
-      await stopTracking(timer.trackedEntry!.id)
+    if (isTracking && timer?.id) {
+      await stopTimer(timer.id)
       return
     }
 
     if (timerId) {
-      await restartTracking(timerId)
+      await restartTimer(timerId)
       return
     }
 
     setOpenNewTimeEntryModal(true)
   }
 
-  const week = useMemo(() => {
-    if (timesheet.startDate && timesheet.endDate) {
-      const dates = getDatesBetweenPeriod(
-        DateTime.fromISO(timesheet.startDate),
-        DateTime.fromISO(timesheet.endDate),
-      )
+  const formattedWeek = useMemo(() => {
+    if (startDate && endDate) {
+      const dates = getDatesBetweenPeriod(DateTime.fromISO(startDate), DateTime.fromISO(endDate))
+      const groupedEntries = groupBy(cloneDeep(timesheet), (e) => e.date)
 
-      return Array.from({ length: dates.length }, (_, idx) => dates[idx]).map((day) => {
-        const payloadDate = weekDays?.days.find((weekDay) => weekDay.day === day.toISODate())
-        return {
-          ...payloadDate,
-          ...durationToFormattedTime(payloadDate?.totalMinutes ?? 0),
-          day: payloadDate?.day ?? day.toISODate(),
-          totalMinutes: payloadDate?.totalMinutes ?? 0,
-        }
-      })
+      return dates.map((day) => ({
+        weekDay: day!.toISODate(),
+        dailyDuration: sumBy(
+          groupedEntries[day!.toISODate() as keyof typeof groupedEntries],
+          (e) => e.durationMinutes,
+        ),
+        timeEntries: groupedEntries[day!.toISODate() as keyof typeof groupedEntries],
+      }))
     }
-  }, [weekDays, timesheet])
+  }, [timesheet, startDate, endDate])
 
-  const selectedDay = week?.find((weekDay) => weekDay.day === timesheet.selectedDay)
+  const selectedDay = formattedWeek?.find((weekDay) => weekDay.weekDay === selectedDate)
 
-  const formatTimer = durationToFormattedTime(minutes)
+  const insights = useMemo(() => {
+    const dayEntries = cloneDeep(selectedDay?.timeEntries ?? [])
+    if (timer) {
+      dayEntries?.map((entry) => {
+        if (entry.id === timer.id) {
+          entry.durationMinutes = timer.durationMinutes ?? 0
+        }
+
+        return entry
+      }) ?? []
+    }
+
+    const groupedEntries = groupBy(dayEntries, (e) =>
+      e.task.isBillable ? 'billable' : 'nonBillable',
+    )
+
+    return {
+      billableDuration: sumBy(groupedEntries['billable'], (e) => e.durationMinutes) ?? 0,
+      unbillableDuration: sumBy(groupedEntries['nonBillable'], (e) => e.durationMinutes) ?? 0,
+      dailyDuration: sumBy(dayEntries, (e) => e.durationMinutes) ?? 0,
+      weeklyDuration: sumBy(timesheet, (e) => e.durationMinutes) ?? 0,
+    }
+  }, [timesheet, selectedDate, timer])
 
   return (
     <Page>
@@ -85,9 +124,9 @@ export const TimerPage = (): JSX.Element => {
           <PageTitle>Timer</PageTitle>
           <PageDescription>Start tracking against a budget to record your time</PageDescription>
         </span>
-        <div className="flex gap-6 items-center text-white">
+        <div className="flex gap-2 items-center text-white">
           <Transition
-            show={timer.isTracking}
+            show={isTracking}
             enter="transition duration-100"
             enterFrom="opacity-0"
             enterTo="opacity-100"
@@ -95,21 +134,21 @@ export const TimerPage = (): JSX.Element => {
             leaveTo="opacity-0"
             className="min-w-[96px] shrink-0 text-left"
           >
-            <p className="font-medium text-3xl">{formatTimer.consumableFormat}</p>
+            <p className="font-medium text-3xl animate-pulse">
+              {formatMinutesToTime(timer?.durationMinutes ?? 0)}
+            </p>
           </Transition>
           <Button
             size="xs"
             variant="secondary"
             onClick={() => handleTracking()}
-            className="w-[174px]"
+            className="w-[200px] py-2"
             block
           >
-            {timer.isTracking ? (
-              <PauseIcon className="w-4 h-4 shrink-0" />
-            ) : (
-              <PlayIcon className="w-4 h-4 shrink-0" />
-            )}
-            <span>{`${timer.isTracking ? 'Stop' : 'Start'} Timer`}</span>
+            <div className="flex items-center gap-2">
+              <ClockIcon className="w-6 h-6 shrink-0" />
+              <span>{`${isTracking ? 'Stop' : 'Start'} Timer`}</span>
+            </div>
           </Button>
         </div>
       </PageHeader>
@@ -117,40 +156,63 @@ export const TimerPage = (): JSX.Element => {
       <PageContent className="space-y-6">
         <TimesheetPeriod />
 
-        <Card className="p-0">
-          <WeekDaySelect />
+        <Card className="p-0 min-h-[800px]">
+          <div className="flex justify-between items-end max-w-[1000px] pt-6 px-6">
+            <WeekDaySelect />
+          </div>
 
           {/* Times */}
           <div className="bg-gray-20 py-[6px] lg:py-2">
-            <div className="max-w-[1100px] px-6 flex justify-between items-center">
-              {week?.map((currentDate) => (
-                <div
-                  key={`time-period-${currentDate.day}`}
-                  className="w-[56px] sm:w-[64px] md:w-[80px] lg:w-[90px] px-1"
-                >
+            <div className="flex justify-between items-center max-w-[1000px] px-6">
+              {formattedWeek?.map((weekDay) => (
+                <div key={weekDay.weekDay} className="px-1">
                   <span className="font-medium text-xs md:text-sm lg:text-base text-gray-70">
-                    {currentDate?.displayFormat}
+                    {formatMinutesToHourMinutes(weekDay.dailyDuration ?? 0)}
                   </span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="p-6 space-y-2 md:max-w-[800px]">
-            {selectedDay?.entries?.map((entry) => (
-              <TimeEntryCard
-                key={`time-entry-${entry.id}`}
-                entry={entry}
-                minutes={minutes}
-                onToggle={handleTracking}
-                onManage={(id) => setTimeEntryId(id)}
-              />
-            ))}
+          <div className="px-6 pt-6">
+            <HorizontalDivider
+              contentLeft={
+                <span className="whitespace-nowrap font-semibold text-gray-100 text-lg">
+                  Time Entries
+                </span>
+              }
+              contentRight={
+                <div className="whitespace-nowrap font-semibold text-gray-100 text-lg">
+                  <FormatDateTime
+                    value={DateTime.fromISO(selectedDate ?? '')}
+                    format="LLLL dd, yyyy"
+                  />
+                </div>
+              }
+            />
+          </div>
+
+          <div className="grid grid-cols-12 p-6">
+            <div className="space-y-2 col-span-12 lg:col-span-7">
+              {selectedDay?.timeEntries?.map((entry) => (
+                <TimeEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  onToggle={handleTracking}
+                  onManage={(id) => setTimeEntryId(id)}
+                />
+              ))}
+            </div>
+
+            <div className="hidden lg:block lg:col-span-5">
+              <TimesheetDayInsights value={insights} />
+            </div>
           </div>
         </Card>
       </PageContent>
 
       <NewTimeEntryModal
+        activeProject={true}
         isOpen={openNewTimeEntryModal}
         onClose={() => setOpenNewTimeEntryModal((state) => !state)}
       />
@@ -158,6 +220,7 @@ export const TimerPage = (): JSX.Element => {
         entryId={timeEntryId}
         isOpen={!!timeEntryId}
         onClose={() => setTimeEntryId(null)}
+        activeProject={true}
       />
     </Page>
   )

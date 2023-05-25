@@ -5,6 +5,8 @@ import GetAccountsValidator from 'App/Validators/Accounts/GetAccountsValidator'
 import UpdateAccountValidator from 'App/Validators/Accounts/UpdateAccountValidator'
 import Role from 'App/Models/Role'
 import UserRole from 'App/Enum/UserRole'
+import InsightsValidator from 'App/Validators/Project/InsightsValidator'
+import Project from 'App/Models/Project'
 
 export default class AccountController {
   public async index(ctx: HttpContextContract) {
@@ -13,7 +15,7 @@ export default class AccountController {
     const payload = await ctx.request.validate(GetAccountsValidator)
 
     try {
-      const team = await ctx.organisation!.getTeamMembers(ctx.auth.user!.id, payload)
+      const team = await ctx.organisation!.getTeamMembers(payload)
       return team.map((member) => member.serialize())
     } catch (error) {
       ctx.logger.error(
@@ -44,13 +46,24 @@ export default class AccountController {
       user.lastname = payload.lastname
     }
 
-    const authRole = ctx.auth.user?.role?.name
+    if (payload.email && payload?.email !== user?.email) {
+      user.email = payload.email
+    }
 
-    if (authRole === UserRole.ORG_ADMIN || authRole === UserRole.OWNER) {
+    // Only ORG_ADMIN and OWNER can change roles. Owner cannot change theirs.
+    const authRole = ctx.auth.user?.role?.name
+    if (
+      (authRole === UserRole.ORG_ADMIN || authRole === UserRole.OWNER) &&
+      user.role?.name !== UserRole.OWNER
+    ) {
       if (payload.role && payload.role !== user.role?.name) {
         const newRole = await Role.findBy('name', payload.role)
         await user.related('role').associate(newRole!)
         await user.load('role')
+
+        if (newRole?.name !== UserRole.MEMBER) {
+          await Project.assignMemberToProjects(user, ctx.organisation!)
+        }
       }
     }
 
@@ -66,5 +79,16 @@ export default class AccountController {
     await user.delete()
 
     return ctx.response.noContent()
+  }
+
+  public async insights(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(InsightsValidator)
+
+    let users: User[] = []
+    if (payload.project_id) {
+      users = await User.getProjectInsights(ctx.auth.user!.organisationId, payload.project_id)
+    }
+
+    return users.map((user) => user.serialize())
   }
 }

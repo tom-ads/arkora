@@ -13,6 +13,18 @@ import Task from './Task'
 import { timerDifference } from 'Helpers/timer'
 import TimeSheetStatus from 'App/Enum/TimeSheetStatus'
 
+export type BillableOptions = 'billable' | 'unbillable'
+
+type EntriesFilters = Partial<{
+  startDate: DateTime
+  endDate: DateTime
+  budgets: number[]
+  projectId: number
+  members: number[]
+  tasks: number[]
+  billable: BillableOptions
+}>
+
 type TimeEntryBuilder = ModelQueryBuilderContract<typeof TimeEntry>
 
 export default class TimeEntry extends BaseModel {
@@ -21,13 +33,13 @@ export default class TimeEntry extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column({ serializeAs: null })
+  @column()
   public userId: number
 
-  @column({ serializeAs: null })
+  @column()
   public budgetId: number
 
-  @column({ serializeAs: null })
+  @column()
   public taskId: number
 
   @column.date()
@@ -37,7 +49,7 @@ export default class TimeEntry extends BaseModel {
   public description: string | null
 
   @column()
-  public estimatedMinutes: number
+  public estimatedMinutes: number | null
 
   @column()
   public durationMinutes: number
@@ -60,7 +72,7 @@ export default class TimeEntry extends BaseModel {
 
   // Relations
 
-  @belongsTo(() => User, { serializeAs: null })
+  @belongsTo(() => User)
   public user: BelongsTo<typeof User>
 
   @belongsTo(() => Budget)
@@ -86,28 +98,107 @@ export default class TimeEntry extends BaseModel {
     }
   )
 
-  // Methods
+  public static forOrganisation = scope((query: TimeEntryBuilder, organisationId: number) => {
+    query.join('users', (query) => {
+      query
+        .on('time_entries.user_id', '=', 'users.id')
+        .andOnVal('users.organisation_id', organisationId)
+    })
+  })
 
-  public async stopTimer() {
+  // Instance Methods
+
+  public async stopTimer(this: TimeEntry) {
     const diffMinutes = timerDifference(this.lastStartedAt)
     this.durationMinutes += diffMinutes
     this.lastStoppedAt = DateTime.now()
+
+    // Ensure updated duration does not exceed daily duration (23:59 -> 1439mins)
+    if (this.isEntryDurationExceeded()) {
+      this.durationMinutes = 1439
+    }
+
     this.save()
   }
 
-  public async restartTimer() {
+  public isEntryDurationExceeded() {
+    // Duration cannot exceed 23:59 -> 1439 minutes
+    return this.durationMinutes >= 1439
+  }
+
+  public async restartTimer(this: TimeEntry) {
     this.lastStartedAt = DateTime.now()
     this.lastStoppedAt = null
     this.save()
   }
 
-  public static async getUserTimesheet(user: User, startDate: string, endDate: string) {
+  // Static Methods
+
+  public static async getTimeEntries(organisationId: number, filters: EntriesFilters) {
+    const result = await TimeEntry.query()
+      .select('time_entries.*', 'tasks.is_billable')
+      .whereHas('user', (query) => {
+        query.where('organisation_id', organisationId)
+      })
+      .leftJoin('tasks', (subQuery) => {
+        subQuery
+          .on('time_entries.budget_id', '=', 'tasks.budget_id')
+          .andOn('time_entries.task_id', '=', 'tasks.id')
+      })
+      .if(filters?.budgets, (query) => {
+        query.whereIn('time_entries.budget_id', filters.budgets!)
+      })
+      .if(filters?.members, (query) => {
+        query.whereIn('time_entries.user_id', filters.members!)
+      })
+      .if(filters?.projectId, (query) => {
+        query.whereHas('budget', (budgetQuery) => {
+          budgetQuery.where('project_id', filters.projectId!)
+        })
+      })
+      .if(filters?.tasks, (query) => {
+        query.whereIn('time_entries.task_id', filters.tasks!)
+      })
+      .if(filters.startDate || filters?.endDate, (query) => {
+        query.withScopes((scopes) => scopes.filterDate(filters?.startDate, filters?.endDate))
+      })
+      .if(filters.billable, (query) => {
+        query.where('tasks.is_billable', filters?.billable === 'billable')
+      })
+      .orderBy('time_entries.date', 'asc')
+      .preload('user')
+      .preload('budget')
+      .preload('task')
+
+    return result
+  }
+
+  public static async getTimesheets(
+    organisationId: number,
+    startDate: DateTime,
+    endDate: DateTime,
+    userId?: number
+  ) {
     return await TimeEntry.query()
-      .where('user_id', user.id)
+      .if(
+        userId,
+        (query) => query.where('user_id', userId!),
+        (query) => query.withScopes((scopes) => scopes.forOrganisation(organisationId))
+      )
+      .withScopes((scopes) => scopes.filterDate(startDate, endDate))
+      .orderBy('time_entries.date', 'asc')
+      .preload('budget', (query) => query.preload('project'))
+      .preload('task')
+  }
+
+  public static async getUserTimesheet(userId: number, startDate: string, endDate: string) {
+    return await TimeEntry.query()
+      .where('user_id', userId)
       .where('date', '>=', startDate)
       .where('date', '<=', endDate)
       .orderBy('date', 'asc')
-      .exec()
+      .preload('budget', (query) => query.preload('project'))
+      .preload('task')
   }
 
   public static async getLastTimer(userId: number) {

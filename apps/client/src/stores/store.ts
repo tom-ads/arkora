@@ -6,6 +6,8 @@ import RegistrationReducer from './slices/registration'
 import OrganisationReducer from './slices/organisation'
 import TimerReducer from './slices/timer'
 import TeamMemberFiltersReducer from './slices/filters/team_members'
+import ProjectFiltersReducer from './slices/filters/project'
+import BudgetFiltersReducer from './slices/filters/budgets'
 
 const appReducers = {
   auth: AuthReducer,
@@ -15,6 +17,8 @@ const appReducers = {
 
   // Filters
   teamMemberFilters: TeamMemberFiltersReducer,
+  projectFilters: ProjectFiltersReducer,
+  budgetFilters: BudgetFiltersReducer,
 }
 
 export const store = configureStore({

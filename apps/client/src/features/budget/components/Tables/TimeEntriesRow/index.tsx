@@ -1,0 +1,116 @@
+import {
+  Avatar,
+  Button,
+  CrossIcon,
+  FormatDateTime,
+  SkeletonBox,
+  TableData,
+  TableRow,
+  TickIcon,
+  UserIcon,
+} from '@/components'
+import { SkeletonCircle } from '@/components/Skeletons/Circle'
+import { formatMinutesToHourMinutes } from '@/helpers/date'
+import TimeEntry from '@/types/models/TimeEntry'
+import { TableRowBaseProps } from '@/types/TableRow'
+import classNames from 'classnames'
+import { DateTime } from 'luxon'
+
+type RowProps = TableRowBaseProps<TimeEntry>
+
+export const TimeEntriesRow = ({ value, onManage }: RowProps): JSX.Element => {
+  const handleManage = () => {
+    if (onManage) {
+      onManage(value.id)
+    }
+  }
+
+  return (
+    <TableRow>
+      <TableData>
+        <div className="flex items-center gap-3">
+          <Avatar className="w-9 h-9 uppercase">
+            {value.user.initials || <UserIcon className="w-5 h-5" />}
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm text-gray-80">
+              {value.user.firstname} {value.user.lastname}
+            </span>
+            {value.user?.role?.name && (
+              <span className="text-xs text-gray-50 font-medium">{value.user.role.name}</span>
+            )}
+          </div>
+        </div>
+      </TableData>
+
+      <TableData>
+        <span className="whitespace-pre-wrap">{value?.description || '- - -'}</span>
+      </TableData>
+
+      <TableData>
+        <FormatDateTime value={value.date} format={DateTime.DATE_MED} />
+      </TableData>
+
+      <TableData>
+        <span>{formatMinutesToHourMinutes(value?.estimatedMinutes)}</span>
+      </TableData>
+
+      <TableData>
+        <span>{formatMinutesToHourMinutes(value?.durationMinutes)}</span>
+      </TableData>
+
+      <TableData>
+        <div
+          className={classNames('w-7 h-7 grid place-content-center rounded-full shrink-0 mx-auto', {
+            'bg-green-10': value?.isBillable,
+            'bg-red-10': !value?.isBillable,
+          })}
+        >
+          {value?.isBillable && <TickIcon className="text-green-90 w-4 h-4" />}
+          {!value?.isBillable && <CrossIcon className="text-red-90 w-4 h-4" />}
+        </div>
+      </TableData>
+
+      <TableData>
+        <Button variant="blank" onClick={handleManage} disabled={!value.lastStoppedAt}>
+          Manage
+        </Button>
+      </TableData>
+    </TableRow>
+  )
+}
+
+export const TimeEntriesSkeletonRow = (): JSX.Element => {
+  return (
+    <TableRow>
+      <TableData className="flex items-center gap-3">
+        <SkeletonCircle width={32} height={32} />
+        <SkeletonBox height={16} randomWidth />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={16} randomWidth />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={16} width={50} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={16} width={50} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={16} width={50} />
+      </TableData>
+
+      <TableData>
+        <SkeletonCircle width={32} height={32} />
+      </TableData>
+
+      <TableData>
+        <SkeletonBox height={16} width={50} />
+      </TableData>
+    </TableRow>
+  )
+}
