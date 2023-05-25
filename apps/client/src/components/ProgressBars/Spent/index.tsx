@@ -5,7 +5,7 @@ import { calculatePercentage } from '@/helpers/currency'
 import { formatMinutesToHourMinutes } from '@/helpers/date'
 import { BaseMetrics } from '@/types'
 
-type RequiredMetics = Omit<BaseMetrics, 'billableDuration' | 'unbillableDuration'>
+type RequiredMetics = BaseMetrics
 
 type SpentProgressBarProps = RequiredMetics & {
   width: number
@@ -13,12 +13,15 @@ type SpentProgressBarProps = RequiredMetics & {
 
 export const SpentProgressBar = ({
   billableCost,
+  billableDuration,
+  unbillableDuration,
   unbillableCost,
   allocatedBudget,
   allocatedDuration,
   width,
 }: SpentProgressBarProps): JSX.Element => {
   const spentCost = billableCost + unbillableCost
+  const spentDuration = billableDuration + unbillableDuration
   const remainingBudget = allocatedBudget - spentCost
 
   return (
@@ -53,7 +56,7 @@ export const SpentProgressBar = ({
               <FormatCurrency value={spentCost} />
             </p>
             <p className="font-semibold text-xs text-gray-80">
-              {formatMinutesToHourMinutes(spentCost)}
+              {formatMinutesToHourMinutes(spentDuration)}
             </p>
           </div>
         </div>

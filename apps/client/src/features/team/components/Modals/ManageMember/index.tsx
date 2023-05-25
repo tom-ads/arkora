@@ -188,7 +188,7 @@ export const ManageMemberModal = (props: ManageMemberModalProps): JSX.Element =>
 
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
-              <ReadOnly value={watch('email')} />
+              <ReadOnly value={watch('email')} className="lowercase" />
             </FormControl>
 
             <FormControl>

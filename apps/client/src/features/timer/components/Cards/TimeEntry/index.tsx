@@ -1,4 +1,4 @@
-import { Badge, PauseIcon, PlayIcon, ToolTip } from '@/components'
+import { PauseIcon, PlayIcon, ToolTip } from '@/components'
 import TimeEntry from '@/types/models/TimeEntry'
 import { Button } from '@/components'
 import classNames from 'classnames'
@@ -20,6 +20,7 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
   }))
 
   const isActive = entry?.id === timerId
+  const budgetColour = entry.budget.colour
 
   if (isActive && entry.durationMinutes < duration) {
     entry.durationMinutes = duration
@@ -51,7 +52,10 @@ export const TimeEntryCard = ({ entry, onToggle, onManage }: TimeEntryCardProps)
           </h2>
         </div>
         <div className="pt-[7px] pb-3 lg:pt-[10px] lg:pb-4">
-          <div className="rounded max-w-[120px] bg-green-60 h-1"></div>
+          <div
+            className="rounded max-w-[120px] h-1"
+            style={{ backgroundColor: budgetColour ?? '#3EC729' }}
+          ></div>
         </div>
         <p className="text-sm lg:text-base text-gray-80">{entry.description ?? 'No Description'}</p>
       </div>

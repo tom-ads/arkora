@@ -90,6 +90,8 @@ export const BudgetRow = ({ value, onManage }: RowProps): JSX.Element => {
           <div className="w-[200px]">
             <SpentProgressBar
               width={200}
+              billableDuration={formattedBudget.billableDuration ?? 0}
+              unbillableDuration={formattedBudget.unbillableDuration ?? 0}
               billableCost={formattedBudget.billableCost}
               unbillableCost={formattedBudget.unbillableCost}
               allocatedBudget={formattedBudget.allocatedBudget}

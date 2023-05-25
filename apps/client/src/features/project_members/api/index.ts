@@ -23,7 +23,7 @@ const budgetEndpoints = appApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['ProjectMembers'],
+      invalidatesTags: ['ProjectMembers', 'BudgetMembers'],
     }),
 
     deleteProjectMember: build.mutation<void, DeleteProjectMemberRequest>({
@@ -31,7 +31,7 @@ const budgetEndpoints = appApi.injectEndpoints({
         url: `${projectMembersBasePath}/${projectId}/members/${memberId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['ProjectMembers'],
+      invalidatesTags: ['ProjectMembers', 'BudgetMembers'],
     }),
   }),
   overrideExisting: false,

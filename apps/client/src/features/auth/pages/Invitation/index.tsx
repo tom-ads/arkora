@@ -135,11 +135,11 @@ export const InvitationPage = (): JSX.Element => {
                   <div className="flex justify-between gap-3">
                     <FormControl>
                       <FormLabel htmlFor="firstname" size="sm">
-                        Firstname
+                        Forename
                       </FormLabel>
                       <FormInput
                         name="firstname"
-                        placeHolder="Enter firstname"
+                        placeHolder="Enter forename"
                         size="sm"
                         error={!!errors.firstname}
                       />
@@ -150,11 +150,11 @@ export const InvitationPage = (): JSX.Element => {
 
                     <FormControl>
                       <FormLabel htmlFor="lastname" size="sm">
-                        Lastname
+                        Surname
                       </FormLabel>
                       <FormInput
                         name="lastname"
-                        placeHolder="Enter lastname"
+                        placeHolder="Enter surname"
                         size="sm"
                         error={!!errors.lastname}
                       />
@@ -168,7 +168,7 @@ export const InvitationPage = (): JSX.Element => {
                     <FormLabel htmlFor="email" size="sm">
                       Email
                     </FormLabel>
-                    <ReadOnly value={invitationParams.email} />
+                    <ReadOnly value={invitationParams.email} className="lowercase" />
                   </FormControl>
 
                   <FormControl>
